@@ -1,74 +1,49 @@
+// src/routes/__root.tsx
+/// <reference types="vite/client" />
+import type { ReactNode } from 'react'
 import {
-  HeadContent,
-  Scripts,
-  createRootRouteWithContext,
+    Outlet,
+    createRootRoute,
+    HeadContent,
+    Scripts,
 } from '@tanstack/react-router'
-import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
-import { TanstackDevtools } from '@tanstack/react-devtools'
 
-import Header from '../components/Header'
-
-import StoreDevtools from '../lib/demo-store-devtools'
-
-import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
-
-import appCss from '../styles.css?url'
-
-import type { QueryClient } from '@tanstack/react-query'
-
-interface MyRouterContext {
-  queryClient: QueryClient
-}
-
-export const Route = createRootRouteWithContext<MyRouterContext>()({
-  head: () => ({
-    meta: [
-      {
-        charSet: 'utf-8',
-      },
-      {
-        name: 'viewport',
-        content: 'width=device-width, initial-scale=1',
-      },
-      {
-        title: 'TanStack Start Starter',
-      },
-    ],
-    links: [
-      {
-        rel: 'stylesheet',
-        href: appCss,
-      },
-    ],
-  }),
-
-  shellComponent: RootDocument,
+export const Route = createRootRoute({
+    head: () => ({
+        meta: [
+            {
+                charSet: 'utf-8',
+            },
+            {
+                name: 'viewport',
+                content: 'width=device-width, initial-scale=1',
+            },
+            {
+                title: 'TanStack Start Starter',
+            },
+        ],
+    }),
+    component: RootComponent,
 })
 
-function RootDocument({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang="en">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        <Header />
-        {children}
-        <TanstackDevtools
-          config={{
-            position: 'bottom-left',
-          }}
-          plugins={[
-            {
-              name: 'Tanstack Router',
-              render: <TanStackRouterDevtoolsPanel />,
-            },
-            StoreDevtools,
-            TanStackQueryDevtools,
-          ]}
-        />
-        <Scripts />
-      </body>
-    </html>
-  )
+function RootComponent() {
+    return (
+        <RootDocument>
+            <Outlet />
+        </RootDocument>
+    )
+}
+
+function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
+    return (
+        <html>
+            <head>
+                <HeadContent />
+            </head>
+            <body>
+                {children}
+                <Scripts />
+            </body>
+        </html>
+    )
 }
