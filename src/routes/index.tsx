@@ -1,14 +1,10 @@
 // src/routes/index.tsx
 import { createFileRoute } from "@tanstack/react-router";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Menu,
   X,
   ShoppingBag,
-  Play,
-  Zap,
-  Target,
-  Flame,
   OctagonAlertIcon,
   ArrowLeft,
   ArrowRight,
@@ -22,13 +18,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Command,
   CommandEmpty,
   CommandGroup,
@@ -41,17 +30,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-  type CarouselApi,
-} from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
 import { useAlgeriaLocations } from "@/hooks/useAlgeriaLocations";
+import { useOrderSubmission } from "@/hooks/useOrderSubmission";
+import { OrderNotifications } from "@/components/OrderNotifications";
+import { useOrderNotifications } from "@/hooks/useOrderNotifications";
+import { db } from "@/lib/instantdb";
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -73,16 +57,29 @@ function Home() {
     message: "",
   });
   const [validationError, setValidationError] = useState(false);
-  const [quantity, setQuantity] = useState(1);
-  const price = 2500; // Base price in DZD
+  const [orderSuccess, setOrderSuccess] = useState(false);
+  const [orderNumber, setOrderNumber] = useState("");
+  const [orderError, setOrderError] = useState("");
+  const [quantity, setQuantity] = useState(0);
+  const [quantityError, setQuantityError] = useState(false);
+  const price = 2500;
   const total = price * quantity;
+  const { isSubmitting, submitOrder } = useOrderSubmission();
+  const { sendOrderNotification } = useOrderNotifications();
+
+  // Query to get the default product and its stock
+  const { data: productsData } = db.useQuery({ products: {} });
+  const defaultProduct = productsData?.products?.find(
+    (p) => p.name === "مونو باك الكلاسيكي"
+  ) || { stock: 0 };
+  const totalStock = defaultProduct.stock || 0;
 
   const incrementQuantity = () => {
-    setQuantity((prev) => prev + 1);
+    setQuantity((prev) => (prev < totalStock ? prev + 1 : prev));
   };
 
   const decrementQuantity = () => {
-    setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
+    setQuantity((prev) => (prev > 0 ? prev - 1 : 0));
   };
 
   // Use the custom hook for location data
@@ -96,13 +93,13 @@ function Home() {
   // Handle selections with automatic resets
   const handleWilayaChange = (value: string) => {
     setSelectedWilaya(value);
-    setSelectedDaira(""); // Reset daira when wilaya changes
-    setSelectedCommune(""); // Reset commune when wilaya changes
+    setSelectedDaira("");
+    setSelectedCommune("");
   };
 
   const handleDairaChange = (value: string) => {
     setSelectedDaira(value);
-    setSelectedCommune(""); // Reset commune when daira changes
+    setSelectedCommune("");
   };
 
   const handleCommuneChange = (value: string) => {
@@ -134,8 +131,20 @@ function Home() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = () => {
-    // Validate required fields (excluding email)
+  const handleSubmit = async () => {
+    setValidationError(false);
+    setQuantityError(false);
+    setOrderError("");
+    setOrderSuccess(false);
+
+    // Validate quantity first
+    if (quantity < 1) {
+      setQuantityError(true);
+      setTimeout(() => setQuantityError(false), 5000);
+      return;
+    }
+
+    // Validate required fields
     if (
       !formData.name ||
       !formData.phone ||
@@ -147,10 +156,52 @@ function Home() {
       setTimeout(() => setValidationError(false), 5000);
       return;
     }
-    // If validation passes
-    setValidationError(false);
-    setFormData({ name: "", email: "", phone: "", message: "" });
-    alert("🎉 جاري التوجيه للدفع! (هذا عرض تجريبي)");
+
+    try {
+      // Submit order
+      const result = await submitOrder({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        message: formData.message,
+        wilaya: selectedWilaya,
+        daira: selectedDaira,
+        commune: selectedCommune,
+        quantity: quantity,
+      });
+
+      if (result.success) {
+        setOrderSuccess(true);
+        setOrderNumber(result.orderNumber || "");
+
+        // Send real-time notification
+        sendOrderNotification(
+          result.orderNumber || "",
+          selectedWilaya,
+          quantity
+        );
+
+        // Reset form
+        setFormData({ name: "", email: "", phone: "", message: "" });
+        setSelectedWilaya("");
+        setSelectedDaira("");
+        setSelectedCommune("");
+        setQuantity(0);
+
+        // Hide success message after 10 seconds
+        setTimeout(() => {
+          setOrderSuccess(false);
+          setOrderNumber("");
+        }, 10000);
+      } else {
+        setOrderError(result.error || "حدث خطأ غير متوقع");
+        setTimeout(() => setOrderError(""), 5000);
+      }
+    } catch (error) {
+      console.error("Error in handleSubmit:", error);
+      setOrderError("حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.");
+      setTimeout(() => setOrderError(""), 5000);
+    }
   };
 
   const scrollToSection = (sectionId) => {
@@ -160,6 +211,14 @@ function Home() {
     }
     setMobileMenuOpen(false);
   };
+
+  const getUnitLabel = (count) => {
+    if (count === 1) return "وحدة";
+    if (count === 2) return "وحدتان";
+    if (count >= 3 && count <= 10) return "وحدات";
+    return "وحدة";
+  };
+
   const specs = [
     {
       image: "https://m.media-amazon.com/images/I/51uRC25FgML.jpg",
@@ -269,7 +328,7 @@ function Home() {
       <div className="w-full border-b border-black"></div>
 
       <section className="relative min-h-screen flex items-center justify-center p-4 sm:p-6 overflow-hidden">
-        {/* Background decorative elements - hidden on small screens */}
+        {/* Background decorative elements*/}
 
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center z-10">
           {/* Text Content */}
@@ -313,14 +372,14 @@ function Home() {
                 className="w-full h-auto"
               />
 
-              {/* "New" Badge - positioned on image */}
+              {/* "New" Badge*/}
               <div className="absolute -top-2 sm:-top-4 -left-2 sm:-left-4 bg-yellow-400 border-2 border-black p-2 sm:p-4 rotate-12">
                 <span className="font-black text-lg sm:text-xl md:text-2xl">
                   جديد!
                 </span>
               </div>
 
-              {/* "Comfortable" Badge - positioned on image */}
+              {/* "Comfortable" Badge*/}
               <div className="absolute -bottom-2 sm:-bottom-4 -right-2 sm:-right-4 bg-black text-white border-2 border-black p-2 sm:p-3 -rotate-6">
                 <span className="font-bold text-sm sm:text-base">مريح</span>
               </div>
@@ -398,6 +457,38 @@ function Home() {
                     <AlertDescription className="text-sm md:text-base font-medium">
                       تأكد من إدخال الاسم، رقم الهاتف، واختيار الموقع (الولاية،
                       الدائرة، والبلدية).
+                    </AlertDescription>
+                  </div>
+                </Alert>
+              )}
+
+              {/* Order Success Message */}
+              {orderSuccess && (
+                <Alert className="border-2 border-green-500 bg-green-50 text-black mb-6 flex items-start gap-3 p-4 rounded-xl">
+                  <Check className="h-5 w-5 text-green-600 mt-1" />
+                  <div className="text-right">
+                    <AlertTitle className="font-extrabold text-base md:text-lg text-green-800">
+                      تم إرسال طلبك بنجاح!
+                    </AlertTitle>
+                    <AlertDescription className="text-sm md:text-base font-medium text-green-700">
+                      رقم الطلب: {orderNumber}
+                      <br />
+                      سيتم التواصل معك خلال 24 ساعة لتأكيد الطلب وترتيب التسليم.
+                    </AlertDescription>
+                  </div>
+                </Alert>
+              )}
+
+              {/* Order Error Message */}
+              {orderError && (
+                <Alert className="border-2 border-red-500 bg-red-50 text-black mb-6 flex items-start gap-3 p-4 rounded-xl">
+                  <OctagonAlertIcon className="h-5 w-5 text-red-600 mt-1" />
+                  <div className="text-right">
+                    <AlertTitle className="font-extrabold text-base md:text-lg text-red-800">
+                      حدث خطأ في إرسال الطلب
+                    </AlertTitle>
+                    <AlertDescription className="text-sm md:text-base font-medium text-red-700">
+                      {orderError}
                     </AlertDescription>
                   </div>
                 </Alert>
@@ -723,16 +814,37 @@ function Home() {
               <div className="hidden lg:block bg-white border-2 border-black p-6 xl:p-8 transform rotate-1">
                 <div className="space-y-6 text-right">
                   {/* Quantity */}
-                  <div>
-                    <Label className="block mb-4 text-lg font-black text-right">
-                      الكمية
+                  <div className="space-y-4">
+                    <Label className="block text-lg font-black text-right text-gray-900">
+                      الكمية المطلوبة
+                      <span className="block text-sm font-semibold text-gray-600 mt-1">
+                        متبقي {totalStock - quantity}{" "}
+                        {getUnitLabel(totalStock - quantity)} في المخزون
+                      </span>
                     </Label>
+
+                    {/* Quantity Error Alert */}
+                    {quantityError && (
+                      <Alert className="border-2 border-red-400 bg-red-50 text-red-900 flex items-start gap-3 p-4 rounded-xl shadow-sm">
+                        <OctagonAlertIcon className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+                        <div className="text-right flex-1">
+                          <AlertTitle className="font-bold text-base text-red-900">
+                            خطأ في الكمية
+                          </AlertTitle>
+                          <AlertDescription className="text-sm font-medium text-red-700 mt-1">
+                            يرجى اختيار كمية واحدة على الأقل لإتمام الطلب
+                          </AlertDescription>
+                        </div>
+                      </Alert>
+                    )}
+
                     <div className="flex items-center justify-center gap-6 mb-6">
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={incrementQuantity}
-                        className="h-12 w-12 xl:h-14 xl:w-14 border-2 border-black bg-white hover:bg-gray-100 font-black transition-all flex items-center justify-center"
+                        disabled={quantity >= totalStock}
+                        className="h-12 w-12 xl:h-14 xl:w-14 border-2 border-black bg-white hover:bg-gray-100 font-black transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <Plus className="h-5 w-5 xl:h-6 xl:w-6" />
                       </Button>
@@ -743,7 +855,8 @@ function Home() {
                         variant="ghost"
                         size="icon"
                         onClick={decrementQuantity}
-                        className="h-12 w-12 xl:h-14 xl:w-14 border-2 border-black bg-white hover:bg-gray-100 font-black transition-all flex items-center justify-center"
+                        disabled={quantity <= 0}
+                        className="h-12 w-12 xl:h-14 xl:w-14 border-2 border-black bg-white hover:bg-gray-100 font-black transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <Minus className="h-5 w-5 xl:h-6 xl:w-6" />
                       </Button>
@@ -772,16 +885,37 @@ function Home() {
             <div className="bg-white border-2 border-black p-4 transform rotate-1 max-w-md mx-auto">
               <div className="space-y-4 text-right">
                 {/* Quantity */}
-                <div>
-                  <Label className="block mb-3 text-base font-black text-right">
-                    الكمية
+                <div className="space-y-4">
+                  <Label className="block text-lg font-black text-right text-gray-900">
+                    الكمية المطلوبة
+                    <span className="block text-sm font-semibold text-gray-600 mt-1">
+                      متبقي {totalStock - quantity}{" "}
+                      {getUnitLabel(totalStock - quantity)} في المخزون
+                    </span>
                   </Label>
+
+                  {/* Quantity Error Alert */}
+                  {quantityError && (
+                    <Alert className="border-2 border-red-400 bg-red-50 text-red-900 flex items-start gap-3 p-4 rounded-xl shadow-sm">
+                      <OctagonAlertIcon className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+                      <div className="text-right flex-1">
+                        <AlertTitle className="font-bold text-base text-red-900">
+                          خطأ في الكمية
+                        </AlertTitle>
+                        <AlertDescription className="text-sm font-medium text-red-700 mt-1">
+                          يرجى اختيار كمية واحدة على الأقل لإتمام الطلب
+                        </AlertDescription>
+                      </div>
+                    </Alert>
+                  )}
+
                   <div className="flex items-center justify-center gap-4 mb-4">
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={incrementQuantity}
-                      className="h-10 w-10 border-2 border-black bg-white hover:bg-gray-100 font-black transition-all flex items-center justify-center"
+                      disabled={quantity >= totalStock}
+                      className="h-10 w-10 border-2 border-black bg-white hover:bg-gray-100 font-black transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Plus className="h-4 w-4" />
                     </Button>
@@ -792,7 +926,8 @@ function Home() {
                       variant="ghost"
                       size="icon"
                       onClick={decrementQuantity}
-                      className="h-10 w-10 border-2 border-black bg-white hover:bg-gray-100 font-black transition-all flex items-center justify-center"
+                      disabled={quantity <= 0}
+                      className="h-10 w-10 border-2 border-black bg-white hover:bg-gray-100 font-black transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Minus className="h-4 w-4" />
                     </Button>
@@ -826,6 +961,7 @@ function Home() {
           </Button>
         </div>
       </section>
+      <OrderNotifications userWilaya={selectedWilaya} />
 
       <footer className="bg-black text-white p-8 border-t-4 border-black">
         <div className="max-w-7xl mx-auto text-center">

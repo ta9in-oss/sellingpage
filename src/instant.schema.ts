@@ -27,6 +27,7 @@ const _schema = i.schema({
       customer_address: i.string(),
       customer_wilaya: i.string(),
       customer_city: i.string(),
+      quantity: i.number(), // Added quantity
       status: i.json(),
       total_amount: i.string(),
       created_at: i.date(),
@@ -37,9 +38,24 @@ const _schema = i.schema({
     orderProduct: {
       forward: { on: "orders", has: "one", label: "product" },
       reverse: { on: "products", has: "many", label: "orders" },
-    }
+    },
   },
-  rooms: {},
+  rooms: {
+    // Room for real-time order notifications
+    orderNotifications: {
+      presence: i.entity({
+        userId: i.string(),
+      }),
+      topics: {
+        newOrder: i.entity({
+          orderNumber: i.string(),
+          customerWilaya: i.string(),
+          quantity: i.number(),
+          timestamp: i.string(),
+        }),
+      },
+    },
+  },
 });
 
 // This helps Typescript display nicer intellisense
