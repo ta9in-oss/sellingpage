@@ -110,6 +110,25 @@
   --sidebar-ring: oklch(0.552 0.016 285.938);
 }
 
+button, 
+a,
+[role="button"],
+input[type="submit"],
+input[type="button"],
+input[type="reset"],
+[tabindex]:not([tabindex="-1"]) {
+  cursor: pointer;
+}
+
+a:hover,
+button:hover,
+[role="button"]:hover,
+input[type="submit"]:hover,
+input[type="button"]:hover,
+input[type="reset"]:hover {
+  cursor: pointer;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

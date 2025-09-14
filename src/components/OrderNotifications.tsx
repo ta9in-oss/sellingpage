@@ -68,9 +68,19 @@ export const OrderNotifications = ({ userWilaya }: OrderNotificationsProps) => {
         return (
           <Alert
             key={notification.id}
-            className="bg-green-500 text-white border-2 border-black shadow-[4px_4px_0px_0px_#000] rounded-none animate-in slide-in-from-right-full duration-300 flex justify-between items-start pr-2 [&>svg+div]:translate-y-0"
+            className="bg-cyan-500 text-white border-2 border-black shadow-[4px_4px_0px_0px_#000] rounded-none animate-in slide-in-from-right-full duration-300 flex justify-between items-start pr-2 [&>svg+div]:translate-y-0"
             dir="rtl"
           >
+            
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-white hover:bg-cyan-500 pl-0! rounded-none"
+              onClick={() => removeNotification(notification.id)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+
             <div className="flex items-start gap-3">
               <ShoppingBag className="mt-0.5 h-4 w-4 text-white" />
               <div className="flex-col justify-center text-right">
@@ -111,14 +121,6 @@ export const OrderNotifications = ({ userWilaya }: OrderNotificationsProps) => {
               </div>
             </div>
 
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-white hover:bg-green-600 pl-0! rounded-none"
-              onClick={() => removeNotification(notification.id)}
-            >
-              <X className="h-4 w-4" />
-            </Button>
           </Alert>
         );
       })}

@@ -13,4 +13,5 @@ export default defineConfig({
         tanstackStart({ customViteReactPlugin: true }),
         viteReact(),
     ],
+    publicDir: 'src/public',
 })

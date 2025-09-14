@@ -34,14 +34,14 @@ export function useOrderSubmission(): UseOrderSubmissionReturn {
 
   const ensureDefaultProduct = async (): Promise<string> => {
     // Check if default product exists
-    let defaultProduct = products.find(p => p.name === 'مونو باك الكلاسيكي');
+    let defaultProduct = products.find(p => p.name === 'صاكادو الكلاسيكي');
     
     if (!defaultProduct) {
       // Create default product
       const productId = id();
       await db.transact([
         tx.products[productId].update({
-          name: 'مونو باك الكلاسيكي',
+          name: 'صاكادو الكلاسيكي',
           description: 'التصميم الأصلي بحزام واحد - مساحة تخزين 25 لتر، نايلون مقاوم للتمزق، وزن 1.2 كيلو',
           price: 2500,
           image: 'https://images.modeherz.de/item/images/309629/full/PIQUADRO-Blue-Square-Revamp-Mono-Sling-Bag-Verde---Nero-309629.jpg',
