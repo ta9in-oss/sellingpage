@@ -69,7 +69,7 @@ function Home() {
   // Query to get the default product and its stock
   const { data: productsData } = db.useQuery({ products: {} });
   const defaultProduct = productsData?.products?.find(
-    (p) => p.name === "صاكادو الكلاسيكي"
+    (p) => p.name === "صاكادو"
   ) || { stock: 0 };
   const totalStock = defaultProduct.stock || 0;
 

@@ -34,15 +34,15 @@ export function useOrderSubmission(): UseOrderSubmissionReturn {
 
   const ensureDefaultProduct = async (): Promise<string> => {
     // Check if default product exists
-    let defaultProduct = products.find(p => p.name === 'صاكادو الكلاسيكي');
+    let defaultProduct = products.find(p => p.name === 'صاكادو');
     
     if (!defaultProduct) {
       // Create default product
       const productId = id();
       await db.transact([
         tx.products[productId].update({
-          name: 'صاكادو الكلاسيكي',
-          description: 'التصميم الأصلي بحزام واحد - مساحة تخزين 25 لتر، نايلون مقاوم للتمزق، وزن 1.2 كيلو',
+          name: 'صاكادو',
+          description: 'صاكادو يد وحدة: يرفد بزاف ويبان صغير. خفيف، مريح، يخدم القراية والسبور والخرجات',
           price: 2500,
           image: 'https://images.modeherz.de/item/images/309629/full/PIQUADRO-Blue-Square-Revamp-Mono-Sling-Bag-Verde---Nero-309629.jpg',
           is_available: true,
@@ -78,6 +78,7 @@ export function useOrderSubmission(): UseOrderSubmissionReturn {
       
       // Get product for stock check and price
       const product = products.find(p => p.id === productId) || { price: 2500, stock: 100 };
+      console.log(product);
       
       if (product.stock < formData.quantity) {
         return { success: false, error: 'الكمية المطلوبة غير متوفرة في المخزون' };
