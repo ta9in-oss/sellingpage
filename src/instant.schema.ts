@@ -10,6 +10,7 @@ const _schema = i.schema({
       email: i.string().unique().indexed().optional(),
     }),
     products: i.entity({
+      product_number: i.string().unique(),
       name: i.string(),
       description: i.string(),
       price: i.number(),

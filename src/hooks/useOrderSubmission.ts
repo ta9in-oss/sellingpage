@@ -34,13 +34,14 @@ export function useOrderSubmission(): UseOrderSubmissionReturn {
 
   const ensureDefaultProduct = async (): Promise<string> => {
     // Check if default product exists
-    let defaultProduct = products.find(p => p.name === 'صاكادو');
+    let defaultProduct = products.find(p => p.product_number === 'PROD-234567-A1B2C3');
     
     if (!defaultProduct) {
       // Create default product
       const productId = id();
       await db.transact([
         tx.products[productId].update({
+          product_number: 'PROD-234567-A1B2C3',
           name: 'صاكادو',
           description: 'صاكادو يد وحدة: يرفد بزاف ويبان صغير. خفيف، مريح، يخدم القراية والسبور والخرجات',
           price: 2500,
