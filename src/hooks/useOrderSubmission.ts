@@ -106,15 +106,8 @@ export function useOrderSubmission(): UseOrderSubmissionReturn {
           customer_wilaya: formData.wilaya,
           quantity: formData.quantity,
           status: {
-            current: 'pending',
-            history: [
-              {
-                status: 'pending',
-                timestamp: currentDate.toISOString(),
-                note: 'تم استلام الطلب',
-                quantity: formData.quantity
-              }
-            ]
+            label: 'في الانتظار',
+            value: 'pending'
           },
           total_amount: totalAmount,
           created_at: currentDate,
