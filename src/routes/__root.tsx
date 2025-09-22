@@ -90,15 +90,7 @@ export const Route = createRootRoute({
      * https://github.com/TanStack/router/issues/4585
      * Fix duplicate scripts in hmr
      */
-    scripts: import.meta.env.SSR
-      ? [
-          {
-            src: "https://sdk.minepi.com/pi-sdk.js",
-            id: "pi-sdk",
-          },
-          ...analytics(),
-        ]
-      : [],
+    scripts: import.meta.env.SSR ? [...analytics()] : [],
   }),
   component: RootComponent,
 });
@@ -120,6 +112,16 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
       <body>
         {children}
         <Scripts />
+        <noscript>
+          <img
+            height="1"
+            width="1"
+            style={{ display: "none" }}
+            src={`https://www.facebook.com/tr?id=${
+              process.env.META_PIXEL_ID || import.meta.env.VITE_META_PIXEL_ID
+            }&ev=PageView&noscript=1`}
+          />
+        </noscript>
       </body>
     </html>
   );
