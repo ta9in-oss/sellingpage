@@ -14,14 +14,14 @@ export function Layout({ children, showNavigation = true }: LayoutProps) {
 
   const scrollToSection = (sectionId: string) => {
     // If we're not on the home page, navigate to home first
-    if (window.location.pathname !== '/') {
+    if (window.location.pathname !== "/") {
       navigate({
-         to: '/',
-         hash: `#${sectionId}`,
-         });
+        to: "/",
+        hash: `#${sectionId}`,
+      });
       return;
     }
-    
+
     const element = document.getElementById(sectionId);
     if (element) {
       element.scrollIntoView({ behavior: "smooth" });
@@ -37,21 +37,25 @@ export function Layout({ children, showNavigation = true }: LayoutProps) {
   return (
     <div
       className="min-h-screen flex flex-col bg-white"
-      style={{ 
+      style={{
         fontFamily: "Almarai, sans-serif",
         position: "relative",
-        zIndex: 1
+        zIndex: 1,
       }}
       dir="rtl"
     >
       {/* Header */}
       <header className="bg-white text-black py-3 px-6 border-1 border-black sticky top-0 z-50 flex-shrink-0">
         <div className="max-w-5xl mx-auto flex justify-between items-center">
-          <button 
+          <button
             onClick={goHome}
             className="text-2xl font-black hover:text-yellow-500 transition-colors"
           >
-           صاكادو 
+            <img
+              src="/assets/logo/7aba_store_logo_i1.svg"
+              alt="Logo"
+              className="h-16 w-auto"
+            />
           </button>
 
           {showNavigation && (
@@ -125,17 +129,20 @@ export function Layout({ children, showNavigation = true }: LayoutProps) {
       <div className="w-full border-b border-black flex-shrink-0"></div>
 
       {/* Main Content*/}
-      <main className="flex-1">
-        {children}
-      </main>
+      <main className="flex-1">{children}</main>
 
       {/* Footer*/}
       <footer className="bg-black text-white py-8 px-6 border-t-4 border-black flex-shrink-0 mt-auto">
         <div className="max-w-6xl mx-auto text-center">
-          <div className="text-2xl font-black mb-4">صاكادو</div>
-          <div className="font-bold">
-            © 2025 صاكادو. نثور على طريقة الحمل منذ اليوم.
-          </div>
+          <img
+            src="/assets/logo/7aba_store_logo_i1.svg"
+            alt="Logo"
+            className="h-16 w-auto filter invert mx-auto"
+          />
+          <p className="font-bold">
+            جميع الحقوق محفوظة لـ <a href="/">حبة ستور</a> ©{" "}
+            {new Date().getFullYear()}
+          </p>
         </div>
       </footer>
     </div>

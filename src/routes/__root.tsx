@@ -1,6 +1,7 @@
 // src/routes/__root.tsx
 /// <reference types="vite/client" />
 import type { ReactNode } from "react";
+
 import {
   Outlet,
   createRootRoute,
@@ -8,6 +9,8 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import appCss from "@/styles/app.css?url";
+import analytics from "@/utils/analytics";
+import { seo } from "@/utils/seo";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -19,9 +22,11 @@ export const Route = createRootRoute({
         name: "viewport",
         content: "width=device-width, initial-scale=1",
       },
-      {
-        title: "TanStack Start Starter",
-      },
+      ...seo({
+        title: "حبة ستور | كل مرة حبة جديدة ما صراتش!!!",
+        description:
+          "حبة ستور والكل يتسوق في راحتو. عس مليح ، واشري اللي تحتاج برك.",
+      }),
     ],
     links: [
       {
@@ -29,10 +34,71 @@ export const Route = createRootRoute({
         href: appCss,
       },
       {
-        rel:"stylesheet",
-        href:"https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700&display=swap"
-      }
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700&display=swap",
+      },
+      {
+        rel: "icon",
+        type: "image/x-icon",
+        href: "/favicon.ico",
+      },
+      {
+        rel: "icon",
+        type: "image/svg+xml",
+        href: "/favicon.svg",
+      },
+      {
+        rel: "apple-touch-icon",
+        sizes: "180x180",
+        href: "/apple-touch-icon.png",
+      },
+      {
+        rel: "apple-touch-icon",
+        sizes: "180x180",
+        href: "/apple-touch-icon-dark.png",
+        media: "(prefers-color-scheme: dark)",
+      },
+      {
+        rel: "icon",
+        type: "image/png",
+        sizes: "96x96",
+        href: "/favicon-96x96.png",
+      },
+      {
+        rel: "icon",
+        type: "image/png",
+        sizes: "96x96",
+        href: "/favicon-96x96-dark.png",
+        media: "(prefers-color-scheme: dark)",
+      },
+      {
+        rel: "manifest",
+        href: "/site.webmanifest",
+      },
+      {
+        rel: "apple-touch-startup-image",
+        href: "/apple-touch-icon.png",
+      },
+      {
+        rel: "apple-touch-startup-image",
+        href: "/apple-touch-icon-dark.png",
+        media: "(prefers-color-scheme: dark)",
+      },
     ],
+    /**
+     * Work around for duplicate scripts in ssr
+     * https://github.com/TanStack/router/issues/4585
+     * Fix duplicate scripts in hmr
+     */
+    scripts: import.meta.env.SSR
+      ? [
+          {
+            src: "https://sdk.minepi.com/pi-sdk.js",
+            id: "pi-sdk",
+          },
+          ...analytics(),
+        ]
+      : [],
   }),
   component: RootComponent,
 });
