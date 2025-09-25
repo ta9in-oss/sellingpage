@@ -665,9 +665,9 @@ function Home() {
             <div className="space-y-8">
 
               {/* Product Carousel */}
-              <div className="bg-white border-2 border-black p-6 transform -rotate-1">
+              <div className="bg-white border-2 border-black p-3 sm:p-6 transform -rotate-1">
                 <div className="relative">
-                  <div className="overflow-hidden">
+                  <div className="overflow-hidden rounded-lg">
                     <div
                       className="flex transition-transform duration-300 ease-in-out"
                       style={{
@@ -680,44 +680,50 @@ function Home() {
                           className="min-w-full flex-shrink-0"
                         >
                           <div
-                            className={`${product.bgColor} p-2 border-1 border-black`}
+                            className={`${product.bgColor} p-2 sm:p-4 border-2 border-black rounded-lg`}
                           >
-                            <img
-                              src={product.image}
-                              alt={product.title}
-                              className="w-full h-64 object-contain mx-auto"
-                            />
+                            <div className="relative w-full">
+                              <img
+                                src={product.image}
+                                alt={product.title}
+                                className="w-72 h-64 object-cover rounded-md mx-auto"
+                                loading="lazy"
+                              />
+                            </div>
                           </div>
                         </div>
                       ))}
                     </div>
                   </div>
 
+                  {/* Navigation Buttons */}
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black text-white border-2 border-black font-black hover:bg-gray-800"
+                    className="absolute left-1 sm:left-4 top-1/2 transform -translate-y-1/2 bg-black text-white border-2 border-black font-black hover:bg-gray-800 w-8 h-8 sm:w-10 sm:h-10 z-10"
                     onClick={prevSlide}
                   >
-                    <ArrowLeft size={16} />
+                    <ArrowLeft size={14} className="sm:w-4 sm:h-4" />
                   </Button>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black text-white border-2 border-black font-black hover:bg-gray-800"
+                    className="absolute right-1 sm:right-4 top-1/2 transform -translate-y-1/2 bg-black text-white border-2 border-black font-black hover:bg-gray-800 w-8 h-8 sm:w-10 sm:h-10 z-10"
                     onClick={nextSlide}
                   >
-                    <ArrowRight size={16} />
+                    <ArrowRight size={14} className="sm:w-4 sm:h-4" />
                   </Button>
 
-                  <div className="flex justify-center mt-6 gap-3">
+                  {/* Pagination Dots */}
+                  <div className="flex justify-center mt-4 sm:mt-6 gap-2 sm:gap-3">
                     {products.map((_, index) => (
                       <button
                         key={index}
-                        className={`w-4 h-4 border-2 border-black transition-colors ${
+                        className={`w-3 h-3 sm:w-4 sm:h-4 border-2 border-black transition-colors rounded-sm ${
                           index === currentSlide ? "bg-black" : "bg-white"
                         }`}
                         onClick={() => setCurrentSlide(index)}
+                        aria-label={`Go to slide ${index + 1}`}
                       />
                     ))}
                   </div>

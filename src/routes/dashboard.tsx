@@ -11,12 +11,14 @@ import {
   Eye,
   LogOut,
   Mail,
-  Send
+  Send,
+  Truck
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { db } from '@/lib/instantdb';
+import type { AppSchema } from '@/instant.schema';
 
 export const Route = createFileRoute('/dashboard')({
   component: SellerDashboard,
@@ -196,6 +198,7 @@ const Dashboard = ({ user, onSignOut }) => {
       product: {}
     }
   });
+  
 
   // Query products from InstantDB
   const { data: productsData } = db.useQuery({
@@ -204,6 +207,17 @@ const Dashboard = ({ user, onSignOut }) => {
 
   const orders = ordersData?.orders || [];
   const products = productsData?.products || [];
+  
+  // Calculate total pending quantity
+  const pendingOrdersQuantity = orders
+    .filter(order => {
+      const status = typeof order.status === 'string' ? order.status : order.status?.value;
+      return status === 'pending';
+    })
+    .reduce((sum, order) => sum + (order.quantity || 0), 0);
+  
+  // current stock 
+  const availableStock = products[0]?.stock || 0;
 
   const getStatusColor = (status) => {
     if (typeof status === 'string') {
@@ -249,24 +263,56 @@ const Dashboard = ({ user, onSignOut }) => {
     return status?.label || status?.value || 'غير محدد';
   };
 
-  const updateOrderStatus = async (orderId, newStatus) => {
+  const updateOrderStatus = async (orderId: string, newStatus: { value: string; label: string }) => {
     try {
-      await db.transact([
+      const order = orders.find(o => o.id === orderId);
+      if (!order) return;
+
+      const currentStatus = typeof order.status === 'string' ? order.status : order.status?.value;
+      
+      // Update order status in the database
+      await db.transact(
         db.tx.orders[orderId].update({
           status: newStatus,
           updated_at: new Date().toISOString()
         })
-      ]);
+      );
 
+      // Update stock based on status change
+      if (products.length > 0) {
+        const currentStock = products[0].stock || 0;
+        const orderQuantity = order.quantity || 0;
+        let newStock = currentStock;
+
+        if (currentStatus === 'pending' && newStatus.value === 'confirmed') {
+          newStock = currentStock;
+        }
+      
+        else if ( newStatus.value === 'cancelled') {
+          newStock = currentStock + orderQuantity;
+        }
+
+        // Update stock in the database if it changed
+        if (newStock !== currentStock) {
+          try {
+            await db.transact(
+              db.tx.products[products[0].id].update({
+                stock: Math.max(0, newStock) // Ensure stock doesn't be negative
+              })
+            );
+          } catch (error) {
+            console.error('Error updating product stock:', error);
+          }
+        }
+      }
+
+      // Update selected order 
       if (selectedOrder && selectedOrder.id === orderId) {
-        setSelectedOrder(prev => {
-          if (!prev) return null;
-          return {
-            ...prev,
-            status: newStatus,
-            updated_at: new Date().toISOString() 
-          };
-        });
+        setSelectedOrder(prev => ({
+          ...prev!,
+          status: newStatus,
+          updated_at: new Date().toISOString()
+        }));
       }
     } catch (error) {
       console.error('Error updating order status:', error);
@@ -359,7 +405,23 @@ const Dashboard = ({ user, onSignOut }) => {
 
       <div className="p-6">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
+          {/* Real Stock Card */}
+          <div className="bg-purple-400 text-black border-2 border-black p-6 transform rotate-1 hover:-rotate-1 transition-transform">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-bold text-sm">الكمية الفعلية في المخزون</p>
+                <p className="font-black text-2xl">
+                  {availableStock + pendingOrdersQuantity} وحدة
+                </p>
+              </div>
+              <div className="text-black">
+                <Package size={24} />
+              </div>
+            </div>
+          </div>
+          
+          {/* Other Stats Cards */}
           {[
             { label: 'إجمالي الطلبات', value: orders.length, color: 'bg-yellow-400', icon: <Package /> },
             { 
@@ -435,7 +497,7 @@ const Dashboard = ({ user, onSignOut }) => {
         {/* Orders Cards */}
         <div className="space-y-4">
           {filteredOrders.map((order, index) => (
-            <div key={order.id} className="bg-white border-2 border-black p-4 transform hover:rotate-1 transition-transform">
+            <div key={order.id} className="bg-white border-2 border-black p-4">
               <div className="flex items-center justify-between gap-4">
                 {/* Order Info Section */}
                 <div className="flex items-center gap-6 flex-1">
@@ -468,28 +530,74 @@ const Dashboard = ({ user, onSignOut }) => {
 
                 {/* Action Buttons Section */}
                 <div className="flex items-center gap-2">
-                <Button
-                  onClick={() => updateOrderStatus(order.id, { value: 'confirmed', label: 'مؤكد' })}
-                  className={`border-2 border-black rounded-none font-bold text-sm transition-all ${
-                    (typeof order.status === 'string' ? order.status : order.status?.value) === 'confirmed' 
-                      ? 'bg-green-400 text-black ring-4 ring-green-600 hover:bg-green-500' 
-                      : 'bg-green-200 text-black hover:bg-green-400 hover:text-black'
-                  }`}
-                >
-                  <CheckCircle size={14} className="ml-1" />
-                 تأكيد
-                </Button>
-                <Button
-                  onClick={() => updateOrderStatus(order.id, { value: 'cancelled', label: 'ملغى' })}
-                  className={`border-2 border-black rounded-none font-bold text-sm transition-all ${
-                    (typeof order.status === 'string' ? order.status : order.status?.value) === 'cancelled' 
-                      ? 'bg-red-400 text-white ring-4 ring-red-600 hover:bg-red-500' 
-                      : 'bg-red-200 text-black hover:bg-red-400 hover:text-white'
-                  }`}
-                >
-                  <XCircle size={14} className="ml-1" />
-                  إلغاء
-                </Button>
+                {(() => {
+                  const status = typeof order.status === 'string' ? order.status : order.status?.value;
+                  const isFinalStatus = status === 'cancelled' || status === 'shipped';
+                  
+                  // If order is in final status (cancelled or shipped), show disabled buttons
+                  if (isFinalStatus) {
+                    return (
+                      <div className="flex items-center gap-2">
+                        <Button
+                          disabled
+                          className="border-2 border-gray-400 rounded-none font-bold text-sm bg-gray-200 text-gray-500 cursor-not-allowed"
+                        >
+                          <Truck size={14} className="ml-1" />
+                          شحن
+                        </Button>
+                        <Button
+                          disabled
+                          className="border-2 border-gray-400 rounded-none font-bold text-sm bg-gray-200 text-gray-500 cursor-not-allowed"
+                        >
+                          <CheckCircle size={14} className="ml-1" />
+                          تأكيد
+                        </Button>
+                        <Button
+                          disabled
+                          className="border-2 border-gray-400 rounded-none font-bold text-sm bg-red-100 text-gray-500 cursor-not-allowed"
+                        >
+                          <XCircle size={14} className="ml-1" />
+                          ملغى
+                        </Button>
+                      </div>
+                    );
+                  }
+
+                  // For non-cancelled orders, show appropriate buttons
+                  return (
+                    <>
+                      {/* Show Ship button only for confirmed orders */}
+                      {status === 'confirmed' && (
+                        <Button
+                          onClick={() => updateOrderStatus(order.id, { value: 'shipped', label: 'تم الشحن' })}
+                          className="border-2 border-black rounded-none font-bold text-sm bg-blue-400 text-black hover:bg-blue-500 hover:text-white transition-all"
+                        >
+                          <Truck size={14} className="ml-1" />
+                          شحن
+                        </Button>
+                      )}
+                      
+                      {/* Show Confirm button only for pending orders */}
+                      {status === 'pending' && (
+                        <Button
+                          onClick={() => updateOrderStatus(order.id, { value: 'confirmed', label: 'مؤكد' })}
+                          className="border-2 border-black rounded-none font-bold text-sm bg-green-200 text-black hover:bg-green-400 hover:text-black transition-all"
+                        >
+                          <CheckCircle size={14} className="ml-1" />
+                          تأكيد
+                        </Button>
+                      )}
+                      
+                      <Button
+                        onClick={() => updateOrderStatus(order.id, { value: 'cancelled', label: 'ملغى' })}
+                        className="border-2 border-black rounded-none font-bold text-sm bg-red-200 text-black hover:bg-red-400 hover:text-white transition-all"
+                      >
+                        <XCircle size={14} className="ml-1" />
+                        إلغاء
+                      </Button>
+                    </>
+                  );
+                })()}
                   <Button
                     onClick={() => setSelectedOrder({
                       ...order,
@@ -591,14 +699,22 @@ const Dashboard = ({ user, onSignOut }) => {
                     { value: 'shipped', label: 'تم الشحن', color: 'bg-blue-400', icon: <Package size={16} /> },
                     { value: 'cancelled', label: 'ملغى', color: 'bg-red-400 text-white', icon: <XCircle size={16} /> }
                   ].map((status) => {
-                    const isActive = (typeof selectedOrder.status === 'string' ? selectedOrder.status : selectedOrder.status?.value) === status.value;
+                    const currentStatus = typeof selectedOrder.status === 'string' ? selectedOrder.status : selectedOrder.status?.value;
+                    const isActive = currentStatus === status.value;
+                    const isDisabled = (currentStatus === 'cancelled' || currentStatus === 'shipped') && !isActive;
+                    
                     return (
                       <Button
                         key={status.value}
-                        onClick={() => updateOrderStatus(selectedOrder.id, { value: status.value, label: status.label })}
-                        className={`${status.color} border-2 border-black rounded-none font-bold text-sm transition-all transform hover:scale-105 ${
-                          isActive ? 'ring-4 ring-black scale-105 shadow-lg' : 'hover:shadow-md'
+                        onClick={() => !isDisabled && updateOrderStatus(selectedOrder.id, { value: status.value, label: status.label })}
+                        className={`${status.color} border-2 border-black rounded-none font-bold text-sm transition-all transform ${
+                          isActive 
+                            ? 'ring-4 ring-black scale-105 shadow-lg cursor-default' 
+                            : isDisabled 
+                              ? 'opacity-50 cursor-not-allowed' 
+                              : 'hover:scale-105 hover:shadow-md'
                         }`}
+                        disabled={isDisabled}
                       >
                         <div className="flex items-center gap-1">
                           {status.icon}
@@ -608,6 +724,15 @@ const Dashboard = ({ user, onSignOut }) => {
                     );
                   })}
                 </div>
+                {(() => {
+                  const status = typeof selectedOrder.status === 'string' ? selectedOrder.status : selectedOrder.status?.value;
+                  if (status === 'cancelled') {
+                    return <p className="text-sm text-red-600 mt-2 text-center">لا يمكن تغيير حالة الطلب الملغى</p>;
+                  } else if (status === 'shipped') {
+                    return <p className="text-sm text-blue-600 mt-2 text-center">تم شحن الطلب بنجاح ولا يمكن تعديل حالته</p>;
+                  }
+                  return null;
+                })()}
               </div>
 
               <div className="flex gap-3">
