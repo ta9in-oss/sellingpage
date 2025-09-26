@@ -26,7 +26,7 @@ export const Route = createRootRoute({
         title: "حبة ستور | كل مرة حبة جديدة ما صراتش!!!",
         description:
           "حبة ستور والكل يتسوق في راحتو. عس مليح ، واشري اللي تحتاج برك.",
-        image: "/og_image.png",
+        image: "https://7aba.store/og_image.png",
       }),
     ],
     links: [
