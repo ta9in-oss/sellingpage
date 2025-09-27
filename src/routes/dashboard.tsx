@@ -6,18 +6,19 @@ import {
   XCircle, 
   Clock, 
   Printer, 
-  Search,
-  Filter,
   Eye,
   LogOut,
-  Mail,
   Send,
-  Truck
+  Truck,
+  UserPlus,
+  Trash2, 
+  Shield
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { db } from '@/lib/instantdb';
+import { id } from "@instantdb/react";
 import type { AppSchema } from '@/instant.schema';
 
 export const Route = createFileRoute('/dashboard')({
@@ -45,7 +46,7 @@ interface Order {
 const LoginScreen = ({ onSignIn, isLoading, error }) => {
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
-  const [step, setStep] = useState('email'); // 'email' or 'code'
+  const [step, setStep] = useState('email');
   const [sentTo, setSentTo] = useState('');
 
   const handleSendCode = async (e) => {
@@ -53,9 +54,13 @@ const LoginScreen = ({ onSignIn, isLoading, error }) => {
     if (!email.trim()) return;
     
     try {
-      await onSignIn(email, step);
-      setSentTo(email);
-      setStep('code');
+      const result = await onSignIn(email, step);
+      // Only proceed to code step if email was successfully authorized and code was sent
+      if (result === 'CODE_SENT') {
+        setSentTo(email);
+        setStep('code');
+      }
+      // If result is 'UNAUTHORIZED', stay on email step and error will be shown
     } catch (error) {
       console.error('Error sending code:', error);
     }
@@ -119,7 +124,7 @@ const LoginScreen = ({ onSignIn, isLoading, error }) => {
               {isLoading ? (
                 <>
                   <div className="animate-spin rounded-full h-5 w-5 border-2 border-black border-t-transparent ml-2"></div>
-                  جاري الإرسال...
+                  جاري التحقق...
                 </>
               ) : (
                 <>
@@ -191,6 +196,24 @@ const Dashboard = ({ user, onSignOut }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [showUserManagement, setShowUserManagement] = useState(false);
+  const [newUserEmail, setNewUserEmail] = useState('');
+  const [newUserRole, setNewUserRole] = useState('seller');
+  
+  // Alert modal states
+  const [alertModal, setAlertModal] = useState<{
+    isOpen: boolean;
+    type: 'success' | 'error' | 'confirm';
+    title: string;
+    message: string;
+    onConfirm?: () => void;
+    onCancel?: () => void;
+  }>({
+    isOpen: false,
+    type: 'success',
+    title: '',
+    message: '',
+  });
 
   // Query orders from InstantDB
   const { data: ordersData, isLoading: ordersLoading } = db.useQuery({
@@ -198,15 +221,20 @@ const Dashboard = ({ user, onSignOut }) => {
       product: {}
     }
   });
-  
 
   // Query products from InstantDB
   const { data: productsData } = db.useQuery({
     products: {}
   });
 
+  // Query all users
+  const { data: allUsersData } = db.useQuery({
+    users: {}
+  });
+
   const orders = ordersData?.orders || [];
   const products = productsData?.products || [];
+  const users = allUsersData?.users || [];
   
   // Calculate total pending quantity
   const pendingOrdersQuantity = orders
@@ -218,6 +246,81 @@ const Dashboard = ({ user, onSignOut }) => {
   
   // current stock 
   const availableStock = products[0]?.stock || 0;
+
+  // Check if current user is admin (can manage users)
+  const currentUser = users.find(u => u.email === user.email);
+  const isAdmin = currentUser?.role === 'admin';
+
+  //alert functions
+  const showAlert = (type: 'success' | 'error', title: string, message: string) => {
+    setAlertModal({
+      isOpen: true,
+      type,
+      title,
+      message,
+    });
+  };
+
+  const showConfirm = (title: string, message: string, onConfirm: () => void) => {
+    setAlertModal({
+      isOpen: true,
+      type: 'confirm',
+      title,
+      message,
+      onConfirm,
+      onCancel: () => setAlertModal(prev => ({ ...prev, isOpen: false })),
+    });
+  };
+
+  const closeAlert = () => {
+    setAlertModal(prev => ({ ...prev, isOpen: false }));
+  };
+
+  const addNewUser = async () => {
+    if (!newUserEmail.trim()) return;
+
+    try {
+      await db.transact(
+        db.tx.users[id()].update({
+          email: newUserEmail.toLowerCase(),
+          role: newUserRole,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+      );
+
+      setNewUserEmail('');
+      setNewUserRole('seller');
+      showAlert('success', 'تم بنجاح!', 'تم إضافة المستخدم الجديد بنجاح');
+    } catch (error) {
+      console.error('Error adding user:', error);
+      showAlert('error', 'خطأ!', 'حدث خطأ أثناء إضافة المستخدم');
+    }
+  };
+
+  const removeUser = async (userId: string, userEmail: string) => {
+    // Prevent admin from deleting themselves
+    if (userEmail === user.email) {
+      showAlert('error', 'غير مسموح!', 'لا يمكنك حذف حسابك الخاص');
+      return;
+    }
+
+    showConfirm(
+      'تأكيد حذف المستخدم',
+      `هل أنت متأكد من حذف المستخدم ${userEmail}؟ لا يمكن التراجع عن هذا الإجراء.`,
+      async () => {
+        try {
+          await db.transact(
+            db.tx.users[userId].delete()
+          );
+          showAlert('success', 'تم الحذف!', 'تم حذف المستخدم بنجاح');
+        } catch (error) {
+          console.error('Error removing user:', error);
+          showAlert('error', 'خطأ!', 'حدث خطأ أثناء حذف المستخدم');
+        }
+      }
+    );
+  };
 
   const getStatusColor = (status) => {
     if (typeof status === 'string') {
@@ -350,7 +453,7 @@ const Dashboard = ({ user, onSignOut }) => {
     
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
-      alert('عذراً، لا يمكن فتح نافذة الطباعة. يرجى التأكد من السماح بالنوافذ المنبثقة لهذا الموقع.');
+      showAlert('error', 'تعذرت الطباعة!', 'لا يمكن فتح نافذة الطباعة. يرجى التأكد من السماح بالنوافذ المنبثقة لهذا الموقع.');
       return;
     }
     
@@ -362,7 +465,7 @@ const Dashboard = ({ user, onSignOut }) => {
       };
     } catch (error) {
       console.error('Error while printing:', error);
-      alert('حدث خطأ أثناء محاولة الطباعة. يرجى المحاولة مرة أخرى.');
+      showAlert('error', 'خطأ في الطباعة!', 'حدث خطأ أثناء محاولة الطباعة. يرجى المحاولة مرة أخرى.');
     }
   };
 
@@ -387,9 +490,23 @@ const Dashboard = ({ user, onSignOut }) => {
             <p className="text-lg font-bold text-gray-600">إدارة الطلبات والمبيعات</p>
           </div>
           <div className="flex items-center gap-4">
+            {isAdmin && (
+              <Button
+                onClick={() => setShowUserManagement(!showUserManagement)}
+                className="bg-purple-400 text-black border-2 border-black rounded-none font-bold hover:bg-purple-300"
+              >
+                <Shield className="ml-2" size={16} />
+                إدارة المستخدمين
+              </Button>
+            )}
             <div className="text-right">
               <p className="font-bold text-sm text-gray-600">مرحباً</p>
               <p className="font-black">{user?.email}</p>
+              {currentUser?.role && (
+                <p className="text-xs font-bold text-purple-600">
+                  {currentUser.role === 'admin' ? 'مدير' : 'بائع'}
+                </p>
+              )}
             </div>
             <Button
               onClick={onSignOut}
@@ -404,6 +521,70 @@ const Dashboard = ({ user, onSignOut }) => {
       </div>
 
       <div className="p-6">
+        {/* User Management Section */}
+        {showUserManagement && isAdmin && (
+          <div className="bg-white border-2 border-black p-6 mb-8">
+            <h2 className="text-2xl font-black mb-4">إدارة المستخدمين</h2>
+            
+            {/* Add New User Form */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+              <Input
+                type="email"
+                placeholder="البريد الإلكتروني للمستخدم الجديد"
+                value={newUserEmail}
+                onChange={(e) => setNewUserEmail(e.target.value)}
+                className="border-2 border-black rounded-none font-bold text-right"
+              />
+              <select
+                value={newUserRole}
+                onChange={(e) => setNewUserRole(e.target.value)}
+                className="p-1 border-2 border-black rounded-none font-bold text-right bg-white"
+              >
+                <option value="seller">بائع</option>
+                <option value="admin">مدير</option>
+              </select>
+              <Button
+                onClick={addNewUser}
+                disabled={!newUserEmail.trim()}
+                className="bg-green-400 text-black border-2 border-black rounded-none font-bold hover:bg-green-300"
+              >
+                <UserPlus className="ml-2" size={16} />
+                إضافة مستخدم
+              </Button>
+            </div>
+
+            {/* Users List */}
+            <div className="space-y-2">
+              <h3 className="font-bold mb-2">المستخدمون الحاليون ({users.length}):</h3>
+              {users.map((dbUser) => (
+                <div key={dbUser.id} className="flex items-center justify-between p-4 bg-gray-50 border-2 border-gray-300">
+                  <div className="flex items-center gap-4">
+                    <span className="font-bold">{dbUser.email}</span>
+                    <span className={`px-2 py-1 text-xs font-bold ${
+                      dbUser.role === 'admin' ? 'bg-purple-400' : 'bg-blue-400'
+                    } text-black border border-black`}>
+                      {dbUser.role === 'admin' ? 'مدير' : 'بائع'}
+                    </span>
+                    {dbUser.email === user.email && (
+                      <span className="px-2 py-1 text-xs font-bold bg-yellow-400 text-black border border-black">
+                        أنت
+                      </span>
+                    )}
+                  </div>
+                  {dbUser.email !== user.email && (
+                    <Button
+                      onClick={() => removeUser(dbUser.id, dbUser.email)}
+                      className="bg-red-400 text-white border-2 border-black rounded-none font-bold text-sm hover:bg-red-500"
+                    >
+                      <Trash2 size={14} />
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
           {/* Real Stock Card */}
@@ -657,15 +838,14 @@ const Dashboard = ({ user, onSignOut }) => {
                     <p className="bg-gray-100 p-3 border-2 border-black font-bold">{selectedOrder.customer_name}</p>
                   </div>
                   <div>
-                    <label className="block font-black text-sm mb-1">رقم الهاتف</label>
-                    <p className="bg-gray-100 p-3 border-2 border-black font-mono">{selectedOrder.customer_phone}</p>
+                    <label className="block font-black text-sm mb-1">الهاتف</label>
+                    <p className="bg-gray-100 p-3 border-2 border-black font-bold">{selectedOrder.customer_phone}</p>
                   </div>
                   <div>
                     <label className="block font-black text-sm mb-1">البريد الإلكتروني</label>
-                    <p className="bg-gray-100 p-3 border-2 border-black font-bold">{selectedOrder.customer_email || 'غير محدد'}</p>
+                    <p className="bg-gray-100 p-3 border-2 border-black font-bold">{selectedOrder.customer_email}</p>
                   </div>
                 </div>
-                
                 <div className="space-y-4">
                   <div>
                     <label className="block font-black text-sm mb-1">الولاية</label>
@@ -683,11 +863,12 @@ const Dashboard = ({ user, onSignOut }) => {
                     <label className="block font-black text-sm mb-1">الكمية</label>
                     <p className="bg-gray-100 p-3 border-2 border-black font-bold text-center">{selectedOrder.quantity}</p>
                   </div>
-                  <div>
-                    <label className="block font-black text-sm mb-1">المبلغ الإجمالي</label>
-                    <p className="bg-yellow-400 p-3 border-2 border-black font-black text-center">{selectedOrder.total_amount} دج</p>
-                  </div>
                 </div>
+              </div>
+
+              <div>
+                <label className="block font-black text-sm mb-1">المبلغ الإجمالي</label>
+                <p className="bg-yellow-400 p-3 border-2 border-black font-black text-center">{selectedOrder.total_amount} دج</p>
               </div>
 
               <div>
@@ -755,6 +936,76 @@ const Dashboard = ({ user, onSignOut }) => {
           </div>
         </div>
       )}
+
+      {/*  Alert Modal */}
+      {alertModal.isOpen && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-6 z-50">
+          <div className="bg-white border-4 border-black max-w-md w-full ">
+            {/* Header */}
+            <div className={`p-4 text-center border-b-2 border-black ${
+              alertModal.type === 'success' 
+                ? 'bg-green-400 text-black' 
+                : alertModal.type === 'error' 
+                  ? 'bg-red-400 text-white' 
+                  : 'bg-yellow-400 text-black'
+            }`}>
+              <div className="flex items-center justify-center gap-3">
+                {alertModal.type === 'success' && <CheckCircle size={24} />}
+                {alertModal.type === 'error' && <XCircle size={24} />}
+                {alertModal.type === 'confirm' && <Clock size={24} />}
+                <h3 className="text-xl font-black">{alertModal.title}</h3>
+              </div>
+            </div>
+            
+            {/* Content */}
+            <div className="p-6">
+              <p className="text-center font-bold text-lg mb-6 text-gray-800">
+                {alertModal.message}
+              </p>
+              
+              {/* Buttons */}
+              <div className="flex gap-3">
+                {alertModal.type === 'confirm' ? (
+                  <>
+                    <Button
+                      onClick={() => {
+                        alertModal.onConfirm?.();
+                        closeAlert();
+                      }}
+                      className="flex-1 bg-red-400 text-white border-2 border-black rounded-none font-black hover:bg-red-500 transition-all transform hover:scale-105 shadow-[2px_2px_0px_0px_#000]"
+                    >
+                      <CheckCircle className="ml-2" size={16} />
+                      تأكيد
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        alertModal.onCancel?.();
+                        closeAlert();
+                      }}
+                      className="flex-1 bg-gray-400 text-black border-2 border-black rounded-none font-black hover:bg-gray-500 transition-all transform hover:scale-105 shadow-[2px_2px_0px_0px_#000]"
+                    >
+                      <XCircle className="ml-2" size={16} />
+                      إلغاء
+                    </Button>
+                  </>
+                ) : (
+                  <Button
+                    onClick={closeAlert}
+                    className={`w-full border-2 border-black rounded-none font-black text-lg transition-all transform hover:scale-105 shadow-[2px_2px_0px_0px_#000] ${
+                      alertModal.type === 'success' 
+                        ? 'bg-green-400 text-black hover:bg-green-500' 
+                        : 'bg-red-400 text-white hover:bg-red-500'
+                    }`}
+                  >
+                    <CheckCircle className="ml-2" size={16} />
+                    حسناً
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -765,18 +1016,67 @@ export default function SellerDashboard() {
   const [authError, setAuthError] = useState('');
   const [sentEmail, setSentEmail] = useState('');
 
+  // Query all users
+  const { data: allUsersData, isLoading: usersLoading } = db.useQuery({
+    users: {}
+  });
+
+  // Get current authorized user using find
+  const getCurrentUser = React.useCallback(() => {
+    if (!user || !allUsersData?.users) return null;
+    return allUsersData.users.find(
+      (dbUser: any) => dbUser.email?.toLowerCase() === user.email?.toLowerCase()
+    );
+  }, [user, allUsersData]);
+
+  const currentAuthorizedUser = getCurrentUser();
+  const isAuthorizedUser = !!currentAuthorizedUser && (currentAuthorizedUser.role === 'admin' || currentAuthorizedUser.role === 'seller');
+
+  console.log('All users:', allUsersData?.users);
+  console.log('Current user email:', user?.email);
+  console.log('Current authorized user:', currentAuthorizedUser);
+  console.log('isAuthorizedUser', isAuthorizedUser);
+
+  const checkUserAuthorization = (email: string) => {
+    if (!allUsersData?.users) {
+      console.log('Users data not loaded yet');
+      return false;
+    }
+
+    const foundUser = allUsersData.users.find(
+      (dbUser: any) => dbUser.email?.toLowerCase() === email.toLowerCase()
+    );
+
+    console.log('Checking authorization for:', email);
+    console.log('Found user:', foundUser);
+
+    // Check if user exists and has admin or seller role
+    return foundUser && (foundUser.role === 'admin' || foundUser.role === 'seller');
+  };
+
   const handleAuth = async (emailOrCode, step) => {
     setAuthLoading(true);
     setAuthError('');
     
     try {
       if (step === 'email') {
-        // Send magic code to email
+        // First check if the email is authorized using loaded data
+        const isAuthorized = checkUserAuthorization(emailOrCode);
+        
+        if (!isAuthorized) {
+          setAuthError('هذا البريد الإلكتروني غير مخول للوصول إلى هذه اللوحة. يرجى التواصل مع المدير.');
+          setAuthLoading(false);
+          return 'UNAUTHORIZED'; // Return status to indicate unauthorized
+        }
+        
+        // Send magic code to email if authorized
         await db.auth.sendMagicCode({ email: emailOrCode });
         setSentEmail(emailOrCode);
+        return 'CODE_SENT'; // Return status to indicate code was sent successfully
       } else if (step === 'code') {
         // Sign in with the magic code
         await db.auth.signInWithMagicCode({ email: sentEmail, code: emailOrCode });
+        return 'SIGNED_IN'; // Return status to indicate successful sign in
       }
     } catch (error) {
       console.error('Auth error:', error);
@@ -785,6 +1085,7 @@ export default function SellerDashboard() {
           ? 'فشل في إرسال رمز التحقق. تأكد من صحة البريد الإلكتروني.'
           : 'رمز التحقق غير صحيح. يرجى المحاولة مرة أخرى.'
       );
+      return 'ERROR'; // Return error status
     } finally {
       setAuthLoading(false);
     }
@@ -796,8 +1097,8 @@ export default function SellerDashboard() {
     setSentEmail('');
   };
 
-  // Show loading state while checking authentication
-  if (isLoading) {
+  // Show loading state while checking authentication and users data
+  if (isLoading || usersLoading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
@@ -819,6 +1120,31 @@ export default function SellerDashboard() {
     );
   }
 
-  // Show dashboard if user is authenticated
+  // Show unauthorized message if user is authenticated but not in users table or doesn't have proper role
+  if (user && !isAuthorizedUser) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center p-6" dir="rtl" style={{ fontFamily: 'Almarai, sans-serif' }}>
+        <div className="bg-white border-2 border-red-500 p-8 transform -rotate-1 max-w-md w-full text-center">
+          <div className="mb-6">
+            <XCircle className="mx-auto mb-4 text-red-500" size={48} />
+            <h1 className="text-2xl font-black mb-4 text-red-600">غير مخول للوصول</h1>
+            <p className="text-lg font-bold text-gray-700 mb-6">
+              هذا الحساب ({user.email}) غير مخول للوصول إلى لوحة تحكم البائع. يرجى التواصل مع المدير.
+            </p>
+          </div>
+          
+          <Button
+            onClick={signOut}
+            className="w-full bg-red-400 text-white px-8 py-4 border-2 border-black rounded-none font-black text-lg hover:bg-red-500 transition-all duration-150 transform hover:translate-x-1 hover:translate-y-1 shadow-[2px_2px_0px_0px_#000]"
+          >
+            <LogOut className="ml-2" size={20} />
+            تسجيل الخروج
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Show dashboard if user is authenticated and authorized
   return <Dashboard user={user} onSignOut={signOut} />;
 }

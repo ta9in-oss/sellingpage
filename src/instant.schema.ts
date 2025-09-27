@@ -9,6 +9,12 @@ const _schema = i.schema({
     $users: i.entity({
       email: i.string().unique().indexed().optional(),
     }),
+    users: i.entity({
+      email: i.string().unique().indexed(),
+      role: i.string().optional(), 
+      created_at: i.date(),
+      updated_at: i.date(),
+    }),
     products: i.entity({
       product_number: i.string().unique(),
       name: i.string(),
