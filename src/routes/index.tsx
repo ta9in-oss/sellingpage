@@ -185,9 +185,9 @@ function Home() {
         );
 
         // Redirect to success page with order number
-        navigate({ 
-          to: "/success", 
-          search: { orderNumber: result.orderNumber || "" } 
+        navigate({
+          to: "/success",
+          search: { orderNumber: result.orderNumber || "" }
         });
       } else {
         setOrderError(result.error || "حدث خطأ غير متوقع");
@@ -227,7 +227,7 @@ function Home() {
       image: "bagpack_003.png",
       title: "المادة: %100 بوليستار",
       description:
-       "مصنوعة %100 بوليستار، قوية، ما تتقشر ما تتقطع، وأهم شي ما تشعّرش، وما تديرش الحساسية",
+        "مصنوعة %100 بوليستار، قوية، ما تتقشر ما تتقطع، وأهم شي ما تشعّرش، وما تديرش الحساسية",
       bgColor: "bg-white text-black ",
     },
     {
@@ -274,343 +274,216 @@ function Home() {
     >
       <Layout showNavigation={true}>
 
-      <div className="w-full border-b border-black"></div>
+        <div className="w-full border-b border-black"></div>
 
-      {/* Hero Section */}
-      <section className="bg-white py-16 px-6"> 
-        <div className="max-w-5xl mx-auto"> 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            {/* Text Content */}
-            <div className="space-y-8 order-2 lg:order-1">
-              <h1 className="text-4xl lg:text-5xl font-black leading-tight text-right">
-                حزام واحد
-                <br />
-                يحكم الكل
-              </h1>
+        {/* Hero Section */}
+        <section className="bg-white py-16 px-6">
+          <div className="max-w-5xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+              {/* Text Content */}
+              <div className="space-y-8 order-2 lg:order-1">
+                <h1 className="text-4xl lg:text-5xl font-black leading-tight text-right">
+                  حزام واحد
+                  <br />
+                  يحكم الكل
+                </h1>
 
-              {/* Description Box */}
-              <div className="bg-black text-white p-4 sm:p-6 border-1 border-black transform -rotate-1">
-                <p className="text-base sm:text-lg md:text-l font-bold text-right leading-relaxed">
-                  صاكادو يد وحدة: يرفد بزاف ويبان صغير. خفيف، مريح، يخدم القراية والسبور والخرجات
-                </p>
-              </div>
-
-              <Button
-                className="bg-yellow-400 text-black px-8 py-4 border-1 border-black rounded-none font-black text-lg hover:bg-yellow-300 transition-all duration-150 transform hover:translate-x-1 hover:translate-y-1 shadow-[2px_2px_0px_0px_#000]"
-                onClick={() => scrollToSection("buy")}
-              >
-                <ShoppingBag className="ml-2" size={20} />
-                اشتر الآن - 2500 دج
-              </Button>
-            </div>
-
-            {/* Image Section */}
-            <div className="relative order-1 lg:order-2 flex justify-center">
-              <div className="relative max-w-md">
-                <img
-                  src="/bagpack_001.png"
-                  alt="Mono Backpack"
-                  className="w-full h-auto transform rotate-3"
-                />
-
-                {/* Big Cost Cards */}
-                <div className="absolute top-8 sm:top-12 left-8 sm:left-12 transform -rotate-12 z-10">
-                  {/* Price Card  */}
-                  <div className="bg-yellow-400 border-4 border-black px-6 py-4 mb-2 shadow-[4px_4px_0px_0px_#000] hover:shadow-[6px_6px_0px_0px_#000] transition-all">
-                    <span className="font-black text-2xl sm:text-3xl">2500 دج</span>
-                  </div>
-                  {/* Free Delivery Card */}
-                  <div className="bg-green-400 border-4 border-black px-6 py-4 shadow-[4px_4px_0px_0px_#000] hover:shadow-[6px_6px_0px_0px_#000] transition-all">
-                    <span className="font-black text-lg sm:text-xl">التوصيل باطل</span>
-                  </div>
+                {/* Description Box */}
+                <div className="bg-black text-white p-4 sm:p-6 border-1 border-black transform -rotate-1">
+                  <p className="text-base sm:text-lg md:text-l font-bold text-right leading-relaxed">
+                    صاكادو يد وحدة: يرفد بزاف ويبان صغير. خفيف، مريح، يخدم القراية والسبور والخرجات
+                  </p>
                 </div>
+
+                <Button
+                  className="bg-yellow-400 text-black px-8 py-4 border-1 border-black rounded-none font-black text-lg hover:bg-yellow-300 transition-all duration-150 transform hover:translate-x-1 hover:translate-y-1 shadow-[2px_2px_0px_0px_#000]"
+                  onClick={() => scrollToSection("buy")}
+                >
+                  <ShoppingBag className="ml-2" size={20} />
+                  اشتر الآن - 2500 دج
+                </Button>
               </div>
-            </div>
-          </div>
-        </div>
-      </section>
-      <div className="w-full h-0.5 bg-black"></div>
 
-      {/* Specs Section */}
-      <section id="specs" className="bg-white py-16 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-black mb-4">
-              المواصفات والخصائص
-            </h2>
-            <div className="bg-black h-1 w-32 mx-auto"></div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {specs.map((spec, index) => (
-              <div
-                key={index}
-                className={`${spec.bgColor} border-2 border-black p-8 text-center transition-all duration-150 transform hover:-translate-y-1 hover:scale-110  shadow-[2px_2px_0px_0px_#000] hover:shadow-[4px_4px_0px_0px_#000]`}
-              >
-                <div className="mb-6">
+              {/* Image Section */}
+              <div className="relative order-1 lg:order-2 flex justify-center">
+                <div className="relative max-w-md">
                   <img
-                    src={spec.image}
-                    alt={spec.title}
-                    className="w-48 h-48 object-contain mx-auto"
+                    src="/bagpack_001.png"
+                    alt="Mono Backpack"
+                    className="w-full h-auto transform rotate-3"
                   />
+
+                  {/* Big Cost Cards */}
+                  <div className="absolute top-8 sm:top-12 left-8 sm:left-12 transform -rotate-12 z-10">
+                    {/* Price Card  */}
+                    <div className="bg-yellow-400 border-4 border-black px-6 py-4 mb-2 shadow-[4px_4px_0px_0px_#000] hover:shadow-[6px_6px_0px_0px_#000] transition-all">
+                      <span className="font-black text-2xl sm:text-3xl">2500 دج</span>
+                    </div>
+                    {/* Free Delivery Card */}
+                    <div className="bg-green-400 border-4 border-black px-6 py-4 shadow-[4px_4px_0px_0px_#000] hover:shadow-[6px_6px_0px_0px_#000] transition-all">
+                      <span className="font-black text-lg sm:text-xl">التوصيل باطل</span>
+                    </div>
+                  </div>
                 </div>
-                <h3 className="font-black text-xl mb-4">{spec.title}</h3>
-                <p className="text-sm leading-relaxed ">
-                  {spec.description}
-                </p>
               </div>
-            ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+        <div className="w-full h-0.5 bg-black"></div>
 
-      <div className="w-full h-0.5 bg-black"></div>
+        {/* Specs Section */}
+        <section id="specs" className="bg-white py-16 px-6">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-4xl font-black mb-4">
+                المواصفات والخصائص
+              </h2>
+              <div className="bg-black h-1 w-32 mx-auto"></div>
+            </div>
 
-      {/* Order Section */}
-      <section id="buy" className="bg-white py-16 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-black mb-4">
-             اطلب قبل ما تخلاص
-            </h2>
-            <div className="bg-black h-1 w-32 mx-auto"></div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {specs.map((spec, index) => (
+                <div
+                  key={index}
+                  className={`${spec.bgColor} border-2 border-black p-8 text-center transition-all duration-150 transform hover:-translate-y-1 hover:scale-110  shadow-[2px_2px_0px_0px_#000] hover:shadow-[4px_4px_0px_0px_#000]`}
+                >
+                  <div className="mb-6">
+                    <img
+                      src={spec.image}
+                      alt={spec.title}
+                      className="w-48 h-48 object-contain mx-auto"
+                    />
+                  </div>
+                  <h3 className="font-black text-xl mb-4">{spec.title}</h3>
+                  <p className="text-sm leading-relaxed ">
+                    {spec.description}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
+        </section>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div className="w-full h-0.5 bg-black"></div>
 
-            {/* Form Section */}
-            <div className="space-y-8">
-              <div className="bg-white border-2 border-black p-8">
-                {validationError && (
-                  <Alert className="border-2 border-red-500 bg-red-50 text-black mb-6 flex items-start gap-3 p-4">
-                    <OctagonAlertIcon className="h-5 w-5 text-black mt-1" />
-                    <div className="text-right">
-                      <AlertTitle className="font-extrabold text-base">
-                        يرجى ملء جميع الحقول المطلوبة
-                      </AlertTitle>
-                      <AlertDescription className="text-sm font-medium">
-                        تأكد من إدخال الاسم، رقم الهاتف، واختيار الموقع (الولاية،
-                        الدائرة، والبلدية).
-                      </AlertDescription>
-                    </div>
-                  </Alert>
-                )}
+        {/* Order Section */}
+        <section id="buy" className="bg-white py-16 px-6">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-4xl font-black mb-4">
+                اطلب قبل ما تخلاص
+              </h2>
+              <div className="bg-black h-1 w-32 mx-auto"></div>
+            </div>
 
-                {orderError && (
-                  <Alert className="border-2 border-red-500 bg-red-50 text-black mb-6 flex items-start gap-3 p-4">
-                    <OctagonAlertIcon className="h-5 w-5 text-red-600 mt-1" />
-                    <div className="text-right">
-                      <AlertTitle className="font-extrabold text-base text-red-800">
-                        حدث خطأ في إرسال الطلب
-                      </AlertTitle>
-                      <AlertDescription className="text-sm font-medium text-red-700">
-                        {orderError}
-                      </AlertDescription>
-                    </div>
-                  </Alert>
-                )}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
 
-                <div className="space-y-6">
-                  <div>
-                    <Label
-                      htmlFor="name"
-                      className="block text-base font-bold mb-2 text-right"
-                    >
-                     الاسم الكامل 
-                     <span className="text-red-500 mr-1 text-xl">*</span>
-                    </Label>
-                    <Input
-                      type="text"
-                      id="name"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      className="w-full p-6 border-2 border-black rounded-none bg-white text-right font-bold"
-                      placeholder="أدخل اسمك الكامل"
-                    />
-                  </div>
+              {/* Form Section */}
+              <div className="space-y-8">
+                <div className="bg-white border-2 border-black p-8">
+                  {validationError && (
+                    <Alert className="border-2 border-red-500 bg-red-50 text-black mb-6 flex items-start gap-3 p-4">
+                      <OctagonAlertIcon className="h-5 w-5 text-black mt-1" />
+                      <div className="text-right">
+                        <AlertTitle className="font-extrabold text-base">
+                          يرجى ملء جميع الحقول المطلوبة
+                        </AlertTitle>
+                        <AlertDescription className="text-sm font-medium">
+                          تأكد من إدخال الاسم، رقم الهاتف، واختيار الموقع (الولاية،
+                          الدائرة، والبلدية).
+                        </AlertDescription>
+                      </div>
+                    </Alert>
+                  )}
 
-                  <div>
-                    <Label
-                      htmlFor="email"
-                      className="block text-base font-bold mb-2 text-right"
-                    >
-                      البريد الإلكتروني (ليس مهمًا)
-                    </Label>
-                    <Input
-                      type="email"
-                      id="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      className="w-full p-6 border-2 border-black rounded-none bg-white text-right font-bold"
-                      placeholder="أدخل بريدك الإلكتروني"
-                    />
-                  </div>
+                  {orderError && (
+                    <Alert className="border-2 border-red-500 bg-red-50 text-black mb-6 flex items-start gap-3 p-4">
+                      <OctagonAlertIcon className="h-5 w-5 text-red-600 mt-1" />
+                      <div className="text-right">
+                        <AlertTitle className="font-extrabold text-base text-red-800">
+                          حدث خطأ في إرسال الطلب
+                        </AlertTitle>
+                        <AlertDescription className="text-sm font-medium text-red-700">
+                          {orderError}
+                        </AlertDescription>
+                      </div>
+                    </Alert>
+                  )}
 
-                  <div>
-                    <Label
-                      htmlFor="phone"
-                      className="block text-base font-bold mb-2 text-right"
-                    >
-                      رقم الهاتف
-                      <span className="text-red-500 mr-1 text-xl">*</span>
-                    </Label>
-                    <Input
-                      type="tel"
-                      id="phone"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      className="w-full p-6 border-2 border-black rounded-none bg-white text-right font-bold"
-                      placeholder="أدخل رقم هاتفك"
-                    />
-                  </div>
-
-                  <div className="space-y-4">
-                    {/* Wilaya Combobox */}
+                  <div className="space-y-6">
                     <div>
-                      <Label className="text-right block text-base font-bold mb-2">
-                        الولاية
+                      <Label
+                        htmlFor="name"
+                        className="block text-base font-bold mb-2 text-right"
+                      >
+                        الاسم الكامل
                         <span className="text-red-500 mr-1 text-xl">*</span>
                       </Label>
-                      <Popover open={wilayaOpen} onOpenChange={setWilayaOpen}>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            role="combobox"
-                            aria-expanded={wilayaOpen}
-                            className="w-full p-4 border-2 border-black rounded-none bg-white font-bold justify-between text-right h-auto flex flex-row-reverse"
-                          >
-                            <ChevronsUpDown className="mr-2 h-4 w-4 shrink-0 opacity-50" />
-                            {selectedWilaya || "اختر الولاية"}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent
-                          className="w-[var(--radix-popover-trigger-width)] p-0 border-2 border-black bg-white"
-                          align="start"
-                          side="bottom"
-                        >
-                          <Command dir="rtl" className="rounded-none bg-white">
-                            <CommandInput
-                              placeholder="ابحث عن الولاية..."
-                              className="mt-2 text-right border-0 border-black rounded-none h-12 font-bold"
-                            />
-                            <CommandList className="max-h-60 overflow-y-auto bg-white">
-                              <CommandEmpty className="text-center py-6 font-bold">
-                                لم يتم العثور على ولاية
-                              </CommandEmpty>
-                              <CommandGroup>
-                                {wilayas.map((wilaya) => (
-                                  <CommandItem
-                                    key={wilaya}
-                                    value={wilaya}
-                                    onSelect={() => {
-                                      handleWilayaChange(wilaya);
-                                      setWilayaOpen(false);
-                                    }}
-                                    className="text-right font-bold py-3 px-4 cursor-pointer hover:bg-gray-100"
-                                  >
-                                    {wilaya}
-                                    <Check
-                                      className={cn(
-                                        "mr-2 h-4 w-4",
-                                        selectedWilaya === wilaya
-                                          ? "opacity-100"
-                                          : "opacity-0"
-                                      )}
-                                    />
-                                  </CommandItem>
-                                ))}
-                              </CommandGroup>
-                            </CommandList>
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
+                      <Input
+                        type="text"
+                        id="name"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleInputChange}
+                        className="w-full p-6 border-2 border-black rounded-none bg-white text-right font-bold"
+                        placeholder="أدخل اسمك الكامل"
+                      />
                     </div>
 
-                    {/* Daira Combobox - Only show when Wilaya is selected */}
-                    {selectedWilaya && (
-                      <div>
-                        <Label className="text-right block text-base font-bold mb-2">
-                          الدائرة
-                          <span className="text-red-500 mr-1 text-xl">*</span>
-                        </Label>
-                        <Popover open={dairaOpen} onOpenChange={setDairaOpen}>
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              role="combobox"
-                              aria-expanded={dairaOpen}
-                              className="w-full p-4 border-2 border-black rounded-none bg-white font-bold justify-between text-right h-auto flex flex-row-reverse"
-                              disabled={!selectedWilaya}
-                            >
-                              <ChevronsUpDown className="mr-2 h-4 w-4 shrink-0 opacity-50" />
-                              {selectedDaira || "اختر الدائرة"}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent
-                            className="w-[var(--radix-popover-trigger-width)] p-0 border-2 border-black bg-white"
-                            align="start"
-                            side="bottom"
-                          >
-                            <Command dir="rtl" className="rounded-none bg-white">
-                              <CommandInput
-                                placeholder="ابحث عن الدائرة..."
-                                className="mt-2 text-right border-0 border-black rounded-none h-12 font-bold"
-                              />
-                              <CommandList className="max-h-60 overflow-y-auto bg-white">
-                                <CommandEmpty className="text-center py-6 font-bold">
-                                  لم يتم العثور على دائرة
-                                </CommandEmpty>
-                                <CommandGroup>
-                                  {availableDairas.map((daira) => (
-                                    <CommandItem
-                                      key={daira}
-                                      value={daira}
-                                      onSelect={() => {
-                                        handleDairaChange(daira);
-                                        setDairaOpen(false);
-                                      }}
-                                      className="text-right font-bold py-3 px-4 cursor-pointer hover:bg-gray-100"
-                                    >
-                                      {daira}
-                                      <Check
-                                        className={cn(
-                                          "mr-2 h-4 w-4",
-                                          selectedDaira === daira
-                                            ? "opacity-100"
-                                            : "opacity-0"
-                                        )}
-                                      />
-                                    </CommandItem>
-                                  ))}
-                                </CommandGroup>
-                              </CommandList>
-                            </Command>
-                          </PopoverContent>
-                        </Popover>
-                      </div>
-                    )}
+                    <div>
+                      <Label
+                        htmlFor="email"
+                        className="block text-base font-bold mb-2 text-right"
+                      >
+                        البريد الإلكتروني (ليس مهمًا)
+                      </Label>
+                      <Input
+                        type="email"
+                        id="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        className="w-full p-6 border-2 border-black rounded-none bg-white text-right font-bold"
+                        placeholder="أدخل بريدك الإلكتروني"
+                      />
+                    </div>
 
-                    {/* Commune Combobox - Only show when Daira is selected */}
-                    {selectedDaira && (
+                    <div>
+                      <Label
+                        htmlFor="phone"
+                        className="block text-base font-bold mb-2 text-right"
+                      >
+                        رقم الهاتف
+                        <span className="text-red-500 mr-1 text-xl">*</span>
+                      </Label>
+                      <Input
+                        type="tel"
+                        id="phone"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleInputChange}
+                        className="w-full p-6 border-2 border-black rounded-none bg-white text-right font-bold"
+                        placeholder="أدخل رقم هاتفك"
+                      />
+                    </div>
+
+                    <div className="space-y-4">
+                      {/* Wilaya Combobox */}
                       <div>
                         <Label className="text-right block text-base font-bold mb-2">
-                          البلدية
+                          الولاية
                           <span className="text-red-500 mr-1 text-xl">*</span>
                         </Label>
-                        <Popover open={communeOpen} onOpenChange={setCommuneOpen}>
+                        <Popover open={wilayaOpen} onOpenChange={setWilayaOpen}>
                           <PopoverTrigger asChild>
                             <Button
                               variant="outline"
                               role="combobox"
-                              aria-expanded={communeOpen}
+                              aria-expanded={wilayaOpen}
                               className="w-full p-4 border-2 border-black rounded-none bg-white font-bold justify-between text-right h-auto flex flex-row-reverse"
-                              disabled={!selectedDaira}
                             >
                               <ChevronsUpDown className="mr-2 h-4 w-4 shrink-0 opacity-50" />
-                              {selectedCommune || "اختر البلدية"}
+                              {selectedWilaya || "اختر الولاية"}
                             </Button>
                           </PopoverTrigger>
                           <PopoverContent
@@ -620,29 +493,29 @@ function Home() {
                           >
                             <Command dir="rtl" className="rounded-none bg-white">
                               <CommandInput
-                                placeholder="ابحث عن البلدية..."
+                                placeholder="ابحث عن الولاية..."
                                 className="mt-2 text-right border-0 border-black rounded-none h-12 font-bold"
                               />
                               <CommandList className="max-h-60 overflow-y-auto bg-white">
                                 <CommandEmpty className="text-center py-6 font-bold">
-                                  لم يتم العثور على بلدية
+                                  لم يتم العثور على ولاية
                                 </CommandEmpty>
                                 <CommandGroup>
-                                  {availableCommunes.map((commune) => (
+                                  {wilayas.map((wilaya) => (
                                     <CommandItem
-                                      key={commune}
-                                      value={commune}
+                                      key={wilaya}
+                                      value={wilaya}
                                       onSelect={() => {
-                                        handleCommuneChange(commune);
-                                        setCommuneOpen(false);
+                                        handleWilayaChange(wilaya);
+                                        setWilayaOpen(false);
                                       }}
                                       className="text-right font-bold py-3 px-4 cursor-pointer hover:bg-gray-100"
                                     >
-                                      {commune}
+                                      {wilaya}
                                       <Check
                                         className={cn(
                                           "mr-2 h-4 w-4",
-                                          selectedCommune === commune
+                                          selectedWilaya === wilaya
                                             ? "opacity-100"
                                             : "opacity-0"
                                         )}
@@ -655,169 +528,295 @@ function Home() {
                           </PopoverContent>
                         </Popover>
                       </div>
-                    )}
+
+                      {/* Daira Combobox - Only show when Wilaya is selected */}
+                      {selectedWilaya && (
+                        <div>
+                          <Label className="text-right block text-base font-bold mb-2">
+                            الدائرة
+                            <span className="text-red-500 mr-1 text-xl">*</span>
+                          </Label>
+                          <Popover open={dairaOpen} onOpenChange={setDairaOpen}>
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                aria-expanded={dairaOpen}
+                                className="w-full p-4 border-2 border-black rounded-none bg-white font-bold justify-between text-right h-auto flex flex-row-reverse"
+                                disabled={!selectedWilaya}
+                              >
+                                <ChevronsUpDown className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+                                {selectedDaira || "اختر الدائرة"}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent
+                              className="w-[var(--radix-popover-trigger-width)] p-0 border-2 border-black bg-white"
+                              align="start"
+                              side="bottom"
+                            >
+                              <Command dir="rtl" className="rounded-none bg-white">
+                                <CommandInput
+                                  placeholder="ابحث عن الدائرة..."
+                                  className="mt-2 text-right border-0 border-black rounded-none h-12 font-bold"
+                                />
+                                <CommandList className="max-h-60 overflow-y-auto bg-white">
+                                  <CommandEmpty className="text-center py-6 font-bold">
+                                    لم يتم العثور على دائرة
+                                  </CommandEmpty>
+                                  <CommandGroup>
+                                    {availableDairas.map((daira) => (
+                                      <CommandItem
+                                        key={daira}
+                                        value={daira}
+                                        onSelect={() => {
+                                          handleDairaChange(daira);
+                                          setDairaOpen(false);
+                                        }}
+                                        className="text-right font-bold py-3 px-4 cursor-pointer hover:bg-gray-100"
+                                      >
+                                        {daira}
+                                        <Check
+                                          className={cn(
+                                            "mr-2 h-4 w-4",
+                                            selectedDaira === daira
+                                              ? "opacity-100"
+                                              : "opacity-0"
+                                          )}
+                                        />
+                                      </CommandItem>
+                                    ))}
+                                  </CommandGroup>
+                                </CommandList>
+                              </Command>
+                            </PopoverContent>
+                          </Popover>
+                        </div>
+                      )}
+
+                      {/* Commune Combobox - Only show when Daira is selected */}
+                      {selectedDaira && (
+                        <div>
+                          <Label className="text-right block text-base font-bold mb-2">
+                            البلدية
+                            <span className="text-red-500 mr-1 text-xl">*</span>
+                          </Label>
+                          <Popover open={communeOpen} onOpenChange={setCommuneOpen}>
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                aria-expanded={communeOpen}
+                                className="w-full p-4 border-2 border-black rounded-none bg-white font-bold justify-between text-right h-auto flex flex-row-reverse"
+                                disabled={!selectedDaira}
+                              >
+                                <ChevronsUpDown className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+                                {selectedCommune || "اختر البلدية"}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent
+                              className="w-[var(--radix-popover-trigger-width)] p-0 border-2 border-black bg-white"
+                              align="start"
+                              side="bottom"
+                            >
+                              <Command dir="rtl" className="rounded-none bg-white">
+                                <CommandInput
+                                  placeholder="ابحث عن البلدية..."
+                                  className="mt-2 text-right border-0 border-black rounded-none h-12 font-bold"
+                                />
+                                <CommandList className="max-h-60 overflow-y-auto bg-white">
+                                  <CommandEmpty className="text-center py-6 font-bold">
+                                    لم يتم العثور على بلدية
+                                  </CommandEmpty>
+                                  <CommandGroup>
+                                    {availableCommunes.map((commune) => (
+                                      <CommandItem
+                                        key={commune}
+                                        value={commune}
+                                        onSelect={() => {
+                                          handleCommuneChange(commune);
+                                          setCommuneOpen(false);
+                                        }}
+                                        className="text-right font-bold py-3 px-4 cursor-pointer hover:bg-gray-100"
+                                      >
+                                        {commune}
+                                        <Check
+                                          className={cn(
+                                            "mr-2 h-4 w-4",
+                                            selectedCommune === commune
+                                              ? "opacity-100"
+                                              : "opacity-0"
+                                          )}
+                                        />
+                                      </CommandItem>
+                                    ))}
+                                  </CommandGroup>
+                                </CommandList>
+                              </Command>
+                            </PopoverContent>
+                          </Popover>
+                        </div>
+                      )}
+                    </div>
+
                   </div>
-
                 </div>
               </div>
-            </div>
-            {/* Product Selection */}
-            <div className="space-y-8">
+              {/* Product Selection */}
+              <div className="space-y-8">
 
-              {/* Product Carousel */}
-              <div className="bg-white border-2 border-black p-3 sm:p-6 transform -rotate-1">
-                <div className="relative">
-                  <div className="overflow-hidden rounded-lg">
-                    <div
-                      className="flex transition-transform duration-300 ease-in-out"
-                      style={{
-                        transform: `translateX(${currentSlide * 100}%)`, 
-                      }}
-                    >
-                      {products.map((product) => (
-                        <div
-                          key={product.id}
-                          className="min-w-full flex-shrink-0"
-                        >
+                {/* Product Carousel */}
+                <div className="bg-white border-2 border-black p-3 sm:p-6 transform -rotate-1">
+                  <div className="relative">
+                    <div className="overflow-hidden rounded-lg">
+                      <div
+                        className="flex transition-transform duration-300 ease-in-out"
+                        style={{
+                          transform: `translateX(${currentSlide * 100}%)`,
+                        }}
+                      >
+                        {products.map((product) => (
                           <div
-                            className={`${product.bgColor} p-2 sm:p-4 border-2 border-black rounded-lg`}
+                            key={product.id}
+                            className="min-w-full flex-shrink-0"
                           >
-                            <div className="relative w-full">
-                              <img
-                                src={product.image}
-                                alt={product.title}
-                                className="w-72 h-64 object-cover rounded-md mx-auto"
-                                loading="lazy"
-                              />
+                            <div
+                              className={`${product.bgColor} p-2 sm:p-4 border-2 border-black rounded-lg`}
+                            >
+                              <div className="relative w-full">
+                                <img
+                                  src={product.image}
+                                  alt={product.title}
+                                  className="w-72 h-64 object-cover rounded-md mx-auto"
+                                  loading="lazy"
+                                />
+                              </div>
                             </div>
                           </div>
-                        </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Navigation Buttons */}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute left-1 sm:left-4 top-1/2 transform -translate-y-1/2 bg-black text-white border-2 border-black font-black hover:bg-gray-800 w-8 h-8 sm:w-10 sm:h-10 z-10"
+                      onClick={prevSlide}
+                    >
+                      <ArrowLeft size={14} className="sm:w-4 sm:h-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-1 sm:right-4 top-1/2 transform -translate-y-1/2 bg-black text-white border-2 border-black font-black hover:bg-gray-800 w-8 h-8 sm:w-10 sm:h-10 z-10"
+                      onClick={nextSlide}
+                    >
+                      <ArrowRight size={14} className="sm:w-4 sm:h-4" />
+                    </Button>
+
+                    {/* Pagination Dots */}
+                    <div className="flex justify-center mt-4 sm:mt-6 gap-2 sm:gap-3">
+                      {products.map((_, index) => (
+                        <button
+                          key={index}
+                          className={`w-3 h-3 sm:w-4 sm:h-4 border-2 border-black transition-colors rounded-sm ${index === currentSlide ? "bg-black" : "bg-white"
+                            }`}
+                          onClick={() => setCurrentSlide(index)}
+                          aria-label={`Go to slide ${index + 1}`}
+                        />
                       ))}
                     </div>
                   </div>
-
-                  {/* Navigation Buttons */}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute left-1 sm:left-4 top-1/2 transform -translate-y-1/2 bg-black text-white border-2 border-black font-black hover:bg-gray-800 w-8 h-8 sm:w-10 sm:h-10 z-10"
-                    onClick={prevSlide}
-                  >
-                    <ArrowLeft size={14} className="sm:w-4 sm:h-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-1 sm:right-4 top-1/2 transform -translate-y-1/2 bg-black text-white border-2 border-black font-black hover:bg-gray-800 w-8 h-8 sm:w-10 sm:h-10 z-10"
-                    onClick={nextSlide}
-                  >
-                    <ArrowRight size={14} className="sm:w-4 sm:h-4" />
-                  </Button>
-
-                  {/* Pagination Dots */}
-                  <div className="flex justify-center mt-4 sm:mt-6 gap-2 sm:gap-3">
-                    {products.map((_, index) => (
-                      <button
-                        key={index}
-                        className={`w-3 h-3 sm:w-4 sm:h-4 border-2 border-black transition-colors rounded-sm ${
-                          index === currentSlide ? "bg-black" : "bg-white"
-                        }`}
-                        onClick={() => setCurrentSlide(index)}
-                        aria-label={`Go to slide ${index + 1}`}
-                      />
-                    ))}
-                  </div>
                 </div>
-              </div>
 
-              {/* Quantity Section */}
-              <div className="bg-white border-2 border-black p-6 transform rotate-1">
-                <div className="space-y-6 text-right">
-                  <div className="space-y-4">
-                    <Label className="block text-lg font-black text-gray-900">
-                      الكمية المطلوبة
-                      <span className="block text-sm font-semibold text-gray-600 mt-1">
-                        متبقي {totalStock - quantity}{" "}
-                        {getUnitLabel(totalStock - quantity)} في المخزون
-                      </span>
-                    </Label>
-
-                    {quantityError && (
-                      <Alert className="border-2 border-red-400 bg-red-50 text-red-900 flex items-start gap-3 p-4">
-                        <OctagonAlertIcon className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
-                        <div className="text-right flex-1">
-                          <AlertTitle className="font-bold text-base text-red-900">
-                            خطأ في الكمية
-                          </AlertTitle>
-                          <AlertDescription className="text-sm font-medium text-red-700 mt-1">
-                            يرجى اختيار كمية واحدة على الأقل لإتمام الطلب
-                          </AlertDescription>
-                        </div>
-                      </Alert>
-                    )}
-
-                    <div className="flex items-center justify-center gap-6">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={incrementQuantity}
-                        disabled={quantity >= totalStock}
-                        className="h-12 w-12 border-2 border-black bg-white hover:bg-gray-100 font-black transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <Plus className="h-5 w-5" />
-                      </Button>
-                      <span className="w-16 text-center font-black text-xl">
-                        {quantity}
-                      </span>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={decrementQuantity}
-                        disabled={quantity <= 0}
-                        className="h-12 w-12 border-2 border-black bg-white hover:bg-gray-100 font-black transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <Minus className="h-5 w-5" />
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  <div className="border-t-2 border-black pt-4">
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center text-lg">
-                        <span className="font-black">السعر</span>
-                        <span className="font-black">{price} دج</span>
-                      </div>
-                      <div className="flex justify-between items-center font-black text-xl">
-                        <span>المجموع</span>
-                        <span className="text-white bg-black px-3 py-1 border-2 border-black">
-                          {total} دج
+                {/* Quantity Section */}
+                <div className="bg-white border-2 border-black p-6 transform rotate-1">
+                  <div className="space-y-6 text-right">
+                    <div className="space-y-4">
+                      <Label className="block text-lg font-black text-gray-900">
+                        الكمية المطلوبة
+                        <span className="block text-sm font-semibold text-gray-600 mt-1">
+                          متبقي {totalStock - quantity}{" "}
+                          {getUnitLabel(totalStock - quantity)} في المخزون
                         </span>
+                      </Label>
+
+                      {quantityError && (
+                        <Alert className="border-2 border-red-400 bg-red-50 text-red-900 flex items-start gap-3 p-4">
+                          <OctagonAlertIcon className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+                          <div className="text-right flex-1">
+                            <AlertTitle className="font-bold text-base text-red-900">
+                              خطأ في الكمية
+                            </AlertTitle>
+                            <AlertDescription className="text-sm font-medium text-red-700 mt-1">
+                              يرجى اختيار كمية واحدة على الأقل لإتمام الطلب
+                            </AlertDescription>
+                          </div>
+                        </Alert>
+                      )}
+
+                      <div className="flex items-center justify-center gap-6">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={incrementQuantity}
+                          disabled={quantity >= totalStock}
+                          className="h-12 w-12 border-2 border-black bg-white hover:bg-gray-100 font-black transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <Plus className="h-5 w-5" />
+                        </Button>
+                        <span className="w-16 text-center font-black text-xl">
+                          {quantity}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={decrementQuantity}
+                          disabled={quantity <= 0}
+                          className="h-12 w-12 border-2 border-black bg-white hover:bg-gray-100 font-black transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <Minus className="h-5 w-5" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="border-t-2 border-black pt-4">
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center text-lg">
+                          <span className="font-black">السعر</span>
+                          <span className="font-black">{price} دج</span>
+                        </div>
+                        <div className="flex justify-between items-center font-black text-xl">
+                          <span>المجموع</span>
+                          <span className="text-white bg-black px-3 py-1 border-2 border-black">
+                            {total} دج
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
+
+
+
+            {/* Submit Button */}
+            <div className="flex justify-center mt-12">
+              <Button
+                type="button"
+                className="bg-yellow-400 text-black px-32 py-6 border-1 border-black rounded-none font-black text-lg hover:bg-yellow-300 transition-all duration-150 transform hover:translate-x-1 hover:translate-y-1 shadow-[2px_2px_0px_0px_#000]"
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "جاري الإرسال..." : "اطلب الآن"}
+              </Button>
+            </div>
           </div>
+        </section>
 
-          
-
-          {/* Submit Button */}
-          <div className="flex justify-center mt-12">
-            <Button
-              type="button"
-              className="bg-yellow-400 text-black px-32 py-6 border-1 border-black rounded-none font-black text-lg hover:bg-yellow-300 transition-all duration-150 transform hover:translate-x-1 hover:translate-y-1 shadow-[2px_2px_0px_0px_#000]"
-              onClick={handleSubmit}
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? "جاري الإرسال..." : "اطلب الآن"}
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      <OrderNotifications userWilaya={selectedWilaya} />
-    </Layout>
+        <OrderNotifications userWilaya={selectedWilaya} userCommune={selectedCommune} />
+      </Layout>
     </div>
   );
 }

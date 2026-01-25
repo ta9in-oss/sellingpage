@@ -24,3 +24,38 @@ export const getRelativeTimeInArabic = (timestamp: Date): string => {
     return `قبل ${diffInDays} يوم`;
   }
 };
+
+/**
+ * Check if an order is older than 24 hours
+ */
+export const isOlderThanOneDay = (timestamp: Date): boolean => {
+  const now = new Date();
+  const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  return timestamp < oneDayAgo;
+};
+
+/**
+ * Format aggregated order count with proper Arabic grammar
+ * @param count - Number of orders
+ * @param locationType - 'wilaya' or 'commune'
+ * @param locationName - Name of the location
+ */
+export const formatAggregatedOrderText = (
+  count: number,
+  locationType: 'wilaya' | 'commune',
+  locationName: string
+): string => {
+  const locationPrefix = locationType === 'wilaya' ? 'ولاية' : 'بلدية';
+
+  if (count === 1) {
+    return `تم تقديم طلب واحد من ${locationPrefix} ${locationName}`;
+  } else if (count === 2) {
+    return `تم تقديم طلبين من ${locationPrefix} ${locationName}`;
+  } else if (count >= 3 && count <= 10) {
+    return `تم تقديم ${count} طلبات من ${locationPrefix} ${locationName}`;
+  } else if (count >= 11 && count <= 99) {
+    return `تم تقديم ${count} طلبا من ${locationPrefix} ${locationName}`;
+  } else {
+    return `تم تقديم ${count} طلب من ${locationPrefix} ${locationName}`;
+  }
+};

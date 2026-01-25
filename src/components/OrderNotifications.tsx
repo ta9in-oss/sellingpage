@@ -1,129 +1,117 @@
 import { useOrderNotifications } from "@/hooks/useOrderNotifications";
-import { X, ShoppingBag, MapPin, TrendingUp } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ShoppingBag, MapPin, Zap } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { getRelativeTimeInArabic } from "@/lib/timeUtils";
-import { useEffect, useState } from "react";
+import { getRelativeTimeInArabic, formatAggregatedOrderText } from "@/lib/timeUtils";
 
 interface OrderNotificationsProps {
-  userWilaya?: string; 
+  userWilaya?: string;
+  userCommune?: string;
 }
 
-export const OrderNotifications = ({ userWilaya }: OrderNotificationsProps) => {
-  const { notifications, removeNotification, totalOrdersFromUserWilaya } =
-    useOrderNotifications(userWilaya);
+export const OrderNotifications = ({ userWilaya, userCommune }: OrderNotificationsProps) => {
+  const { currentNotification, hasNotifications } = useOrderNotifications(userWilaya, userCommune);
 
-  const [showTotalCount, setShowTotalCount] = useState(false);
+  // Don't render anything if there's no current notification
+  if (!currentNotification) {
+    return null;
+  }
 
-  // Show the total count when userWilaya changes and hide it after 8 seconds
-  useEffect(() => {
-    if (userWilaya && totalOrdersFromUserWilaya > 0) {
-      setShowTotalCount(true);
+  const isFromSameWilaya = currentNotification.isUserWilaya;
+  const isFromSameCommune = currentNotification.isUserCommune;
+  const isLive = currentNotification.isLive;
+  const isAggregated = currentNotification.type === 'aggregated';
 
-      const timer = setTimeout(() => {
-        setShowTotalCount(false);
-      }, 8000); // Hide after 8 seconds
+  // Determine background color based on notification type
+  const bgColor = isLive
+    ? "bg-green-500" // Live orders - green
+    : isFromSameCommune || isFromSameWilaya
+      ? "bg-cyan-500" // Same location - cyan  
+      : "bg-blue-500"; // Others - blue
 
-      return () => clearTimeout(timer);
-    } else {
-      setShowTotalCount(false);
+  // Get notification title
+  const getTitle = () => {
+    if (isLive) {
+      return (
+        <div className="flex items-center gap-2">
+          <Zap size={16} className="text-yellow-300" />
+          <span>طلب جديد!</span>
+        </div>
+      );
     }
-  }, [userWilaya, totalOrdersFromUserWilaya]);
+    if (isFromSameCommune) {
+      return (
+        <div className="flex items-center gap-2">
+          <MapPin size={14} className="text-yellow-300" />
+          <span>طلب من بلديتك!</span>
+        </div>
+      );
+    }
+    if (isFromSameWilaya) {
+      return (
+        <div className="flex items-center gap-2">
+          <MapPin size={14} className="text-yellow-300" />
+          <span>طلب من ولايتك!</span>
+        </div>
+      );
+    }
+    return "طلب حديث!";
+  };
+
+  // Get notification description
+  const getDescription = () => {
+    if (isAggregated) {
+      // Aggregated notification
+      return formatAggregatedOrderText(
+        currentNotification.count!,
+        currentNotification.locationType!,
+        currentNotification.location
+      );
+    } else {
+      // Individual notification
+      if (isFromSameCommune) {
+        return `أحد سكان بلديتك "${currentNotification.location}" قام بطلب ${currentNotification.quantity}`;
+      } else if (isFromSameWilaya) {
+        return `أحد سكان ولايتك "${currentNotification.location}" قام بطلب ${currentNotification.quantity}`;
+      } else {
+        return `أحد سكان ${currentNotification.location} قام بطلب ${currentNotification.quantity}`;
+      }
+    }
+  };
+
+  // Show timestamp for individual recent/live orders only
+  const showTimestamp = !isAggregated && currentNotification.timestamp;
 
   return (
-    <div className="fixed bottom-4 left-4 z-50 space-y-2 max-w-sm">
-      {/* Show total orders from user's wilaya if available */}
-      {showTotalCount && userWilaya && totalOrdersFromUserWilaya > 0 && (
-        <Alert
-          className="bg-blue-500 text-white border-2 border-black shadow-[2px_2px_0px_0px_#000] rounded-none animate-in slide-in-from-bottom-full duration-300 flex justify-between items-center pr-2 [&>svg+div]:translate-y-0"
-          dir="rtl"
-        >
-          <div className="flex items-start gap-3">
-            <TrendingUp className="mt-0.5 h-4 w-4 text-white" />
-            <div className="flex-col justify-center">
-               <AlertTitle className="text-white text-sm font-bold">
-                 إجمالي طلبات أهالي {userWilaya}: {totalOrdersFromUserWilaya}
-              </AlertTitle>
-              <AlertDescription className="text-blue-100 text-xs">
-                الثقة تبدأ من المنطقة
+    <div className="fixed bottom-4 left-4 z-50 w-80 min-w-[320px]">
+      <Alert
+        className={`${bgColor} text-white border-2 border-black shadow-[4px_4px_0px_0px_#000] rounded-none [&>svg+div]:translate-y-0 !grid-cols-none !block`}
+        dir="rtl"
+      >
+        <div className="flex items-start gap-3">
+          <ShoppingBag className="mt-0.5 h-4 w-4 text-white flex-shrink-0" />
+          <div className="flex flex-col justify-center text-right flex-1 min-w-0">
+            <AlertTitle className="text-white text-sm font-bold mb-1">
+              {getTitle()}
+            </AlertTitle>
+
+            <AlertDescription className="text-white font-bold text-base leading-tight">
+              {getDescription()}
+            </AlertDescription>
+
+            {(isFromSameCommune || isFromSameWilaya) && !isAggregated && (
+              <AlertDescription className="text-xs text-yellow-200 mt-1 font-medium">
+                {isFromSameCommune ? "جارك يثق بالمنتج - فرصة ذهبية! ✨" : "أهل ولايتك يثقون بالمنتج! 💫"}
               </AlertDescription>
-            </div>
+            )}
+
+            {showTimestamp && (
+              <AlertDescription className="text-xs opacity-100 mt-1 text-white/90 font-medium">
+                {getRelativeTimeInArabic(currentNotification.timestamp!)}
+              </AlertDescription>
+            )}
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-white hover:bg-blue-600 pl-0! rounded-none"
-            onClick={() => setShowTotalCount(false)}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </Alert>
-      )}
-
-      {/* Notification messages */}
-      {notifications.map((notification) => {
-        const isFromSameWilaya =
-          userWilaya && notification.customerWilaya === userWilaya;
-
-        return (
-          <Alert
-            key={notification.id}
-            className="bg-cyan-500 text-white border-2 border-black shadow-[4px_4px_0px_0px_#000] rounded-none animate-in slide-in-from-right-full duration-300 flex justify-between items-start pr-2 [&>svg+div]:translate-y-0"
-            dir="rtl"
-          >
-            
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-white hover:bg-cyan-500 pl-0! rounded-none"
-              onClick={() => removeNotification(notification.id)}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-
-            <div className="flex items-start gap-3">
-              <ShoppingBag className="mt-0.5 h-4 w-4 text-white" />
-              <div className="flex-col justify-center text-right">
-                <AlertTitle className="text-white text-sm font-bold mb-1 flex items-center gap-2">
-                  {isFromSameWilaya 
-                    ? "طلب من جارك!" 
-                    : notification.isInitial ? "طلب حديث!" : "طلب جديد!"
-                  }
-                  {isFromSameWilaya && (
-                    <MapPin size={14} className="text-yellow-300" />
-                  )}
-                </AlertTitle>
-
-                <AlertDescription className="text-white font-bold text-base leading-tight">
-                  {isFromSameWilaya ? (
-                    <>
-                      أحد سكان منطقتك{" "}
-                      "{notification.customerWilaya}" قام بطلب{" "}
-                      {notification.quantity}
-                    </>
-                  ) : (
-                    <>
-                      أحد سكان {notification.customerWilaya} قام بطلب{" "}
-                      {notification.quantity}
-                    </>
-                  )}
-                </AlertDescription>
-
-                {isFromSameWilaya && (
-                  <AlertDescription className="text-xs text-yellow-200 mt-1 font-medium">
-                    جارك يثق بالمنتج - فرصة ذهبية! ✨
-                  </AlertDescription>
-                )}
-
-                <AlertDescription className="text-xs opacity-100 mt-1 text-white/90 font-medium">
-                  {getRelativeTimeInArabic(notification.timestamp)}
-                </AlertDescription>
-              </div>
-            </div>
-
-          </Alert>
-        );
-      })}
+        </div>
+      </Alert>
     </div>
   );
 };
