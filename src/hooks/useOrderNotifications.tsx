@@ -29,8 +29,8 @@ interface Order {
   created_at: number | string;
 }
 
-const DISPLAY_DURATION = 2000; // 2 seconds
-const GAP_DURATION = 1000; // 1 second
+const DISPLAY_DURATION = 5000; // 5 seconds - optimal for reading
+const GAP_DURATION = 2500; // 2.5 seconds - smooth pacing
 
 export const useOrderNotifications = (userWilaya?: string, userCommune?: string) => {
   const [notificationQueue, setNotificationQueue] = useState<NotificationItem[]>([]);

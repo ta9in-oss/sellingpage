@@ -82,9 +82,9 @@ export const OrderNotifications = ({ userWilaya, userCommune }: OrderNotificatio
   const showTimestamp = !isAggregated && currentNotification.timestamp;
 
   return (
-    <div className="fixed bottom-4 left-4 z-50 w-80 min-w-[320px]">
+    <div className="fixed bottom-4 left-4 z-50 w-80 min-w-[320px] animate-in slide-in-from-left-4 fade-in duration-500 ease-out">
       <Alert
-        className={`${bgColor} text-white border-2 border-black shadow-[4px_4px_0px_0px_#000] rounded-none [&>svg+div]:translate-y-0 !grid-cols-none !block`}
+        className={`${bgColor} text-white border-2 border-black shadow-[4px_4px_0px_0px_#000] rounded-none [&>svg+div]:translate-y-0 !grid-cols-none !block transition-all duration-300`}
         dir="rtl"
       >
         <div className="flex items-start gap-3">
