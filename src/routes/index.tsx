@@ -59,7 +59,7 @@ function Home() {
   });
   const [validationError, setValidationError] = useState(false);
   const [orderError, setOrderError] = useState("");
-  const [quantity, setQuantity] = useState(0);
+  const [quantity, setQuantity] = useState(1);
   const [quantityError, setQuantityError] = useState(false);
   const price = 2500;
   const total = price * quantity;
@@ -78,7 +78,7 @@ function Home() {
   };
 
   const decrementQuantity = () => {
-    setQuantity((prev) => (prev > 0 ? prev - 1 : 0));
+    setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
   };
 
   // Use the custom hook for location data
@@ -772,7 +772,7 @@ function Home() {
                           variant="ghost"
                           size="icon"
                           onClick={decrementQuantity}
-                          disabled={quantity <= 0}
+                          disabled={quantity <= 1}
                           className="h-12 w-12 border-2 border-black bg-white hover:bg-gray-100 font-black transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           <Minus className="h-5 w-5" />
