@@ -9,10 +9,16 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TestComponentsRouteImport } from './routes/test-components'
 import { Route as SuccessRouteImport } from './routes/success'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 
+const TestComponentsRoute = TestComponentsRouteImport.update({
+  id: '/test-components',
+  path: '/test-components',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SuccessRoute = SuccessRouteImport.update({
   id: '/success',
   path: '/success',
@@ -33,34 +39,45 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/success': typeof SuccessRoute
+  '/test-components': typeof TestComponentsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/success': typeof SuccessRoute
+  '/test-components': typeof TestComponentsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/success': typeof SuccessRoute
+  '/test-components': typeof TestComponentsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/success'
+  fullPaths: '/' | '/dashboard' | '/success' | '/test-components'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/success'
-  id: '__root__' | '/' | '/dashboard' | '/success'
+  to: '/' | '/dashboard' | '/success' | '/test-components'
+  id: '__root__' | '/' | '/dashboard' | '/success' | '/test-components'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRoute
   SuccessRoute: typeof SuccessRoute
+  TestComponentsRoute: typeof TestComponentsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/test-components': {
+      id: '/test-components'
+      path: '/test-components'
+      fullPath: '/test-components'
+      preLoaderRoute: typeof TestComponentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/success': {
       id: '/success'
       path: '/success'
@@ -89,6 +106,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRoute,
   SuccessRoute: SuccessRoute,
+  TestComponentsRoute: TestComponentsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
