@@ -3,3 +3,9 @@ node_modules/
 .env
 .output
 .output/
+apps/store/.output/
+apps/platform/.output/
+apps/store/.env
+apps/platform/.env
+apps/*/node_modules/
+packages/*/node_modules/

@@ -1,0 +1,26 @@
+{
+  "name": "@7aba/store-ui",
+  "version": "0.0.1",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "dependencies": {
+    "lucide-react": "^0.542.0",
+    "@radix-ui/react-slot": "^1.2.3",
+    "@radix-ui/react-popover": "^1.1.15",
+    "@radix-ui/react-label": "^2.1.7",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.3.1",
+    "class-variance-authority": "^0.7.1",
+    "cmdk": "^1.1.1",
+    "@radix-ui/react-dialog": "^1.1.15"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2",
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.9"
+  },
+  "peerDependencies": {
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
+  }
+}
