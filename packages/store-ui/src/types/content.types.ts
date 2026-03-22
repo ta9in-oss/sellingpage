@@ -68,7 +68,7 @@ export interface UrgencyConfig {
     stockThreshold?: number;
 }
 
-export interface CTASection {
+export interface CTAContent {
     title: string;
     subtitle?: string;
     description?: string;
@@ -90,7 +90,7 @@ export interface SiteContent {
     benefits?: Benefit[];
     comparison?: ComparisonItem[];
     urgency?: UrgencyConfig;
-    cta?: CTASection;
+    cta?: CTAContent;
     orderLayout?: OrderLayoutConfig;
     sections: {
         specs: {

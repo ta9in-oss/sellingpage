@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useBuilderStore } from '@/hooks/useBuilderStore'
 import { cn } from '@/lib/utils'
 import {
@@ -118,6 +118,9 @@ export function SectionList() {
   const { config, selectedSectionId, selectSection, removeSection, reorderSections, addSection } =
     useBuilderStore()
   const [showAddMenu, setShowAddMenu] = useState(false)
+  const [isClient, setIsClient] = useState(false)
+
+  useEffect(() => { setIsClient(true) }, [])
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event
@@ -126,6 +129,16 @@ export function SectionList() {
     }
   }
 
+  const sectionCards = config.sections.map((section) => (
+    <SortableSectionCard
+      key={section.id}
+      section={section}
+      isSelected={selectedSectionId === section.id}
+      onSelect={() => selectSection(section.id)}
+      onRemove={() => removeSection(section.id)}
+    />
+  ))
+
   return (
     <div className="flex flex-col h-full">
       <div className="px-3 py-3 border-b border-zinc-200">
@@ -133,22 +146,18 @@ export function SectionList() {
       </div>
 
       <div className="flex-1 overflow-y-auto p-2">
-        <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          <SortableContext
-            items={config.sections.map((s) => s.id)}
-            strategy={verticalListSortingStrategy}
-          >
-            {config.sections.map((section) => (
-              <SortableSectionCard
-                key={section.id}
-                section={section}
-                isSelected={selectedSectionId === section.id}
-                onSelect={() => selectSection(section.id)}
-                onRemove={() => removeSection(section.id)}
-              />
-            ))}
-          </SortableContext>
-        </DndContext>
+        {isClient ? (
+          <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext
+              items={config.sections.map((s) => s.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              {sectionCards}
+            </SortableContext>
+          </DndContext>
+        ) : (
+          sectionCards
+        )}
       </div>
 
       <div className="p-2 border-t border-zinc-200 relative">

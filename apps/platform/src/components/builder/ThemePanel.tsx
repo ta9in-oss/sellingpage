@@ -133,6 +133,8 @@ export function ThemePanel() {
                   )}
                   dir="ltr"
                   autoFocus
+                  aria-label={`قيمة لون ${label}`}
+                  id={`color-input-${key}`}
                 />
               )}
             </div>

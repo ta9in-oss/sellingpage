@@ -29,7 +29,7 @@ export function FeatureGrid({ title, subtitle, features }: FeatureGridProps) {
                                 className={`${feature.bgColor} border-2 border-black p-8 text-center transition-all duration-150 transform hover:-translate-y-1 hover:scale-110 shadow-[2px_2px_0px_0px_#000] hover:shadow-[4px_4px_0px_0px_#000]`}
                             >
                                 <div className="mb-6">
-                                    <img src={feature.image} alt={feature.title} className="w-48 h-48 object-contain mx-auto" />
+                                    {feature.image && <img src={feature.image} alt={feature.title} className="w-48 h-48 object-contain mx-auto" />}
                                 </div>
                                 <h3 className="font-black text-xl mb-4">{feature.title}</h3>
                                 <p className="text-sm leading-relaxed">{feature.description}</p>
@@ -64,7 +64,7 @@ export function FeatureGrid({ title, subtitle, features }: FeatureGridProps) {
                             }}
                         >
                             <div className="mb-6">
-                                <img src={feature.image} alt={feature.title} className="w-48 h-48 object-contain mx-auto" />
+                                {feature.image && <img src={feature.image} alt={feature.title} className="w-48 h-48 object-contain mx-auto" />}
                             </div>
                             <h3 className="font-black text-xl mb-4" style={{ color: index % 2 === 0 ? theme.colors.accent : theme.colors.foreground }}>{feature.title}</h3>
                             <p className="text-sm leading-relaxed" style={{ color: '#9ca3af' }}>{feature.description}</p>

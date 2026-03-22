@@ -48,7 +48,7 @@ export function HeroSection({ content, onCtaClick }: HeroSectionProps) {
 
                         <div className="relative order-1 lg:order-2 flex justify-center">
                             <div className="relative max-w-md">
-                                <img src={content.image} alt="Product" className="w-full h-auto transform rotate-3" />
+                                {content.image && <img src={content.image} alt="Product" className="w-full h-auto transform rotate-3" />}
 
                                 <div className="absolute top-8 sm:top-12 left-8 sm:left-12 transform -rotate-12 z-10">
                                     <div className="bg-yellow-400 border-4 border-black px-6 py-4 mb-2 shadow-[4px_4px_0px_0px_#000] hover:shadow-[6px_6px_0px_0px_#000] transition-all">
@@ -130,7 +130,7 @@ export function HeroSection({ content, onCtaClick }: HeroSectionProps) {
                     <div className="relative order-1 lg:order-2 flex justify-center">
                         <div className="relative max-w-md">
                             <div className="absolute inset-0 rounded-2xl blur-3xl opacity-20 -z-10" style={{ backgroundColor: theme.colors.accent }} />
-                            <img src={content.image} alt="Product" className="w-full h-auto rounded-2xl" />
+                            {content.image && <img src={content.image} alt="Product" className="w-full h-auto rounded-2xl" />}
                         </div>
                     </div>
                 </div>

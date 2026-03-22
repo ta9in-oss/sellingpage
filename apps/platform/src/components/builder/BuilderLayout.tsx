@@ -98,6 +98,8 @@ export function BuilderLayout({ storeId }: BuilderLayoutProps) {
           )}
           dir="rtl"
           placeholder="اسم المتجر"
+          aria-label="اسم المتجر"
+          id="store-name-input"
         />
 
         <div className="flex items-center gap-1 text-xs text-zinc-400 ms-auto">

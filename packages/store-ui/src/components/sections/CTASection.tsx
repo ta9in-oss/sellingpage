@@ -1,10 +1,10 @@
 import { ShoppingCart } from 'lucide-react';
-import type { CTASection as CTASectionType } from '../../types/content.types';
+import type { CTAContent } from '../../types/content.types';
 import { cn } from '../../lib/utils';
 import { useTheme } from '../../context/ThemeContext';
 
 interface CTASectionProps {
-    cta: CTASectionType;
+    cta: CTAContent;
     className?: string;
 }
 
