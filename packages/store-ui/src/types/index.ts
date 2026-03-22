@@ -1,5 +1,20 @@
 import type { Theme } from '../themes/theme.types'
 
+export type {
+  HeroContent,
+  Feature,
+  ProductImage,
+  Testimonial,
+  FAQItem,
+  Guarantee,
+  Benefit,
+  UrgencyConfig,
+  OrderLayoutConfig,
+  OrderLayoutType,
+  ComparisonItem,
+  SiteContent,
+} from './content.types'
+
 export interface StoreConfig {
   meta: {
     name: string

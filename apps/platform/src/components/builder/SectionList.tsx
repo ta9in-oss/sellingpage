@@ -1,0 +1,189 @@
+import { useState } from 'react'
+import { useBuilderStore } from '@/hooks/useBuilderStore'
+import { cn } from '@/lib/utils'
+import {
+  DndContext,
+  closestCenter,
+  type DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+import {
+  GripVertical,
+  Trash2,
+  Plus,
+  Sparkles,
+  LayoutGrid,
+  MessageSquare,
+  HelpCircle,
+  ShieldCheck,
+  ClipboardList,
+} from 'lucide-react'
+import type { Section } from '@7aba/store-ui'
+
+type SectionType = Section['type']
+
+const SECTION_LABELS: Record<SectionType, string> = {
+  hero: 'قسم البطل',
+  features: 'المميزات',
+  testimonials: 'آراء العملاء',
+  faq: 'الأسئلة الشائعة',
+  guarantee: 'الضمان',
+  'order-form': 'نموذج الطلب',
+}
+
+const SECTION_ICONS: Record<SectionType, React.ComponentType<{ size?: number; className?: string }>> = {
+  hero: Sparkles,
+  features: LayoutGrid,
+  testimonials: MessageSquare,
+  faq: HelpCircle,
+  guarantee: ShieldCheck,
+  'order-form': ClipboardList,
+}
+
+const ADDABLE_TYPES: SectionType[] = ['hero', 'features', 'testimonials', 'faq', 'guarantee']
+
+interface SortableSectionCardProps {
+  section: Section
+  isSelected: boolean
+  onSelect: () => void
+  onRemove: () => void
+}
+
+function SortableSectionCard({ section, isSelected, onSelect, onRemove }: SortableSectionCardProps) {
+  const isLocked = section.type === 'order-form'
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: section.id,
+    disabled: isLocked,
+  })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  }
+
+  const Icon = SECTION_ICONS[section.type]
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      onClick={onSelect}
+      className={cn(
+        'flex items-center gap-2 px-2 py-2 rounded cursor-pointer transition-colors',
+        'border border-transparent hover:bg-zinc-50',
+        isSelected && 'bg-zinc-100 border-s-2 border-s-zinc-900 border-e-transparent border-y-transparent',
+        isLocked && 'opacity-75'
+      )}
+    >
+      {!isLocked ? (
+        <button
+          {...attributes}
+          {...listeners}
+          onClick={(e) => e.stopPropagation()}
+          className="text-zinc-300 hover:text-zinc-500 cursor-grab active:cursor-grabbing shrink-0"
+          aria-label="سحب"
+        >
+          <GripVertical size={14} />
+        </button>
+      ) : (
+        <div className="w-[14px] shrink-0" />
+      )}
+
+      <Icon size={14} className="text-zinc-500 shrink-0" />
+      <span className="flex-1 text-sm font-medium truncate">{SECTION_LABELS[section.type]}</span>
+
+      {!isLocked && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            onRemove()
+          }}
+          className="text-zinc-300 hover:text-red-500 transition-colors shrink-0"
+          aria-label="حذف القسم"
+        >
+          <Trash2 size={14} />
+        </button>
+      )}
+    </div>
+  )
+}
+
+export function SectionList() {
+  const { config, selectedSectionId, selectSection, removeSection, reorderSections, addSection } =
+    useBuilderStore()
+  const [showAddMenu, setShowAddMenu] = useState(false)
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+    if (over && active.id !== over.id) {
+      reorderSections(String(active.id), String(over.id))
+    }
+  }
+
+  return (
+    <div className="flex flex-col h-full">
+      <div className="px-3 py-3 border-b border-zinc-200">
+        <span className="text-xs font-bold text-zinc-500 uppercase tracking-wide">الأقسام</span>
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-2">
+        <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext
+            items={config.sections.map((s) => s.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            {config.sections.map((section) => (
+              <SortableSectionCard
+                key={section.id}
+                section={section}
+                isSelected={selectedSectionId === section.id}
+                onSelect={() => selectSection(section.id)}
+                onRemove={() => removeSection(section.id)}
+              />
+            ))}
+          </SortableContext>
+        </DndContext>
+      </div>
+
+      <div className="p-2 border-t border-zinc-200 relative">
+        <button
+          onClick={() => setShowAddMenu((v) => !v)}
+          className={cn(
+            'w-full flex items-center justify-center gap-2 py-2 rounded text-sm font-medium',
+            'bg-zinc-900 text-white hover:bg-zinc-700 transition-colors'
+          )}
+        >
+          <Plus size={14} />
+          إضافة قسم
+        </button>
+
+        {showAddMenu && (
+          <div className="absolute bottom-full left-2 right-2 mb-1 bg-white border border-zinc-200 rounded shadow-lg z-10 overflow-hidden">
+            {ADDABLE_TYPES.map((type) => {
+              const Icon = SECTION_ICONS[type]
+              return (
+                <button
+                  key={type}
+                  onClick={() => {
+                    addSection(type)
+                    setShowAddMenu(false)
+                  }}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-zinc-50 transition-colors"
+                >
+                  <Icon size={14} className="text-zinc-500" />
+                  {SECTION_LABELS[type]}
+                </button>
+              )
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
