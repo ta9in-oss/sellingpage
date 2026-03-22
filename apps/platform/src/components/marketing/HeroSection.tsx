@@ -1,6 +1,8 @@
 import { useLang } from '@/hooks/useLang'
 import { Link } from '@tanstack/react-router'
 import { cn } from '@/lib/utils'
+import { ThemeProvider, HeroSection as StoreHeroSection, brutalistTheme } from '@7aba/store-ui'
+import type { HeroContent } from '@7aba/store-ui'
 
 const T = {
   headline: { ar: 'أطلق متجرك الإلكتروني في دقيقتين', fr: 'Lancez votre boutique en 2 minutes' },
@@ -10,6 +12,16 @@ const T = {
   },
   cta1: { ar: 'اختر باقتك', fr: 'Choisir votre forfait' },
   cta2: { ar: 'كيف يعمل؟', fr: 'Comment ça marche?' },
+}
+
+const demoHeroContent: HeroContent = {
+  title: ['حزام واحد', 'يحكم الكل'],
+  description: 'صاكادو يد وحدة: يرفد بزاف ويبان صغير. خفيف، مريح، يخدم القراية والسبور والخرجات',
+  ctaText: 'اشتر الآن',
+  ctaLink: '#buy',
+  image: '',
+  priceTag: { amount: '2500', currency: 'دج' },
+  freeDelivery: true,
 }
 
 export function HeroSection() {
@@ -77,7 +89,7 @@ export function HeroSection() {
           </a>
         </div>
 
-        {/* Floating mockup */}
+        {/* Live store preview mockup */}
         <div
           className="relative mt-12 w-full max-w-2xl rounded-2xl overflow-hidden shadow-2xl"
           style={{ animation: 'float 3s ease-in-out infinite' }}
@@ -90,13 +102,22 @@ export function HeroSection() {
               mystore.7aba.store
             </span>
           </div>
-          <div className="bg-white h-48 flex items-center justify-center">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-orange-100 rounded-2xl mx-auto mb-3 flex items-center justify-center">
-                <span className="text-2xl">🛍️</span>
-              </div>
-              <div className="w-32 h-3 bg-gray-200 rounded mx-auto mb-2" />
-              <div className="w-24 h-2 bg-gray-100 rounded mx-auto" />
+          <div
+            className="relative overflow-hidden bg-white"
+            style={{ height: '340px' }}
+          >
+            <div
+              style={{
+                transform: 'scale(0.52)',
+                transformOrigin: 'top center',
+                width: '192%',
+                marginLeft: '-46%',
+                pointerEvents: 'none',
+              }}
+            >
+              <ThemeProvider value={brutalistTheme}>
+                <StoreHeroSection content={demoHeroContent} />
+              </ThemeProvider>
             </div>
           </div>
         </div>

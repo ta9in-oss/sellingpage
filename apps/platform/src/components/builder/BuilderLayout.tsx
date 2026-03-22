@@ -13,7 +13,9 @@ import { GuaranteeForm } from './forms/GuaranteeForm'
 import { OrderFormForm } from './forms/OrderFormForm'
 import { useNavigate } from '@tanstack/react-router'
 import type { StoreConfig, Section } from '@7aba/store-ui'
-import { Loader2, Check } from 'lucide-react'
+import { Loader2, Check, Monitor, Smartphone, Rocket } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 
 interface BuilderLayoutProps {
   storeId: string
@@ -87,15 +89,12 @@ export function BuilderLayout({ storeId }: BuilderLayoutProps) {
   return (
     <div className="min-h-screen flex flex-col bg-white" dir="rtl">
       {/* Top bar */}
-      <header className="h-12 border-b border-zinc-200 flex items-center px-4 gap-3 shrink-0">
-        <input
+      <header className="h-14 border-b border-zinc-200 flex items-center px-4 gap-3 shrink-0 bg-white">
+        <Input
           type="text"
           value={config.meta.name}
           onChange={(e) => updateMeta({ name: e.target.value })}
-          className={cn(
-            'flex-1 max-w-xs border border-zinc-200 rounded px-2 py-1 text-sm font-medium',
-            'focus:outline-none focus:ring-2 focus:ring-zinc-900'
-          )}
+          className="max-w-[200px] h-8 text-sm font-medium"
           dir="rtl"
           placeholder="اسم المتجر"
           aria-label="اسم المتجر"
@@ -116,15 +115,14 @@ export function BuilderLayout({ storeId }: BuilderLayoutProps) {
           )}
         </div>
 
-        <button
-          onClick={() => navigate({ to: '/dashboard/deploy', search: { storeId } })}
-          className={cn(
-            'px-4 py-1.5 bg-zinc-900 text-white text-sm font-medium rounded',
-            'hover:bg-zinc-700 transition-colors'
-          )}
+        <Button
+          size="sm"
+          onClick={() => navigate({ to: '/dashboard/deploy', search: { storeId, tier: 'starter' } })}
+          className="gap-1.5"
         >
+          <Rocket size={13} />
           نشر
-        </button>
+        </Button>
       </header>
 
       {/* Desktop: three-column layout */}
@@ -169,18 +167,14 @@ export function BuilderLayout({ storeId }: BuilderLayoutProps) {
         {/* Mobile tab bar */}
         <nav className="h-12 border-t border-zinc-200 flex shrink-0">
           {MOBILE_TABS.map(({ key, label }) => (
-            <button
+            <Button
               key={key}
+              variant={mobileTab === key ? 'default' : 'ghost'}
               onClick={() => setMobileTab(key)}
-              className={cn(
-                'flex-1 text-sm font-medium transition-colors',
-                mobileTab === key
-                  ? 'bg-zinc-900 text-white'
-                  : 'text-zinc-500 hover:text-zinc-900'
-              )}
+              className="flex-1 rounded-none h-full text-sm"
             >
               {label}
-            </button>
+            </Button>
           ))}
         </nav>
       </div>

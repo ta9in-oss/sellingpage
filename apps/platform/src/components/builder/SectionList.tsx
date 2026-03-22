@@ -24,6 +24,10 @@ import {
   ClipboardList,
 } from 'lucide-react'
 import type { Section } from '@7aba/store-ui'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Card } from '@/components/ui/card'
 
 type SectionType = Section['type']
 
@@ -70,14 +74,14 @@ function SortableSectionCard({ section, isSelected, onSelect, onRemove }: Sortab
   const Icon = SECTION_ICONS[section.type]
 
   return (
-    <div
+    <Card
       ref={setNodeRef}
       style={style}
       onClick={onSelect}
       className={cn(
-        'flex items-center gap-2 px-2 py-2 rounded cursor-pointer transition-colors',
-        'border border-transparent hover:bg-zinc-50',
-        isSelected && 'bg-zinc-100 border-s-2 border-s-zinc-900 border-e-transparent border-y-transparent',
+        'flex items-center gap-2 px-2 py-2 cursor-pointer transition-all mb-1 shadow-none',
+        'hover:bg-zinc-50 border',
+        isSelected && 'border-s-2 border-s-zinc-900 bg-zinc-50',
         isLocked && 'opacity-75'
       )}
     >
@@ -98,19 +102,25 @@ function SortableSectionCard({ section, isSelected, onSelect, onRemove }: Sortab
       <Icon size={14} className="text-zinc-500 shrink-0" />
       <span className="flex-1 text-sm font-medium truncate">{SECTION_LABELS[section.type]}</span>
 
+      <Badge variant="outline" className="text-[10px] px-1 py-0 h-4 shrink-0">
+        {section.type}
+      </Badge>
+
       {!isLocked && (
-        <button
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-6 w-6 shrink-0 text-zinc-300 hover:text-red-500 hover:bg-transparent"
           onClick={(e) => {
             e.stopPropagation()
             onRemove()
           }}
-          className="text-zinc-300 hover:text-red-500 transition-colors shrink-0"
           aria-label="حذف القسم"
         >
-          <Trash2 size={14} />
-        </button>
+          <Trash2 size={13} />
+        </Button>
       )}
-    </div>
+    </Card>
   )
 }
 
@@ -145,7 +155,7 @@ export function SectionList() {
         <span className="text-xs font-bold text-zinc-500 uppercase tracking-wide">الأقسام</span>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-2">
+      <ScrollArea className="flex-1 p-2">
         {isClient ? (
           <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
             <SortableContext
@@ -158,22 +168,20 @@ export function SectionList() {
         ) : (
           sectionCards
         )}
-      </div>
+      </ScrollArea>
 
       <div className="p-2 border-t border-zinc-200 relative">
-        <button
+        <Button
           onClick={() => setShowAddMenu((v) => !v)}
-          className={cn(
-            'w-full flex items-center justify-center gap-2 py-2 rounded text-sm font-medium',
-            'bg-zinc-900 text-white hover:bg-zinc-700 transition-colors'
-          )}
+          className="w-full gap-2"
+          size="sm"
         >
           <Plus size={14} />
           إضافة قسم
-        </button>
+        </Button>
 
         {showAddMenu && (
-          <div className="absolute bottom-full left-2 right-2 mb-1 bg-white border border-zinc-200 rounded shadow-lg z-10 overflow-hidden">
+          <Card className="absolute bottom-full left-2 right-2 mb-1 z-10 overflow-hidden shadow-lg p-1">
             {ADDABLE_TYPES.map((type) => {
               const Icon = SECTION_ICONS[type]
               return (
@@ -183,14 +191,14 @@ export function SectionList() {
                     addSection(type)
                     setShowAddMenu(false)
                   }}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-zinc-50 transition-colors"
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded hover:bg-zinc-50 transition-colors"
                 >
                   <Icon size={14} className="text-zinc-500" />
                   {SECTION_LABELS[type]}
                 </button>
               )
             })}
-          </div>
+          </Card>
         )}
       </div>
     </div>

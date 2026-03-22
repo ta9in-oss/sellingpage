@@ -4,6 +4,18 @@ import { presets } from '@7aba/store-ui'
 import type { Theme } from '@7aba/store-ui'
 import { cn } from '@/lib/utils'
 import { Check } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Separator } from '@/components/ui/separator'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Card, CardContent } from '@/components/ui/card'
 
 const PRESET_LABELS: Record<string, string> = {
   brutalist: 'بسيط',
@@ -65,30 +77,27 @@ export function ThemePanel() {
   }
 
   return (
-    <div className="p-4 space-y-6">
+    <div className="p-4 space-y-5">
+      {/* Preset cards */}
       <div>
-        <h2 className="font-bold text-sm text-zinc-500 uppercase tracking-wide mb-3">
-          إعدادات القالب
-        </h2>
-
-        {/* Preset cards */}
+        <p className="text-xs font-bold text-zinc-500 uppercase tracking-wide mb-3">إعدادات القالب</p>
         <div className="grid grid-cols-3 gap-2">
           {presets.map((preset) => (
             <button
               key={preset.name}
               onClick={() => applyPreset(preset)}
               className={cn(
-                'relative flex flex-col items-center gap-1 p-2 rounded border text-xs font-medium transition-colors',
+                'relative flex flex-col items-center gap-1 p-2 rounded-lg border text-xs font-medium transition-colors',
                 theme.name === preset.name
                   ? 'border-zinc-900 bg-zinc-900 text-white'
-                  : 'border-zinc-200 hover:border-zinc-400'
+                  : 'border-zinc-200 hover:border-zinc-400 text-zinc-700'
               )}
             >
               {theme.name === preset.name && (
                 <Check size={10} className="absolute top-1 end-1" />
               )}
               <div
-                className="w-full h-8 rounded-sm border"
+                className="w-full h-8 rounded border"
                 style={{
                   background: preset.colors.background,
                   borderColor: preset.colors.border,
@@ -100,21 +109,23 @@ export function ThemePanel() {
         </div>
       </div>
 
+      <Separator />
+
       {/* Color overrides */}
       <div>
-        <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wide mb-2">الألوان</h3>
+        <p className="text-xs font-bold text-zinc-500 uppercase tracking-wide mb-3">الألوان</p>
         <div className="space-y-2">
           {COLOR_LABELS.map(({ key, label }) => (
             <div key={key} className="flex items-center gap-2">
               <button
                 onClick={() => setEditingColor(editingColor === key ? null : key)}
-                className="w-6 h-6 rounded border-2 border-zinc-300 shrink-0"
+                className="w-6 h-6 rounded border-2 border-zinc-300 shrink-0 transition-transform hover:scale-110"
                 style={{ background: theme.colors[key] }}
                 aria-label={`تعديل لون ${label}`}
               />
-              <span className="text-sm flex-1">{label}</span>
+              <Label className="flex-1 text-sm font-normal">{label}</Label>
               {editingColor === key && (
-                <input
+                <Input
                   type="text"
                   defaultValue={theme.colors[key]}
                   onBlur={(e) => {
@@ -127,10 +138,7 @@ export function ThemePanel() {
                       setEditingColor(null)
                     }
                   }}
-                  className={cn(
-                    'w-24 rounded border border-zinc-300 px-2 py-1 text-xs font-mono',
-                    'focus:outline-none focus:ring-2 focus:ring-zinc-900'
-                  )}
+                  className="w-24 h-7 text-xs font-mono"
                   dir="ltr"
                   autoFocus
                   aria-label={`قيمة لون ${label}`}
@@ -142,88 +150,88 @@ export function ThemePanel() {
         </div>
       </div>
 
+      <Separator />
+
       {/* Typography */}
       <div>
-        <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wide mb-2">الخطوط</h3>
-        <div className="space-y-2">
+        <p className="text-xs font-bold text-zinc-500 uppercase tracking-wide mb-3">الخطوط</p>
+        <div className="space-y-3">
           <div className="space-y-1">
-            <label className="block text-xs font-medium">خط النص</label>
-            <select
+            <Label className="text-xs">خط النص</Label>
+            <Select
               value={theme.typography.fontFamily.split(',')[0].trim()}
-              onChange={(e) => updateFont('fontFamily', `${e.target.value}, sans-serif`)}
-              className={cn(
-                'w-full rounded border border-zinc-300 px-2 py-1 text-sm',
-                'focus:outline-none focus:ring-2 focus:ring-zinc-900'
-              )}
+              onValueChange={(v) => updateFont('fontFamily', `${v}, sans-serif`)}
             >
-              {FONT_OPTIONS.map((f) => (
-                <option key={f} value={f}>
-                  {f}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="h-8 text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {FONT_OPTIONS.map((f) => (
+                  <SelectItem key={f} value={f} className="text-sm">
+                    {f}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-1">
-            <label className="block text-xs font-medium">خط العناوين</label>
-            <select
+            <Label className="text-xs">خط العناوين</Label>
+            <Select
               value={(theme.typography.headingFont ?? theme.typography.fontFamily).split(',')[0].trim()}
-              onChange={(e) => updateFont('headingFont', `${e.target.value}, sans-serif`)}
-              className={cn(
-                'w-full rounded border border-zinc-300 px-2 py-1 text-sm',
-                'focus:outline-none focus:ring-2 focus:ring-zinc-900'
-              )}
+              onValueChange={(v) => updateFont('headingFont', `${v}, sans-serif`)}
             >
-              {FONT_OPTIONS.map((f) => (
-                <option key={f} value={f}>
-                  {f}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="h-8 text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {FONT_OPTIONS.map((f) => (
+                  <SelectItem key={f} value={f} className="text-sm">
+                    {f}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </div>
 
+      <Separator />
+
       {/* Border radius */}
       <div>
-        <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wide mb-2">
-          استدارة الزوايا
-        </h3>
+        <p className="text-xs font-bold text-zinc-500 uppercase tracking-wide mb-3">استدارة الزوايا</p>
         <div className="flex gap-1">
           {RADIUS_OPTIONS.map((r) => (
-            <button
+            <Button
               key={r}
+              variant={theme.effects.borderRadius === r ? 'default' : 'outline'}
+              size="sm"
+              className="flex-1 px-0 text-xs h-8"
               onClick={() => updateRadius(r)}
-              className={cn(
-                'flex-1 py-1 text-xs border rounded transition-colors',
-                theme.effects.borderRadius === r
-                  ? 'border-zinc-900 bg-zinc-900 text-white'
-                  : 'border-zinc-200 hover:border-zinc-400'
-              )}
             >
               {r === '9999px' ? '●' : r.replace('px', '')}
-            </button>
+            </Button>
           ))}
         </div>
       </div>
 
+      <Separator />
+
       {/* Direction */}
       <div>
-        <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wide mb-2">الاتجاه</h3>
+        <p className="text-xs font-bold text-zinc-500 uppercase tracking-wide mb-3">الاتجاه</p>
         <div className="flex gap-2">
           {(['rtl', 'ltr'] as const).map((dir) => (
-            <button
+            <Button
               key={dir}
+              variant={theme.direction === dir ? 'default' : 'outline'}
+              size="sm"
+              className="flex-1"
               onClick={() => updateDirection(dir)}
-              className={cn(
-                'flex-1 py-1.5 text-sm font-medium rounded border transition-colors',
-                theme.direction === dir
-                  ? 'border-zinc-900 bg-zinc-900 text-white'
-                  : 'border-zinc-200 hover:border-zinc-400'
-              )}
             >
               {dir === 'rtl' ? 'RTL →' : '← LTR'}
-            </button>
+            </Button>
           ))}
         </div>
       </div>

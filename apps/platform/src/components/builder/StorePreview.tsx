@@ -8,18 +8,20 @@ import {
   GuaranteeSection,
   TestimonialSection,
   FeatureGrid,
+  OrderSection,
 } from '@7aba/store-ui'
-import type { Section } from '@7aba/store-ui'
+import type { Section, StoreConfig } from '@7aba/store-ui'
 import type {
   HeroContent,
   FAQItem,
   Guarantee,
   Testimonial,
   Feature,
+  ProductImage,
 } from '@7aba/store-ui'
 import { Monitor, Smartphone } from 'lucide-react'
 
-function SectionRenderer({ section }: { section: Section }) {
+function SectionRenderer({ section, config }: { section: Section; config: StoreConfig }) {
   switch (section.type) {
     case 'hero': {
       const content: HeroContent = {
@@ -75,11 +77,20 @@ function SectionRenderer({ section }: { section: Section }) {
     }
 
     case 'order-form': {
+      const productImages: ProductImage[] = config.product.images.map((img, i) => ({
+        id: i + 1,
+        image: img,
+        title: config.product.name || 'المنتج',
+        bgColor: 'bg-zinc-100',
+      }))
       return (
-        <div className="py-12 px-6 bg-zinc-50 text-center">
-          <p className="text-zinc-500 font-medium">📋 نموذج الطلب</p>
-          <p className="text-sm text-zinc-400 mt-1">{section.submitLabel}</p>
-        </div>
+        <OrderSection
+          price={config.product.price}
+          totalStock={10}
+          productImages={productImages}
+          onSubmit={async () => {}}
+          title={section.submitLabel}
+        />
       )
     }
 
@@ -137,7 +148,7 @@ export function StorePreview() {
           <div className="rounded-2xl border-4 border-zinc-800 overflow-hidden shadow-2xl bg-white">
             <ThemeProvider value={config.theme}>
               {config.sections.map((section) => (
-                <SectionRenderer key={section.id} section={section} />
+                <SectionRenderer key={section.id} section={section} config={config} />
               ))}
             </ThemeProvider>
           </div>
