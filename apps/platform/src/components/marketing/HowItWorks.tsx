@@ -36,11 +36,11 @@ const steps = [
   },
   {
     icon: 'Bell',
-    ar: 'إشعارات البيع الفوري',
-    fr: 'Notifications de vente en direct',
+    ar: 'FOMO للزبائن — تلقائي',
+    fr: 'FOMO automatique pour vos clients',
     desc: {
-      ar: 'كل طلب جديد يظهر كإشعار live على شاشتك — ميزة لا يملكها أحد غيرك',
-      fr: 'Chaque commande s\'affiche en temps réel — une fonctionnalité exclusive',
+      ar: 'زوار متجرك يشوفوا: "شخص من وهران طلب للتو" — يخلق إلحاح ويرفع المبيعات',
+      fr: 'Les visiteurs voient : "Quelqu\'un d\'Oran vient de commander" — urgence automatique',
     },
   },
   {

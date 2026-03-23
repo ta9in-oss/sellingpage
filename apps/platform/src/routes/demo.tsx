@@ -11,6 +11,8 @@ import {
   brutalistTheme,
 } from '@7aba/store-ui'
 import type { OrderData } from '@7aba/store-ui'
+import { useEffect, useState } from 'react'
+import { ShoppingBag, MapPin, Zap } from 'lucide-react'
 
 export const Route = createFileRoute('/demo')({
   component: DemoPage,
@@ -93,6 +95,54 @@ const content = {
   },
 }
 
+const demoNotifs = [
+  { type: 'live' as const, title: 'طلب جديد!', desc: 'أحد سكان وهران قام بطلب 1 × صاكادو', sub: 'منذ لحظات', bg: 'bg-green-500' },
+  { type: 'wilaya' as const, title: 'طلب من ولايتك!', desc: 'أحد سكان قسنطينة قام بطلب 2 × صاكادو', sub: 'أهل ولايتك يثقون بالمنتج! 💫', bg: 'bg-cyan-500' },
+  { type: 'recent' as const, title: 'طلب حديث!', desc: 'أحد سكان الجزائر قام بطلب 1 × صاكادو', sub: 'منذ 3 دقائق', bg: 'bg-blue-500' },
+]
+
+function DemoNotification() {
+  const [idx, setIdx] = useState(0)
+  const [visible, setVisible] = useState(false)
+
+  useEffect(() => {
+    const t = setTimeout(() => setVisible(true), 2000)
+    return () => clearTimeout(t)
+  }, [])
+
+  useEffect(() => {
+    if (!visible) return
+    const hide = setTimeout(() => {
+      setVisible(false)
+      setTimeout(() => { setIdx(p => (p + 1) % demoNotifs.length); setVisible(true) }, 1500)
+    }, 5000)
+    return () => clearTimeout(hide)
+  }, [visible, idx])
+
+  const n = demoNotifs[idx]
+  return (
+    <div
+      className="fixed bottom-4 left-4 z-50 w-80 transition-all duration-500"
+      style={{ transform: visible ? 'translateX(0)' : 'translateX(-110%)', opacity: visible ? 1 : 0 }}
+      dir="rtl"
+    >
+      <div className={`${n.bg} text-white border-2 border-black shadow-[4px_4px_0px_0px_#000] p-3`}>
+        <div className="flex items-start gap-3">
+          <ShoppingBag size={16} className="mt-0.5 text-white flex-shrink-0" />
+          <div className="flex flex-col gap-0.5">
+            <span className="text-sm font-black flex items-center gap-1.5">
+              {n.type === 'live' ? <Zap size={12} className="text-yellow-300 flex-shrink-0" /> : <MapPin size={12} className="text-yellow-300 flex-shrink-0" />}
+              {n.title}
+            </span>
+            <span className="text-sm font-bold leading-tight">{n.desc}</span>
+            <span className="text-xs opacity-90 mt-0.5">{n.sub}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function DemoPage() {
   const scrollToBuy = () => {
     document.getElementById('buy')?.scrollIntoView({ behavior: 'smooth' })
@@ -105,6 +155,7 @@ function DemoPage() {
 
   return (
     <ThemeProvider value={brutalistTheme}>
+      <DemoNotification />
       <div dir="rtl" className="font-[Almarai,sans-serif]">
         {/* Demo banner */}
         <div className="fixed top-0 inset-x-0 z-50 bg-yellow-400 border-b-2 border-black py-2 px-4 text-center">
