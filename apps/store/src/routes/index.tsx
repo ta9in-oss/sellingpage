@@ -63,13 +63,20 @@ function Home() {
         daira: orderData.daira,
         commune: orderData.commune,
         quantity: orderData.quantity,
+        paymentMethod: orderData.paymentMethod || "cod",
       });
 
       if (result.success) {
         setSelectedWilaya(orderData.wilaya);
         setSelectedCommune(orderData.commune);
         sendOrderNotification(result.orderNumber || "", orderData.wilaya, orderData.quantity);
-        navigate({ to: "/success", search: { orderNumber: result.orderNumber || "" } });
+
+        if (result.checkoutUrl) {
+          // Chargily payment: redirect to payment gateway
+          window.location.href = result.checkoutUrl;
+        } else {
+          navigate({ to: "/success", search: { orderNumber: result.orderNumber || "" } });
+        }
       } else {
         setOrderError(result.error || "حدث خطأ غير متوقع");
         setTimeout(() => setOrderError(""), 5000);

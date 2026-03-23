@@ -125,6 +125,9 @@ importers:
       '@7aba/store-ui':
         specifier: workspace:*
         version: link:../../packages/store-ui
+      '@chargily/chargily-pay':
+        specifier: ^2.1.0
+        version: 2.1.0
       '@instantdb/react':
         specifier: ^0.21.13
         version: 0.21.30(react@19.1.1)
@@ -411,6 +414,9 @@ packages:
   '@babel/types@7.29.0':
     resolution: {integrity: sha512-LwdZHpScM4Qz8Xw2iKSzS+cfglZzJGvofQICy7W7v4caru4EaAmyUuO6BGrbyQ2mYV11W0U8j5mBhd14dd3B0A==}
     engines: {node: '>=6.9.0'}
+
+  '@chargily/chargily-pay@2.1.0':
+    resolution: {integrity: sha512-BMmvgowoZN2ETqNcSTle7VIVX4wHYvxTzk1Cu3o1TV+1Lj2P1hznIo6dgj7Die9ALUsBAnSR+SjuhYsrN1LlPw==}
 
   '@cloudflare/kv-asset-handler@0.4.2':
     resolution: {integrity: sha512-SIOD2DxrRRwQ+jgzlXCqoEFiKOFqaPjhnNTGKXSRLvp1HiOvapLaFG2kEr9dYQTYe8rKrd9uvDUzmAITeNyaHQ==}
@@ -4210,6 +4216,8 @@ snapshots:
     dependencies:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.28.5
+
+  '@chargily/chargily-pay@2.1.0': {}
 
   '@cloudflare/kv-asset-handler@0.4.2': {}
 

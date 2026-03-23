@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Minus, OctagonAlertIcon } from 'lucide-react';
+import { Plus, Minus, OctagonAlertIcon, Truck, CreditCard } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Label } from '../../components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from '../../components/ui/alert';
@@ -15,6 +15,8 @@ interface QuantitySelectorProps {
     isSubmitting?: boolean;
     submitButtonText?: string;
     showSubmitButton?: boolean;
+    paymentMethod?: 'cod' | 'chargily';
+    onPaymentMethodChange?: (method: 'cod' | 'chargily') => void;
 }
 
 export function QuantitySelector({
@@ -27,6 +29,8 @@ export function QuantitySelector({
     isSubmitting = false,
     submitButtonText = 'أكّد الطلب',
     showSubmitButton = true,
+    paymentMethod = 'cod',
+    onPaymentMethodChange,
 }: QuantitySelectorProps) {
     const [quantityError, setQuantityError] = useState(false);
     const theme = useTheme();
@@ -96,6 +100,23 @@ export function QuantitySelector({
                             <p className="text-sm font-semibold opacity-80">({quantity} × {price.toLocaleString()} دج)</p>
                         </div>
 
+                        {onPaymentMethodChange && (
+                            <div className="border-2 border-black p-4 space-y-3">
+                                <p className="font-black text-sm text-right">طريقة الدفع</p>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <button type="button" onClick={() => onPaymentMethodChange('cod')}
+                                        className={`flex items-center justify-center gap-2 p-3 border-2 border-black font-bold text-sm transition-all ${paymentMethod === 'cod' ? 'bg-black text-yellow-400' : 'bg-white text-black hover:bg-gray-100'}`}>
+                                        <Truck size={18} />
+                                        <span>عند الاستلام</span>
+                                    </button>
+                                    <button type="button" onClick={() => onPaymentMethodChange('chargily')}
+                                        className={`flex items-center justify-center gap-2 p-3 border-2 border-black font-bold text-sm transition-all ${paymentMethod === 'chargily' ? 'bg-black text-yellow-400' : 'bg-white text-black hover:bg-gray-100'}`}>
+                                        <CreditCard size={18} />
+                                        <span>دفع إلكتروني</span>
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                         {showSubmitButton && (
                             <Button onClick={handleSubmit} disabled={isSubmitting}
                                 className="w-full bg-yellow-400 text-black px-8 py-6 border-2 border-black rounded-none font-black text-xl hover:bg-yellow-300 transition-all duration-150 transform hover:translate-x-1 hover:translate-y-1 shadow-[4px_4px_0px_0px_#000]">
@@ -150,6 +171,25 @@ export function QuantitySelector({
                         <p className="text-sm font-semibold" style={{ color: '#6b7280' }}>({quantity} × {price.toLocaleString()} دج)</p>
                     </div>
 
+                    {onPaymentMethodChange && (
+                        <div className="p-4 space-y-3" style={{ border: `1px solid ${theme.colors.border}`, borderRadius: theme.effects.borderRadius }}>
+                            <p className="font-black text-sm text-right" style={{ color: theme.colors.foreground }}>طريقة الدفع</p>
+                            <div className="grid grid-cols-2 gap-3">
+                                <button type="button" onClick={() => onPaymentMethodChange('cod')}
+                                    className="flex items-center justify-center gap-2 p-3 font-bold text-sm transition-all"
+                                    style={{ backgroundColor: paymentMethod === 'cod' ? theme.colors.accent : theme.colors.muted, color: paymentMethod === 'cod' ? '#000' : theme.colors.foreground, border: `1px solid ${theme.colors.border}`, borderRadius: theme.effects.borderRadius }}>
+                                    <Truck size={18} />
+                                    <span>عند الاستلام</span>
+                                </button>
+                                <button type="button" onClick={() => onPaymentMethodChange('chargily')}
+                                    className="flex items-center justify-center gap-2 p-3 font-bold text-sm transition-all"
+                                    style={{ backgroundColor: paymentMethod === 'chargily' ? theme.colors.accent : theme.colors.muted, color: paymentMethod === 'chargily' ? '#000' : theme.colors.foreground, border: `1px solid ${theme.colors.border}`, borderRadius: theme.effects.borderRadius }}>
+                                    <CreditCard size={18} />
+                                    <span>دفع إلكتروني</span>
+                                </button>
+                            </div>
+                        </div>
+                    )}
                     {showSubmitButton && (
                         <Button onClick={handleSubmit} disabled={isSubmitting}
                             className="w-full px-8 py-6 font-black text-xl transition-all"

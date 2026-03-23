@@ -34,9 +34,13 @@ const _schema = i.schema({
       customer_address: i.string(),
       customer_wilaya: i.string(),
       customer_city: i.string(),
-      quantity: i.number(), // Added quantity
+      quantity: i.number(),
       status: i.json(),
       total_amount: i.string(),
+      // Payment fields
+      payment_method: i.string().optional(),       // 'cod' | 'chargily'
+      payment_status: i.string().optional(),       // 'not_required' | 'pending' | 'paid' | 'failed'
+      chargily_checkout_id: i.string().optional(), // Chargily checkout session ID
       created_at: i.date(),
       updated_at: i.date(),
     }),

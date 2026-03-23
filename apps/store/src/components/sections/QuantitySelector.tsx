@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Minus, OctagonAlertIcon } from 'lucide-react';
+import { Plus, Minus, OctagonAlertIcon, CreditCard, Truck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -15,6 +15,8 @@ interface QuantitySelectorProps {
     isSubmitting?: boolean;
     submitButtonText?: string;
     showSubmitButton?: boolean;
+    paymentMethod?: 'cod' | 'chargily';
+    onPaymentMethodChange?: (method: 'cod' | 'chargily') => void;
 }
 
 export function QuantitySelector({
@@ -27,6 +29,8 @@ export function QuantitySelector({
     isSubmitting = false,
     submitButtonText = 'أكّد الطلب',
     showSubmitButton = true,
+    paymentMethod = 'cod',
+    onPaymentMethodChange,
 }: QuantitySelectorProps) {
     const [quantityError, setQuantityError] = useState(false);
     const theme = getTheme();
@@ -96,10 +100,42 @@ export function QuantitySelector({
                             <p className="text-sm font-semibold opacity-80">({quantity} × {price.toLocaleString()} دج)</p>
                         </div>
 
+                        {onPaymentMethodChange && (
+                            <div className="space-y-3">
+                                <p className="font-black text-base">طريقة الدفع</p>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <button type="button" onClick={() => onPaymentMethodChange('cod')}
+                                        className={`flex flex-col items-center gap-2 p-3 border-2 border-black font-bold text-sm transition-all duration-150 ${
+                                            paymentMethod === 'cod'
+                                                ? 'bg-yellow-400 text-black shadow-[4px_4px_0px_0px_#000] -translate-x-0.5 -translate-y-0.5'
+                                                : 'bg-white text-black hover:bg-gray-50 shadow-[2px_2px_0px_0px_#000]'
+                                        }`}>
+                                        <Truck size={20} />
+                                        <span>عند الاستلام</span>
+                                    </button>
+                                    <button type="button" onClick={() => onPaymentMethodChange('chargily')}
+                                        className={`flex flex-col items-center gap-2 p-3 border-2 border-black font-bold text-sm transition-all duration-150 ${
+                                            paymentMethod === 'chargily'
+                                                ? 'bg-yellow-400 text-black shadow-[4px_4px_0px_0px_#000] -translate-x-0.5 -translate-y-0.5'
+                                                : 'bg-white text-black hover:bg-gray-50 shadow-[2px_2px_0px_0px_#000]'
+                                        }`}>
+                                        <CreditCard size={20} />
+                                        <span>دفع إلكتروني</span>
+                                        <span className="text-xs opacity-70">EDAHABIA/CIB</span>
+                                    </button>
+                                </div>
+                                {paymentMethod === 'chargily' && (
+                                    <p className="text-xs font-bold text-gray-600 border-r-4 border-yellow-400 pr-3">
+                                        ستُحوَّل إلى Chargily Pay للدفع الآمن
+                                    </p>
+                                )}
+                            </div>
+                        )}
+
                         {showSubmitButton && (
                             <Button onClick={handleSubmit} disabled={isSubmitting}
                                 className="w-full bg-yellow-400 text-black px-8 py-6 border-2 border-black rounded-none font-black text-xl hover:bg-yellow-300 transition-all duration-150 transform hover:translate-x-1 hover:translate-y-1 shadow-[4px_4px_0px_0px_#000]">
-                                {isSubmitting ? 'جاري الإرسال...' : submitButtonText}
+                                {isSubmitting ? 'جاري المعالجة...' : paymentMethod === 'chargily' ? 'ادفع الآن' : submitButtonText}
                             </Button>
                         )}
                     </div>

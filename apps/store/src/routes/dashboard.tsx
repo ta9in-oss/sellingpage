@@ -41,6 +41,9 @@ interface Order {
   product?: any; 
   quantity?: number;
   total_amount?: number;
+  payment_method?: 'cod' | 'chargily';
+  payment_status?: 'not_required' | 'pending' | 'paid' | 'failed';
+  chargily_checkout_id?: string;
 }
 
 const LoginScreen = ({ onSignIn, isLoading, error }) => {
@@ -707,6 +710,17 @@ const Dashboard = ({ user, onSignOut }) => {
                     {getStatusIcon(order.status)}
                     {getStatusLabel(order.status)}
                   </div>
+                  
+                  {/* Payment badge */}
+                  {order.payment_method === 'chargily' && (
+                    <div className={`inline-flex items-center gap-1 px-2 py-1 border-2 border-black font-bold text-xs ${
+                      order.payment_status === 'paid' ? 'bg-green-400' :
+                      order.payment_status === 'failed' ? 'bg-red-400' :
+                      'bg-yellow-300'
+                    }`}>
+                      💳 {order.payment_status === 'paid' ? 'مدفوع' : order.payment_status === 'failed' ? 'فشل' : 'معلق'}
+                    </div>
+                  )}
                 </div>
 
                 {/* Action Buttons Section */}
@@ -782,7 +796,9 @@ const Dashboard = ({ user, onSignOut }) => {
                   <Button
                     onClick={() => setSelectedOrder({
                       ...order,
-                      total_amount: Number(order.total_amount)
+                      total_amount: Number(order.total_amount),
+                      payment_method: order.payment_method as 'cod' | 'chargily' | undefined,
+                      payment_status: order.payment_status as 'not_required' | 'pending' | 'paid' | 'failed' | undefined,
                     })}
                     className="bg-yellow-400 text-black border-2 border-black rounded-none font-bold text-sm hover:bg-yellow-300 px-3 py-2 transition-all"
                   >
@@ -869,6 +885,24 @@ const Dashboard = ({ user, onSignOut }) => {
               <div>
                 <label className="block font-black text-sm mb-1">المبلغ الإجمالي</label>
                 <p className="bg-yellow-400 p-3 border-2 border-black font-black text-center">{selectedOrder.total_amount} دج</p>
+              </div>
+              
+              <div>
+                <label className="block font-black text-sm mb-1">طريقة الدفع</label>
+                <div className="flex gap-2">
+                  <span className={`px-3 py-2 border-2 border-black font-bold text-sm ${selectedOrder.payment_method === 'chargily' ? 'bg-blue-100' : 'bg-gray-100'}`}>
+                    {selectedOrder.payment_method === 'chargily' ? '💳 دفع إلكتروني' : '🚚 الدفع عند الاستلام'}
+                  </span>
+                  {selectedOrder.payment_method === 'chargily' && (
+                    <span className={`px-3 py-2 border-2 border-black font-bold text-sm ${
+                      selectedOrder.payment_status === 'paid' ? 'bg-green-400' :
+                      selectedOrder.payment_status === 'failed' ? 'bg-red-400' :
+                      'bg-yellow-300'
+                    }`}>
+                      {selectedOrder.payment_status === 'paid' ? '✅ مدفوع' : selectedOrder.payment_status === 'failed' ? '❌ فشل' : '⏳ معلق'}
+                    </span>
+                  )}
+                </div>
               </div>
 
               <div>

@@ -45,6 +45,7 @@ export interface OrderData {
     commune: string;
     quantity: number;
     total: number;
+    paymentMethod: 'cod' | 'chargily';
 }
 
 export function OrderSection({
@@ -71,6 +72,7 @@ export function OrderSection({
     const [communeOpen, setCommuneOpen] = useState(false);
     const [validationError, setValidationError] = useState(false);
     const [orderError, setOrderError] = useState('');
+    const [paymentMethod, setPaymentMethod] = useState<'cod' | 'chargily'>('cod');
 
     const { wilayas, getAvailableDairas, getAvailableCommunes } = useAlgeriaLocations();
     const availableDairas = getAvailableDairas(selectedWilaya);
@@ -129,6 +131,7 @@ export function OrderSection({
                 commune: selectedCommune,
                 quantity,
                 total: price * quantity,
+                paymentMethod,
             });
         } catch (error: any) {
             setOrderError(error.message || 'حدث خطأ في إرسال الطلب');
@@ -439,6 +442,8 @@ export function OrderSection({
                                 price={price}
                                 onSubmit={handleSubmit}
                                 isSubmitting={isSubmitting}
+                                paymentMethod={paymentMethod}
+                                onPaymentMethodChange={setPaymentMethod}
                             />
                         </div>
                     </>
@@ -454,6 +459,8 @@ export function OrderSection({
                                 price={price}
                                 onSubmit={handleSubmit}
                                 isSubmitting={isSubmitting}
+                                paymentMethod={paymentMethod}
+                                onPaymentMethodChange={setPaymentMethod}
                             />
                         </div>
 
@@ -482,6 +489,8 @@ export function OrderSection({
                                 price={price}
                                 onSubmit={handleSubmit}
                                 isSubmitting={isSubmitting}
+                                paymentMethod={paymentMethod}
+                                onPaymentMethodChange={setPaymentMethod}
                             />
                         </div>
 
@@ -507,6 +516,8 @@ export function OrderSection({
                                 price={price}
                                 onSubmit={handleSubmit}
                                 isSubmitting={isSubmitting}
+                                paymentMethod={paymentMethod}
+                                onPaymentMethodChange={setPaymentMethod}
                             />
                         </div>
                     </>
@@ -528,6 +539,8 @@ export function OrderSection({
                         price={price}
                         onSubmit={handleSubmit}
                         isSubmitting={isSubmitting}
+                        paymentMethod={paymentMethod}
+                        onPaymentMethodChange={setPaymentMethod}
                     />
                 </div>
             </div>
@@ -546,6 +559,8 @@ export function OrderSection({
                     price={price}
                     onSubmit={handleSubmit}
                     isSubmitting={isSubmitting}
+                    paymentMethod={paymentMethod}
+                    onPaymentMethodChange={setPaymentMethod}
                 />
             </div>
         );
@@ -563,6 +578,8 @@ export function OrderSection({
                     price={price}
                     onSubmit={handleSubmit}
                     isSubmitting={isSubmitting}
+                    paymentMethod={paymentMethod}
+                    onPaymentMethodChange={setPaymentMethod}
                 />
             </div>
             <div className="space-y-8">

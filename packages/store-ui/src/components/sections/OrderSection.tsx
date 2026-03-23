@@ -44,6 +44,7 @@ export interface OrderData {
     commune: string;
     quantity: number;
     total: number;
+    paymentMethod: 'cod' | 'chargily';
 }
 
 export function OrderSection({
@@ -56,6 +57,7 @@ export function OrderSection({
     title = 'اطلب قبل ما تخلاص',
 }: OrderSectionProps) {
     const [quantity, setQuantity] = useState(1);
+    const [paymentMethod, setPaymentMethod] = useState<'cod' | 'chargily'>('cod');
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -128,6 +130,7 @@ export function OrderSection({
                 commune: selectedCommune,
                 quantity,
                 total: price * quantity,
+                paymentMethod,
             });
         } catch (error: any) {
             setOrderError(error.message || 'حدث خطأ في إرسال الطلب');
@@ -438,6 +441,8 @@ export function OrderSection({
                                 price={price}
                                 onSubmit={handleSubmit}
                                 isSubmitting={isSubmitting}
+                                paymentMethod={paymentMethod}
+                                onPaymentMethodChange={setPaymentMethod}
                             />
                         </div>
                     </>
@@ -453,6 +458,8 @@ export function OrderSection({
                                 price={price}
                                 onSubmit={handleSubmit}
                                 isSubmitting={isSubmitting}
+                                paymentMethod={paymentMethod}
+                                onPaymentMethodChange={setPaymentMethod}
                             />
                         </div>
 
@@ -481,6 +488,8 @@ export function OrderSection({
                                 price={price}
                                 onSubmit={handleSubmit}
                                 isSubmitting={isSubmitting}
+                                paymentMethod={paymentMethod}
+                                onPaymentMethodChange={setPaymentMethod}
                             />
                         </div>
 
@@ -506,6 +515,8 @@ export function OrderSection({
                                 price={price}
                                 onSubmit={handleSubmit}
                                 isSubmitting={isSubmitting}
+                                paymentMethod={paymentMethod}
+                                onPaymentMethodChange={setPaymentMethod}
                             />
                         </div>
                     </>
@@ -545,6 +556,8 @@ export function OrderSection({
                     price={price}
                     onSubmit={handleSubmit}
                     isSubmitting={isSubmitting}
+                    paymentMethod={paymentMethod}
+                    onPaymentMethodChange={setPaymentMethod}
                 />
             </div>
         );
@@ -562,6 +575,8 @@ export function OrderSection({
                     price={price}
                     onSubmit={handleSubmit}
                     isSubmitting={isSubmitting}
+                    paymentMethod={paymentMethod}
+                    onPaymentMethodChange={setPaymentMethod}
                 />
             </div>
             <div className="space-y-8">

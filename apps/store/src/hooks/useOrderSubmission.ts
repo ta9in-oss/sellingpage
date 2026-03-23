@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { id, tx } from '@instantdb/react';
 import { db } from '@/lib/instantdb';
+import { createChargilyCheckout } from '@/server/createChargilyCheckout';
 
 interface OrderFormData {
   name: string;
@@ -12,11 +13,12 @@ interface OrderFormData {
   commune: string;
   quantity: number;
   productId?: string;
+  paymentMethod?: 'cod' | 'chargily';
 }
 
 interface UseOrderSubmissionReturn {
   isSubmitting: boolean;
-  submitOrder: (formData: OrderFormData) => Promise<{ success: boolean; orderNumber?: string; error?: string }>;
+  submitOrder: (formData: OrderFormData) => Promise<{ success: boolean; orderNumber?: string; checkoutUrl?: string; error?: string }>;
 }
 
 export function useOrderSubmission(): UseOrderSubmissionReturn {
@@ -85,10 +87,11 @@ export function useOrderSubmission(): UseOrderSubmissionReturn {
         return { success: false, error: 'الكمية المطلوبة غير متوفرة في المخزون' };
       }
 
+      const paymentMethod = formData.paymentMethod || 'cod';
       const orderNumber = generateOrderNumber();
       const currentDate = new Date();
       
-      const totalAmount = (product.price * formData.quantity).toString();
+      const totalAmount = (product.price * formData.quantity);
       
       // Create customer address string
       const customerAddress = `${formData.commune}, ${formData.daira}, ${formData.wilaya}`;
@@ -111,7 +114,9 @@ export function useOrderSubmission(): UseOrderSubmissionReturn {
             label: 'في الانتظار',
             value: 'pending'
           },
-          total_amount: totalAmount,
+          total_amount: totalAmount.toString(),
+          payment_method: paymentMethod,
+          payment_status: paymentMethod === 'cod' ? 'not_required' : 'pending',
           created_at: currentDate,
           updated_at: currentDate,
         }),
@@ -123,6 +128,28 @@ export function useOrderSubmission(): UseOrderSubmissionReturn {
           updated_at: currentDate
         })
       ]);
+
+      // For Chargily payment: create checkout session
+      if (paymentMethod === 'chargily') {
+        const result = await createChargilyCheckout({
+          data: {
+            orderNumber,
+            orderId,
+            totalAmount,
+            customerName: formData.name.trim(),
+          }
+        });
+
+        // Save checkoutId to order
+        await db.transact([
+          tx.orders[orderId].update({
+            chargily_checkout_id: result.checkoutId,
+            updated_at: new Date(),
+          })
+        ]);
+
+        return { success: true, orderNumber, checkoutUrl: result.checkoutUrl };
+      }
 
       return { success: true, orderNumber };
       
