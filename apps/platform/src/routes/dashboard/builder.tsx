@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 import { BuilderLayout } from '@/components/builder/BuilderLayout'
 import { db } from '@/lib/instantdb'
 import { id } from '@instantdb/react'
+import type { User } from '@instantdb/react'
 
 export const Route = createFileRoute('/dashboard/builder')({
   validateSearch: (search) => ({
@@ -15,9 +16,10 @@ export const Route = createFileRoute('/dashboard/builder')({
 function BuilderPage() {
   const { storeId, plan } = Route.useSearch()
   const navigate = useNavigate()
+  const { user } = db.useAuth()
 
   if (storeId === 'new') {
-    return <CreateAndRedirect navigate={navigate} plan={plan} />
+    return <CreateAndRedirect navigate={navigate} plan={plan} user={user ?? null} />
   }
 
   return <BuilderLayout storeId={storeId} />
@@ -26,15 +28,17 @@ function BuilderPage() {
 function CreateAndRedirect({
   navigate,
   plan,
+  user,
 }: {
   navigate: ReturnType<typeof useNavigate>
   plan: string
+  user: User | null
 }) {
   useEffect(() => {
     const newId = id()
     db.transact(
       db.tx.stores[newId].update({
-        userId: '',
+        userId: user?.id ?? '',
         slug: newId.slice(0, 8),
         config: { plan: plan || 'simple' },
         status: 'draft',
