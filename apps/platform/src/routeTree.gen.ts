@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as DemoRouteImport } from './routes/demo'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as DashboardDeployRouteImport } from './routes/dashboard/deploy'
@@ -18,6 +19,11 @@ import { Route as DashboardBuilderRouteImport } from './routes/dashboard/builder
 const PricingRoute = PricingRouteImport.update({
   id: '/pricing',
   path: '/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -43,6 +49,7 @@ const DashboardBuilderRoute = DashboardBuilderRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
   '/pricing': typeof PricingRoute
   '/dashboard/builder': typeof DashboardBuilderRoute
   '/dashboard/deploy': typeof DashboardDeployRoute
@@ -50,6 +57,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
   '/pricing': typeof PricingRoute
   '/dashboard/builder': typeof DashboardBuilderRoute
   '/dashboard/deploy': typeof DashboardDeployRoute
@@ -58,6 +66,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
   '/pricing': typeof PricingRoute
   '/dashboard/builder': typeof DashboardBuilderRoute
   '/dashboard/deploy': typeof DashboardDeployRoute
@@ -67,6 +76,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/demo'
     | '/pricing'
     | '/dashboard/builder'
     | '/dashboard/deploy'
@@ -74,6 +84,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/demo'
     | '/pricing'
     | '/dashboard/builder'
     | '/dashboard/deploy'
@@ -81,6 +92,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/demo'
     | '/pricing'
     | '/dashboard/builder'
     | '/dashboard/deploy'
@@ -89,6 +101,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
   PricingRoute: typeof PricingRoute
   DashboardBuilderRoute: typeof DashboardBuilderRoute
   DashboardDeployRoute: typeof DashboardDeployRoute
@@ -102,6 +115,13 @@ declare module '@tanstack/react-router' {
       path: '/pricing'
       fullPath: '/pricing'
       preLoaderRoute: typeof PricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -137,6 +157,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
   PricingRoute: PricingRoute,
   DashboardBuilderRoute: DashboardBuilderRoute,
   DashboardDeployRoute: DashboardDeployRoute,

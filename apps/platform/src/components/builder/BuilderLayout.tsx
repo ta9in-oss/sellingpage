@@ -88,20 +88,20 @@ export function BuilderLayout({ storeId }: BuilderLayoutProps) {
 
   return (
     <div className="min-h-screen flex flex-col bg-white" dir="rtl">
-      {/* Top bar */}
-      <header className="h-14 border-b border-zinc-200 flex items-center px-4 gap-3 shrink-0 bg-white">
+      {/* Top bar — brutalist */}
+      <header className="h-14 border-b-2 border-black flex items-center px-4 gap-3 shrink-0 bg-white">
         <Input
           type="text"
           value={config.meta.name}
           onChange={(e) => updateMeta({ name: e.target.value })}
-          className="max-w-[200px] h-8 text-sm font-medium"
+          className="max-w-[200px] h-8 text-sm font-bold border-2 border-black rounded-none shadow-none focus-visible:ring-yellow-400"
           dir="rtl"
           placeholder="اسم المتجر"
           aria-label="اسم المتجر"
           id="store-name-input"
         />
 
-        <div className="flex items-center gap-1 text-xs text-zinc-400 ms-auto">
+        <div className="flex items-center gap-1 text-xs text-zinc-500 ms-auto">
           {isSaving ? (
             <>
               <Loader2 size={12} className="animate-spin" />
@@ -109,7 +109,7 @@ export function BuilderLayout({ storeId }: BuilderLayoutProps) {
             </>
           ) : (
             <>
-              <Check size={12} className="text-green-500" />
+              <Check size={12} className="text-green-600" />
               تم الحفظ
             </>
           )}
@@ -118,34 +118,33 @@ export function BuilderLayout({ storeId }: BuilderLayoutProps) {
         <Button
           size="sm"
           onClick={() => navigate({ to: '/dashboard/deploy', search: { storeId, tier: 'starter' } })}
-          className="gap-1.5"
+          className="gap-1.5 rounded-none border-2 border-black bg-yellow-400 text-black hover:bg-black hover:text-yellow-400 font-black shadow-[2px_2px_0px_0px_#000] hover:shadow-none transition-all"
         >
           <Rocket size={13} />
-          نشر
+          نشر المتجر
         </Button>
       </header>
 
       {/* Desktop: three-column layout */}
       <div className="flex-1 hidden lg:flex overflow-hidden">
-        {/* Left panel: section list */}
-        <aside className="w-60 border-e border-zinc-200 shrink-0 overflow-y-auto flex flex-col">
+        {/* Left panel */}
+        <aside className="w-60 border-e-2 border-black shrink-0 overflow-y-auto flex flex-col bg-white">
           <SectionList />
         </aside>
 
         {/* Center: preview */}
-        <main className="flex-1 overflow-hidden">
+        <main className="flex-1 overflow-hidden bg-zinc-100">
           <StorePreview />
         </main>
 
-        {/* Right panel: forms / theme */}
-        <aside className="w-80 border-s border-zinc-200 shrink-0 overflow-y-auto">
+        {/* Right panel */}
+        <aside className="w-80 border-s-2 border-black shrink-0 overflow-y-auto bg-white">
           <RightPanel />
         </aside>
       </div>
 
       {/* Mobile: tabbed layout */}
       <div className="flex-1 flex flex-col lg:hidden overflow-hidden">
-        {/* Mobile tab content */}
         <div className="flex-1 overflow-hidden">
           {mobileTab === 'sections' && (
             <div className="h-full overflow-y-auto">
@@ -165,13 +164,18 @@ export function BuilderLayout({ storeId }: BuilderLayoutProps) {
         </div>
 
         {/* Mobile tab bar */}
-        <nav className="h-12 border-t border-zinc-200 flex shrink-0">
+        <nav className="h-12 border-t-2 border-black flex shrink-0">
           {MOBILE_TABS.map(({ key, label }) => (
             <Button
               key={key}
               variant={mobileTab === key ? 'default' : 'ghost'}
               onClick={() => setMobileTab(key)}
-              className="flex-1 rounded-none h-full text-sm"
+              className={cn(
+                'flex-1 rounded-none h-full text-sm font-bold border-0',
+                mobileTab === key
+                  ? 'bg-yellow-400 text-black hover:bg-yellow-400'
+                  : 'bg-white text-black hover:bg-zinc-100'
+              )}
             >
               {label}
             </Button>

@@ -35,14 +35,15 @@ const defaultConfig: StoreConfig = {
     {
       id: nanoid(),
       type: 'hero',
-      headline: 'عنوان متجرك',
-      subheadline: 'وصف المنتج',
+      headline: 'اسم منتجك هنا',
+      subheadline: 'صف منتجك في جملة أو جملتين. اجذب انتباه الزبون وبين له الفائدة.',
       cta: 'اطلب الآن',
+      image: '',
     },
     {
       id: nanoid(),
       type: 'order-form',
-      submitLabel: 'أرسل الطلب',
+      submitLabel: 'أكّد الطلب',
       fields: [
         { id: nanoid(), label: 'الاسم الكامل', type: 'text', required: true },
         { id: nanoid(), label: 'رقم الهاتف', type: 'phone', required: true },
@@ -50,8 +51,8 @@ const defaultConfig: StoreConfig = {
     },
   ],
   product: {
-    name: '',
-    price: 0,
+    name: 'منتجي',
+    price: 2500,
     currency: 'DZD',
     images: [],
   },
@@ -67,40 +68,53 @@ function createDefaultSection(type: Section['type']): Section {
       return {
         id: nanoid(),
         type: 'hero',
-        headline: 'عنوان جديد',
-        subheadline: 'وصف المنتج',
+        headline: 'عنوان القسم الجديد',
+        subheadline: 'صف منتجك هنا بشكل جذاب',
         cta: 'اطلب الآن',
+        image: '',
       }
     case 'features':
       return {
         id: nanoid(),
         type: 'features',
-        items: [{ icon: '⭐', title: 'ميزة رائعة', body: 'وصف الميزة هنا' }],
+        items: [
+          { icon: '⭐', title: 'جودة عالية', body: 'منتج مصنوع من أفضل المواد' },
+          { icon: '🚀', title: 'توصيل سريع', body: 'يصلك خلال 2 إلى 5 أيام' },
+          { icon: '💯', title: 'ضمان استرداد', body: 'ضمان استرداد كامل خلال 7 أيام' },
+        ],
       }
     case 'testimonials':
       return {
         id: nanoid(),
         type: 'testimonials',
-        items: [{ name: 'عميل راضٍ', text: 'منتج رائع جداً!', rating: 5 }],
+        items: [
+          { name: 'أحمد بن علي', text: 'منتج رائع جداً! جودة ممتازة وتوصيل سريع', rating: 5 },
+          { name: 'فاطمة الزهراء', text: 'راضية بزاف، ننصح بيه لكل الناس', rating: 5 },
+          { name: 'محمد الأمين', text: 'المنتج كيما في الصور، ما خيبش الظن', rating: 5 },
+        ],
       }
     case 'faq':
       return {
         id: nanoid(),
         type: 'faq',
-        items: [{ q: 'سؤال شائع؟', a: 'الإجابة هنا.' }],
+        items: [
+          { q: 'كيفاش نطلب؟', a: 'اكتب معلوماتك في الاستمارة وانتظر التأكيد.' },
+          { q: 'واش التوصيل مجاني؟', a: 'إيه! التوصيل مجاني لكامل الوطن.' },
+          { q: 'كيفاش الدفع؟', a: 'الدفع عند الاستلام فقط.' },
+        ],
       }
     case 'guarantee':
       return {
         id: nanoid(),
         type: 'guarantee',
-        text: 'ضمان استرداد الأموال خلال 7 أيام',
+        text: 'ضمان استرداد الأموال خلال 7 أيام بلا أسئلة',
         icon: 'shield',
       }
     case 'order-form':
       return {
         id: nanoid(),
         type: 'order-form',
-        submitLabel: 'أرسل الطلب',
+        submitLabel: 'أكّد الطلب',
         fields: [
           { id: nanoid(), label: 'الاسم الكامل', type: 'text', required: true },
           { id: nanoid(), label: 'رقم الهاتف', type: 'phone', required: true },

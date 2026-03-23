@@ -10,7 +10,7 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --radius: 0.625rem;
+  --radius: 0px;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -31,45 +31,47 @@
   --color-ring: var(--ring);
 }
 
+/* Brutalist theme — black/white/yellow */
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --radius: 0px;
+  --background: oklch(1 0 0);               /* white */
+  --foreground: oklch(0 0 0);               /* black */
+  --card: oklch(1 0 0);                     /* white */
+  --card-foreground: oklch(0 0 0);          /* black */
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --popover-foreground: oklch(0 0 0);
+  --primary: oklch(0 0 0);                  /* black */
+  --primary-foreground: oklch(1 0 0);       /* white */
+  --secondary: oklch(0.96 0.12 99);         /* yellow-100 */
+  --secondary-foreground: oklch(0 0 0);
+  --muted: oklch(0.96 0 0);                 /* gray-100 */
+  --muted-foreground: oklch(0.45 0 0);      /* gray-500 */
+  --accent: oklch(0.9 0.18 99);             /* yellow-400 */
+  --accent-foreground: oklch(0 0 0);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --border: oklch(0 0 0);                   /* black borders */
+  --input: oklch(0 0 0);
+  --ring: oklch(0.9 0.18 99);              /* yellow focus ring */
 }
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+/* Base styles */
+body {
+  font-family: 'Almarai', sans-serif;
+  background: white;
+  color: black;
+}
+
+/* Brutalist button overrides */
+.btn-brutalist {
+  border: 2px solid black;
+  box-shadow: 2px 2px 0px 0px #000;
+  transition: box-shadow 100ms, transform 100ms;
+}
+.btn-brutalist:hover {
+  box-shadow: 4px 4px 0px 0px #000;
+  transform: translate(-1px, -1px);
+}
+.btn-brutalist:active {
+  box-shadow: 0px 0px 0px 0px #000;
+  transform: translate(2px, 2px);
 }
