@@ -6,7 +6,7 @@ const T = {
   pricing: { ar: 'الأسعار', fr: 'Tarifs' },
   howItWorks: { ar: 'كيف يعمل؟', fr: 'Comment ça marche?' },
   demo: { ar: 'عرض تجريبي', fr: 'Démo' },
-  start: { ar: 'ابدأ مجاناً', fr: 'Commencer' },
+  start: { ar: 'ابدأ الآن', fr: 'Commencer' },
 }
 
 export function Navbar() {

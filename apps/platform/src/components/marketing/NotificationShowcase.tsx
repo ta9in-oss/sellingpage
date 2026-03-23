@@ -10,7 +10,7 @@ const T = {
     fr: 'Vos clients voient qui a acheté avant eux — automatiquement',
   },
   sub: {
-    ar: 'كل مرة يزور حد متجرك، يشوف إشعارات صغيرة في الزاوية: "شخص من وهران طلب للتو" أو "5 أشخاص من ولايتك طلبوا هذا الأسبوع". هذا يخلق إلحاح حقيقي ويرفع معدل التحويل — مثل WiserNotify، لكن مدمج في متجرك مجاناً.',
+    ar: 'كل مرة يزور حد متجرك، يشوف إشعارات صغيرة في الزاوية: "شخص من وهران طلب للتو" أو "5 أشخاص من ولايتك طلبوا هذا الأسبوع". هذا يخلق إلحاح حقيقي ويرفع معدل التحويل — مثل WiserNotify، لكن مدمج في متجرك مباشرة.',
     fr: 'À chaque visite, vos clients voient des notifications discrètes : "Quelqu\'un d\'Oran vient de commander" ou "5 personnes de votre wilaya ont commandé cette semaine". Crée une vraie urgence — comme WiserNotify, mais intégré gratuitement.',
   },
   features: [

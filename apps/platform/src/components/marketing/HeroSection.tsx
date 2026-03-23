@@ -8,7 +8,7 @@ const T = {
     ar: 'منصة بناء المتاجر للتجار الجزائريين. ادفع مرة واحدة، اكتسب كل شيء.',
     fr: 'La plateforme e-commerce pour les marchands algériens. Payez une fois, possédez tout.',
   },
-  cta1: { ar: 'ابدأ مجاناً', fr: 'Commencer gratuitement' },
+  cta1: { ar: 'ابدأ الآن', fr: 'Commencer maintenant' },
   cta2: { ar: 'شوف مثال حي', fr: 'Voir un exemple' },
 }
 
