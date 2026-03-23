@@ -20,7 +20,6 @@ const T = {
   cta: { ar: 'اختر هذه الباقة', fr: 'Choisir ce forfait' },
   once: { ar: 'دفع مرة واحدة', fr: 'Paiement unique' },
   everything: { ar: 'كل ميزات', fr: 'Tout de' },
-  plus: { ar: 'بالإضافة إلى', fr: 'En plus' },
   compareTitle: { ar: 'مقارنة الباقات', fr: 'Comparer les forfaits' },
   faqTitle: { ar: 'الأسئلة الشائعة', fr: 'Questions fréquentes' },
 }
@@ -39,7 +38,7 @@ const tiers = [
       { ar: 'نموذج طلبات', fr: 'Formulaire de commandes' },
       { ar: '3 قوالب', fr: '3 thèmes' },
       { ar: 'لوحة تحكم', fr: 'Tableau de bord' },
-      { ar: 'إشعارات فورية', fr: 'Notifications en temps réel' },
+      { ar: 'إشعارات FOMO للزبائن', fr: 'Notifications FOMO clients' },
     ],
   },
   {
@@ -92,7 +91,7 @@ const compareFeatures = [
   { ar: 'نموذج طلبات', fr: 'Formulaire commandes', simple: true, pro: true, studio: true, partner: true },
   { ar: '3 قوالب', fr: '3 thèmes', simple: true, pro: true, studio: true, partner: true },
   { ar: 'لوحة تحكم', fr: 'Tableau de bord', simple: true, pro: true, studio: true, partner: true },
-  { ar: 'إشعارات فورية', fr: 'Notifications', simple: true, pro: true, studio: true, partner: true },
+  { ar: 'إشعارات FOMO للزبائن', fr: 'Notifications FOMO', simple: true, pro: true, studio: true, partner: true },
   { ar: 'الكود المصدري', fr: 'Code source', simple: false, pro: true, studio: true, partner: true },
   { ar: 'رفع على GitHub', fr: 'GitHub', simple: false, pro: true, studio: true, partner: true },
   { ar: 'تخصيص كامل', fr: 'Personnalisation complète', simple: false, pro: true, studio: true, partner: true },
@@ -116,11 +115,11 @@ const faqs = [
     q: { ar: 'هل أحتاج خبرة تقنية لاستخدام المنصة؟', fr: 'Ai-je besoin de compétences techniques?' },
     a: {
       ar: 'لا! المنصة مصممة ليستخدمها أي تاجر بدون خبرة تقنية. فقط اختر قالبك، خصص المحتوى، وانشر.',
-      fr: 'Non! La plateforme est conçue pour être utilisée par n\'importe quel marchand sans compétences techniques.',
+      fr: "Non! La plateforme est conçue pour être utilisée par n'importe quel marchand sans compétences techniques.",
     },
   },
   {
-    q: { ar: 'ماذا يحدث لمتجري إذا توقفت المنصة؟', fr: 'Que se passe-t-il si la plateforme s\'arrête?' },
+    q: { ar: 'ماذا يحدث لمتجري إذا توقفت المنصة؟', fr: "Que se passe-t-il si la plateforme s'arrête?" },
     a: {
       ar: 'متجرك يعمل على Cloudflare بشكل مستقل تماماً عن منصة 7aba. حتى لو أغلقنا الخدمة، متجرك يستمر للأبد.',
       fr: 'Votre boutique fonctionne sur Cloudflare indépendamment de la plateforme 7aba. Même si nous fermons, votre boutique continue.',
@@ -141,7 +140,7 @@ const faqs = [
     },
   },
   {
-    q: { ar: 'ما هو إنفراستراكتشر المتجر؟', fr: 'Quelle est l\'infrastructure de la boutique?' },
+    q: { ar: 'ما هو إنفراستراكتشر المتجر؟', fr: "Quelle est l'infrastructure de la boutique?" },
     a: {
       ar: 'كل متجر يعمل على Cloudflare Workers (CDN عالمي) مع InstantDB لقاعدة البيانات في الوقت الفعلي. سرعة تحميل أقل من 100ms في الجزائر.',
       fr: 'Chaque boutique fonctionne sur Cloudflare Workers (CDN mondial) avec InstantDB pour la base de données en temps réel.',
@@ -154,21 +153,18 @@ function FaqItem({ q, a }: { q: { ar: string; fr: string }; a: { ar: string; fr:
   const [open, setOpen] = useState(false)
 
   return (
-    <div className="border-b border-gray-100 last:border-0">
+    <div className="border-b-2 border-black last:border-0">
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between gap-4 py-4 text-start font-semibold text-gray-900 hover:text-orange-600 transition-colors"
+        className="w-full flex items-center justify-between gap-4 py-5 text-start font-black text-black hover:text-yellow-600 transition-colors"
       >
         <span>{t(q)}</span>
         <ChevronDown
-          className={cn(
-            'w-5 h-5 text-gray-400 shrink-0 transition-transform',
-            open && 'rotate-180'
-          )}
+          className={cn('w-5 h-5 shrink-0 transition-transform', open && 'rotate-180')}
         />
       </button>
       {open && (
-        <p className="pb-4 text-gray-500 leading-relaxed text-sm">{t(a)}</p>
+        <p className="pb-5 text-black/60 leading-relaxed text-sm text-right">{t(a)}</p>
       )}
     </div>
   )
@@ -182,42 +178,47 @@ function PricingPage() {
       <Navbar />
 
       {/* Header */}
-      <section className="pt-32 pb-16 px-4 text-center">
-        <h1 className="text-4xl lg:text-5xl font-black text-gray-900 mb-4">
+      <section className="pt-32 pb-16 px-4 text-center border-b-2 border-black bg-white"
+        style={{
+          backgroundImage: 'linear-gradient(#00000008 1px, transparent 1px), linear-gradient(90deg, #00000008 1px, transparent 1px)',
+          backgroundSize: '40px 40px',
+        }}
+      >
+        <h1 className="text-4xl lg:text-6xl font-black text-black mb-4">
           {t(T.title)}
         </h1>
-        <p className="text-lg text-gray-500">{t(T.sub)}</p>
+        <p className="text-lg text-black/60 font-medium">{t(T.sub)}</p>
       </section>
 
       {/* Pricing cards */}
-      <section className="pb-24 px-4">
-        <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <section className="py-24 px-4 border-b-2 border-black">
+        <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {tiers.map((tier) => (
             <div
               key={tier.id}
               className={cn(
-                'relative rounded-2xl p-6 flex flex-col gap-4 border',
+                'relative p-6 flex flex-col gap-4 border-2 border-black',
                 tier.accent
-                  ? 'bg-orange-500 border-orange-400 text-white shadow-xl shadow-orange-200'
-                  : 'bg-white border-gray-200 text-gray-900'
+                  ? 'bg-yellow-400 shadow-[6px_6px_0px_0px_#000]'
+                  : 'bg-white shadow-[4px_4px_0px_0px_#000]'
               )}
             >
               {tier.badge && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-xs font-bold px-3 py-1 rounded-full bg-gray-900 text-white whitespace-nowrap">
+                <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 text-xs font-black px-3 py-1 bg-black text-yellow-400 whitespace-nowrap border-2 border-black">
                   {t(tier.badge)}
                 </span>
               )}
 
-              <h3 className={cn('text-lg font-bold', tier.accent ? 'text-white' : 'text-gray-900')}>
+              <h3 className="text-lg font-black text-black">
                 {t(tier.name)}
               </h3>
 
               <div>
-                <div className={cn('text-3xl font-black', tier.accent ? 'text-white' : 'text-gray-900')}>
+                <div className="text-3xl font-black text-black">
                   {tier.dzd}
-                  <span className="text-sm font-medium ms-1">DZD</span>
+                  <span className="text-sm font-bold ms-1">DZD</span>
                 </div>
-                <div className={cn('text-xs mt-0.5', tier.accent ? 'text-orange-100' : 'text-gray-400')}>
+                <div className="text-xs mt-0.5 text-black/50 font-medium">
                   {tier.usd} · {t(T.once)}
                 </div>
               </div>
@@ -225,17 +226,19 @@ function PricingPage() {
               {/* Features */}
               <ul className="flex flex-col gap-2 flex-1">
                 {tier.parent && (
-                  <li className={cn('text-xs font-semibold', tier.accent ? 'text-orange-100' : 'text-gray-400')}>
+                  <li className="text-xs font-black text-black/50 border-b border-black/20 pb-2">
                     {t(T.everything)} {t(tier.parent)} +
                   </li>
                 )}
                 {tier.features.map((f, i) => (
                   <li key={i} className="flex items-center gap-2 text-sm">
-                    <Check
-                      className={cn('w-4 h-4 shrink-0', tier.accent ? 'text-orange-100' : 'text-orange-500')}
-                      strokeWidth={2.5}
-                    />
-                    <span className={tier.accent ? 'text-white' : 'text-gray-700'}>{t(f)}</span>
+                    <span className={cn(
+                      'w-4 h-4 flex items-center justify-center shrink-0 border border-black',
+                      tier.accent ? 'bg-black text-yellow-400' : 'bg-yellow-400 text-black'
+                    )}>
+                      <Check className="w-2.5 h-2.5" strokeWidth={3} />
+                    </span>
+                    <span className="text-black font-medium">{t(f)}</span>
                   </li>
                 ))}
               </ul>
@@ -243,10 +246,11 @@ function PricingPage() {
               <Link
                 to="/pricing"
                 className={cn(
-                  'text-center text-sm font-semibold py-2.5 rounded-xl transition-all',
+                  'text-center text-sm font-black py-2.5 border-2 border-black transition-all',
+                  'shadow-[3px_3px_0px_0px_#000] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px]',
                   tier.accent
-                    ? 'bg-white text-orange-600 hover:bg-orange-50'
-                    : 'bg-gray-900 text-white hover:bg-gray-800'
+                    ? 'bg-black text-yellow-400'
+                    : 'bg-yellow-400 text-black'
                 )}
               >
                 {t(T.cta)}
@@ -257,46 +261,48 @@ function PricingPage() {
       </section>
 
       {/* Comparison table */}
-      <section id="compare" className="py-16 px-4 bg-gray-50">
+      <section id="compare" className="py-24 px-4 border-b-2 border-black bg-white">
         <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl font-black text-center text-gray-900 mb-10">
+          <h2 className="text-3xl font-black text-black mb-12 border-r-4 border-yellow-400 pr-4 text-right">
             {t(T.compareTitle)}
           </h2>
-          <div className="overflow-x-auto rounded-2xl border border-gray-200 shadow-sm">
+          <div className="overflow-x-auto border-2 border-black">
             <table className="w-full text-sm">
-              <thead className="sticky top-0 bg-white z-10">
-                <tr className="border-b border-gray-200">
-                  <th className="text-start px-5 py-4 font-semibold text-gray-500 w-2/5" />
-                  <th className="px-5 py-4 text-center font-bold text-orange-600 bg-orange-50 border-x border-orange-100">
+              <thead>
+                <tr className="border-b-2 border-black bg-black text-white">
+                  <th className="text-start px-5 py-4 font-black w-2/5 text-white/60" />
+                  <th className="px-5 py-4 text-center font-black text-yellow-400 border-x-2 border-yellow-400 bg-yellow-400/20">
                     {t({ ar: 'بسيط', fr: 'Simple' })}
                   </th>
-                  <th className="px-5 py-4 text-center font-semibold text-gray-700">
+                  <th className="px-5 py-4 text-center font-bold text-white/80">
                     {t({ ar: 'احترافي', fr: 'Pro' })}
                   </th>
-                  <th className="px-5 py-4 text-center font-semibold text-gray-700">
+                  <th className="px-5 py-4 text-center font-bold text-white/80">
                     {t({ ar: 'ستوديو', fr: 'Studio' })}
                   </th>
-                  <th className="px-5 py-4 text-center font-semibold text-gray-700">
+                  <th className="px-5 py-4 text-center font-bold text-white/80">
                     {t({ ar: 'راعي', fr: 'Partenaire' })}
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {compareFeatures.map((row, i) => (
-                  <tr key={i} className="border-b border-gray-100 last:border-0 hover:bg-gray-50/50">
-                    <td className="px-5 py-3 text-gray-600">{t(row)}</td>
+                  <tr key={i} className="border-b-2 border-black last:border-0 hover:bg-yellow-50 transition-colors">
+                    <td className="px-5 py-3 font-medium text-black">{t(row)}</td>
                     {(['simple', 'pro', 'studio', 'partner'] as const).map((col) => (
                       <td
                         key={col}
                         className={cn(
                           'px-5 py-3 text-center',
-                          col === 'simple' && 'bg-orange-50/40 border-x border-orange-50'
+                          col === 'simple' && 'bg-yellow-50 border-x-2 border-yellow-400'
                         )}
                       >
                         {row[col] ? (
-                          <Check className="w-4 h-4 text-green-500 mx-auto" strokeWidth={2.5} />
+                          <span className="inline-flex items-center justify-center w-5 h-5 bg-yellow-400 border border-black mx-auto">
+                            <Check className="w-3 h-3 text-black" strokeWidth={3} />
+                          </span>
                         ) : (
-                          <span className="text-gray-300 text-lg">—</span>
+                          <span className="text-black/20 text-lg font-black">—</span>
                         )}
                       </td>
                     ))}
@@ -309,12 +315,12 @@ function PricingPage() {
       </section>
 
       {/* FAQ */}
-      <section className="py-16 px-4">
+      <section className="py-24 px-4">
         <div className="max-w-2xl mx-auto">
-          <h2 className="text-3xl font-black text-center text-gray-900 mb-10">
+          <h2 className="text-3xl font-black text-black mb-12 border-r-4 border-yellow-400 pr-4 text-right">
             {t(T.faqTitle)}
           </h2>
-          <div className="rounded-2xl border border-gray-100 divide-y divide-gray-100 px-6">
+          <div className="border-2 border-black px-6">
             {faqs.map((faq, i) => (
               <FaqItem key={i} q={faq.q} a={faq.a} />
             ))}
