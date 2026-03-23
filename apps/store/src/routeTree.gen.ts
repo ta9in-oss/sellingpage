@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TestComponentsRouteImport } from './routes/test-components'
 import { Route as SuccessRouteImport } from './routes/success'
+import { Route as SetupRouteImport } from './routes/setup'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 
@@ -22,6 +23,11 @@ const TestComponentsRoute = TestComponentsRouteImport.update({
 const SuccessRoute = SuccessRouteImport.update({
   id: '/success',
   path: '/success',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SetupRoute = SetupRouteImport.update({
+  id: '/setup',
+  path: '/setup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -38,12 +44,14 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/setup': typeof SetupRoute
   '/success': typeof SuccessRoute
   '/test-components': typeof TestComponentsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/setup': typeof SetupRoute
   '/success': typeof SuccessRoute
   '/test-components': typeof TestComponentsRoute
 }
@@ -51,20 +59,28 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/setup': typeof SetupRoute
   '/success': typeof SuccessRoute
   '/test-components': typeof TestComponentsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/success' | '/test-components'
+  fullPaths: '/' | '/dashboard' | '/setup' | '/success' | '/test-components'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/success' | '/test-components'
-  id: '__root__' | '/' | '/dashboard' | '/success' | '/test-components'
+  to: '/' | '/dashboard' | '/setup' | '/success' | '/test-components'
+  id:
+    | '__root__'
+    | '/'
+    | '/dashboard'
+    | '/setup'
+    | '/success'
+    | '/test-components'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRoute
+  SetupRoute: typeof SetupRoute
   SuccessRoute: typeof SuccessRoute
   TestComponentsRoute: typeof TestComponentsRoute
 }
@@ -83,6 +99,13 @@ declare module '@tanstack/react-router' {
       path: '/success'
       fullPath: '/success'
       preLoaderRoute: typeof SuccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/setup': {
+      id: '/setup'
+      path: '/setup'
+      fullPath: '/setup'
+      preLoaderRoute: typeof SetupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -105,6 +128,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRoute,
+  SetupRoute: SetupRoute,
   SuccessRoute: SuccessRoute,
   TestComponentsRoute: TestComponentsRoute,
 }
