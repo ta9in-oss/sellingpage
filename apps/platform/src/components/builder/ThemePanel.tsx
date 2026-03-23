@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useBuilderStore } from '@/hooks/useBuilderStore'
 import { presets } from '@7aba/store-ui'
 import type { Theme } from '@7aba/store-ui'
@@ -29,6 +29,14 @@ export function ThemePanel() {
   const { config, updateTheme } = useBuilderStore()
   const { theme } = config
 
+  // Local color state — updates instantly for swatch preview without hitting Zustand
+  const [localColors, setLocalColors] = useState(theme.colors)
+
+  // Sync local colors when a preset is applied (theme.name changes)
+  useEffect(() => {
+    setLocalColors(theme.colors)
+  }, [theme.name]) // eslint-disable-line react-hooks/exhaustive-deps
+
   // Load fonts used by the current theme on mount
   useEffect(() => {
     loadGoogleFont(theme.typography.fontFamily)
@@ -37,13 +45,15 @@ export function ThemePanel() {
 
   const applyPreset = (preset: Theme) => {
     updateTheme(preset)
+    setLocalColors(preset.colors)
     loadGoogleFont(preset.typography.fontFamily)
     if (preset.typography.headingFont) loadGoogleFont(preset.typography.headingFont)
   }
 
-  const updateColor = (key: keyof Theme['colors'], value: string) => {
+  // Only update Zustand (which re-renders the preview) when user releases the picker
+  const commitColor = useCallback((key: keyof Theme['colors'], value: string) => {
     updateTheme({ ...theme, colors: { ...theme.colors, [key]: value } })
-  }
+  }, [theme, updateTheme])
 
   const updateFont = (field: 'fontFamily' | 'headingFont', fontName: string) => {
     loadGoogleFont(fontName)
@@ -102,29 +112,47 @@ export function ThemePanel() {
         <div className="space-y-3">
           {COLOR_LABELS.map(({ key, label }) => (
             <div key={key} className="flex items-center gap-2">
-              {/* Native color picker — opens browser color wheel on click */}
+              {/* Native color picker:
+                  - onInput: update local swatch only (no Zustand, no preview re-render)
+                  - onChange: fires once on release → commit to Zustand → updates preview */}
               <label
                 htmlFor={`cp-${key}`}
                 className="w-8 h-8 rounded border-2 border-zinc-200 overflow-hidden cursor-pointer shrink-0 hover:border-zinc-400 transition-colors"
-                style={{ background: theme.colors[key] }}
+                style={{ background: localColors[key] }}
                 title={label}
               >
                 <input
                   id={`cp-${key}`}
                   type="color"
-                  value={theme.colors[key]}
-                  onChange={(e) => updateColor(key, e.target.value)}
+                  value={localColors[key]}
+                  onInput={(e) => {
+                    const v = (e.target as HTMLInputElement).value
+                    setLocalColors((prev) => ({ ...prev, [key]: v }))
+                  }}
+                  onChange={(e) => commitColor(key, e.target.value)}
                   className="opacity-0 w-full h-full cursor-pointer"
                 />
               </label>
               <Label className="flex-1 text-sm font-normal">{label}</Label>
-              {/* Hex input — live edit */}
+              {/* Hex input — commits on Enter / blur */}
               <input
                 type="text"
-                value={theme.colors[key]}
+                value={localColors[key]}
                 onChange={(e) => {
                   const v = e.target.value
-                  if (/^#[0-9a-fA-F]{0,6}$/.test(v)) updateColor(key, v)
+                  if (/^#[0-9a-fA-F]{0,6}$/.test(v)) {
+                    setLocalColors((prev) => ({ ...prev, [key]: v }))
+                  }
+                }}
+                onBlur={(e) => {
+                  if (/^#[0-9a-fA-F]{6}$/.test(e.target.value)) {
+                    commitColor(key, e.target.value)
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && /^#[0-9a-fA-F]{6}$/.test(localColors[key])) {
+                    commitColor(key, localColors[key])
+                  }
                 }}
                 className="w-20 h-7 text-xs font-mono border border-zinc-200 rounded px-2 focus:outline-none focus:ring-1 focus:ring-zinc-900 bg-white"
                 dir="ltr"
