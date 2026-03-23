@@ -244,7 +244,8 @@ function PricingPage() {
               </ul>
 
               <Link
-                to="/pricing"
+                to="/dashboard/builder"
+                search={{ plan: tier.id }}
                 className={cn(
                   'text-center text-sm font-black py-2.5 border-2 border-black transition-all',
                   'shadow-[3px_3px_0px_0px_#000] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px]',

@@ -5,33 +5,44 @@ import { db } from '@/lib/instantdb'
 import { id } from '@instantdb/react'
 
 export const Route = createFileRoute('/dashboard/builder')({
-  validateSearch: (search) => ({ storeId: (search.storeId as string) || 'new' }),
+  validateSearch: (search) => ({
+    storeId: (search.storeId as string) || 'new',
+    plan: (search.plan as string) || '',
+  }),
   component: BuilderPage,
 })
 
 function BuilderPage() {
-  const { storeId } = Route.useSearch()
+  const { storeId, plan } = Route.useSearch()
   const navigate = useNavigate()
 
   if (storeId === 'new') {
-    return <CreateAndRedirect navigate={navigate} />
+    return <CreateAndRedirect navigate={navigate} plan={plan} />
   }
 
   return <BuilderLayout storeId={storeId} />
 }
 
-function CreateAndRedirect({ navigate }: { navigate: ReturnType<typeof useNavigate> }) {
+function CreateAndRedirect({
+  navigate,
+  plan,
+}: {
+  navigate: ReturnType<typeof useNavigate>
+  plan: string
+}) {
   useEffect(() => {
     const newId = id()
     db.transact(
       db.tx.stores[newId].update({
         userId: '',
         slug: newId.slice(0, 8),
-        config: null,
+        config: { plan: plan || 'simple' },
         status: 'draft',
       })
     ).then(() => {
-      navigate({ to: '/dashboard/builder', search: { storeId: newId }, replace: true })
+      navigate({ to: '/dashboard/builder', search: { storeId: newId, plan: '' }, replace: true })
+    }).catch((err: unknown) => {
+      console.error('Failed to create store:', err)
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])

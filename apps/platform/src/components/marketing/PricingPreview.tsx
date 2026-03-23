@@ -14,6 +14,7 @@ const T = {
 
 const tiers = [
   {
+    id: 'simple',
     name: { ar: 'بسيط', fr: 'Simple' },
     dzd: '3,900',
     usd: '$29',
@@ -21,6 +22,7 @@ const tiers = [
     accent: true,
   },
   {
+    id: 'pro',
     name: { ar: 'احترافي', fr: 'Pro' },
     dzd: '14,900',
     usd: '$99',
@@ -28,6 +30,7 @@ const tiers = [
     accent: false,
   },
   {
+    id: 'studio',
     name: { ar: 'ستوديو', fr: 'Studio' },
     dzd: '49,000',
     usd: '$299',
@@ -35,6 +38,7 @@ const tiers = [
     accent: false,
   },
   {
+    id: 'partner',
     name: { ar: 'راعي', fr: 'Partenaire' },
     dzd: '99,000+',
     usd: '$500+',
@@ -94,7 +98,8 @@ export function PricingPreview() {
               </div>
 
               <Link
-                to="/pricing"
+                to="/dashboard/builder"
+                search={{ plan: tier.id }}
                 className={cn(
                   'mt-auto text-center text-sm font-black py-2.5 border-2 border-black transition-all',
                   tier.accent
