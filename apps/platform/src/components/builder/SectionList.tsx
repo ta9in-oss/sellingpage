@@ -57,7 +57,7 @@ const SECTION_ICONS: Record<SectionType, React.ComponentType<{ size?: number; cl
   'order-form': ClipboardList,
 }
 
-const ADDABLE_TYPES: SectionType[] = ['hero', 'features', 'testimonials', 'faq', 'guarantee']
+const ADDABLE_TYPES: SectionType[] = ['hero', 'features', 'testimonials', 'faq', 'guarantee', 'order-form']
 
 interface SortableSectionCardProps {
   section: Section
@@ -67,11 +67,15 @@ interface SortableSectionCardProps {
   isDragOverlay?: boolean
 }
 
-function SortableSectionCard({ section, isSelected, onSelect, onRemove, isDragOverlay = false }: SortableSectionCardProps) {
-  const isLocked = section.type === 'order-form'
+function SortableSectionCard({
+  section,
+  isSelected,
+  onSelect,
+  onRemove,
+  isDragOverlay = false,
+}: SortableSectionCardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: section.id,
-    disabled: isLocked,
   })
 
   const style = {
@@ -91,25 +95,20 @@ function SortableSectionCard({ section, isSelected, onSelect, onRemove, isDragOv
         'flex items-center gap-2 px-2 py-2 cursor-pointer transition-all mb-1 shadow-none select-none',
         'hover:bg-zinc-50 border',
         isSelected && !isDragOverlay && 'border-s-2 border-s-zinc-900 bg-zinc-50',
-        isLocked && 'opacity-75',
         isDragOverlay && 'shadow-xl border-2 border-black bg-yellow-50 rotate-1 scale-105 cursor-grabbing'
       )}
     >
-      {!isLocked ? (
-        <button
-          {...(isDragOverlay ? {} : { ...attributes, ...listeners })}
-          onClick={(e) => e.stopPropagation()}
-          className={cn(
-            'text-zinc-300 hover:text-zinc-600 shrink-0 cursor-grab active:cursor-grabbing',
-            isDragOverlay && 'cursor-grabbing text-zinc-600'
-          )}
-          aria-label="سحب"
-        >
-          <GripVertical size={14} />
-        </button>
-      ) : (
-        <div className="w-[14px] shrink-0" />
-      )}
+      <button
+        {...(isDragOverlay ? {} : { ...attributes, ...listeners })}
+        onClick={(e) => e.stopPropagation()}
+        className={cn(
+          'text-zinc-300 hover:text-zinc-600 shrink-0 cursor-grab active:cursor-grabbing',
+          isDragOverlay && 'cursor-grabbing text-zinc-600'
+        )}
+        aria-label="سحب"
+      >
+        <GripVertical size={14} />
+      </button>
 
       <Icon size={14} className="text-zinc-500 shrink-0" />
       <span className="flex-1 text-sm font-medium truncate">{SECTION_LABELS[section.type]}</span>
@@ -118,7 +117,7 @@ function SortableSectionCard({ section, isSelected, onSelect, onRemove, isDragOv
         {section.type}
       </Badge>
 
-      {!isLocked && !isDragOverlay && (
+      {!isDragOverlay && (
         <Button
           variant="ghost"
           size="icon"
@@ -143,7 +142,9 @@ export function SectionList() {
   const [activeId, setActiveId] = useState<string | null>(null)
   const [isClient, setIsClient] = useState(false)
 
-  useEffect(() => { setIsClient(true) }, [])
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -181,6 +182,9 @@ export function SectionList() {
       </div>
 
       <ScrollArea className="flex-1 p-2">
+        {config.sections.length === 0 && (
+          <p className="text-xs text-zinc-400 text-center py-4">لا توجد أقسام. أضف قسمًا.</p>
+        )}
         {isClient ? (
           <DndContext
             sensors={sensors}

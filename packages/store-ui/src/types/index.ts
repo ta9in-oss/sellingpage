@@ -21,6 +21,8 @@ export interface StoreConfig {
     slug: string
     locale: 'ar' | 'fr' | 'en'
     rtl: boolean
+    siteTitle?: string
+    siteDescription?: string
   }
   theme: Theme
   sections: Section[]

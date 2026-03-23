@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { useBuilderStore } from '@/hooks/useBuilderStore'
-import { cn } from '@/lib/utils'
 import { loadGoogleFont } from '@/lib/googleFonts'
 import {
   ThemeProvider,
@@ -20,7 +19,7 @@ import type {
   Feature,
   ProductImage,
 } from '@7aba/store-ui'
-import { Monitor, Smartphone } from 'lucide-react'
+
 
 // Placeholder product images used when merchant hasn't uploaded images yet
 const PLACEHOLDER_IMAGES: ProductImage[] = [
@@ -132,7 +131,6 @@ function SectionRenderer({ section, config }: { section: Section; config: StoreC
 
 export function StorePreview() {
   const { config } = useBuilderStore()
-  const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop')
 
   // Load theme fonts whenever they change
   useEffect(() => {
@@ -142,46 +140,16 @@ export function StorePreview() {
     }
   }, [config.theme.typography.fontFamily, config.theme.typography.headingFont])
 
-  const isDesktop = viewMode === 'desktop'
-
   return (
     <div className="flex flex-col h-full">
-      {/* Device toggle */}
-      <div className="flex justify-center gap-2 py-2 border-b border-zinc-200 bg-white shrink-0">
-        <button
-          onClick={() => setViewMode('desktop')}
-          className={cn(
-            'flex items-center gap-1.5 px-3 py-1.5 rounded text-sm font-medium transition-colors',
-            isDesktop
-              ? 'bg-zinc-900 text-white'
-              : 'text-zinc-500 hover:text-zinc-900'
-          )}
-        >
-          <Monitor size={14} />
-          سطح المكتب
-        </button>
-        <button
-          onClick={() => setViewMode('mobile')}
-          className={cn(
-            'flex items-center gap-1.5 px-3 py-1.5 rounded text-sm font-medium transition-colors',
-            !isDesktop
-              ? 'bg-zinc-900 text-white'
-              : 'text-zinc-500 hover:text-zinc-900'
-          )}
-        >
-          <Smartphone size={14} />
-          جوال
-        </button>
-      </div>
-
       {/* Scale wrapper */}
       <div className="flex-1 overflow-auto bg-zinc-100 flex justify-center p-4">
         <div
           style={{
-            width: isDesktop ? '1200px' : '390px',
-            transform: `scale(${isDesktop ? 0.55 : 0.75})`,
+            width: '1200px',
+            transform: 'scale(0.55)',
             transformOrigin: 'top center',
-            marginBottom: isDesktop ? '-45%' : '-25%',
+            marginBottom: '-45%',
           }}
         >
           <div
@@ -189,9 +157,15 @@ export function StorePreview() {
             style={{ fontFamily: config.theme.typography.fontFamily }}
           >
             <ThemeProvider value={config.theme}>
-              {config.sections.map((section) => (
-                <SectionRenderer key={section.id} section={section} config={config} />
-              ))}
+              {config.sections.length === 0 ? (
+                <div className="flex items-center justify-center h-64 text-zinc-400 text-lg">
+                  لا توجد أقسام — أضف قسمًا من القائمة
+                </div>
+              ) : (
+                config.sections.map((section) => (
+                  <SectionRenderer key={section.id} section={section} config={config} />
+                ))
+              )}
             </ThemeProvider>
           </div>
         </div>

@@ -149,30 +149,19 @@ export const useBuilderStore = create<BuilderState & BuilderActions>((set, get) 
 
   addSection: (type) => {
     const newSection = createDefaultSection(type)
-    set((state) => {
-      const sections = [...state.config.sections]
-      const orderFormIndex = sections.findIndex((s) => s.type === 'order-form')
-      if (orderFormIndex !== -1) {
-        sections.splice(orderFormIndex, 0, newSection)
-      } else {
-        sections.push(newSection)
-      }
-      return { config: { ...state.config, sections } }
-    })
+    set((state) => ({
+      config: { ...state.config, sections: [...state.config.sections, newSection] },
+    }))
   },
 
   removeSection: (id) =>
-    set((state) => {
-      const section = state.config.sections.find((s) => s.id === id)
-      if (section?.type === 'order-form') return state
-      return {
-        config: {
-          ...state.config,
-          sections: state.config.sections.filter((s) => s.id !== id),
-        },
-        selectedSectionId: state.selectedSectionId === id ? null : state.selectedSectionId,
-      }
-    }),
+    set((state) => ({
+      config: {
+        ...state.config,
+        sections: state.config.sections.filter((s) => s.id !== id),
+      },
+      selectedSectionId: state.selectedSectionId === id ? null : state.selectedSectionId,
+    })),
 
   reorderSections: (activeId, overId) =>
     set((state) => {
@@ -180,9 +169,6 @@ export const useBuilderStore = create<BuilderState & BuilderActions>((set, get) 
       const activeIndex = sections.findIndex((s) => s.id === activeId)
       const overIndex = sections.findIndex((s) => s.id === overId)
       if (activeIndex === -1 || overIndex === -1) return state
-      if (sections[activeIndex].type === 'order-form') return state
-      const orderFormIndex = sections.findIndex((s) => s.type === 'order-form')
-      if (orderFormIndex !== -1 && overIndex >= orderFormIndex) return state
       const [moved] = sections.splice(activeIndex, 1)
       sections.splice(overIndex, 0, moved)
       return { config: { ...state.config, sections } }
@@ -208,8 +194,8 @@ export const useBuilderStore = create<BuilderState & BuilderActions>((set, get) 
 
   saveToInstantDB: (storeId, db) => {
     if (saveTimer) clearTimeout(saveTimer)
-    set({ isSaving: true })
     saveTimer = setTimeout(async () => {
+      set({ isSaving: true })
       try {
         const config = get().config
         await db.transact(db.tx.stores[storeId].update({ config }))
@@ -217,7 +203,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>((set, get) 
       } catch {
         set({ isSaving: false })
       }
-    }, 800)
+    }, 1200)
   },
 
   hydrateConfig: (config) => set({ config }),

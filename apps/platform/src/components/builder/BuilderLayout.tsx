@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useBuilderStore } from '@/hooks/useBuilderStore'
 import { db } from '@/lib/instantdb'
 import { cn } from '@/lib/utils'
@@ -15,15 +15,61 @@ import { GuaranteeForm } from './forms/GuaranteeForm'
 import { OrderFormForm } from './forms/OrderFormForm'
 import { useNavigate } from '@tanstack/react-router'
 import type { StoreConfig, Section } from '@7aba/store-ui'
-import { Loader2, Check, Monitor, Smartphone, Rocket, Palette, Package, Bell } from 'lucide-react'
+import { Loader2, Check, Rocket, Palette, Package, Bell, Globe } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 
 interface BuilderLayoutProps {
   storeId: string
 }
 
-type SettingsTab = 'theme' | 'product' | 'notifications'
+type SettingsTab = 'theme' | 'product' | 'notifications' | 'site'
+
+function SitePanel() {
+  const { config, updateMeta } = useBuilderStore()
+  const { meta } = config
+  return (
+    <div className="p-4 space-y-4" dir="rtl">
+      <p className="text-xs font-bold text-zinc-500 uppercase tracking-wide">بيانات الموقع والـ SEO</p>
+      <div className="space-y-1">
+        <Label className="text-xs">عنوان التاب (title)</Label>
+        <Input
+          value={meta.siteTitle ?? ''}
+          onChange={(e) => updateMeta({ siteTitle: e.target.value })}
+          placeholder="مثال: حقيبة ظهر للمدرسة | متجرك"
+          className="text-sm"
+          dir="rtl"
+        />
+        <p className="text-[11px] text-zinc-400">يظهر في تاب المتصفح ونتائج البحث</p>
+      </div>
+      <div className="space-y-1">
+        <Label className="text-xs">الوصف (description)</Label>
+        <Textarea
+          value={meta.siteDescription ?? ''}
+          onChange={(e) => updateMeta({ siteDescription: e.target.value })}
+          placeholder="مثال: اطلب حقيبتك الآن بتوصيل مجاني لجميع ولايات الجزائر."
+          className="text-sm resize-none"
+          rows={3}
+          dir="rtl"
+        />
+        <p className="text-[11px] text-zinc-400">يظهر تحت الرابط في نتائج جوجل (130-160 حرف مثالي)</p>
+      </div>
+      <div className="space-y-1">
+        <Label className="text-xs">رابط المتجر (slug)</Label>
+        <Input
+          value={meta.slug ?? ''}
+          onChange={(e) => updateMeta({ slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-') })}
+          placeholder="my-store"
+          className="text-sm font-mono"
+          dir="ltr"
+        />
+        <p className="text-[11px] text-zinc-400">haba.store/<strong>{meta.slug || 'my-store'}</strong></p>
+      </div>
+    </div>
+  )
+}
 
 function RightPanel() {
   const { config, selectedSectionId } = useBuilderStore()
@@ -38,6 +84,7 @@ function RightPanel() {
             { key: 'theme' as const, label: 'الثيم', Icon: Palette },
             { key: 'product' as const, label: 'المنتج', Icon: Package },
             { key: 'notifications' as const, label: 'الإشعارات', Icon: Bell },
+            { key: 'site' as const, label: 'الموقع', Icon: Globe },
           ]).map(({ key, label, Icon }) => (
             <button
               key={key}
@@ -58,6 +105,7 @@ function RightPanel() {
           {settingsTab === 'theme' && <ThemePanel />}
           {settingsTab === 'product' && <ProductPanel />}
           {settingsTab === 'notifications' && <NotificationsPanel />}
+          {settingsTab === 'site' && <SitePanel />}
         </div>
       </div>
     )
@@ -91,6 +139,7 @@ export function BuilderLayout({ storeId }: BuilderLayoutProps) {
     useBuilderStore()
   const navigate = useNavigate()
   const [mobileTab, setMobileTab] = useState<MobileTab>('preview')
+  const hasHydratedRef = useRef(false)
 
   // Load store data from InstantDB
   const { data } = db.useQuery({
@@ -106,6 +155,7 @@ export function BuilderLayout({ storeId }: BuilderLayoutProps) {
         // Only hydrate if the config is a complete StoreConfig (has sections + theme)
         if (parsed?.sections && Array.isArray(parsed.sections) && parsed?.theme) {
           hydrateConfig(parsed as StoreConfig)
+          hasHydratedRef.current = true
         }
       } catch {
         // keep default config if parse fails
@@ -114,8 +164,11 @@ export function BuilderLayout({ storeId }: BuilderLayoutProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [(data as any)?.stores?.[0]?.id])
 
-  // Auto-save on config change
+  // Auto-save on config change — skip the initial render before any user change
+  const configRef = useRef(config)
   useEffect(() => {
+    if (configRef.current === config) return // skip if config object hasn't changed
+    configRef.current = config
     saveToInstantDB(storeId, db)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config, storeId])
