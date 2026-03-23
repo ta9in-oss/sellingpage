@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { db } from '@/lib/instantdb'
 import { cn } from '@/lib/utils'
+import { ExternalLink } from 'lucide-react'
 
 interface Props {
   storeId: string
@@ -10,6 +11,7 @@ interface Props {
 export function ConnectServicesStep({ storeId, onContinue }: Props) {
   const [cfAccountId, setCfAccountId] = useState('')
   const [instantAppId, setInstantAppId] = useState('')
+  const [instantAdminToken, setInstantAdminToken] = useState('')
   const [cfConnected, setCfConnected] = useState(false)
   const [instantConnected, setInstantConnected] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -29,6 +31,11 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
     }
     if (store.instantAppId) {
       setInstantAppId(store.instantAppId)
+    }
+    if (store.instantAdminToken) {
+      setInstantAdminToken(store.instantAdminToken)
+    }
+    if (store.instantAppId && store.instantAdminToken) {
       setInstantConnected(true)
     }
   }, [storeData])
@@ -44,12 +51,12 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
       }
       if (e.data?.type === 'instantdb_connected' && typeof e.data.appId === 'string') {
         setInstantAppId(e.data.appId)
-        setInstantConnected(true)
+        if (instantAdminToken) setInstantConnected(true)
       }
     }
     window.addEventListener('message', handler)
     return () => window.removeEventListener('message', handler)
-  }, [])
+  }, [instantAdminToken])
 
   const openCFOAuth = () => {
     const redirectUri = `${window.location.origin}/auth/cloudflare`
@@ -63,13 +70,20 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
     window.open(url, 'instant-oauth', 'width=620,height=720,noopener')
   }
 
-  const canContinue = cfAccountId.trim() !== '' && instantAppId.trim() !== ''
+  const canContinue =
+    cfAccountId.trim() !== '' &&
+    instantAppId.trim() !== '' &&
+    instantAdminToken.trim() !== ''
 
   const handleContinue = async () => {
     setSaving(true)
     try {
       await db.transact(
-        db.tx.stores[storeId].update({ cfAccountId: cfAccountId.trim(), instantAppId: instantAppId.trim() })
+        db.tx.stores[storeId].update({
+          cfAccountId: cfAccountId.trim(),
+          instantAppId: instantAppId.trim(),
+          instantAdminToken: instantAdminToken.trim(),
+        })
       )
       onContinue()
     } finally {
@@ -82,7 +96,7 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
       <div>
         <h2 className="text-lg font-bold">ربط الخدمات</h2>
         <p className="text-sm text-muted-foreground mt-1">
-          اربط حساباتك لنشر متجرك تلقائياً
+          اربط حساباتك لنشر متجرك تلقائياً على بنيتك التحتية
         </p>
       </div>
 
@@ -94,30 +108,47 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
         connected={cfConnected}
         oauthLabel="ربط Cloudflare"
         onOAuth={openCFOAuth}
-        inputValue={cfAccountId}
-        inputPlaceholder="CF Account ID"
-        inputLabel="أو أدخل معرف الحساب يدوياً"
-        onInputChange={(v) => {
-          setCfAccountId(v)
-          setCfConnected(v.trim() !== '')
-        }}
+        docUrl="https://dash.cloudflare.com/profile/api-tokens"
+        fields={[
+          {
+            value: cfAccountId,
+            placeholder: 'CF Account ID',
+            label: 'Account ID (من إعدادات الحساب)',
+            onChange: (v) => { setCfAccountId(v); setCfConnected(v.trim() !== '') },
+          },
+        ]}
       />
 
       {/* InstantDB card */}
       <ServiceCard
         icon={<InstantIcon />}
         name="InstantDB"
-        description="قاعدة بيانات لحظية لطلبات المتجر"
+        description="قاعدة بيانات لحظية لطلبات المتجر والمستخدمين"
         connected={instantConnected}
         oauthLabel="ربط InstantDB"
         onOAuth={openInstantOAuth}
-        inputValue={instantAppId}
-        inputPlaceholder="InstantDB App ID"
-        inputLabel="أو أدخل معرف التطبيق يدوياً"
-        onInputChange={(v) => {
-          setInstantAppId(v)
-          setInstantConnected(v.trim() !== '')
-        }}
+        docUrl="https://instantdb.com/dash"
+        fields={[
+          {
+            value: instantAppId,
+            placeholder: 'App ID',
+            label: 'App ID',
+            onChange: (v) => {
+              setInstantAppId(v)
+              setInstantConnected(v.trim() !== '' && instantAdminToken.trim() !== '')
+            },
+          },
+          {
+            value: instantAdminToken,
+            placeholder: 'Admin Token (UUID)',
+            label: 'Admin Token — من إعدادات التطبيق → Admin',
+            isSecret: true,
+            onChange: (v) => {
+              setInstantAdminToken(v)
+              setInstantConnected(instantAppId.trim() !== '' && v.trim() !== '')
+            },
+          },
+        ]}
       />
 
       <button
@@ -136,6 +167,14 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
   )
 }
 
+interface FieldDef {
+  value: string
+  placeholder: string
+  label: string
+  isSecret?: boolean
+  onChange: (v: string) => void
+}
+
 interface ServiceCardProps {
   icon: React.ReactNode
   name: string
@@ -143,10 +182,8 @@ interface ServiceCardProps {
   connected: boolean
   oauthLabel: string
   onOAuth: () => void
-  inputValue: string
-  inputPlaceholder: string
-  inputLabel: string
-  onInputChange: (v: string) => void
+  docUrl: string
+  fields: FieldDef[]
 }
 
 function ServiceCard({
@@ -156,10 +193,8 @@ function ServiceCard({
   connected,
   oauthLabel,
   onOAuth,
-  inputValue,
-  inputPlaceholder,
-  inputLabel,
-  onInputChange,
+  docUrl,
+  fields,
 }: ServiceCardProps) {
   return (
     <div className="border rounded-xl p-5 space-y-4">
@@ -177,29 +212,44 @@ function ServiceCard({
             connected ? 'text-green-600' : 'text-muted-foreground'
           )}
         >
-          <span
-            className={cn('w-2 h-2 rounded-full', connected ? 'bg-green-500' : 'bg-gray-300')}
-          />
+          <span className={cn('w-2 h-2 rounded-full', connected ? 'bg-green-500' : 'bg-gray-300')} />
           {connected ? 'متصل' : 'غير متصل'}
         </div>
       </div>
 
-      <button
-        onClick={onOAuth}
-        className="px-4 py-2 text-sm border rounded-lg hover:bg-muted transition-colors font-medium"
-      >
-        {oauthLabel}
-      </button>
+      <div className="flex items-center gap-2">
+        <button
+          onClick={onOAuth}
+          className="px-4 py-2 text-sm border rounded-lg hover:bg-muted transition-colors font-medium"
+        >
+          {oauthLabel}
+        </button>
+        <a
+          href={docUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ExternalLink size={12} />
+          أين أجد هذه البيانات؟
+        </a>
+      </div>
 
-      <div>
-        <label className="block text-xs text-muted-foreground mb-1">{inputLabel}</label>
-        <input
-          value={inputValue}
-          onChange={(e) => onInputChange(e.target.value)}
-          className="w-full px-3 py-2 border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring/30 transition-colors"
-          placeholder={inputPlaceholder}
-          dir="ltr"
-        />
+      <div className="space-y-3">
+        {fields.map((f) => (
+          <div key={f.placeholder}>
+            <label className="block text-xs text-muted-foreground mb-1">{f.label}</label>
+            <input
+              type={f.isSecret ? 'password' : 'text'}
+              value={f.value}
+              onChange={(e) => f.onChange(e.target.value)}
+              className="w-full px-3 py-2 border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring/30 transition-colors font-mono"
+              placeholder={f.placeholder}
+              dir="ltr"
+              autoComplete={f.isSecret ? 'new-password' : 'off'}
+            />
+          </div>
+        ))}
       </div>
     </div>
   )
@@ -220,3 +270,4 @@ function InstantIcon() {
     </div>
   )
 }
+

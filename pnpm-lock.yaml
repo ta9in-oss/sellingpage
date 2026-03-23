@@ -31,6 +31,9 @@ importers:
       '@dnd-kit/utilities':
         specifier: ^3.2.2
         version: 3.2.2(react@19.1.1)
+      '@instantdb/admin':
+        specifier: ^0.22.169
+        version: 0.22.169
       '@instantdb/react':
         specifier: ^0.21.13
         version: 0.21.30(react@19.1.1)

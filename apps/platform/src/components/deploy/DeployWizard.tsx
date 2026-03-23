@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { ReviewStep } from './steps/ReviewStep'
 import { ConnectServicesStep } from './steps/ConnectServicesStep'
+import { SetupAdminStep } from './steps/SetupAdminStep'
 import { DeployingStep } from './steps/DeployingStep'
 import { LiveStep } from './steps/LiveStep'
 import { ProDeliveryStep } from './steps/ProDeliveryStep'
@@ -11,31 +12,26 @@ interface Props {
   tier: 'starter' | 'pro' | 'enterprise'
 }
 
-type StarterStep = 'review' | 'deploying' | 'live'
-type ProStep = 'review' | 'connect' | 'deploying' | 'live'
+// All tiers: review → connect → admin-setup → deploying → live
+// Pro/Enterprise additionally get source code delivery on the live step
+type WizardStep = 'review' | 'connect' | 'admin-setup' | 'deploying' | 'live'
 
-const STARTER_STEPS: { key: StarterStep; label: string }[] = [
-  { key: 'review', label: 'المراجعة' },
-  { key: 'deploying', label: 'النشر' },
-  { key: 'live', label: 'مكتمل' },
-]
-
-const PRO_STEPS: { key: ProStep; label: string }[] = [
+const STEPS: { key: WizardStep; label: string }[] = [
   { key: 'review', label: 'المراجعة' },
   { key: 'connect', label: 'الخدمات' },
+  { key: 'admin-setup', label: 'المدير' },
   { key: 'deploying', label: 'النشر' },
   { key: 'live', label: 'مكتمل' },
 ]
 
 export function DeployWizard({ storeId, tier }: Props) {
   const isProOrEnterprise = tier === 'pro' || tier === 'enterprise'
-  const steps = isProOrEnterprise ? PRO_STEPS : STARTER_STEPS
   const [currentStep, setCurrentStep] = useState(0)
   const [showProDelivery, setShowProDelivery] = useState(false)
 
-  const advance = () => setCurrentStep((s) => Math.min(s + 1, steps.length - 1))
+  const advance = () => setCurrentStep((s) => Math.min(s + 1, STEPS.length - 1))
 
-  const currentKey = steps[currentStep].key
+  const currentKey = STEPS[currentStep].key
 
   const renderStep = () => {
     if (currentKey === 'review') {
@@ -43,6 +39,9 @@ export function DeployWizard({ storeId, tier }: Props) {
     }
     if (currentKey === 'connect') {
       return <ConnectServicesStep storeId={storeId} onContinue={advance} />
+    }
+    if (currentKey === 'admin-setup') {
+      return <SetupAdminStep storeId={storeId} onContinue={advance} />
     }
     if (currentKey === 'deploying') {
       return (
@@ -83,7 +82,7 @@ export function DeployWizard({ storeId, tier }: Props) {
 
       {/* Step indicator */}
       <div className="flex items-center gap-0 mb-8">
-        {steps.map((step, index) => (
+        {STEPS.map((step, index) => (
           <div key={step.key} className="flex items-center gap-0 flex-1 last:flex-none">
             <div className="flex flex-col items-center gap-1.5">
               <div
@@ -111,7 +110,7 @@ export function DeployWizard({ storeId, tier }: Props) {
                 {step.label}
               </span>
             </div>
-            {index < steps.length - 1 && (
+            {index < STEPS.length - 1 && (
               <div
                 className={cn(
                   'flex-1 h-0.5 mx-2 mb-5 transition-colors',
@@ -123,7 +122,7 @@ export function DeployWizard({ storeId, tier }: Props) {
         ))}
       </div>
 
-      {/* Step content with slide-in animation */}
+      {/* Step content */}
       <div
         key={currentStep}
         className="animate-in slide-in-from-right-4 fade-in duration-300"

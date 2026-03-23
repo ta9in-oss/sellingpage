@@ -25,6 +25,7 @@ const STEP_LABELS = [
   'الاتصال بـ Cloudflare',
   'نشر على Workers',
   'التحقق من الموقع',
+  'إضافة مدير المتجر',
   'حفظ البيانات',
 ]
 
@@ -108,8 +109,33 @@ export function DeployingStep({ storeId, onComplete, onError }: Props) {
       addLog(`✓ الموقع يعمل على: ${deployedUrl}`)
       setStepStatus(4, 'done')
 
-      // Step 5: Save data
+      // Step 5: Add store admin user to their InstantDB
       setStepStatus(5, 'running')
+      addLog('> إضافة مدير المتجر إلى قاعدة البيانات...')
+      await delay(600)
+      const adminEmail = store?.adminEmail
+      const instantAdminToken = store?.instantAdminToken
+      const instantAppId = store?.instantAppId
+      if (adminEmail && instantAdminToken && instantAppId) {
+        try {
+          // Call server function to add user via @instantdb/admin
+          const { addStoreAdmin } = await import('@/server/addStoreAdmin')
+          await addStoreAdmin({
+            data: { instantAppId, instantAdminToken, adminEmail },
+          })
+          addLog(`✓ تم إضافة المدير: ${adminEmail}`)
+        } catch (adminErr) {
+          // Non-fatal: log the error but continue the deploy
+          addLog(`⚠ تعذّر إضافة المدير تلقائياً: ${(adminErr as Error).message}`)
+          addLog('  يمكنك إضافته يدوياً من InstantDB Explorer → جدول users')
+        }
+      } else {
+        addLog('⚠ لا يوجد بريد مدير محدد — يمكنك إضافته لاحقاً من الإعدادات')
+      }
+      setStepStatus(5, 'done')
+
+      // Step 6: Save data
+      setStepStatus(6, 'running')
       addLog('> حفظ البيانات في قاعدة البيانات...')
       await delay(800)
       await db.transact(
@@ -121,7 +147,7 @@ export function DeployingStep({ storeId, onComplete, onError }: Props) {
         })
       )
       addLog('✓ تم حفظ البيانات')
-      setStepStatus(5, 'done')
+      setStepStatus(6, 'done')
 
       addLog('> 🎉 اكتملت عملية النشر بنجاح!')
       await delay(600)

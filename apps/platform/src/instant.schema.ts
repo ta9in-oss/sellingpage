@@ -15,6 +15,8 @@ const schema = i.schema({
       status: i.string().indexed(),
       cfAccountId: i.string(),
       instantAppId: i.string(),
+      instantAdminToken: i.string(),  // admin token for merchant's InstantDB app
+      adminEmail: i.string(),         // email of the store's first admin user
       deployedUrl: i.string(),
       lastDeployAt: i.date(),
       deployLog: i.string(),
@@ -24,3 +26,4 @@ const schema = i.schema({
 
 export default schema
 export type AppSchema = typeof schema
+
