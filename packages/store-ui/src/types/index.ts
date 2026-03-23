@@ -41,7 +41,7 @@ export type Section =
   | { id: string; type: 'features'; items: { icon: string; title: string; body: string }[] }
   | { id: string; type: 'testimonials'; items: { name: string; text: string; rating: number }[] }
   | { id: string; type: 'faq'; items: { q: string; a: string }[] }
-  | { id: string; type: 'guarantee'; text: string; icon: string }
+  | { id: string; type: 'guarantee'; items: { title: string; description: string; icon: string }[] }
   | { id: string; type: 'order-form'; submitLabel: string; fields: FormField[] }
 
 export interface FormField {

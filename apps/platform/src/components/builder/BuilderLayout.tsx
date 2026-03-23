@@ -5,6 +5,8 @@ import { cn } from '@/lib/utils'
 import { SectionList } from './SectionList'
 import { StorePreview } from './StorePreview'
 import { ThemePanel } from './ThemePanel'
+import { ProductPanel } from './ProductPanel'
+import { NotificationsPanel } from './NotificationsPanel'
 import { HeroForm } from './forms/HeroForm'
 import { FeaturesForm } from './forms/FeaturesForm'
 import { TestimonialsForm } from './forms/TestimonialsForm'
@@ -13,7 +15,7 @@ import { GuaranteeForm } from './forms/GuaranteeForm'
 import { OrderFormForm } from './forms/OrderFormForm'
 import { useNavigate } from '@tanstack/react-router'
 import type { StoreConfig, Section } from '@7aba/store-ui'
-import { Loader2, Check, Monitor, Smartphone, Rocket } from 'lucide-react'
+import { Loader2, Check, Monitor, Smartphone, Rocket, Palette, Package, Bell } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
@@ -21,10 +23,45 @@ interface BuilderLayoutProps {
   storeId: string
 }
 
+type SettingsTab = 'theme' | 'product' | 'notifications'
+
 function RightPanel() {
   const { config, selectedSectionId } = useBuilderStore()
+  const [settingsTab, setSettingsTab] = useState<SettingsTab>('theme')
 
-  if (!selectedSectionId) return <ThemePanel />
+  if (!selectedSectionId) {
+    return (
+      <div className="flex flex-col h-full">
+        {/* Tab bar */}
+        <div className="flex border-b-2 border-black shrink-0">
+          {([
+            { key: 'theme' as const, label: 'الثيم', Icon: Palette },
+            { key: 'product' as const, label: 'المنتج', Icon: Package },
+            { key: 'notifications' as const, label: 'الإشعارات', Icon: Bell },
+          ]).map(({ key, label, Icon }) => (
+            <button
+              key={key}
+              onClick={() => setSettingsTab(key)}
+              className={cn(
+                'flex-1 flex flex-col items-center gap-0.5 py-2 text-xs font-bold transition-colors border-e border-black last:border-e-0',
+                settingsTab === key
+                  ? 'bg-yellow-400 text-black'
+                  : 'bg-white text-zinc-500 hover:bg-zinc-50'
+              )}
+            >
+              <Icon size={14} />
+              {label}
+            </button>
+          ))}
+        </div>
+        <div className="flex-1 overflow-y-auto">
+          {settingsTab === 'theme' && <ThemePanel />}
+          {settingsTab === 'product' && <ProductPanel />}
+          {settingsTab === 'notifications' && <NotificationsPanel />}
+        </div>
+      </div>
+    )
+  }
 
   const section = config.sections.find((s) => s.id === selectedSectionId) as Section | undefined
   if (!section) return <ThemePanel />

@@ -94,11 +94,14 @@ function SectionRenderer({ section, config }: { section: Section; config: StoreC
     }
 
     case 'guarantee': {
-      const guarantees: Guarantee[] = [
-        { icon: 'truck', title: 'توصيل مجاني', description: section.text || 'ضمان استرداد الأموال خلال 7 أيام' },
-        { icon: 'refresh', title: 'إرجاع مجاني', description: 'عندك 7 أيام باش ترجع المنتج' },
-        { icon: 'credit', title: 'دفع عند الاستلام', description: 'تخلص فقط لما تستلم' },
-      ]
+      // Support new items[] format; fall back gracefully for old text+icon format
+      const guarantees: Guarantee[] = section.items && section.items.length > 0
+        ? section.items.map((item) => ({ icon: item.icon, title: item.title, description: item.description }))
+        : [
+            { icon: 'truck', title: 'توصيل مجاني', description: 'توصيل مجاني لجميع الولايات' },
+            { icon: 'refresh', title: 'إرجاع مجاني', description: 'عندك 7 أيام باش ترجع المنتج' },
+            { icon: 'shield', title: 'ضمان الجودة', description: 'ضمان استرداد الأموال خلال 7 أيام' },
+          ]
       return <GuaranteeSection guarantees={guarantees} />
     }
 

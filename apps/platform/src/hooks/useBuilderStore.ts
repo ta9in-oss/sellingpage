@@ -19,6 +19,7 @@ interface BuilderActions {
   updateTheme: (theme: Theme) => void
   updateMeta: (patch: Partial<StoreConfig['meta']>) => void
   updateProduct: (patch: Partial<StoreConfig['product']>) => void
+  updateNotifications: (patch: Partial<StoreConfig['notifications']>) => void
   saveToInstantDB: (storeId: string, db: any) => void
   hydrateConfig: (config: StoreConfig) => void
 }
@@ -107,8 +108,11 @@ function createDefaultSection(type: Section['type']): Section {
       return {
         id: nanoid(),
         type: 'guarantee',
-        text: 'ضمان استرداد الأموال خلال 7 أيام بلا أسئلة',
-        icon: 'shield',
+        items: [
+          { icon: 'truck', title: 'توصيل مجاني', description: 'توصيل مجاني لجميع الولايات' },
+          { icon: 'refresh', title: 'إرجاع مجاني', description: 'عندك 7 أيام باش ترجع المنتج' },
+          { icon: 'shield', title: 'ضمان الجودة', description: 'ضمان استرداد الأموال خلال 7 أيام' },
+        ],
       }
     case 'order-form':
       return {
@@ -195,6 +199,11 @@ export const useBuilderStore = create<BuilderState & BuilderActions>((set, get) 
   updateProduct: (patch) =>
     set((state) => ({
       config: { ...state.config, product: { ...state.config.product, ...patch } },
+    })),
+
+  updateNotifications: (patch) =>
+    set((state) => ({
+      config: { ...state.config, notifications: { ...state.config.notifications, ...patch } },
     })),
 
   saveToInstantDB: (storeId, db) => {
