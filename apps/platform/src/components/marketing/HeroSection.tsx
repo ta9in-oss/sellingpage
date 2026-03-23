@@ -40,8 +40,7 @@ export function HeroSection() {
         {/* CTAs */}
         <div className="flex flex-col sm:flex-row items-center gap-3 mt-2">
           <Link
-            to="/dashboard/builder"
-            search={{ storeId: 'new', plan: '' }}
+            to="/dashboard"
             className={cn(
               'px-8 py-3 font-black text-base border-2 border-black',
               'bg-yellow-400 text-black',
