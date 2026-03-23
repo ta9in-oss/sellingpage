@@ -5,11 +5,18 @@ import {
   DndContext,
   closestCenter,
   type DragEndEvent,
+  type DragStartEvent,
+  DragOverlay,
+  PointerSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
 } from '@dnd-kit/core'
 import {
   SortableContext,
   verticalListSortingStrategy,
   useSortable,
+  sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import {
@@ -28,6 +35,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Card } from '@/components/ui/card'
+import { createPortal } from 'react-dom'
 
 type SectionType = Section['type']
 
@@ -56,9 +64,10 @@ interface SortableSectionCardProps {
   isSelected: boolean
   onSelect: () => void
   onRemove: () => void
+  isDragOverlay?: boolean
 }
 
-function SortableSectionCard({ section, isSelected, onSelect, onRemove }: SortableSectionCardProps) {
+function SortableSectionCard({ section, isSelected, onSelect, onRemove, isDragOverlay = false }: SortableSectionCardProps) {
   const isLocked = section.type === 'order-form'
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: section.id,
@@ -67,30 +76,33 @@ function SortableSectionCard({ section, isSelected, onSelect, onRemove }: Sortab
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
+    transition: isDragOverlay ? undefined : transition,
+    opacity: isDragging && !isDragOverlay ? 0.3 : 1,
   }
 
   const Icon = SECTION_ICONS[section.type]
 
   return (
     <Card
-      ref={setNodeRef}
+      ref={isDragOverlay ? undefined : setNodeRef}
       style={style}
-      onClick={onSelect}
+      onClick={isDragOverlay ? undefined : onSelect}
       className={cn(
-        'flex items-center gap-2 px-2 py-2 cursor-pointer transition-all mb-1 shadow-none',
+        'flex items-center gap-2 px-2 py-2 cursor-pointer transition-all mb-1 shadow-none select-none',
         'hover:bg-zinc-50 border',
-        isSelected && 'border-s-2 border-s-zinc-900 bg-zinc-50',
-        isLocked && 'opacity-75'
+        isSelected && !isDragOverlay && 'border-s-2 border-s-zinc-900 bg-zinc-50',
+        isLocked && 'opacity-75',
+        isDragOverlay && 'shadow-xl border-2 border-black bg-yellow-50 rotate-1 scale-105 cursor-grabbing'
       )}
     >
       {!isLocked ? (
         <button
-          {...attributes}
-          {...listeners}
+          {...(isDragOverlay ? {} : { ...attributes, ...listeners })}
           onClick={(e) => e.stopPropagation()}
-          className="text-zinc-300 hover:text-zinc-500 cursor-grab active:cursor-grabbing shrink-0"
+          className={cn(
+            'text-zinc-300 hover:text-zinc-600 shrink-0 cursor-grab active:cursor-grabbing',
+            isDragOverlay && 'cursor-grabbing text-zinc-600'
+          )}
           aria-label="سحب"
         >
           <GripVertical size={14} />
@@ -106,7 +118,7 @@ function SortableSectionCard({ section, isSelected, onSelect, onRemove }: Sortab
         {section.type}
       </Badge>
 
-      {!isLocked && (
+      {!isLocked && !isDragOverlay && (
         <Button
           variant="ghost"
           size="icon"
@@ -128,16 +140,29 @@ export function SectionList() {
   const { config, selectedSectionId, selectSection, removeSection, reorderSections, addSection } =
     useBuilderStore()
   const [showAddMenu, setShowAddMenu] = useState(false)
+  const [activeId, setActiveId] = useState<string | null>(null)
   const [isClient, setIsClient] = useState(false)
 
   useEffect(() => { setIsClient(true) }, [])
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  )
+
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(String(event.active.id))
+  }
+
   const handleDragEnd = (event: DragEndEvent) => {
+    setActiveId(null)
     const { active, over } = event
     if (over && active.id !== over.id) {
       reorderSections(String(active.id), String(over.id))
     }
   }
+
+  const activeSection = activeId ? config.sections.find((s) => s.id === activeId) : null
 
   const sectionCards = config.sections.map((section) => (
     <SortableSectionCard
@@ -157,13 +182,33 @@ export function SectionList() {
 
       <ScrollArea className="flex-1 p-2">
         {isClient ? (
-          <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+          >
             <SortableContext
               items={config.sections.map((s) => s.id)}
               strategy={verticalListSortingStrategy}
             >
               {sectionCards}
             </SortableContext>
+
+            {createPortal(
+              <DragOverlay dropAnimation={{ duration: 150, easing: 'ease' }}>
+                {activeSection && (
+                  <SortableSectionCard
+                    section={activeSection}
+                    isSelected={false}
+                    onSelect={() => {}}
+                    onRemove={() => {}}
+                    isDragOverlay
+                  />
+                )}
+              </DragOverlay>,
+              document.body
+            )}
           </DndContext>
         ) : (
           sectionCards

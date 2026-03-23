@@ -103,7 +103,10 @@ export function BuilderLayout({ storeId }: BuilderLayoutProps) {
       try {
         const parsed =
           typeof store.config === 'string' ? JSON.parse(store.config) : store.config
-        hydrateConfig(parsed as StoreConfig)
+        // Only hydrate if the config is a complete StoreConfig (has sections + theme)
+        if (parsed?.sections && Array.isArray(parsed.sections) && parsed?.theme) {
+          hydrateConfig(parsed as StoreConfig)
+        }
       } catch {
         // keep default config if parse fails
       }

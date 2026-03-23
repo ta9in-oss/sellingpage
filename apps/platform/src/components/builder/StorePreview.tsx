@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useBuilderStore } from '@/hooks/useBuilderStore'
 import { cn } from '@/lib/utils'
+import { loadGoogleFont } from '@/lib/googleFonts'
 import {
   ThemeProvider,
   HeroSection,
@@ -133,6 +134,14 @@ export function StorePreview() {
   const { config } = useBuilderStore()
   const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop')
 
+  // Load theme fonts whenever they change
+  useEffect(() => {
+    loadGoogleFont(config.theme.typography.fontFamily)
+    if (config.theme.typography.headingFont) {
+      loadGoogleFont(config.theme.typography.headingFont)
+    }
+  }, [config.theme.typography.fontFamily, config.theme.typography.headingFont])
+
   const isDesktop = viewMode === 'desktop'
 
   return (
@@ -175,7 +184,10 @@ export function StorePreview() {
             marginBottom: isDesktop ? '-45%' : '-25%',
           }}
         >
-          <div className="border-4 border-black overflow-hidden shadow-[4px_4px_0px_0px_#000] bg-white">
+          <div
+            className="border-4 border-black overflow-hidden shadow-[4px_4px_0px_0px_#000] bg-white"
+            style={{ fontFamily: config.theme.typography.fontFamily }}
+          >
             <ThemeProvider value={config.theme}>
               {config.sections.map((section) => (
                 <SectionRenderer key={section.id} section={section} config={config} />

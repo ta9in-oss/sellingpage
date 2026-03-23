@@ -1,21 +1,13 @@
-import { useState } from 'react'
+import { useEffect } from 'react'
 import { useBuilderStore } from '@/hooks/useBuilderStore'
 import { presets } from '@7aba/store-ui'
 import type { Theme } from '@7aba/store-ui'
 import { cn } from '@/lib/utils'
 import { Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { Card, CardContent } from '@/components/ui/card'
+import { loadGoogleFont, FONT_OPTIONS } from '@/lib/googleFonts'
 
 const PRESET_LABELS: Record<string, string> = {
   brutalist: 'بسيط',
@@ -31,53 +23,49 @@ const COLOR_LABELS: Array<{ key: keyof Theme['colors']; label: string }> = [
   { key: 'border', label: 'الحدود' },
 ]
 
-const FONT_OPTIONS = [
-  'Almarai',
-  'Cairo',
-  'Tajawal',
-  'Noto Sans Arabic',
-  'Rubik',
-  'Readex Pro',
-  'IBM Plex Arabic',
-  'Changa',
-]
-
 const RADIUS_OPTIONS = ['0px', '4px', '8px', '12px', '9999px']
 
 export function ThemePanel() {
   const { config, updateTheme } = useBuilderStore()
   const { theme } = config
-  const [editingColor, setEditingColor] = useState<keyof Theme['colors'] | null>(null)
 
-  const applyPreset = (preset: Theme) => updateTheme(preset)
+  // Load fonts used by the current theme on mount
+  useEffect(() => {
+    loadGoogleFont(theme.typography.fontFamily)
+    if (theme.typography.headingFont) loadGoogleFont(theme.typography.headingFont)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const updateColor = (key: keyof Theme['colors'], value: string) => {
-    updateTheme({
-      ...theme,
-      colors: { ...theme.colors, [key]: value },
-    })
+  const applyPreset = (preset: Theme) => {
+    updateTheme(preset)
+    loadGoogleFont(preset.typography.fontFamily)
+    if (preset.typography.headingFont) loadGoogleFont(preset.typography.headingFont)
   }
 
-  const updateFont = (field: 'fontFamily' | 'headingFont', value: string) => {
+  const updateColor = (key: keyof Theme['colors'], value: string) => {
+    updateTheme({ ...theme, colors: { ...theme.colors, [key]: value } })
+  }
+
+  const updateFont = (field: 'fontFamily' | 'headingFont', fontName: string) => {
+    loadGoogleFont(fontName)
     updateTheme({
       ...theme,
-      typography: { ...theme.typography, [field]: value },
+      typography: { ...theme.typography, [field]: `${fontName}, sans-serif` },
     })
   }
 
   const updateRadius = (radius: string) => {
-    updateTheme({
-      ...theme,
-      effects: { ...theme.effects, borderRadius: radius },
-    })
+    updateTheme({ ...theme, effects: { ...theme.effects, borderRadius: radius } })
   }
 
   const updateDirection = (direction: 'rtl' | 'ltr') => {
     updateTheme({ ...theme, direction })
   }
 
+  const currentBodyFont = theme.typography.fontFamily.split(',')[0].trim()
+  const currentHeadingFont = (theme.typography.headingFont ?? theme.typography.fontFamily).split(',')[0].trim()
+
   return (
-    <div className="p-4 space-y-5">
+    <div className="p-4 space-y-5" dir="rtl">
       {/* Preset cards */}
       <div>
         <p className="text-xs font-bold text-zinc-500 uppercase tracking-wide mb-3">إعدادات القالب</p>
@@ -98,10 +86,7 @@ export function ThemePanel() {
               )}
               <div
                 className="w-full h-8 rounded border"
-                style={{
-                  background: preset.colors.background,
-                  borderColor: preset.colors.border,
-                }}
+                style={{ background: preset.colors.background, borderColor: preset.colors.border }}
               />
               {PRESET_LABELS[preset.name] ?? preset.name}
             </button>
@@ -111,40 +96,40 @@ export function ThemePanel() {
 
       <Separator />
 
-      {/* Color overrides */}
+      {/* Color overrides — real color picker */}
       <div>
         <p className="text-xs font-bold text-zinc-500 uppercase tracking-wide mb-3">الألوان</p>
-        <div className="space-y-2">
+        <div className="space-y-3">
           {COLOR_LABELS.map(({ key, label }) => (
             <div key={key} className="flex items-center gap-2">
-              <button
-                onClick={() => setEditingColor(editingColor === key ? null : key)}
-                className="w-6 h-6 rounded border-2 border-zinc-300 shrink-0 transition-transform hover:scale-110"
+              {/* Native color picker — opens browser color wheel on click */}
+              <label
+                htmlFor={`cp-${key}`}
+                className="w-8 h-8 rounded border-2 border-zinc-200 overflow-hidden cursor-pointer shrink-0 hover:border-zinc-400 transition-colors"
                 style={{ background: theme.colors[key] }}
-                aria-label={`تعديل لون ${label}`}
-              />
-              <Label className="flex-1 text-sm font-normal">{label}</Label>
-              {editingColor === key && (
-                <Input
-                  type="text"
-                  defaultValue={theme.colors[key]}
-                  onBlur={(e) => {
-                    updateColor(key, e.target.value)
-                    setEditingColor(null)
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      updateColor(key, (e.target as HTMLInputElement).value)
-                      setEditingColor(null)
-                    }
-                  }}
-                  className="w-24 h-7 text-xs font-mono"
-                  dir="ltr"
-                  autoFocus
-                  aria-label={`قيمة لون ${label}`}
-                  id={`color-input-${key}`}
+                title={label}
+              >
+                <input
+                  id={`cp-${key}`}
+                  type="color"
+                  value={theme.colors[key]}
+                  onChange={(e) => updateColor(key, e.target.value)}
+                  className="opacity-0 w-full h-full cursor-pointer"
                 />
-              )}
+              </label>
+              <Label className="flex-1 text-sm font-normal">{label}</Label>
+              {/* Hex input — live edit */}
+              <input
+                type="text"
+                value={theme.colors[key]}
+                onChange={(e) => {
+                  const v = e.target.value
+                  if (/^#[0-9a-fA-F]{0,6}$/.test(v)) updateColor(key, v)
+                }}
+                className="w-20 h-7 text-xs font-mono border border-zinc-200 rounded px-2 focus:outline-none focus:ring-1 focus:ring-zinc-900 bg-white"
+                dir="ltr"
+                maxLength={7}
+              />
             </div>
           ))}
         </div>
@@ -152,46 +137,52 @@ export function ThemePanel() {
 
       <Separator />
 
-      {/* Typography */}
+      {/* Typography — Google Fonts with font preview */}
       <div>
         <p className="text-xs font-bold text-zinc-500 uppercase tracking-wide mb-3">الخطوط</p>
         <div className="space-y-3">
+          {/* Body font */}
           <div className="space-y-1">
             <Label className="text-xs">خط النص</Label>
-            <Select
-              value={theme.typography.fontFamily.split(',')[0].trim()}
-              onValueChange={(v) => updateFont('fontFamily', `${v}, sans-serif`)}
-            >
-              <SelectTrigger className="h-8 text-sm">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
+            <div className="border border-zinc-200 rounded overflow-hidden">
+              <select
+                value={currentBodyFont}
+                onChange={(e) => updateFont('fontFamily', e.target.value)}
+                className="w-full px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-zinc-900"
+                dir="rtl"
+              >
                 {FONT_OPTIONS.map((f) => (
-                  <SelectItem key={f} value={f} className="text-sm">
-                    {f}
-                  </SelectItem>
+                  <option key={f.name} value={f.name} style={{ fontFamily: f.name }}>
+                    {f.label}
+                  </option>
                 ))}
-              </SelectContent>
-            </Select>
+              </select>
+            </div>
+            <p className="text-xs text-zinc-400 mt-1" style={{ fontFamily: `${currentBodyFont}, sans-serif` }}>
+              معاينة: المنتج الأفضل في السوق
+            </p>
           </div>
 
+          {/* Heading font */}
           <div className="space-y-1">
             <Label className="text-xs">خط العناوين</Label>
-            <Select
-              value={(theme.typography.headingFont ?? theme.typography.fontFamily).split(',')[0].trim()}
-              onValueChange={(v) => updateFont('headingFont', `${v}, sans-serif`)}
-            >
-              <SelectTrigger className="h-8 text-sm">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
+            <div className="border border-zinc-200 rounded overflow-hidden">
+              <select
+                value={currentHeadingFont}
+                onChange={(e) => updateFont('headingFont', e.target.value)}
+                className="w-full px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-zinc-900"
+                dir="rtl"
+              >
                 {FONT_OPTIONS.map((f) => (
-                  <SelectItem key={f} value={f} className="text-sm">
-                    {f}
-                  </SelectItem>
+                  <option key={f.name} value={f.name} style={{ fontFamily: f.name }}>
+                    {f.label}
+                  </option>
                 ))}
-              </SelectContent>
-            </Select>
+              </select>
+            </div>
+            <p className="text-sm font-bold text-zinc-700 mt-1" style={{ fontFamily: `${currentHeadingFont}, sans-serif` }}>
+              معاينة: عنوان رئيسي
+            </p>
           </div>
         </div>
       </div>
