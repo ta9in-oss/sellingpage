@@ -1,11 +1,8 @@
 import { useLang } from '@/hooks/useLang'
 import { Link } from '@tanstack/react-router'
 import { cn } from '@/lib/utils'
-import { ThemeProvider, HeroSection as StoreHeroSection, brutalistTheme } from '@7aba/store-ui'
-import type { HeroContent } from '@7aba/store-ui'
 
 const T = {
-  badge: { ar: '🇩🇿 صنع في الجزائر', fr: '🇩🇿 Fabriqué en Algérie' },
   headline: { ar: 'أطلق متجرك الإلكتروني في دقيقتين', fr: 'Lancez votre boutique en 2 minutes' },
   sub: {
     ar: 'منصة بناء المتاجر للتجار الجزائريين. ادفع مرة واحدة، اكتسب كل شيء.',
@@ -13,16 +10,6 @@ const T = {
   },
   cta1: { ar: 'ابدأ مجاناً', fr: 'Commencer gratuitement' },
   cta2: { ar: 'شوف مثال حي', fr: 'Voir un exemple' },
-}
-
-const demoHeroContent: HeroContent = {
-  title: ['حزام واحد', 'يحكم الكل'],
-  description: 'صاكادو يد وحدة: يرفد بزاف ويبان صغير. خفيف، مريح، يخدم القراية والسبور والخرجات',
-  ctaText: 'اشتر الآن',
-  ctaLink: '#buy',
-  image: '/bagpack_001.png',
-  priceTag: { amount: '2500', currency: 'دج' },
-  freeDelivery: true,
 }
 
 export function HeroSection() {
@@ -40,11 +27,6 @@ export function HeroSection() {
       />
 
       <div className="relative z-10 max-w-4xl mx-auto flex flex-col items-center gap-8">
-        {/* Badge */}
-        <span className="inline-flex items-center gap-2 text-sm font-black px-4 py-2 border-2 border-black bg-yellow-400 shadow-[2px_2px_0px_0px_#000]">
-          {t(T.badge)}
-        </span>
-
         {/* Headline */}
         <h1 className="text-5xl lg:text-7xl font-black leading-tight text-black tracking-tight">
           {t(T.headline)}
@@ -94,19 +76,11 @@ export function HeroSection() {
           </div>
           {/* Store preview */}
           <div className="relative overflow-hidden bg-white" style={{ height: '360px' }}>
-            <div
-              style={{
-                transform: 'scale(0.52)',
-                transformOrigin: 'top center',
-                width: '192%',
-                marginLeft: '-46%',
-                pointerEvents: 'none',
-              }}
-            >
-              <ThemeProvider value={brutalistTheme}>
-                <StoreHeroSection content={demoHeroContent} />
-              </ThemeProvider>
-            </div>
+            <img
+              src="/demo-store-preview.png"
+              alt="Store preview"
+              className="w-full h-full object-cover"
+            />
           </div>
         </div>
       </div>

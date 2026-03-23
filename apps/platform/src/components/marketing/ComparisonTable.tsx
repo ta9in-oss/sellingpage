@@ -43,30 +43,30 @@ export function ComparisonTable() {
   const { t } = useLang()
 
   return (
-    <section className="py-24 px-4 bg-gray-50">
+    <section className="py-24 px-4 bg-white border-y-2 border-black">
       <div className="max-w-5xl mx-auto">
-        <h2 className="text-3xl lg:text-4xl font-black text-center text-gray-900 mb-12">
+        <h2 className="text-3xl lg:text-4xl font-black text-center text-black mb-12">
           {t(T.title)}
         </h2>
 
-        <div className="overflow-x-auto rounded-2xl border border-gray-200 shadow-sm">
+        <div className="overflow-x-auto border-2 border-black">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-start px-6 py-4 font-semibold text-gray-500 w-1/4">
+              <tr className="border-b-2 border-black">
+                <th className="text-start px-6 py-4 font-semibold text-black w-1/4">
                   {t(T.feature)}
                 </th>
                 {/* 7aba column — highlighted */}
-                <th className="px-6 py-4 bg-orange-50 border-x border-orange-200 text-center">
-                  <span className="font-black text-orange-600 text-base">7aba</span>
-                  <div className="text-xs text-orange-500 font-medium mt-0.5">
+                <th className="px-6 py-4 bg-yellow-400 border-x-2 border-black text-center">
+                  <span className="font-black text-black text-base">7aba</span>
+                  <div className="text-xs text-black/60 font-medium mt-0.5">
                     {t({ ar: 'دفع مرة واحدة', fr: 'Paiement unique' })}
                   </div>
                 </th>
-                <th className="px-6 py-4 text-center font-semibold text-gray-600">
+                <th className="px-6 py-4 text-center font-semibold text-black">
                   Ayor.ai
                 </th>
-                <th className="px-6 py-4 text-center font-semibold text-gray-600">
+                <th className="px-6 py-4 text-center font-semibold text-black">
                   Shopify
                 </th>
               </tr>
@@ -75,22 +75,19 @@ export function ComparisonTable() {
               {features.map((row, i) => (
                 <tr
                   key={i}
-                  className={cn(
-                    'border-b border-gray-100 last:border-0',
-                    'hover:bg-gray-50/50 transition-colors'
-                  )}
+                  className="border-b-2 border-black last:border-0"
                 >
-                  <td className="px-6 py-4 font-medium text-gray-700">
+                  <td className="px-6 py-4 font-medium text-black">
                     {t(row.label)}
                   </td>
                   {/* 7aba */}
-                  <td className="px-6 py-4 bg-orange-50/50 border-x border-orange-100 text-center">
+                  <td className="px-6 py-4 bg-yellow-50 border-x-2 border-black text-center">
                     <span
                       className={cn(
                         'font-semibold',
                         row.haba.highlight
-                          ? 'text-orange-600 text-base font-black'
-                          : 'text-green-600'
+                          ? 'font-black text-black'
+                          : 'text-green-700'
                       )}
                     >
                       {t(row.haba.text)}
@@ -101,7 +98,7 @@ export function ComparisonTable() {
                     <span
                       className={cn(
                         'font-medium',
-                        row.ayor.good ? 'text-green-600' : 'text-red-500'
+                        row.ayor.good ? 'text-green-700' : 'text-red-600'
                       )}
                     >
                       {t(row.ayor.text)}
@@ -112,7 +109,7 @@ export function ComparisonTable() {
                     <span
                       className={cn(
                         'font-medium',
-                        row.shopify.good ? 'text-green-600' : 'text-red-500'
+                        row.shopify.good ? 'text-green-700' : 'text-red-600'
                       )}
                     >
                       {t(row.shopify.text)}

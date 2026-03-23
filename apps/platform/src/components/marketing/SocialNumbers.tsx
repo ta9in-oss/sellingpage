@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLang } from '@/hooks/useLang'
-import { cn } from '@/lib/utils'
 
 const stats = [
   { value: 500, suffix: '+', ar: 'متجر منشور', fr: 'Boutiques lancées' },
@@ -41,11 +40,11 @@ function StatCard({
 
   return (
     <div className="flex flex-col items-center gap-2 text-center">
-      <div className="text-5xl lg:text-6xl font-black text-gray-900 tabular-nums">
+      <div className="text-5xl lg:text-6xl font-black text-black tabular-nums">
         {count}
-        <span className="text-orange-500">{suffix}</span>
+        <span className="text-black">{suffix}</span>
       </div>
-      <p className="text-base text-gray-500 font-medium">{label}</p>
+      <p className="text-base text-black/70 font-medium">{label}</p>
     </div>
   )
 }
@@ -72,9 +71,7 @@ export function SocialNumbers() {
   return (
     <section
       ref={ref}
-      className={cn(
-        'py-24 px-4 bg-white border-y border-gray-100'
-      )}
+      className="py-24 px-4 bg-yellow-400 border-y-2 border-black"
     >
       <div className="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-12">
         {stats.map((stat, i) => (

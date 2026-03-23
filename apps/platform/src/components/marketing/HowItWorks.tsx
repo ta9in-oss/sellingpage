@@ -1,6 +1,7 @@
+import { useEffect, useRef, useState } from 'react'
 import { useLang } from '@/hooks/useLang'
 import { cn } from '@/lib/utils'
-import { Palette, SlidersHorizontal, Rocket } from 'lucide-react'
+import { Palette, SlidersHorizontal, Bell, Rocket } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 const T = {
@@ -10,6 +11,7 @@ const T = {
 const icons: Record<string, LucideIcon> = {
   Palette,
   SlidersHorizontal,
+  Bell,
   Rocket,
 }
 
@@ -19,72 +21,99 @@ const steps = [
     ar: 'اختر قالبك',
     fr: 'Choisissez votre thème',
     desc: {
-      ar: 'ثلاثة قوالب احترافية جاهزة للتخصيص',
-      fr: 'Trois thèmes professionnels prêts à personnaliser',
+      ar: '3 قوالب بسيط، جريء، دافئ',
+      fr: '3 thèmes optimisés pour vendre',
     },
   },
   {
     icon: 'SlidersHorizontal',
-    ar: 'خصص متجرك',
-    fr: 'Personnalisez votre boutique',
+    ar: 'خصص محتواك',
+    fr: 'Personnalisez le contenu',
     desc: {
-      ar: 'محرر بصري مع معاينة فورية',
-      fr: 'Éditeur visuel avec aperçu instantané',
+      ar: 'صور، نصوص، أسعار — كل شيء بصري',
+      fr: 'Images, textes, prix — tout visuel',
+    },
+  },
+  {
+    icon: 'Bell',
+    ar: 'إشعارات البيع الفوري',
+    fr: 'Notifications de vente en direct',
+    desc: {
+      ar: 'كل طلب جديد يظهر كإشعار live على شاشتك — ميزة لا يملكها أحد غيرك',
+      fr: 'Chaque commande s\'affiche en temps réel — une fonctionnalité exclusive',
     },
   },
   {
     icon: 'Rocket',
-    ar: 'أطلق في دقيقتين',
-    fr: 'Lancez en 2 minutes',
+    ar: 'أطلق متجرك + داشبورد',
+    fr: 'Lancez + Dashboard complet',
     desc: {
-      ar: 'نشر تلقائي على Cloudflare',
-      fr: 'Déploiement automatique sur Cloudflare',
+      ar: 'نشر تلقائي على Cloudflare مع داشبورد لإدارة الطلبات',
+      fr: 'Déploiement Cloudflare + dashboard pour gérer vos commandes',
     },
   },
 ]
 
 export function HowItWorks() {
   const { t, lang } = useLang()
+  const [visible, setVisible] = useState(false)
+  const ref = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true)
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.15 }
+    )
+    if (ref.current) observer.observe(ref.current)
+    return () => observer.disconnect()
+  }, [])
 
   return (
-    <section id="how" className="py-24 px-4 bg-white">
+    <section id="how" ref={ref} className="py-24 px-4 bg-white border-y-2 border-black">
       <div className="max-w-5xl mx-auto">
-        <h2 className="text-3xl lg:text-4xl font-black text-center text-gray-900 mb-16">
+        <h2 className="text-4xl font-black text-black mb-16 border-r-4 border-yellow-400 pr-4 text-right">
           {t(T.title)}
         </h2>
 
-        <div className="relative grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="relative grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Dashed connector on desktop */}
-          <div
-            className={cn(
-              'hidden md:block absolute top-10 h-px border-t-2 border-dashed border-orange-200',
-              'left-[calc(16.66%+2rem)] right-[calc(16.66%+2rem)]'
-            )}
-          />
+          <div className="hidden md:block absolute top-8 h-px border-t-2 border-dashed border-black left-[calc(12.5%+2rem)] right-[calc(12.5%+2rem)]" />
 
           {steps.map((step, i) => {
             const Icon = icons[step.icon]
             return (
               <div
                 key={i}
-                className="relative flex flex-col items-center text-center gap-4"
+                className={cn(
+                  'relative border-2 border-black bg-white shadow-[3px_3px_0px_0px_#000] p-6',
+                  'transition-all duration-500',
+                  visible
+                    ? 'opacity-100 translate-y-0'
+                    : 'opacity-0 translate-y-6'
+                )}
+                style={{ transitionDelay: `${i * 150}ms` }}
               >
-                {/* Number circle */}
-                <div className="relative z-10 w-20 h-20 rounded-2xl bg-orange-50 border-2 border-orange-200 flex items-center justify-center">
-                  <span className="absolute -top-2.5 -end-2.5 w-6 h-6 rounded-full bg-orange-500 text-white text-xs font-black flex items-center justify-center">
-                    {i + 1}
-                  </span>
-                  <Icon className="w-8 h-8 text-orange-500" strokeWidth={1.5} />
+                {/* Number badge */}
+                <span className="absolute -top-3 -end-3 w-8 h-8 bg-yellow-400 border-2 border-black font-black text-sm flex items-center justify-center">
+                  {i + 1}
+                </span>
+
+                {/* Icon */}
+                <div className="w-16 h-16 bg-yellow-400 border-2 border-black flex items-center justify-center mb-4">
+                  <Icon className="w-8 h-8 text-black" strokeWidth={2} />
                 </div>
 
-                <div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-1">
-                    {lang === 'ar' ? step.ar : step.fr}
-                  </h3>
-                  <p className="text-sm text-gray-500 leading-relaxed">
-                    {t(step.desc)}
-                  </p>
-                </div>
+                <h3 className="font-black text-black text-lg mb-2">
+                  {lang === 'ar' ? step.ar : step.fr}
+                </h3>
+                <p className="text-black/60 text-sm leading-relaxed">
+                  {t(step.desc)}
+                </p>
               </div>
             )
           })}

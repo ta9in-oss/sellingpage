@@ -3,6 +3,7 @@ import { Navbar } from '@/components/marketing/Navbar'
 import { HeroSection } from '@/components/marketing/HeroSection'
 import { ComparisonTable } from '@/components/marketing/ComparisonTable'
 import { HowItWorks } from '@/components/marketing/HowItWorks'
+import { NotificationShowcase } from '@/components/marketing/NotificationShowcase'
 import { FeatureGrid } from '@/components/marketing/FeatureGrid'
 import { SocialNumbers } from '@/components/marketing/SocialNumbers'
 import { PricingPreview } from '@/components/marketing/PricingPreview'
@@ -19,6 +20,7 @@ function LandingPage() {
       <HeroSection />
       <ComparisonTable />
       <HowItWorks />
+      <NotificationShowcase />
       <FeatureGrid />
       <SocialNumbers />
       <PricingPreview />

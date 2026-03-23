@@ -20,11 +20,11 @@ export function Footer() {
           {/* Brand */}
           <div className="flex flex-col items-center md:items-start gap-3">
             <img
-              src="/assets/logo/7aba_store_logo_i2.svg"
+              src="/assets/logo/7aba_store_logo_i1.svg"
               alt="7aba.store"
               className="h-10 w-auto brightness-0 invert"
               onError={(e) => {
-                ;(e.currentTarget as HTMLImageElement).src = '/assets/logo/7aba_store_logo_i2.png'
+                ;(e.currentTarget as HTMLImageElement).src = '/assets/logo/7aba_store_logo_i1.png'
                 ;(e.currentTarget as HTMLImageElement).classList.add('brightness-0', 'invert')
               }}
             />

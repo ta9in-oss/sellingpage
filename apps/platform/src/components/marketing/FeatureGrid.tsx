@@ -106,9 +106,9 @@ export function FeatureGrid() {
   const { t, lang } = useLang()
 
   return (
-    <section className="py-24 px-4 bg-gray-50">
+    <section className="py-24 px-4 bg-white border-y-2 border-black">
       <div className="max-w-6xl mx-auto">
-        <h2 className="text-3xl lg:text-4xl font-black text-center text-gray-900 mb-12">
+        <h2 className="text-3xl lg:text-4xl font-black text-center text-black mb-12">
           {t(T.title)}
         </h2>
 
@@ -119,17 +119,17 @@ export function FeatureGrid() {
               <div
                 key={i}
                 className={cn(
-                  'bg-white rounded-2xl p-5 border border-gray-100',
-                  'hover:border-orange-200 hover:shadow-md transition-all group'
+                  'border-2 border-black bg-white shadow-[3px_3px_0px_0px_#000] p-5',
+                  'hover:bg-yellow-50 hover:shadow-[1px_1px_0px_0px_#000] hover:translate-x-[2px] hover:translate-y-[2px] transition-all'
                 )}
               >
-                <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center mb-3 group-hover:bg-orange-100 transition-colors">
-                  <Icon className="w-5 h-5 text-orange-500" strokeWidth={1.5} />
+                <div className="w-10 h-10 bg-yellow-400 border-2 border-black flex items-center justify-center mb-3">
+                  <Icon className="w-5 h-5 text-black" strokeWidth={2} />
                 </div>
-                <h3 className="font-bold text-gray-900 text-sm mb-1">
+                <h3 className="font-black text-black text-sm mb-1">
                   {lang === 'ar' ? feature.ar : feature.fr}
                 </h3>
-                <p className="text-xs text-gray-500 leading-relaxed">
+                <p className="text-xs text-black/60 leading-relaxed">
                   {t(feature.desc)}
                 </p>
               </div>
