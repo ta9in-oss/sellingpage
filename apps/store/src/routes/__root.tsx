@@ -29,7 +29,7 @@ export const Route = createRootRoute({
         title: "حبة ستور | كل مرة حبة جديدة ما صراتش!!!",
         description:
           "حبة ستور والكل يتسوق في راحتو. عس مليح ، واشري اللي تحتاج برك.",
-        image: "https://7aba.store/og_image.png",
+        image: "https://7aba.store/og_image.webp",
       }),
     ],
     links: [
@@ -37,9 +37,19 @@ export const Route = createRootRoute({
         rel: "stylesheet",
         href: appCss,
       },
+      // Preconnect for Google Fonts (non-blocking font strategy)
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&display=swap",
+      },
+      // Preload LCP image (hero product image)
+      {
+        rel: "preload",
+        as: "image",
+        href: "/bagpack_001.webp",
+        type: "image/webp",
       },
       {
         rel: "icon",

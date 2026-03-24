@@ -43,16 +43,22 @@ export function ProductCarousel({
                         className="flex transition-transform duration-300 ease-in-out"
                         style={{ transform: `translateX(${currentSlide * 100}%)` }}
                     >
-                        {products.map((product) => (
+                        {products.map((product, index) => (
                             <div key={product.id} className="min-w-full flex-shrink-0">
                                 <div className={`${product.bgColor} p-2 sm:p-4 border-2 border-black rounded-lg`}>
                                     <div className="relative w-full">
-                                        <img
-                                            src={product.image}
-                                            alt={product.title}
-                                            className="w-72 h-64 object-cover rounded-md mx-auto"
-                                            loading="lazy"
-                                        />
+                                        <picture>
+                                            <source srcSet={product.image.replace(/\.(png|jpg|jpeg)$/i, '.webp')} type="image/webp" />
+                                            <img
+                                                src={product.image}
+                                                alt={product.title}
+                                                className="w-72 h-64 object-cover rounded-md mx-auto"
+                                                loading={index === 0 ? 'eager' : 'lazy'}
+                                                decoding="async"
+                                                width="288"
+                                                height="256"
+                                            />
+                                        </picture>
                                     </div>
                                 </div>
                             </div>

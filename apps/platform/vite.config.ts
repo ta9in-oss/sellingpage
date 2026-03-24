@@ -20,4 +20,18 @@ export default defineConfig({
         viteReact(),
     ],
     publicDir: 'src/public',
+    build: {
+        cssCodeSplit: true,
+        rollupOptions: {
+            output: {
+                manualChunks(id) {
+                    if (id.includes('node_modules/@instantdb')) return 'vendor-instantdb'
+                    if (id.includes('node_modules/@radix-ui')) return 'vendor-radix'
+                    if (id.includes('node_modules/lucide-react')) return 'vendor-icons'
+                    if (id.includes('node_modules/@dnd-kit')) return 'vendor-dndkit'
+                    if (id.includes('node_modules/zustand')) return 'vendor-zustand'
+                },
+            },
+        },
+    },
 })

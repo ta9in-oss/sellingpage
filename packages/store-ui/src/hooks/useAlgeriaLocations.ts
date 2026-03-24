@@ -1,6 +1,7 @@
 // hooks/useAlgeriaLocations.ts
-import { useMemo } from 'react';
-import ALGERIA_DATA from '../data/algeria-locations.json';
+// Lazy-loads the 1.4 MB JSON only when the component first mounts,
+// keeping it out of the main JS bundle.
+import { useState, useEffect, useMemo } from 'react';
 
 // Type definitions
 export interface LocationData {
@@ -35,70 +36,61 @@ export interface ProcessedLocationData {
   getAvailableDairas: (wilaya: string) => string[];
   getAvailableCommunes: (wilaya: string, daira: string) => string[];
   getLocationInfo: (commune: string) => LocationData | undefined;
+  loading: boolean;
 }
 
-export const useAlgeriaLocations = (): ProcessedLocationData => {
-  return useMemo(() => {
-    const data = ALGERIA_DATA as LocationData[];
+const EMPTY: ProcessedLocationData = {
+  wilayas: [],
+  dairasByWilaya: {},
+  communesByDaira: {},
+  getAvailableDairas: () => [],
+  getAvailableCommunes: () => [],
+  getLocationInfo: () => undefined,
+  loading: true,
+};
 
-    // Get unique wilayas
-    const wilayasSet = new Set(data.map(item => item.wilaya_name));
+export const useAlgeriaLocations = (): ProcessedLocationData => {
+  const [raw, setRaw] = useState<LocationData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    import('../data/algeria-locations.json').then(m => {
+      setRaw(m.default as LocationData[]);
+      setLoading(false);
+    });
+  }, []);
+
+  return useMemo((): ProcessedLocationData => {
+    if (loading || raw.length === 0) return EMPTY;
+
+    const wilayasSet = new Set(raw.map(item => item.wilaya_name));
     const wilayas = Array.from(wilayasSet).sort();
 
-    // Group dairas by wilaya
     const dairasByWilaya: Record<string, string[]> = {};
-    data.forEach(item => {
-      if (!dairasByWilaya[item.wilaya_name]) {
-        dairasByWilaya[item.wilaya_name] = [];
-      }
-      if (!dairasByWilaya[item.wilaya_name].includes(item.daira_name)) {
+    raw.forEach(item => {
+      if (!dairasByWilaya[item.wilaya_name]) dairasByWilaya[item.wilaya_name] = [];
+      if (!dairasByWilaya[item.wilaya_name].includes(item.daira_name))
         dairasByWilaya[item.wilaya_name].push(item.daira_name);
-      }
     });
+    Object.keys(dairasByWilaya).forEach(w => dairasByWilaya[w].sort());
 
-    // Sort dairas within each wilaya
-    Object.keys(dairasByWilaya).forEach(wilaya => {
-      dairasByWilaya[wilaya].sort();
-    });
-
-    // Group communes by daira
     const communesByDaira: Record<string, string[]> = {};
-    data.forEach(item => {
+    raw.forEach(item => {
       const key = `${item.wilaya_name}-${item.daira_name}`;
-      if (!communesByDaira[key]) {
-        communesByDaira[key] = [];
-      }
-      if (!communesByDaira[key].includes(item.commune_name)) {
+      if (!communesByDaira[key]) communesByDaira[key] = [];
+      if (!communesByDaira[key].includes(item.commune_name))
         communesByDaira[key].push(item.commune_name);
-      }
     });
-
-    // Sort communes within each daira
-    Object.keys(communesByDaira).forEach(key => {
-      communesByDaira[key].sort();
-    });
-
-    // Helper functions for easy access
-    const getAvailableDairas = (wilaya: string): string[] => {
-      return dairasByWilaya[wilaya] || [];
-    };
-
-    const getAvailableCommunes = (wilaya: string, daira: string): string[] => {
-      const key = `${wilaya}-${daira}`;
-      return communesByDaira[key] || [];
-    };
-
-    const getLocationInfo = (commune: string): LocationData | undefined => {
-      return data.find(item => item.commune_name === commune);
-    };
+    Object.keys(communesByDaira).forEach(k => communesByDaira[k].sort());
 
     return {
       wilayas,
       dairasByWilaya,
       communesByDaira,
-      getAvailableDairas,
-      getAvailableCommunes,
-      getLocationInfo,
+      getAvailableDairas: (wilaya) => dairasByWilaya[wilaya] ?? [],
+      getAvailableCommunes: (wilaya, daira) => communesByDaira[`${wilaya}-${daira}`] ?? [],
+      getLocationInfo: (commune) => raw.find(item => item.commune_name === commune),
+      loading: false,
     };
-  }, []);
+  }, [raw, loading]);
 };
