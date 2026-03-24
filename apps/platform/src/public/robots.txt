@@ -1,0 +1,30 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /dashboard/
+Disallow: /dashboard/builder
+Disallow: /dashboard/deploy
+Disallow: /api/
+
+# AI/LLM crawlers — allow indexing for GEO
+User-agent: GPTBot
+Allow: /
+Disallow: /dashboard
+
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /dashboard
+
+User-agent: Claude-Web
+Allow: /
+Disallow: /dashboard
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /dashboard
+
+User-agent: Googlebot
+Allow: /
+Disallow: /dashboard
+
+Sitemap: https://7aba.store/sitemap.xml

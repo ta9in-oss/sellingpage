@@ -1,0 +1,39 @@
+{
+  "name": "7aba.store — منصة المتاجر الجزائرية",
+  "short_name": "7aba.store",
+  "description": "منصة بناء المتاجر الإلكترونية للتجار الجزائريين",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#FACC15",
+  "lang": "ar",
+  "dir": "rtl",
+  "categories": ["business", "shopping"],
+  "icons": [
+    {
+      "src": "/web-app-manifest-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/web-app-manifest-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/demo-store-preview.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "label": "متجر 7aba.store التجريبي"
+    }
+  ]
+}

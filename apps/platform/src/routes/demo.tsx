@@ -16,7 +16,54 @@ import {
   type OrderData,
 } from '@7aba/store-ui'
 
+const SITE_URL = 'https://7aba.store'
+const TITLE = 'متجر تجريبي — شوف كيف يبدو متجرك مع 7aba.store'
+const DESC =
+  'جرّب متجراً جزائرياً حقيقياً مبنياً بـ 7aba.store. شاهد كيف يبدو المتجر، اختبر نموذج الطلب، وتعرف على تجربة المشتري قبل أن تنشئ متجرك الخاص.'
+
+const demoJsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebPage',
+      '@id': `${SITE_URL}/demo#webpage`,
+      url: `${SITE_URL}/demo`,
+      name: TITLE,
+      description: DESC,
+      isPartOf: { '@id': `${SITE_URL}/#website` },
+      breadcrumb: {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'الرئيسية', item: SITE_URL },
+          { '@type': 'ListItem', position: 2, name: 'المتجر التجريبي', item: `${SITE_URL}/demo` },
+        ],
+      },
+    },
+    {
+      '@type': 'ItemPage',
+      name: 'متجر تجريبي — حقيبة ظهر احترافية',
+      description: 'مثال حي لمتجر إلكتروني جزائري مبني بمنصة 7aba.store',
+      image: `${SITE_URL}/demo-store-preview.png`,
+    },
+  ],
+}
+
 export const Route = createFileRoute('/demo')({
+  head: () => ({
+    meta: [
+      { title: TITLE },
+      { name: 'description', content: DESC },
+      { property: 'og:title', content: TITLE },
+      { property: 'og:description', content: DESC },
+      { property: 'og:url', content: `${SITE_URL}/demo` },
+      { property: 'og:image', content: `${SITE_URL}/demo-store-preview.png` },
+      { name: 'twitter:title', content: TITLE },
+      { name: 'twitter:description', content: DESC },
+      { name: 'twitter:image', content: `${SITE_URL}/demo-store-preview.png` },
+    ],
+    links: [{ rel: 'canonical', href: `${SITE_URL}/demo` }],
+    scripts: [{ type: 'application/ld+json', children: JSON.stringify(demoJsonLd) }],
+  }),
   component: DemoStorePage,
 })
 
