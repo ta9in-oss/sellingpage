@@ -13,6 +13,7 @@ export default defineConfig({
         tanstackStart({
             customViteReactPlugin: true,
             server: {
+                // @ts-expect-error preset is valid at runtime
                 preset: process.env.CF_PAGES ? 'cloudflare-pages' : 'node-server',
             },
         }),

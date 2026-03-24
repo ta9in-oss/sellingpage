@@ -29,7 +29,7 @@ export const verifySubscriptionPayment = createServerFn({ method: 'POST' })
     // Grant the tier to the user in our platform DB
     const adminDb = init({
       appId: process.env.VITE_INSTANT_APP_ID!,
-      adminToken: process.env.INSTANT_ADMIN_TOKEN!,
+      adminToken: process.env.INSTANTDB_ADMIN_TOKEN!,
     })
 
     // Look up existing platformUser record by email

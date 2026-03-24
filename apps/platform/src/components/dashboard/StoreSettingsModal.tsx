@@ -1,0 +1,228 @@
+/**
+ * Per-store settings modal — lets the merchant configure:
+ * - Cloudflare Account ID + API token (for deployment)
+ * - InstantDB App ID + Admin token (for the store's live DB)
+ */
+import { useState, useEffect } from 'react'
+import { db } from '@/lib/instantdb'
+import { cn } from '@/lib/utils'
+import { X, Eye, EyeOff, Save, Loader2 } from 'lucide-react'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
+
+interface StoreSettingsModalProps {
+  storeId: string
+  storeName: string
+  initialValues: {
+    cfAccountId?: string
+    cfApiToken?: string
+    instantAppId?: string
+    instantAdminToken?: string
+  }
+  onClose: () => void
+}
+
+export function StoreSettingsModal({
+  storeId,
+  storeName,
+  initialValues,
+  onClose,
+}: StoreSettingsModalProps) {
+  const [cfAccountId, setCfAccountId] = useState(initialValues.cfAccountId ?? '')
+  const [cfApiToken, setCfApiToken] = useState(initialValues.cfApiToken ?? '')
+  const [instantAppId, setInstantAppId] = useState(initialValues.instantAppId ?? '')
+  const [instantAdminToken, setInstantAdminToken] = useState(initialValues.instantAdminToken ?? '')
+  const [showCfToken, setShowCfToken] = useState(false)
+  const [showInstantToken, setShowInstantToken] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  // Close on Escape
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [onClose])
+
+  const handleSave = async () => {
+    setSaving(true)
+    setError(null)
+    setSaved(false)
+    try {
+      await db.transact(
+        db.tx.stores[storeId].update({
+          cfAccountId: cfAccountId.trim(),
+          cfApiToken: cfApiToken.trim(),
+          instantAppId: instantAppId.trim(),
+          instantAdminToken: instantAdminToken.trim(),
+        })
+      )
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2500)
+    } catch (e: unknown) {
+      setError((e as Error)?.message ?? 'تعذر الحفظ. حاول مجدداً.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+      dir="rtl"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
+    >
+      <div className="bg-white border-2 border-black shadow-[6px_6px_0px_0px_#000] w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between p-5 border-b-2 border-black">
+          <div>
+            <h2 className="text-lg font-black">إعدادات النشر</h2>
+            <p className="text-xs text-zinc-500 mt-0.5">{storeName}</p>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-1.5 border-2 border-transparent hover:border-black transition-colors"
+            aria-label="إغلاق"
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        <div className="p-5 space-y-6">
+          {/* Cloudflare section */}
+          <section>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-6 h-6 bg-[#F6821F] flex items-center justify-center shrink-0">
+                <span className="text-white text-xs font-black">CF</span>
+              </div>
+              <h3 className="font-black text-sm">إعدادات Cloudflare</h3>
+            </div>
+            <div className="border-2 border-black p-4 space-y-3 bg-zinc-50">
+              <div className="space-y-1">
+                <Label className="text-xs font-bold">Account ID</Label>
+                <Input
+                  value={cfAccountId}
+                  onChange={(e) => setCfAccountId(e.target.value)}
+                  placeholder="ab523bcff1d5e827..."
+                  dir="ltr"
+                  className="text-sm font-mono"
+                />
+                <p className="text-[11px] text-zinc-400">
+                  من{' '}
+                  <a href="https://dash.cloudflare.com" target="_blank" rel="noopener noreferrer" className="underline">
+                    dash.cloudflare.com
+                  </a>{' '}
+                  ← Workers & Pages ← نظرة عامة ← Account ID
+                </p>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs font-bold">API Token</Label>
+                <div className="relative">
+                  <Input
+                    type={showCfToken ? 'text' : 'password'}
+                    value={cfApiToken}
+                    onChange={(e) => setCfApiToken(e.target.value)}
+                    placeholder="abcdef123456..."
+                    dir="ltr"
+                    className="text-sm font-mono pe-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCfToken(!showCfToken)}
+                    className="absolute inset-y-0 end-2.5 flex items-center text-zinc-400 hover:text-black"
+                  >
+                    {showCfToken ? <EyeOff size={14} /> : <Eye size={14} />}
+                  </button>
+                </div>
+                <p className="text-[11px] text-zinc-400">
+                  يجب أن يكون لديه صلاحية <strong>Cloudflare Pages: Edit</strong> (Profile → API Tokens → Create Token)
+                </p>
+              </div>
+            </div>
+          </section>
+
+          {/* InstantDB section */}
+          <section>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-6 h-6 bg-black flex items-center justify-center shrink-0">
+                <span className="text-yellow-400 text-xs font-black">DB</span>
+              </div>
+              <h3 className="font-black text-sm">إعدادات InstantDB</h3>
+            </div>
+            <div className="border-2 border-black p-4 space-y-3 bg-zinc-50">
+              <div className="space-y-1">
+                <Label className="text-xs font-bold">App ID</Label>
+                <Input
+                  value={instantAppId}
+                  onChange={(e) => setInstantAppId(e.target.value)}
+                  placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                  dir="ltr"
+                  className="text-sm font-mono"
+                />
+                <p className="text-[11px] text-zinc-400">
+                  من{' '}
+                  <a href="https://instantdb.com/dash" target="_blank" rel="noopener noreferrer" className="underline">
+                    instantdb.com/dash
+                  </a>{' '}
+                  ← اختر تطبيقك ← App Settings
+                </p>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs font-bold">Admin Token</Label>
+                <div className="relative">
+                  <Input
+                    type={showInstantToken ? 'text' : 'password'}
+                    value={instantAdminToken}
+                    onChange={(e) => setInstantAdminToken(e.target.value)}
+                    placeholder="your-admin-token..."
+                    dir="ltr"
+                    className="text-sm font-mono pe-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowInstantToken(!showInstantToken)}
+                    className="absolute inset-y-0 end-2.5 flex items-center text-zinc-400 hover:text-black"
+                  >
+                    {showInstantToken ? <EyeOff size={14} /> : <Eye size={14} />}
+                  </button>
+                </div>
+                <p className="text-[11px] text-zinc-400">Admin token للوصول الخلفي إلى بيانات متجرك.</p>
+              </div>
+            </div>
+          </section>
+
+          {error && (
+            <div className="border-2 border-red-400 bg-red-50 p-3 text-sm text-red-700">{error}</div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-between p-5 border-t-2 border-black">
+          <button onClick={onClose} className="text-sm font-bold text-zinc-500 hover:text-black">
+            إلغاء
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className={cn(
+              'flex items-center gap-2 px-5 py-2.5 border-2 border-black text-sm font-black transition-all',
+              saved
+                ? 'bg-green-400 text-black'
+                : 'bg-yellow-400 text-black shadow-[3px_3px_0px_0px_#000] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px]',
+              saving && 'opacity-60 cursor-not-allowed'
+            )}
+          >
+            {saving ? (
+              <><Loader2 size={14} className="animate-spin" /> جارٍ الحفظ...</>
+            ) : saved ? (
+              '✓ تم الحفظ'
+            ) : (
+              <><Save size={14} /> حفظ الإعدادات</>
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}

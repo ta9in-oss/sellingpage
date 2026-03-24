@@ -17,6 +17,7 @@ const schema = i.schema({
       config: i.json(),
       status: i.string().indexed(),
       cfAccountId: i.string(),
+      cfApiToken: i.string(),
       instantAppId: i.string(),
       instantAdminToken: i.string(),  // admin token for merchant's InstantDB app
       adminEmail: i.string(),         // email of the store's first admin user

@@ -2,6 +2,7 @@
 /// <reference types="vite/client" />
 import type { ReactNode } from 'react'
 import { Outlet, createRootRoute, HeadContent, Scripts } from '@tanstack/react-router'
+import { GoogleOAuthProvider } from '@react-oauth/google'
 import appCss from '@/styles/app.css?url'
 
 export const Route = createRootRoute({
@@ -42,7 +43,9 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
         <HeadContent />
       </head>
       <body>
-        {children}
+        <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID ?? ''}>
+          {children}
+        </GoogleOAuthProvider>
         <Scripts />
       </body>
     </html>
