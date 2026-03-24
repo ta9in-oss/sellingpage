@@ -32,6 +32,14 @@ interface OrderSectionProps {
     isSubmitting?: boolean;
     layoutConfig?: OrderLayoutConfig;
     title?: string;
+    /** Active payment method set by merchant config. Not shown as a toggle to buyers. Defaults to 'cod'. */
+    activePaymentMethod?: 'cod' | 'chargily';
+    /** Buyer's authenticated email (required when activePaymentMethod is 'chargily'). */
+    buyerEmail?: string;
+    /** Buyer's display name. */
+    buyerName?: string;
+    /** Called when Chargily is active but buyer hasn't authenticated yet. */
+    onAuthRequest?: () => void;
 }
 
 export interface OrderData {
@@ -55,9 +63,12 @@ export function OrderSection({
     isSubmitting = false,
     layoutConfig,
     title = 'اطلب قبل ما تخلاص',
+    activePaymentMethod = 'cod',
+    buyerEmail,
+    buyerName,
+    onAuthRequest,
 }: OrderSectionProps) {
     const [quantity, setQuantity] = useState(1);
-    const [paymentMethod, setPaymentMethod] = useState<'cod' | 'chargily'>('cod');
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -122,15 +133,27 @@ export function OrderSection({
             return;
         }
 
+        // Require authentication before Chargily e-payment
+        if (activePaymentMethod === 'chargily' && !buyerEmail) {
+            onAuthRequest?.();
+            return;
+        }
+
+        // Prefill buyer identity from auth when using Chargily
+        const resolvedEmail = activePaymentMethod === 'chargily' ? (buyerEmail ?? formData.email) : formData.email;
+        const resolvedName = activePaymentMethod === 'chargily' && buyerName ? buyerName : formData.name;
+
         try {
             await onSubmit({
                 ...formData,
+                name: resolvedName,
+                email: resolvedEmail,
                 wilaya: selectedWilaya,
                 daira: selectedDaira,
                 commune: selectedCommune,
                 quantity,
                 total: price * quantity,
-                paymentMethod,
+                paymentMethod: activePaymentMethod,
             });
         } catch (error: any) {
             setOrderError(error.message || 'حدث خطأ في إرسال الطلب');
@@ -441,8 +464,8 @@ export function OrderSection({
                                 price={price}
                                 onSubmit={handleSubmit}
                                 isSubmitting={isSubmitting}
-                                paymentMethod={paymentMethod}
-                                onPaymentMethodChange={setPaymentMethod}
+                                paymentMethod={activePaymentMethod}
+
                             />
                         </div>
                     </>
@@ -458,8 +481,8 @@ export function OrderSection({
                                 price={price}
                                 onSubmit={handleSubmit}
                                 isSubmitting={isSubmitting}
-                                paymentMethod={paymentMethod}
-                                onPaymentMethodChange={setPaymentMethod}
+                                paymentMethod={activePaymentMethod}
+
                             />
                         </div>
 
@@ -488,8 +511,8 @@ export function OrderSection({
                                 price={price}
                                 onSubmit={handleSubmit}
                                 isSubmitting={isSubmitting}
-                                paymentMethod={paymentMethod}
-                                onPaymentMethodChange={setPaymentMethod}
+                                paymentMethod={activePaymentMethod}
+
                             />
                         </div>
 
@@ -515,8 +538,8 @@ export function OrderSection({
                                 price={price}
                                 onSubmit={handleSubmit}
                                 isSubmitting={isSubmitting}
-                                paymentMethod={paymentMethod}
-                                onPaymentMethodChange={setPaymentMethod}
+                                paymentMethod={activePaymentMethod}
+
                             />
                         </div>
                     </>
@@ -556,8 +579,8 @@ export function OrderSection({
                     price={price}
                     onSubmit={handleSubmit}
                     isSubmitting={isSubmitting}
-                    paymentMethod={paymentMethod}
-                    onPaymentMethodChange={setPaymentMethod}
+                    paymentMethod={activePaymentMethod}
+
                 />
             </div>
         );
@@ -575,8 +598,8 @@ export function OrderSection({
                     price={price}
                     onSubmit={handleSubmit}
                     isSubmitting={isSubmitting}
-                    paymentMethod={paymentMethod}
-                    onPaymentMethodChange={setPaymentMethod}
+                    paymentMethod={activePaymentMethod}
+
                 />
             </div>
             <div className="space-y-8">

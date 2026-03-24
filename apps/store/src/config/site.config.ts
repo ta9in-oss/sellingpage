@@ -25,6 +25,12 @@ export const siteConfig = {
         multiProduct: false,
     },
 
+    // Payment configuration — configured by merchant, not shown to buyers
+    payment: {
+        activeMethod: 'cod' as 'cod' | 'chargily',
+        googleClientId: import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined,
+    },
+
     // InstantDB product reference
     defaultProduct: {
         productNumber: 'PROD-234567-A1B2C3',

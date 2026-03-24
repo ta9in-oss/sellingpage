@@ -11,6 +11,8 @@ export function generateSiteConfig(config: StoreConfig): string {
     benefits: sectionTypes.includes('features'),
   }
 
+  const paymentMethod = config.payment?.activeMethod ?? 'cod'
+
   return `// AUTO-GENERATED — do not edit manually
 import type { SiteConfig } from './site.config.types'
 import { ${config.theme.name}Theme } from './themes/${config.theme.name}'
@@ -23,6 +25,9 @@ export const siteConfig: SiteConfig = {
     faqs: ${flags.faqs},
     guarantees: ${flags.guarantees},
     benefits: ${flags.benefits},
+  },
+  payment: {
+    activeMethod: '${paymentMethod}',
   },
 }
 `

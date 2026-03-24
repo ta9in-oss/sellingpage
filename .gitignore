@@ -9,3 +9,4 @@ apps/store/.env
 apps/platform/.env
 apps/*/node_modules/
 packages/*/node_modules/
+.turbo/

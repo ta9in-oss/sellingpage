@@ -5,7 +5,10 @@ const schema = i.schema({
   entities: {
     platformUsers: i.entity({
       email: i.string().unique().indexed(),
+      /** 'starter' | 'pro' | 'agency' — null/missing means no subscription */
       tier: i.string(),
+      /** Chargily checkout ID that was verified for this purchase */
+      checkoutId: i.string(),
       purchasedAt: i.date(),
     }),
     stores: i.entity({
@@ -17,6 +20,7 @@ const schema = i.schema({
       instantAppId: i.string(),
       instantAdminToken: i.string(),  // admin token for merchant's InstantDB app
       adminEmail: i.string(),         // email of the store's first admin user
+      chargilyApiKey: i.string(),     // Chargily Pay secret key (stored encrypted)
       deployedUrl: i.string(),
       lastDeployAt: i.date(),
       deployLog: i.string(),

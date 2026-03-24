@@ -36,6 +36,12 @@ export interface StoreConfig {
     enabled: boolean
     message: string
   }
+  payment?: {
+    /** Which payment method is active for this store. Configured by the merchant, not shown to buyers. */
+    activeMethod: 'cod' | 'chargily'
+    /** Chargily Pay API key — stored in platform DB and deployed as Worker secret, not in client bundle. */
+    chargilyApiKey?: string
+  }
 }
 
 export type Section =

@@ -2,7 +2,7 @@
 
 > **For AI agents:** Read this file at the start of every session. Update it when you make structural changes, add/remove dependencies, or change conventions. Keep entries concise — one line where possible. Do NOT add prose or explanations that already exist in code. Update the `Last updated` field on every write.
 
-**Last updated:** 2026-07-15  
+**Last updated:** 2026-03-24  
 **Project:** حبة ستور (7aba.store) — Algerian e-commerce platform (store builder + selling page)  
 **Repo:** https://github.com/Ta9in/sellingpage  
 **Monorepo:** pnpm workspaces + Turborepo — `apps/store`, `apps/platform`, `packages/store-ui`
@@ -29,7 +29,7 @@
 | Database | InstantDB (`@instantdb/react`, `@instantdb/admin`) — separate apps per workspace |
 | Components | Shadcn/ui + Radix UI primitives |
 | Build | Vite 6 — store: port 3000, platform: port 3001 |
-| Monorepo | pnpm workspaces + Turborepo (`turbo.json` at root) |
+| Monorepo | pnpm workspaces (`pnpm -r --parallel run dev`) — turbo binary segfaults on this system |
 | State | Zustand (platform builder) + InstantDB reactive queries |
 | DnD | @dnd-kit/core + @dnd-kit/sortable (builder SectionList) |
 | Icons | Lucide React |
@@ -227,3 +227,12 @@ npx tsx seed-orders.ts          # Seed test orders (from apps/store/)
 - Order notifications use queue: 5 s display + 2.5 s gap — logic in `useOrderNotifications`
 - `pnpm install` may require `pnpm approve-builds` for esbuild + @parcel/watcher (run once)
 - `^1.131.31` for @tanstack/react-start resolves to latest (e.g. 1.167.3) which needs vite@>=7 — pin exact `1.131.31`
+- **Turbo binary segfaults** on this system (SIGSEGV) — root `package.json` uses `pnpm -r --parallel run dev` instead
+- **Subscription gate**: Dashboard checks `platformUsers.tier` after login — no tier → shows inline pricing gate (3 tiers: starter/pro/agency)
+- **Tiers**: `starter` 3,900 DZD (create stores), `pro` 14,900 DZD (+ download store/app source), `agency` 49,000 DZD (+ platform source + reselling)
+- **Payment flow**: Chargily checkout via `createSubscriptionCheckout` server fn → success redirect with `?payment=success&tier=xxx&checkout_id=xxx` → verify via `verifySubscriptionPayment` → update `platformUsers.tier`
+- **Downloads**: Tier-gated `DownloadCard` components (Pro: store-source + store-app, Agency: + platform-source) via `getDownloadUrl` server fn
+- **Env vars needed**: `CHARGILY_PLATFORM_SECRET_KEY`, `VITE_APP_URL`, `INSTANT_ADMIN_TOKEN`, `DOWNLOAD_URL_STORE_SOURCE`, `DOWNLOAD_URL_STORE_APP`, `DOWNLOAD_URL_PLATFORM_SOURCE`
+- **Buyer auth** for Chargily: `OrderSection` calls `onAuthRequest()` if no `buyerEmail` and Chargily is active — auth UI is `BuyerAuthModal` in `apps/store/src/routes/index.tsx`
+- `VITE_GOOGLE_CLIENT_ID` env var required in `apps/store` for Google OAuth buyer auth to work
+- **Dashboard store settings** (CF Account ID, InstantDB credentials) saved via `StoreSettingsModal` in `apps/platform/src/routes/dashboard/index.tsx`

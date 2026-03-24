@@ -10,7 +10,12 @@ export default defineConfig({
     },
     plugins: [
         tsConfigPaths(),
-        tanstackStart({ customViteReactPlugin: true }),
+        tanstackStart({
+            customViteReactPlugin: true,
+            server: {
+                preset: process.env.CF_PAGES ? 'cloudflare-pages' : 'node-server',
+            },
+        }),
         viteReact(),
     ],
     publicDir: 'src/public',

@@ -7,6 +7,7 @@ import { StorePreview } from './StorePreview'
 import { ThemePanel } from './ThemePanel'
 import { ProductPanel } from './ProductPanel'
 import { NotificationsPanel } from './NotificationsPanel'
+import { PaymentPanel } from './PaymentPanel'
 import { HeroForm } from './forms/HeroForm'
 import { FeaturesForm } from './forms/FeaturesForm'
 import { TestimonialsForm } from './forms/TestimonialsForm'
@@ -15,7 +16,7 @@ import { GuaranteeForm } from './forms/GuaranteeForm'
 import { OrderFormForm } from './forms/OrderFormForm'
 import { useNavigate } from '@tanstack/react-router'
 import type { StoreConfig, Section } from '@7aba/store-ui'
-import { Loader2, Check, Rocket, Palette, Package, Bell, Globe } from 'lucide-react'
+import { Loader2, Check, Rocket, Palette, Package, Bell, Globe, CreditCard } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -25,7 +26,7 @@ interface BuilderLayoutProps {
   storeId: string
 }
 
-type SettingsTab = 'theme' | 'product' | 'notifications' | 'site'
+type SettingsTab = 'theme' | 'product' | 'notifications' | 'site' | 'payment'
 
 function SitePanel() {
   const { config, updateMeta } = useBuilderStore()
@@ -84,6 +85,7 @@ function RightPanel() {
             { key: 'theme' as const, label: 'الثيم', Icon: Palette },
             { key: 'product' as const, label: 'المنتج', Icon: Package },
             { key: 'notifications' as const, label: 'الإشعارات', Icon: Bell },
+            { key: 'payment' as const, label: 'الدفع', Icon: CreditCard },
             { key: 'site' as const, label: 'الموقع', Icon: Globe },
           ]).map(({ key, label, Icon }) => (
             <button
@@ -105,6 +107,7 @@ function RightPanel() {
           {settingsTab === 'theme' && <ThemePanel />}
           {settingsTab === 'product' && <ProductPanel />}
           {settingsTab === 'notifications' && <NotificationsPanel />}
+          {settingsTab === 'payment' && <PaymentPanel />}
           {settingsTab === 'site' && <SitePanel />}
         </div>
       </div>

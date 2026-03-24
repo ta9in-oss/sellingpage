@@ -13,6 +13,7 @@ import analytics from "@/utils/analytics";
 import { seo } from "@/utils/seo";
 import { siteConfig } from "@/config/site.config";
 import { ThemeProvider } from "@7aba/store-ui";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -115,7 +116,9 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
       </head>
       <body>
         <ThemeProvider value={siteConfig.theme}>
-          {children}
+          <GoogleOAuthProvider clientId={siteConfig.payment.googleClientId ?? ''}>
+            {children}
+          </GoogleOAuthProvider>
         </ThemeProvider>
         <Scripts />
         <noscript>

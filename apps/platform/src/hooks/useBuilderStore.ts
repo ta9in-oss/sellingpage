@@ -20,6 +20,7 @@ interface BuilderActions {
   updateMeta: (patch: Partial<StoreConfig['meta']>) => void
   updateProduct: (patch: Partial<StoreConfig['product']>) => void
   updateNotifications: (patch: Partial<StoreConfig['notifications']>) => void
+  updatePayment: (patch: Partial<NonNullable<StoreConfig['payment']>>) => void
   saveToInstantDB: (storeId: string, db: any) => void
   hydrateConfig: (config: StoreConfig) => void
 }
@@ -60,6 +61,9 @@ const defaultConfig: StoreConfig = {
   notifications: {
     enabled: true,
     message: 'شخص طلب للتو!',
+  },
+  payment: {
+    activeMethod: 'cod',
   },
 }
 
@@ -190,6 +194,14 @@ export const useBuilderStore = create<BuilderState & BuilderActions>((set, get) 
   updateNotifications: (patch) =>
     set((state) => ({
       config: { ...state.config, notifications: { ...state.config.notifications, ...patch } },
+    })),
+
+  updatePayment: (patch) =>
+    set((state) => ({
+      config: {
+        ...state.config,
+        payment: { ...(state.config.payment ?? { activeMethod: 'cod' }), ...patch },
+      },
     })),
 
   saveToInstantDB: (storeId, db) => {

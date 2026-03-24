@@ -6,11 +6,16 @@ import viteReact from '@vitejs/plugin-react'
 
 export default defineConfig({
     server: {
-        port: 3000,
+        port: 3001,
     },
     plugins: [
         tsConfigPaths(),
-        tanstackStart({ customViteReactPlugin: true }),
+        tanstackStart({
+            customViteReactPlugin: true,
+            server: {
+                preset: process.env.CF_PAGES ? 'cloudflare-pages' : 'node-server',
+            },
+        }),
         viteReact(),
     ],
     publicDir: 'src/public',
