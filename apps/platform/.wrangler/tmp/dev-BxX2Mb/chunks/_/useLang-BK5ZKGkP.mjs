@@ -1,0 +1,2 @@
+import{r as e}from"./fs.mjs";function useLang(){const[t,n]=e.useState(()=>("undefined"!=typeof localStorage?localStorage.getItem("lang"):null)||"ar");return{lang:t,toggle:()=>{const e="ar"===t?"fr":"ar";"undefined"!=typeof localStorage&&localStorage.setItem("lang",e),"undefined"!=typeof document&&(document.documentElement.dir="ar"===e?"rtl":"ltr",document.documentElement.lang=e),n(e)},t:e=>e[t]}}export{useLang as u};
+//# sourceMappingURL=useLang-BK5ZKGkP.mjs.map

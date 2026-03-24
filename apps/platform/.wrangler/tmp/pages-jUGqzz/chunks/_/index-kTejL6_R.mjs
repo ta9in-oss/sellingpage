@@ -1,0 +1,2 @@
+import{j as o}from"./fs.mjs";import"../nitro/nitro.mjs";import"node:buffer";import"node:process";import"cloudflare:workers";import"node:events";import"node:timers";import"node:async_hooks";import"node:stream";import"node:stream/web";import"node:fs/promises";function RouteComponent(){return o.jsx("div",{children:'Hello "/dashboard/"!'})}export{RouteComponent as component};
+//# sourceMappingURL=index-kTejL6_R.mjs.map

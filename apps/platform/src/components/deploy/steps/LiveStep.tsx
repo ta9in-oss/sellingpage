@@ -158,7 +158,7 @@ export function LiveStep({ storeId }: Props) {
 
       {/* Back to platform dashboard */}
       <button
-        onClick={() => navigate({ to: '/dashboard' })}
+        onClick={() => navigate({ to: '/dashboard', search: {} })}
         className="w-full max-w-md py-3 rounded-lg font-semibold text-sm bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
       >
         العودة للوحة التحكم

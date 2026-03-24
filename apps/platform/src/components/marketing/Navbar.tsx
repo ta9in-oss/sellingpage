@@ -50,7 +50,7 @@ export function Navbar() {
             {lang === 'ar' ? 'FR' : 'عر'}
           </button>
           <Link
-            to="/dashboard"
+            to="/dashboard" search={{}}
             className={cn(
               'text-sm font-black px-4 py-2 border-2 border-black',
               'bg-yellow-400 text-black hover:bg-black hover:text-yellow-400 transition-colors',

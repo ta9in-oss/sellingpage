@@ -33,7 +33,7 @@ export const getDownloadUrl = createServerFn({ method: 'POST' })
   .handler(async ({ data }) => {
     const adminDb = init({
       appId: process.env.VITE_INSTANT_APP_ID!,
-      adminToken: process.env.INSTANT_ADMIN_TOKEN!,
+      adminToken: process.env.INSTANTDB_ADMIN_TOKEN!,
     })
 
     const result = await adminDb.query({

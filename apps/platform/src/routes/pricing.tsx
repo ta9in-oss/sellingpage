@@ -122,7 +122,7 @@ function PricingPage() {
               {lang === 'ar' ? 'FR' : 'AR'}
             </button>
             <Link
-              to="/dashboard"
+              to="/dashboard" search={{}}
               className="text-sm font-bold border-2 border-black px-4 py-1.5 bg-yellow-400 shadow-[2px_2px_0px_#000] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
             >
               {t(T.login)}
@@ -187,7 +187,7 @@ function PricingPage() {
               </ul>
 
               <Link
-                to="/dashboard"
+                to="/dashboard" search={{}}
                 className={cn(
                   'block text-center text-sm font-black py-3 border-2 border-black transition-all',
                   tier.accent

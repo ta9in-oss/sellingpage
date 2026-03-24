@@ -1,6 +1,13 @@
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+/**
+ * /dashboard — main merchant dashboard
+ *
+ * Flow:
+ *   1. Not authed → show AuthModal
+ *   2. Authed, no subscription → show SubscriptionGate (pricing page inline)
+ *   3. Authed + subscribed → show StoresDashboard + DownloadsPanel
+ */
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
-
 import { db } from '@/lib/instantdb'
 import { id } from '@instantdb/react'
 import { cn } from '@/lib/utils'
@@ -8,332 +15,315 @@ import { AuthModal } from '@/components/auth/AuthModal'
 import { StoreSettingsModal } from '@/components/dashboard/StoreSettingsModal'
 import { createSubscriptionCheckout } from '@/server/createSubscriptionCheckout'
 import { verifySubscriptionPayment } from '@/server/verifySubscriptionPayment'
+import { getDownloadUrl } from '@/server/getDownloadUrl'
+import type { DownloadType } from '@/server/getDownloadUrl'
 import {
-  Plus, Settings, ExternalLink, LogOut, Store, Rocket, ChevronRight,
+  Plus, Settings, ExternalLink, LogOut, Store, Rocket,
+  Download, Package, Smartphone, Code2, Loader2, CheckCircle2,
 } from 'lucide-react'
 
 export const Route = createFileRoute('/dashboard/')({
   validateSearch: (search): { payment?: string; tier?: string; checkout_id?: string } => ({
-    payment: (search.payment as string) || undefined,
-    tier: (search.tier as string) || undefined,
-    checkout_id: (search.checkout_id as string) || undefined,
+    payment: search.payment as string | undefined,
+    tier: search.tier as string | undefined,
+    checkout_id: search.checkout_id as string | undefined,
   }),
   component: DashboardPage,
 })
 
-function DashboardPage() {
-  return (
-    <>
-      <DashboardInner />
-    </>
-  )
-}
+// ─── Main page ────────────────────────────────────────────────────────────────
 
-function DashboardInner() {
-  const { user, isLoading } = db.useAuth()
-  const search = Route.useSearch()
+function DashboardPage() {
+  const { payment, tier, checkout_id } = Route.useSearch()
+  const { isLoading, user } = db.useAuth()
+  const [showAuth, setShowAuth] = useState(false)
+
+  // Verify Chargily payment on return from checkout
+  useEffect(() => {
+    if (payment === 'success' && tier && checkout_id && user?.email) {
+      verifySubscriptionPayment({
+        data: {
+          checkoutId: checkout_id,
+          tier: tier as 'starter' | 'pro' | 'agency',
+          userEmail: user.email,
+        },
+      }).catch(console.error)
+    }
+  }, [payment, tier, checkout_id, user?.email])
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" dir="rtl">
-        <div className="text-center space-y-2">
-          <div className="text-3xl animate-spin">⏳</div>
-          <p className="text-zinc-500 text-sm">جارٍ التحقق من الحساب...</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     )
   }
 
   if (!user) {
-    return <AuthScreen />
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4" dir="rtl">
+        {showAuth ? (
+          <AuthModal
+            title="الدخول للوحة التحكم"
+            subtitle="أدخل معلوماتك لمتابعة"
+            onClose={() => setShowAuth(false)}
+          />
+        ) : (
+          <div className="text-center space-y-4">
+            <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto">
+              <Store className="h-8 w-8 text-primary-foreground" />
+            </div>
+            <h1 className="text-2xl font-bold">7aba.store</h1>
+            <p className="text-muted-foreground">سجّل دخولك للوصول للوحة التحكم</p>
+            <button
+              onClick={() => setShowAuth(true)}
+              className="px-6 py-3 bg-primary text-primary-foreground rounded-xl font-semibold hover:bg-primary/90 transition-colors"
+            >
+              تسجيل الدخول
+            </button>
+          </div>
+        )}
+      </div>
+    )
   }
 
-  return (
-    <SubscriptionGate
-      userId={user.id}
-      userEmail={user.email ?? ''}
-      paymentStatus={search.payment}
-      paymentTier={search.tier}
-      checkoutId={search.checkout_id}
-    />
-  )
+  return <AuthenticatedDashboard email={user.email} />
 }
 
-// ─── Auth screen ──────────────────────────────────────────────────────────────
+// ─── Authenticated shell ───────────────────────────────────────────────────────
 
-function AuthScreen() {
-  return (
-    <div className="min-h-screen bg-zinc-50 flex flex-col items-center justify-center" dir="rtl">
-      <div className="text-center mb-8">
-        <Link to="/">
-          <img src="/assets/logo/7aba_store_logo_i1.svg" alt="7aba.store" className="h-12 mx-auto mb-4"
-            onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/assets/logo/7aba_store_logo_i1.png' }} />
-        </Link>
-        <h1 className="text-2xl font-black">لوحة التحكم</h1>
-        <p className="text-sm text-zinc-500 mt-1">سجّل دخولك للمتابعة</p>
-      </div>
-      <AuthModal
-        title="تسجيل الدخول"
-        subtitle="أنشئ حساباً أو ادخل بحسابك لإدارة متاجرك"
-      />
-    </div>
-  )
-}
-
-// ─── Subscription gate ────────────────────────────────────────────────────────
-
-function SubscriptionGate({
-  userId,
-  userEmail,
-  paymentStatus,
-  paymentTier,
-  checkoutId,
-}: {
-  userId: string
-  userEmail: string
-  paymentStatus?: string
-  paymentTier?: string
-  checkoutId?: string
-}) {
-  const navigate = useNavigate()
-  const [verifying, setVerifying] = useState(false)
-  const [verifyError, setVerifyError] = useState<string | null>(null)
-
-  const { data } = db.useQuery({
-    platformUsers: { $: { where: { id: userId } } },
+function AuthenticatedDashboard({ email }: { email: string }) {
+  const { data, isLoading } = db.useQuery({
+    platformUsers: { $: { where: { email } } },
   })
 
-  const platformUser = (data as any)?.platformUsers?.[0]
-  const tier: string | undefined = platformUser?.tier
+  const platformUser = (data?.platformUsers ?? [])[0] as
+    | { id: string; email: string; tier?: string } | undefined
 
-  // Handle Chargily return with payment=success
-  useEffect(() => {
-    if (paymentStatus !== 'success' || !paymentTier || !checkoutId || tier) return
-    ;(async () => {
-      setVerifying(true)
-      setVerifyError(null)
-      try {
-        const result = await verifySubscriptionPayment({
-          data: { checkoutId, tier: paymentTier as 'starter' | 'pro' | 'agency', userEmail },
-        })
-        if (!result.success) {
-          setVerifyError('لم يتم تأكيد الدفع بعد. إذا دفعت بالفعل، انتظر لحظة ثم أعد تحديث الصفحة.')
-        } else {
-          // Clear URL search params
-          navigate({ to: '/dashboard', replace: true })
-        }
-      } catch (e: unknown) {
-        setVerifyError((e as Error)?.message ?? 'خطأ في التحقق من الدفع.')
-      } finally {
-        setVerifying(false)
-      }
-    })()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [paymentStatus, paymentTier, checkoutId])
-
-  if (verifying) {
+  if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" dir="rtl">
-        <div className="text-center space-y-3">
-          <div className="text-3xl animate-spin">⏳</div>
-          <p className="font-black">جارٍ التحقق من الدفع...</p>
-          <p className="text-sm text-zinc-500">الرجاء الانتظار</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     )
   }
 
+  const tier = platformUser?.tier
+
   if (!tier) {
-    return (
-      <PaywallDashboard
-        userId={userId}
-        userEmail={userEmail}
-        verifyError={verifyError}
-        paymentFailed={paymentStatus === 'failed'}
-      />
-    )
+    return <SubscriptionGate email={email} />
   }
 
-  return <StoresDashboard userId={userId} userEmail={userEmail} tier={tier} />
+  return <StoresDashboard email={email} tier={tier} />
 }
 
-// ─── Paywall ──────────────────────────────────────────────────────────────────
+// ─── Subscription gate ─────────────────────────────────────────────────────────
 
-const TIER_DEFS = [
+const TIERS: {
+  id: 'starter' | 'pro' | 'agency'
+  name: string
+  price: string
+  accent: boolean
+  features: string[]
+}[] = [
   {
-    id: 'starter' as const,
+    id: 'starter',
     name: 'مبتدئ',
-    price: '3,900 DZD',
+    price: '3,900 دج',
     accent: false,
-    badge: null,
-    features: ['إنشاء ونشر المتاجر', 'لوحة إدارة الطلبات', 'دفع COD + Chargily'],
+    features: ['إنشاء ونشر المتاجر', 'نطاق مخصص (Cloudflare)', 'لوحة إدارة الطلبات', 'دفع نقدي + Chargily'],
   },
   {
-    id: 'pro' as const,
+    id: 'pro',
     name: 'احترافي',
-    price: '14,900 DZD',
+    price: '14,900 دج',
     accent: true,
-    badge: 'الأكثر شيوعاً',
-    features: ['كل ما في مبتدئ', 'تحميل كود المتجر', 'تحميل كود التطبيق'],
+    features: ['كل ما في مبتدئ', 'تحميل كود المتجر', 'تحميل كود التطبيق', 'دعم ذو أولوية'],
   },
   {
-    id: 'agency' as const,
+    id: 'agency',
     name: 'وكالة',
-    price: '49,000 DZD',
+    price: '49,000 دج',
     accent: false,
-    badge: null,
-    features: ['كل ما في احترافي', 'كود المنصة كاملاً', 'حق إعادة البيع'],
+    features: ['كل ما في احترافي', 'كود المنصة كاملاً', 'متاجر غير محدودة', 'دعم مباشر'],
   },
 ]
 
-function PaywallDashboard({
-  userId,
-  userEmail,
-  verifyError,
-  paymentFailed,
-}: {
-  userId: string
-  userEmail: string
-  verifyError: string | null
-  paymentFailed: boolean
-}) {
-  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null)
-  const [checkoutError, setCheckoutError] = useState<string | null>(null)
+function SubscriptionGate({ email }: { email: string }) {
+  const [loading, setLoading] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
-  const handleBuy = async (tierId: 'starter' | 'pro' | 'agency') => {
-    setCheckoutLoading(tierId)
-    setCheckoutError(null)
+  const handleBuy = async (tier: 'starter' | 'pro' | 'agency') => {
+    setLoading(tier)
+    setError(null)
     try {
-      const result = await createSubscriptionCheckout({ data: { tier: tierId, userId, userEmail } })
+      const result = await createSubscriptionCheckout({
+        data: { tier, userId: email, userEmail: email },
+      })
       window.location.href = result.checkoutUrl
-    } catch (e: unknown) {
-      setCheckoutError((e as Error)?.message ?? 'تعذر إنشاء الدفع. حاول مجدداً.')
-    } finally {
-      setCheckoutLoading(null)
+    } catch (e: any) {
+      setError(e.message || 'حدث خطأ')
+      setLoading(null)
     }
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50" dir="rtl">
-      <DashboardHeader userEmail={userEmail} showLogout />
-      <main className="max-w-5xl mx-auto px-4 py-12">
-        <div className="text-center mb-12">
-          <h1 className="text-3xl font-black mb-2">اختر باقتك</h1>
-          <p className="text-zinc-500">دفع مرة واحدة — بدون اشتراكات شهرية</p>
+    <div className="min-h-screen bg-background p-6" dir="rtl">
+      <DashboardHeader email={email} />
+      <div className="max-w-5xl mx-auto mt-10 space-y-6">
+        <div className="text-center space-y-2">
+          <h2 className="text-2xl font-bold">اختر باقتك</h2>
+          <p className="text-muted-foreground">اشترك الآن للبدء في بناء متجرك الإلكتروني</p>
         </div>
-
-        {(verifyError || paymentFailed || checkoutError) && (
-          <div className="border-2 border-red-400 bg-red-50 p-4 text-sm text-red-700 mb-8 max-w-md mx-auto">
-            {verifyError ?? (paymentFailed ? 'فشل الدفع. حاول مجدداً.' : checkoutError)}
-          </div>
-        )}
-
+        {error && <p className="text-destructive text-center text-sm">{error}</p>}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {TIER_DEFS.map((tier) => (
+          {TIERS.map((t) => (
             <div
-              key={tier.id}
+              key={t.id}
               className={cn(
-                'border-2 border-black p-7 shadow-[4px_4px_0px_0px_#000] flex flex-col relative',
-                tier.accent ? 'bg-yellow-400 shadow-[6px_6px_0px_0px_#000]' : 'bg-white'
+                'rounded-2xl border p-6 space-y-5 flex flex-col',
+                t.accent && 'border-primary shadow-lg',
               )}
             >
-              {tier.badge && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-black text-yellow-400 text-xs font-black px-3 py-0.5 whitespace-nowrap">
-                  {tier.badge}
-                </span>
-              )}
-              <h2 className="text-xl font-black mb-1">{tier.name}</h2>
-              <p className="text-2xl font-black mb-5">{tier.price}</p>
-              <ul className="flex-1 space-y-2 mb-6">
-                {tier.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-sm">
-                    <span className="font-bold mt-0.5">✓</span>
+              <div>
+                <p className="font-bold text-lg">{t.name}</p>
+                <p className="text-2xl font-black mt-1">{t.price}</p>
+                <p className="text-xs text-muted-foreground">دفعة واحدة</p>
+              </div>
+              <ul className="space-y-2 flex-1">
+                {t.features.map((f) => (
+                  <li key={f} className="flex items-center gap-2 text-sm">
+                    <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
                     {f}
                   </li>
                 ))}
               </ul>
               <button
-                onClick={() => handleBuy(tier.id)}
-                disabled={!!checkoutLoading}
+                onClick={() => handleBuy(t.id)}
+                disabled={!!loading}
                 className={cn(
-                  'w-full py-3 border-2 border-black text-sm font-black transition-all',
-                  tier.accent
-                    ? 'bg-black text-yellow-400 hover:bg-zinc-900'
-                    : 'bg-yellow-400 text-black shadow-[3px_3px_0px_0px_#000] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px]',
-                  checkoutLoading === tier.id && 'opacity-60 cursor-not-allowed'
+                  'w-full py-3 rounded-xl font-semibold transition-colors',
+                  t.accent
+                    ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                    : 'border border-border hover:bg-muted',
+                  loading === t.id && 'opacity-60 cursor-not-allowed',
                 )}
               >
-                {checkoutLoading === tier.id ? 'جارٍ التحويل...' : 'اشترك الآن'}
+                {loading === t.id ? (
+                  <Loader2 className="h-4 w-4 animate-spin mx-auto" />
+                ) : (
+                  'اشترك الآن'
+                )}
               </button>
             </div>
           ))}
         </div>
-      </main>
+      </div>
     </div>
   )
 }
 
-// ─── Main dashboard ───────────────────────────────────────────────────────────
+// ─── Stores dashboard ──────────────────────────────────────────────────────────
 
-function StoresDashboard({ userId, userEmail, tier }: { userId: string; userEmail: string; tier: string }) {
+interface StoreSettingsData {
+  id: string
+  name: string
+  cfAccountId?: string
+  cfApiToken?: string
+  instantAppId?: string
+  instantAdminToken?: string
+}
+
+function StoresDashboard({ email, tier }: { email: string; tier: string }) {
   const navigate = useNavigate()
-  const [settingsStore, setSettingsStore] = useState<null | {
-    id: string; name: string
-    cfAccountId?: string; cfApiToken?: string
-    instantAppId?: string; instantAdminToken?: string
-  }>(null)
+  const [settingsStore, setSettingsStore] = useState<StoreSettingsData | null>(null)
 
-  const { data } = db.useQuery({ stores: { $: { where: { userId } } } })
-  const stores = ((data as any)?.stores ?? []) as any[]
+  const { data, isLoading } = db.useQuery({
+    stores: { $: { where: { userId: email } } },
+  })
+  const stores = (data?.stores ?? []) as any[]
 
-  const handleNewStore = () => {
-    navigate({ to: '/dashboard/builder', search: { storeId: 'new', plan: tier } })
+  const handleNewStore = async () => {
+    const storeId = id()
+    await db.transact(
+      db.tx.stores[storeId].update({
+        userId: email,
+        slug: `store-${storeId.slice(0, 8)}`,
+        status: 'draft',
+        config: {
+          meta: { name: 'متجر جديد', description: '' },
+          theme: 'brutalist',
+          sections: ['hero', 'order'],
+          product: {},
+          payment: { method: 'cod' },
+        },
+      }),
+    )
+    navigate({ to: '/dashboard/builder', search: { storeId, plan: '' } })
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50" dir="rtl">
-      <DashboardHeader userEmail={userEmail} tier={tier} showLogout />
-      <main className="max-w-6xl mx-auto px-4 py-10">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-black">متاجري</h1>
-            <p className="text-sm text-zinc-500 mt-0.5">{stores.length} {stores.length === 1 ? 'متجر' : 'متاجر'}</p>
+    <div className="min-h-screen bg-background p-6" dir="rtl">
+      <DashboardHeader email={email} tier={tier} />
+
+      <div className="max-w-6xl mx-auto mt-8 space-y-8">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-bold">متاجرك</h2>
+            <button
+              onClick={handleNewStore}
+              className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors"
+            >
+              <Plus className="h-4 w-4" />
+              متجر جديد
+            </button>
           </div>
-          <button
-            onClick={handleNewStore}
-            className="flex items-center gap-2 px-4 py-2.5 border-2 border-black text-sm font-black bg-yellow-400 text-black shadow-[3px_3px_0px_0px_#000] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] transition-all"
-          >
-            <Plus size={15} /> متجر جديد
-          </button>
+
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : stores.length === 0 ? (
+            <EmptyStores onNew={handleNewStore} />
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {stores.map((store: any) => (
+                <StoreCard
+                  key={store.id}
+                  store={store}
+                  tier={tier}
+                  onSettings={() =>
+                    setSettingsStore({
+                      id: store.id,
+                      name: store.config?.meta?.name ?? store.slug ?? store.id,
+                      cfAccountId: store.cfAccountId,
+                      cfApiToken: store.cfApiToken,
+                      instantAppId: store.instantAppId,
+                      instantAdminToken: store.instantAdminToken,
+                    })
+                  }
+                />
+              ))}
+            </div>
+          )}
         </div>
 
-        {stores.length === 0 ? (
-          <EmptyStores onNew={handleNewStore} />
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {stores.map((store: any) => (
-              <StoreCard
-                key={store.id}
-                store={store}
-                onSettings={() => setSettingsStore({
-                  id: store.id,
-                  name: store.config?.meta?.name ?? store.slug ?? store.id,
-                  cfAccountId: store.cfAccountId,
-                  cfApiToken: store.cfApiToken,
-                  instantAppId: store.instantAppId,
-                  instantAdminToken: store.instantAdminToken,
-                })}
-              />
-            ))}
-          </div>
+        {/* Downloads panel — pro / agency only */}
+        {(tier === 'pro' || tier === 'agency') && (
+          <DownloadsPanel tier={tier} userEmail={email} />
         )}
-      </main>
+      </div>
 
       {settingsStore && (
         <StoreSettingsModal
           storeId={settingsStore.id}
           storeName={settingsStore.name}
-          initialValues={settingsStore}
+          initialValues={{
+            cfAccountId: settingsStore.cfAccountId,
+            cfApiToken: settingsStore.cfApiToken,
+            instantAppId: settingsStore.instantAppId,
+            instantAdminToken: settingsStore.instantAdminToken,
+          }}
           onClose={() => setSettingsStore(null)}
         />
       )}
@@ -341,124 +331,188 @@ function StoresDashboard({ userId, userEmail, tier }: { userId: string; userEmai
   )
 }
 
-// ─── Store card ───────────────────────────────────────────────────────────────
+// ─── Store card ────────────────────────────────────────────────────────────────
 
-function StoreCard({ store, onSettings }: { store: any; onSettings: () => void }) {
+function StoreCard({
+  store,
+  tier,
+  onSettings,
+}: {
+  store: any
+  tier: string
+  onSettings: () => void
+}) {
   const navigate = useNavigate()
-  const name: string = store.config?.meta?.name ?? store.slug ?? store.id
-  const slug: string = store.slug ?? ''
-  const status: string = store.status ?? 'draft'
-  const deployedUrl: string | undefined = store.deployedUrl
+  const name = store.config?.meta?.name || store.slug || store.id
+  const status = store.status ?? 'draft'
 
   return (
-    <div className="bg-white border-2 border-black shadow-[4px_4px_0px_0px_#000] flex flex-col">
-      <div className="p-5 border-b-2 border-black flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-9 h-9 border-2 border-black bg-yellow-400 flex items-center justify-center shrink-0">
-            <Store size={16} />
-          </div>
-          <div className="min-w-0">
-            <p className="font-black text-sm truncate">{name}</p>
-            <p className="text-xs text-zinc-400 font-mono truncate">{slug}</p>
-          </div>
+    <div className="rounded-2xl border bg-card p-5 flex flex-col gap-4">
+      <div className="flex items-start justify-between">
+        <div className="min-w-0">
+          <p className="font-bold truncate">{name}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">/{store.slug}</p>
         </div>
-        <StatusBadge status={status} />
+        <span
+          className={cn(
+            'text-xs px-2 py-0.5 rounded-full shrink-0',
+            status === 'live'
+              ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+              : 'bg-muted text-muted-foreground',
+          )}
+        >
+          {status === 'live' ? 'مباشر' : 'مسودة'}
+        </span>
       </div>
 
-      {deployedUrl && (
-        <div className="px-5 py-2.5 border-b border-zinc-100">
-          <a href={deployedUrl} target="_blank" rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-xs text-blue-600 hover:underline font-mono truncate">
-            <ExternalLink size={11} />{deployedUrl.replace(/^https?:\/\//, '')}
-          </a>
-        </div>
+      {store.deployedUrl && (
+        <a
+          href={store.deployedUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1.5 text-xs text-primary hover:underline truncate"
+        >
+          <ExternalLink className="h-3 w-3 shrink-0" />
+          {store.deployedUrl}
+        </a>
       )}
 
-      <div className="p-4 flex gap-2 mt-auto">
+      <div className="flex items-center gap-2 mt-auto">
         <button
           onClick={() => navigate({ to: '/dashboard/builder', search: { storeId: store.id, plan: '' } })}
-          className="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-bold border-2 border-black bg-white hover:bg-yellow-400 transition-colors"
+          className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg border text-sm hover:bg-muted transition-colors"
         >
-          <ChevronRight size={12} /> المحرر
+          <Store className="h-3.5 w-3.5" />
+          تعديل
         </button>
         <button
-          onClick={() => navigate({ to: '/dashboard/deploy', search: { storeId: store.id, tier: 'starter' } })}
-          className="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-bold border-2 border-black bg-white hover:bg-yellow-400 transition-colors"
+          onClick={() =>
+            navigate({
+              to: '/dashboard/deploy',
+              search: { storeId: store.id, tier: tier as 'starter' | 'pro' | 'enterprise' },
+            })
+          }
+          className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-primary text-primary-foreground text-sm hover:bg-primary/90 transition-colors"
         >
-          <Rocket size={12} /> نشر
+          <Rocket className="h-3.5 w-3.5" />
+          نشر
         </button>
         <button
           onClick={onSettings}
-          className="w-9 flex items-center justify-center border-2 border-black bg-white hover:bg-zinc-100 transition-colors"
-          title="إعدادات النشر"
-          aria-label="إعدادات النشر"
+          className="p-2 rounded-lg border hover:bg-muted transition-colors"
+          title="الإعدادات"
         >
-          <Settings size={14} />
+          <Settings className="h-4 w-4" />
         </button>
       </div>
     </div>
   )
 }
 
-function StatusBadge({ status }: { status: string }) {
-  const styles: Record<string, string> = {
-    live: 'bg-green-100 text-green-800 border-green-300',
-    draft: 'bg-zinc-100 text-zinc-600 border-zinc-300',
-    deploying: 'bg-blue-100 text-blue-800 border-blue-300',
-    failed: 'bg-red-100 text-red-700 border-red-300',
+// ─── Downloads panel ───────────────────────────────────────────────────────────
+
+function DownloadsPanel({ tier, userEmail }: { tier: string; userEmail: string }) {
+  const [downloading, setDownloading] = useState<DownloadType | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleDownload = async (downloadType: DownloadType) => {
+    setDownloading(downloadType)
+    setError(null)
+    try {
+      const result = await getDownloadUrl({ data: { downloadType, userEmail } })
+      const a = document.createElement('a')
+      a.href = result.url
+      a.download = ''
+      a.click()
+    } catch (e: any) {
+      setError(e.message || 'حدث خطأ أثناء التحميل')
+    } finally {
+      setDownloading(null)
+    }
   }
-  const labels: Record<string, string> = { live: 'مباشر', draft: 'مسودة', deploying: 'جارٍ النشر', failed: 'فشل' }
+
+  const items: { type: DownloadType; label: string; icon: React.ReactNode; tiers: string[] }[] = [
+    { type: 'store-source', label: 'كود المتجر (React)', icon: <Package className="h-5 w-5" />, tiers: ['pro', 'agency'] },
+    { type: 'store-app', label: 'كود التطبيق (Mobile)', icon: <Smartphone className="h-5 w-5" />, tiers: ['pro', 'agency'] },
+    { type: 'platform-source', label: 'كود المنصة كاملاً', icon: <Code2 className="h-5 w-5" />, tiers: ['agency'] },
+  ]
+
+  const available = items.filter((i) => i.tiers.includes(tier))
+
   return (
-    <span className={cn('text-[10px] font-bold px-2 py-0.5 border rounded-full shrink-0', styles[status] ?? styles.draft)}>
-      {labels[status] ?? status}
-    </span>
+    <div className="rounded-2xl border p-6 space-y-4">
+      <h3 className="font-bold text-lg flex items-center gap-2">
+        <Download className="h-5 w-5 text-primary" />
+        التحميلات
+      </h3>
+      {error && <p className="text-destructive text-sm">{error}</p>}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {available.map((item) => (
+          <button
+            key={item.type}
+            onClick={() => handleDownload(item.type)}
+            disabled={!!downloading}
+            className="flex items-center gap-3 p-4 rounded-xl border hover:bg-muted transition-colors text-right disabled:opacity-60"
+          >
+            <span className="text-primary">{item.icon}</span>
+            <span className="font-medium text-sm">{item.label}</span>
+            {downloading === item.type && (
+              <Loader2 className="h-4 w-4 animate-spin mr-auto" />
+            )}
+          </button>
+        ))}
+      </div>
+    </div>
   )
 }
 
+// ─── Empty state ───────────────────────────────────────────────────────────────
+
 function EmptyStores({ onNew }: { onNew: () => void }) {
   return (
-    <div className="border-2 border-dashed border-zinc-300 py-20 flex flex-col items-center text-center gap-4">
-      <div className="w-16 h-16 border-2 border-black bg-yellow-400 flex items-center justify-center">
-        <Store size={28} />
-      </div>
+    <div className="rounded-2xl border border-dashed p-12 text-center space-y-4">
+      <Store className="h-10 w-10 text-muted-foreground mx-auto" />
       <div>
-        <p className="font-black text-lg">لا توجد متاجر بعد</p>
-        <p className="text-sm text-zinc-500 mt-1">أنشئ متجرك الأول في دقائق</p>
+        <p className="font-semibold">لا يوجد متاجر بعد</p>
+        <p className="text-sm text-muted-foreground mt-1">أنشئ متجرك الأول الآن</p>
       </div>
       <button
         onClick={onNew}
-        className="flex items-center gap-2 px-5 py-2.5 border-2 border-black text-sm font-black bg-yellow-400 text-black shadow-[3px_3px_0px_0px_#000] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] transition-all"
+        className="px-6 py-2.5 bg-primary text-primary-foreground rounded-xl font-semibold hover:bg-primary/90 transition-colors"
       >
-        <Plus size={15} /> إنشاء متجر
+        إنشاء متجر
       </button>
     </div>
   )
 }
 
-// ─── Shared header ────────────────────────────────────────────────────────────
+// ─── Header ────────────────────────────────────────────────────────────────────
 
-function DashboardHeader({ userEmail, tier, showLogout }: { userEmail: string; tier?: string; showLogout?: boolean }) {
-  const TIER_LABELS: Record<string, string> = { starter: 'مبتدئ', pro: 'احترافي', agency: 'وكالة' }
+function DashboardHeader({ email, tier }: { email: string; tier?: string }) {
+  const tierLabels: Record<string, string> = { starter: 'مبتدئ', pro: 'احترافي', agency: 'وكالة' }
+
   return (
-    <header className="h-14 border-b-2 border-black bg-white flex items-center px-5 gap-4" dir="rtl">
-      <Link to="/">
-        <img src="/assets/logo/7aba_store_logo_i1.svg" alt="7aba.store" className="h-7 w-auto"
-          onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/assets/logo/7aba_store_logo_i1.png' }} />
-      </Link>
-      <div className="ms-auto flex items-center gap-3">
+    <header className="max-w-6xl mx-auto flex items-center justify-between gap-4">
+      <div className="flex items-center gap-3">
+        <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-primary-foreground font-black text-sm">
+          7
+        </div>
+        <span className="font-bold text-lg">7aba.store</span>
         {tier && (
-          <span className="text-[10px] font-black px-2 py-0.5 border-2 border-black bg-yellow-400">
-            {TIER_LABELS[tier] ?? tier}
+          <span className="text-xs px-2 py-0.5 bg-primary/10 text-primary rounded-full">
+            {tierLabels[tier] ?? tier}
           </span>
         )}
-        <span className="text-xs text-zinc-500 hidden sm:block">{userEmail}</span>
-        {showLogout && (
-          <button onClick={() => db.auth.signOut()}
-            className="p-1.5 border-2 border-transparent hover:border-black transition-colors text-zinc-400 hover:text-black"
-            title="خروج" aria-label="خروج">
-            <LogOut size={14} />
-          </button>
-        )}
+      </div>
+      <div className="flex items-center gap-3">
+        <p className="text-sm text-muted-foreground hidden sm:block">{email}</p>
+        <button
+          onClick={() => db.auth.signOut()}
+          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <LogOut className="h-4 w-4" />
+          خروج
+        </button>
       </div>
     </header>
   )
