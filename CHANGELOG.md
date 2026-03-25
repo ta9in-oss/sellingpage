@@ -3,19 +3,32 @@
 All notable changes to this project are documented here.  
 Format: `[version/commit] YYYY-MM-DD — description`
 
-> **Active HEAD:** `c09e717` · **Live:** https://7aba.store · **Repo:** https://github.com/Ta9in/sellingpage
+> **Active HEAD:** `f478c44` · **Live:** https://7aba.store · **Repo:** https://github.com/Ta9in/sellingpage
 
 ---
 
 ## [Unreleased] — Pending
 
-- [ ] Wire payment method to `OrderSection` (COD vs Chargily, config-driven)
-- [ ] Complete buyer auth flow — connect `BuyerAuthModal` to Chargily checkout
-- [ ] Email + password buyer auth (in addition to Google OAuth)
-- [ ] Implement actual Cloudflare deployment from Deploy Wizard
-- [ ] Chargily webhook endpoint for reliable subscription status
-- [ ] Configure env vars: `VITE_GOOGLE_CLIENT_ID`, `CHARGILY_SECRET_KEY`, download URLs
-- [ ] Clean up `apps/store/app/` legacy duplicate directory
+- [ ] Complete buyer auth flow — connect `BuyerAuthModal` to Chargily checkout (pass email/name)
+- [ ] Implement actual Cloudflare deployment from Deploy Wizard (`DeployingStep`)
+- [ ] Set download URLs env vars: `DOWNLOAD_STORE_SOURCE_URL`, `DOWNLOAD_STORE_APP_URL`, `DOWNLOAD_PLATFORM_SOURCE_URL`
+- [ ] Upgrade CF Worker `7aba-webhook` bindings to secrets in CF dashboard
+- [ ] Configure Chargily dashboard webhook URL: `https://7aba-webhook.mohessaid.workers.dev`
+
+---
+
+## [f478c44] 2026-03-24 — OAuth, webhook worker, cleanup
+
+**feat: wire Google OAuth, Chargily webhook CF Worker, delete legacy files**
+
+- `apps/platform/src/routes/__root.tsx`: Add `GoogleOAuthProvider` wrapper (reads `VITE_GOOGLE_CLIENT_ID`)
+- `packages/store-ui/src/components/sections/OrderSection.tsx`: Dynamic submit button text based on `activePaymentMethod` — COD→`'أكّد الطلب'`, Chargily→`'ادفع إلكترونياً →'`
+- Deployed CF Worker `7aba-webhook` at `https://7aba-webhook.mohessaid.workers.dev`
+  - Handles Chargily `checkout.paid` events via HMAC-SHA256 verification
+  - Updates `platformUsers.plan` in InstantDB admin API on successful payment
+- Deleted `apps/store/app/` (legacy 37K-line duplicate directory)
+- `apps/store/.env.example`: added all required vars documentation
+- `AGENTS.md`: updated with webhook worker URL, API route limitation note
 
 ---
 
