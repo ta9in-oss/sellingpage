@@ -9,13 +9,34 @@
 
 ---
 
-## Update Rules
+## ⚡ MCP Tools — USE THESE FIRST
 
-- **When to update:** After any PR/commit that changes architecture, dependencies, routes, schema, config, or conventions.
-- **What to update:** Only the affected section. Do not rewrite sections that haven't changed.
-- **How to update:** Edit in place — replace stale lines, don't append duplicates.
-- **Frequency:** Once per meaningful work session (not per file edit).
-- **Token discipline:** Max ~30 lines per section. Use bullet points. No paragraphs.
+> Before doing ANY of the following, use the corresponding MCP tool instead of manual file edits or bash commands.
+
+| Task | MCP Tool | When to Use |
+|------|----------|-------------|
+| Push code, PRs, issues, branches | **GitHub MCP** (`github-mcp-server-*`) | All git/PR/issue operations |
+| Deploy to Cloudflare, manage DNS, env vars, Pages/Workers | **Cloudflare MCP** (`cloudflare-mcp-*`) | Any Cloudflare operations |
+| Read/write InstantDB schema, query data, manage permissions | **InstantDB MCP** (`instantdb-mcp-*`) | DB schema changes, seeding, queries |
+
+### GitHub MCP
+- Use `github-mcp-server-push_files` for multi-file commits (prefer over individual git commands)
+- Use `github-mcp-server-create_pull_request` for PRs
+- Use `github-mcp-server-list_workflow_runs` to check CI status
+- **Repo owner:** `Ta9in` · **Repo name:** `sellingpage`
+
+### Cloudflare MCP
+- Use `cloudflare-mcp-execute` to deploy Workers/Pages, set env vars, manage DNS
+- **Account ID:** check via `cloudflare-mcp-execute` — do not hardcode
+- **Platform Pages project:** `7aba-platform` → custom domain `7aba.store`
+- **CF token:** set by user as environment variable — never hardcode in files
+
+### InstantDB MCP
+- **Platform DB App ID:** `b9227417-33f4-4c3d-9c88-612e094aff89`
+- **Store DB App ID:** from `VITE_INSTANTDB_APP_ID` env var (per merchant store)
+- Use `instantdb-mcp-push-schema` after editing `instant.schema.ts`
+- Use `instantdb-mcp-push-perms` after editing `instant.perms.ts`
+- Use `instantdb-mcp-query` to inspect live data
 
 ---
 
@@ -29,11 +50,12 @@
 | Database | InstantDB (`@instantdb/react`, `@instantdb/admin`) — separate apps per workspace |
 | Components | Shadcn/ui + Radix UI primitives |
 | Build | Vite 6 — store: port 3000, platform: port 3001 |
-| Monorepo | pnpm workspaces (`pnpm -r --parallel run dev`) — turbo binary segfaults on this system |
+| Monorepo | pnpm workspaces + Turborepo (`turbo.json` at root) |
 | State | Zustand (platform builder) + InstantDB reactive queries |
 | DnD | @dnd-kit/core + @dnd-kit/sortable (builder SectionList) |
 | Icons | Lucide React |
-| Auth | Google OAuth (`@react-oauth/google`) |
+| Auth | Google OAuth (`@react-oauth/google`) + InstantDB magic-code |
+| Payments | Chargily Pay (DZD, Algerian e-payments) |
 | Analytics | Google Analytics, Meta Pixel, Microsoft Clarity, PostHog |
 
 ---
@@ -45,27 +67,31 @@ sellingpage/                  ← monorepo root
 ├── pnpm-workspace.yaml       ← workspace: apps/*, packages/*
 ├── turbo.json                ← Turborepo task config
 ├── package.json              ← root: pnpm overrides for React singleton
+├── CHANGELOG.md              ← project-wide changelog
 ├── MASTER_PLAN.md / AUTOPILOT.md / AGENTS.md
 ├── apps/
-│   ├── store/                ← original selling page (port 3000)
+│   ├── store/                ← store selling page template (port 3000)
+│   │   ├── CHANGELOG.md      ← store-specific changelog
 │   │   └── src/
 │   │       ├── routes/       ← __root, index, success, dashboard, test-components
 │   │       ├── components/ui/
 │   │       ├── hooks/        ← useOrderSubmission, useOrderNotifications, useAlgeriaLocations, useProducts
 │   │       ├── lib/          ← instantdb.ts, utils.ts, content.ts, theme.ts, timeUtils.ts
-│   │       ├── config/       ← site.config.ts (feature flags + active theme)
+│   │       ├── config/       ← site.config.ts (feature flags + active theme + payment config)
 │   │       ├── data/         ← algeria-locations.json
+│   │       ├── server/       ← createChargilyCheckout.ts, verifyChargilyPayment.ts
 │   │       ├── types/, utils/, styles/
 │   │       └── instant.schema.ts, instant.perms.ts
-│   └── platform/             ← store builder/deploy platform (port 3001)
+│   └── platform/             ← main deployed app at 7aba.store (port 3001)
 │       └── src/
-│           ├── routes/       ← __root, index, pricing, dashboard/(index, builder, deploy)
+│           ├── routes/       ← __root, index, pricing, demo, dashboard/(index, builder, deploy)
 │           ├── components/
 │           │   ├── builder/  ← BuilderLayout, SectionList, ThemePanel, StorePreview, forms/
 │           │   ├── deploy/   ← DeployWizard, steps/
 │           │   └── marketing/← Navbar, HeroSection, ComparisonTable, HowItWorks, etc.
 │           ├── hooks/        ← useBuilderStore (Zustand), useLang
 │           ├── lib/          ← instantdb.ts, utils.ts, slugValidation.ts, configGenerator.ts
+│           ├── server/       ← createSubscriptionCheckout.ts, verifySubscriptionPayment.ts, addStoreAdmin.ts, getDownloadUrl.ts
 │           ├── instant.schema.ts ← platformUsers + stores entities
 │           └── routeTree.gen.ts  ← auto-generated, never edit manually
 └── packages/
@@ -75,9 +101,9 @@ sellingpage/                  ← monorepo root
             ├── themes/       ← brutalist.ts, acquisition.ts, warm.ts + theme.types.ts + index.ts
             ├── types/        ← StoreConfig, Section, FormField, content.types.ts
             ├── context/      ← ThemeContext.tsx (ThemeProvider + useTheme)
-            ├── components/sections/ ← 12 section components (refactored to use useTheme)
+            ├── components/sections/ ← 12 section components (all use useTheme)
             ├── components/ui/ ← button, input, label, alert, command, popover, dialog
-            ├── hooks/        ← useAlgeriaLocations
+            ├── hooks/        ← useAlgeriaLocations (dynamic import, returns loading: boolean)
             ├── data/         ← algeria-locations.json
             └── lib/          ← utils.ts (cn)
 ```
@@ -87,7 +113,7 @@ sellingpage/                  ← monorepo root
 ## Database Schema (InstantDB)
 
 ### apps/store — selling page DB
-**App ID:** from `VITE_INSTANTDB_APP_ID` env var  
+**App ID:** from `VITE_INSTANTDB_APP_ID` env var (per merchant)  
 **Entities:** `products`, `orders`, `users`, `$users` (auth), `$files`  
 **`products`:** `product_number` (unique), `name`, `description`, `price`, `image`, `stock`, `is_available`, `created_at`, `updated_at`  
 **`orders`:** `order_number` (unique), `customer_name`, `customer_email`, `customer_phone`, `customer_address`, `customer_wilaya`, `customer_city`, `quantity`, `status` (JSON), `total_amount`, `created_at`, `updated_at`  
@@ -97,9 +123,21 @@ sellingpage/                  ← monorepo root
 ### apps/platform — builder DB
 **App ID:** `b9227417-33f4-4c3d-9c88-612e094aff89` (7aba-platform)  
 **Entities:** `platformUsers`, `stores`  
-**`platformUsers`:** `email`, `name`, `plan` (free|pro), `createdAt`  
-**`stores`:** `slug` (unique), `name`, `config` (JSON blob = StoreConfig), `status` (draft|live), `cfWorkerUrl`, `instantAppId`, `ownerId`, `createdAt`, `updatedAt`  
+**`platformUsers`:** `email`, `name`, `tier` (free|starter|pro|agency), `checkoutId`, `purchasedAt`, `createdAt`  
+**`stores`:** `userId`, `slug` (unique), `name`, `config` (JSON = StoreConfig), `status` (draft|live), `cfAccountId`, `cfApiToken`, `cfWorkerUrl`, `instantAppId`, `instantAdminToken`, `adminEmail`, `chargilyApiKey`, `deployedUrl`, `lastDeployAt`, `deployLog`, `ownerId`, `createdAt`, `updatedAt`  
 **Relationship:** `storeOwner` → stores has-one platformUser, platformUser has-many stores
+
+---
+
+## Subscription Tiers
+
+| Tier | Price | Features |
+|------|-------|---------|
+| `starter` | 3,900 DZD | Create stores, builder access |
+| `pro` | 14,900 DZD | + Download store source code + store app APK |
+| `agency` | 49,000 DZD | + Download platform codebase |
+
+**Paywall flow:** Un-subscribed user → dashboard → pricing inline → Chargily Pay → redirect back → verify → unlock tier
 
 ---
 
@@ -108,8 +146,8 @@ sellingpage/                  ← monorepo root
 - **Interface:** `Theme` in `theme.types.ts` — includes `mode: 'light' | 'dark'`
 - **Switch theme (store):** edit `siteConfig.theme` in `apps/store/src/config/site.config.ts` (compile-time)
 - **Switch theme (platform builder):** `useBuilderStore().config.theme` — runtime via Zustand
-- **Available themes:** `brutalistTheme` (light, b/w/yellow), `acquisitionTheme` (dark, #0A0A0A bg, #F97316 orange), `warmTheme` (light, amber/brown)
-- **Component pattern:** `const theme = useTheme(); const isDark = theme.mode === 'dark'` — `if (!isDark) return <brutalist JSX>`, then dark JSX below
+- **Available themes:** `brutalistTheme` (light), `acquisitionTheme` (dark, #0A0A0A bg, #F97316 orange), `warmTheme` (light, amber/brown)
+- **Component pattern:** `const theme = useTheme(); const isDark = theme.mode === 'dark'` — conditional JSX per mode
 - `useTheme()` from `packages/store-ui/src/context/ThemeContext.tsx` — used by ALL store-ui components
 - `getTheme()` still in `apps/store/src/lib/theme.ts` — only for non-section files in store app
 - **Dark mode wiring:** `__root.tsx` in both apps adds `class="dark"` when `theme.mode === 'dark'`
@@ -136,16 +174,18 @@ Page order in `apps/store/src/routes/index.tsx`: Hero → SocialProofBar → Fea
 
 ---
 
-## Key Config
+## Payment System
 
-### apps/store — `src/config/site.config.ts`
-- Active theme: `brutalistTheme` — swap to `acquisitionTheme` at build time
-- Feature flags default: `notifications: true`, all others `false`
-- To enable acquisition-style sections: `testimonials, faqs, guarantees, benefits → true`
+### Store payment (merchant's customers)
+- Config lives in `StoreConfig.payment`: `activeMethod` (`cod` | `chargily` | `both`), `chargilyApiKey`, `googleClientId`
+- Config set via `PaymentPanel` in builder (NOT customer-facing)
+- `configGenerator.ts` writes this to `site.config.ts` when deploying a store
+- **TODO:** `OrderSection` must read `siteConfig.payment.activeMethod` to show/hide Chargily CTA
 
-### apps/platform — `src/lib/configGenerator.ts`
-- `generateSiteConfig()` builds store's site.config.ts + content.json + wrangler.toml from `StoreConfig`
-- Theme name must match filename: `brutalist` | `acquisition` | `warm`
+### Platform subscription (merchants pay 7aba)
+- `server/createSubscriptionCheckout.ts`: creates Chargily checkout with tier amount
+- `server/verifySubscriptionPayment.ts`: polls Chargily, updates `platformUsers.tier` on success
+- Requires: `VITE_CHARGILY_PUBLIC_KEY` (client) + `CHARGILY_SECRET_KEY` (server)
 
 ---
 
@@ -162,26 +202,76 @@ Page order in `apps/store/src/routes/index.tsx`: Hero → SocialProofBar → Fea
 ### apps/platform (`src/routes/`)
 | Path | File | Purpose |
 |---|---|---|
-| `/` | `index.tsx` | Marketing landing page |
-| `/pricing` | `pricing.tsx` | Pricing + comparison table + FAQ |
-| `/dashboard` | `dashboard/index.tsx` | Merchant overview stub |
-| `/dashboard/builder` | `dashboard/builder.tsx` | Store builder (param: `?storeId=`) |
-| `/dashboard/deploy` | `dashboard/deploy.tsx` | Deploy wizard (param: `?tier=free\|pro`) |
+| `/` | `index.tsx` | Marketing landing page (JSON-LD schemas) |
+| `/pricing` | `pricing.tsx` | Pricing + comparison + FAQ |
+| `/demo` | `demo.tsx` | Demo store using `@7aba/store-ui` |
+| `/dashboard` | `dashboard/index.tsx` | Auth gate → subscription gate → merchant dashboard |
+| `/dashboard/builder` | `dashboard/builder.tsx` | Store builder (`?storeId=`) |
+| `/dashboard/deploy` | `dashboard/deploy.tsx` | Deploy wizard (`?tier=free|pro`) |
+
+---
+
+## Key Config
+
+### apps/store — `src/config/site.config.ts`
+- Active theme: `brutalistTheme` — swap to `acquisitionTheme` at build time
+- `payment.activeMethod`: `'cod'` (default) — change to `'chargily'` or `'both'`
+- Feature flags: `notifications: true`, others `false` by default
+
+### apps/platform — `src/lib/configGenerator.ts`
+- `generateSiteConfig()` builds store's `site.config.ts` + `content.json` + `wrangler.toml` from `StoreConfig`
+- Theme name must match filename: `brutalist` | `acquisition` | `warm`
+- `payment.activeMethod` is written to `site.config.ts` by this generator
+
+---
+
+## Environment Variables
+
+### apps/store
+| Variable | Purpose | Status |
+|---|---|---|
+| `VITE_INSTANTDB_APP_ID` | Store DB app ID | ✅ set (demo) |
+| `VITE_GOOGLE_CLIENT_ID` | Google OAuth for buyer auth | ❌ not set |
+| `VITE_META_PIXEL_ID` | Meta Pixel analytics | ❓ per merchant |
+| `INSTANTDB_ADMIN_TOKEN` | Admin SDK (seed scripts only) | ✅ set |
+
+### apps/platform
+| Variable | Purpose | Status |
+|---|---|---|
+| `VITE_INSTANT_APP_ID` | Platform DB App ID | ✅ set |
+| `INSTANTDB_ADMIN_TOKEN` | Platform admin token | ✅ set |
+| `VITE_GOOGLE_CLIENT_ID` | Google OAuth for platform login | ❓ pending |
+| `VITE_CHARGILY_PUBLIC_KEY` | Chargily public key | ❓ pending |
+| `CHARGILY_SECRET_KEY` | Chargily server-side secret | ❓ pending |
+| `DOWNLOAD_STORE_SOURCE_URL` | Pro tier download URL | ❌ not set |
+| `DOWNLOAD_STORE_APP_URL` | Pro tier app download URL | ❌ not set |
+| `DOWNLOAD_PLATFORM_SOURCE_URL` | Agency tier download URL | ❌ not set |
 
 ---
 
 ## Dev Commands
 
 ```bash
-# From repo root (turborepo):
+# From repo root (uses pnpm -r not turbo — turbo binary may segfault):
 pnpm dev           # Start all apps in parallel
-pnpm build         # Build all apps via turbo
 
 # Per-app:
 cd apps/store && pnpm dev       # port 3000
 cd apps/platform && pnpm dev    # port 3001
+
+# InstantDB schema push (use MCP instead when possible):
+cd apps/platform && npx instant-cli push schema
 npx tsx seed-orders.ts          # Seed test orders (from apps/store/)
 ```
+
+---
+
+## CI/CD
+
+- **GitHub Actions:** `.github/workflows/deploy.yml` — triggers on push to `main`
+- **Builds:** `apps/platform` only (store is a template, not deployed separately)
+- **Deploys to:** Cloudflare Pages project `7aba-platform` → `7aba.store`
+- **CF token in CI:** `CLOUDFLARE_API_TOKEN` secret in GitHub repo settings
 
 ---
 
@@ -201,38 +291,27 @@ npx tsx seed-orders.ts          # Seed test orders (from apps/store/)
 
 ---
 
-## Environment Variables
-
-### apps/store
-| Variable | Purpose |
-|---|---|
-| `VITE_INSTANTDB_APP_ID` | InstantDB app ID (selling page DB) |
-| `INSTANTDB_ADMIN_TOKEN` | Admin SDK token (server-only, seed script) |
-
-### apps/platform
-| Variable | Purpose |
-|---|---|
-| `VITE_INSTANT_APP_ID` | `b9227417-33f4-4c3d-9c88-612e094aff89` (7aba-platform DB) |
-| `INSTANTDB_ADMIN_TOKEN` | Platform admin token |
-
----
-
 ## Known Gotchas
 
 - `apps/store/src/routes/index.tsx` — **5 pre-existing nullability TS errors** — hard rule: never modify business logic here
 - `dashboard.tsx` (store) is 45 KB — read in sections, not all at once
-- `algeria-locations.json` is large — import via `useAlgeriaLocations` hook only
+- `algeria-locations.json` is 1.4 MB — import via `useAlgeriaLocations()` hook only (dynamic import)
+- `useAlgeriaLocations` returns `loading: boolean` — consumers must handle loading state
 - Feature flags in `site.config.ts` control section visibility — check before adding new sections
 - `routeTree.gen.ts` regenerates on `pnpm dev` — never commit manual edits
 - Order notifications use queue: 5 s display + 2.5 s gap — logic in `useOrderNotifications`
 - `pnpm install` may require `pnpm approve-builds` for esbuild + @parcel/watcher (run once)
-- `^1.131.31` for @tanstack/react-start resolves to latest (e.g. 1.167.3) which needs vite@>=7 — pin exact `1.131.31`
-- **Turbo binary segfaults** on this system (SIGSEGV) — root `package.json` uses `pnpm -r --parallel run dev` instead
-- **Subscription gate**: Dashboard checks `platformUsers.tier` after login — no tier → shows inline pricing gate (3 tiers: starter/pro/agency)
-- **Tiers**: `starter` 3,900 DZD (create stores), `pro` 14,900 DZD (+ download store/app source), `agency` 49,000 DZD (+ platform source + reselling)
-- **Payment flow**: Chargily checkout via `createSubscriptionCheckout` server fn → success redirect with `?payment=success&tier=xxx&checkout_id=xxx` → verify via `verifySubscriptionPayment` → update `platformUsers.tier`
-- **Downloads**: Tier-gated `DownloadCard` components (Pro: store-source + store-app, Agency: + platform-source) via `getDownloadUrl` server fn
-- **Env vars needed**: `CHARGILY_PLATFORM_SECRET_KEY`, `VITE_APP_URL`, `INSTANT_ADMIN_TOKEN`, `DOWNLOAD_URL_STORE_SOURCE`, `DOWNLOAD_URL_STORE_APP`, `DOWNLOAD_URL_PLATFORM_SOURCE`
-- **Buyer auth** for Chargily: `OrderSection` calls `onAuthRequest()` if no `buyerEmail` and Chargily is active — auth UI is `BuyerAuthModal` in `apps/store/src/routes/index.tsx`
-- `VITE_GOOGLE_CLIENT_ID` env var required in `apps/store` for Google OAuth buyer auth to work
-- **Dashboard store settings** (CF Account ID, InstantDB credentials) saved via `StoreSettingsModal` in `apps/platform/src/routes/dashboard/index.tsx`
+- `^1.131.31` for `@tanstack/react-start` resolves to latest — must pin exact `1.131.31`
+- **Turbo binary may segfault** on some Linux systems — root `package.json` uses `pnpm -r --parallel run dev` as fallback
+- `apps/platform/src/lib/instantdb.ts` line 5 — `ImportMeta.env` TS error — pre-existing, do NOT touch
+- `apps/store/app/` — legacy duplicate directory of `apps/store/src/` — may have stale files, avoid editing
+
+---
+
+## Update Rules
+
+- **When to update:** After any PR/commit that changes architecture, dependencies, routes, schema, config, or conventions.
+- **What to update:** Only the affected section. Do not rewrite sections that haven't changed.
+- **How to update:** Edit in place — replace stale lines, don't append duplicates.
+- **Frequency:** Once per meaningful work session (not per file edit).
+- **Token discipline:** Max ~30 lines per section. Use bullet points. No paragraphs.
