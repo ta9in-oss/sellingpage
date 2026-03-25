@@ -93,6 +93,7 @@ export function OrderSection({
 
     const theme = useTheme();
     const isDark = theme.mode === 'dark';
+    const submitButtonText = activePaymentMethod === 'chargily' ? 'ادفع إلكترونياً →' : 'أكّد الطلب';
     const darkInput = isDark ? { backgroundColor: '#1a1a1a', border: `1px solid ${theme.colors.border}`, color: theme.colors.foreground, borderRadius: '6px' } : {};
     const darkPopoverBtn = isDark ? { backgroundColor: '#1a1a1a', border: `1px solid ${theme.colors.border}`, color: theme.colors.foreground, borderRadius: '6px' } : {};
     const darkPopoverContent = isDark ? { backgroundColor: '#161616', border: `1px solid ${theme.colors.border}` } : {};
@@ -465,7 +466,7 @@ export function OrderSection({
                                 onSubmit={handleSubmit}
                                 isSubmitting={isSubmitting}
                                 paymentMethod={activePaymentMethod}
-
+                                submitButtonText={submitButtonText}
                             />
                         </div>
                     </>
@@ -482,7 +483,7 @@ export function OrderSection({
                                 onSubmit={handleSubmit}
                                 isSubmitting={isSubmitting}
                                 paymentMethod={activePaymentMethod}
-
+                                submitButtonText={submitButtonText}
                             />
                         </div>
 
@@ -512,7 +513,7 @@ export function OrderSection({
                                 onSubmit={handleSubmit}
                                 isSubmitting={isSubmitting}
                                 paymentMethod={activePaymentMethod}
-
+                                submitButtonText={submitButtonText}
                             />
                         </div>
 
@@ -539,7 +540,7 @@ export function OrderSection({
                                 onSubmit={handleSubmit}
                                 isSubmitting={isSubmitting}
                                 paymentMethod={activePaymentMethod}
-
+                                submitButtonText={submitButtonText}
                             />
                         </div>
                     </>
@@ -580,7 +581,7 @@ export function OrderSection({
                     onSubmit={handleSubmit}
                     isSubmitting={isSubmitting}
                     paymentMethod={activePaymentMethod}
-
+                    submitButtonText={submitButtonText}
                 />
             </div>
         );
@@ -599,7 +600,7 @@ export function OrderSection({
                     onSubmit={handleSubmit}
                     isSubmitting={isSubmitting}
                     paymentMethod={activePaymentMethod}
-
+                    submitButtonText={submitButtonText}
                 />
             </div>
             <div className="space-y-8">

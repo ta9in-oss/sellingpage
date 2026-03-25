@@ -1,10 +1,12 @@
 import * as React from 'react'
 import { Outlet, createRootRoute, HeadContent, Scripts } from '@tanstack/react-router'
+import { GoogleOAuthProvider } from '@react-oauth/google'
 import appCss from '@/styles/app.css?url'
 
 const SITE_URL = 'https://7aba.store'
 const DEFAULT_OG = `${SITE_URL}/og-image.webp`
 const FONT_URL = 'https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&display=swap'
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined
 
 export const Route = createRootRoute({
   head: () => ({
@@ -47,7 +49,9 @@ function RootComponent() {
         <HeadContent />
       </head>
       <body>
-        <Outlet />
+        <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID ?? ''}>
+          <Outlet />
+        </GoogleOAuthProvider>
         <Scripts />
       </body>
     </html>

@@ -180,12 +180,14 @@ Page order in `apps/store/src/routes/index.tsx`: Hero → SocialProofBar → Fea
 - Config lives in `StoreConfig.payment`: `activeMethod` (`cod` | `chargily` | `both`), `chargilyApiKey`, `googleClientId`
 - Config set via `PaymentPanel` in builder (NOT customer-facing)
 - `configGenerator.ts` writes this to `site.config.ts` when deploying a store
-- **TODO:** `OrderSection` must read `siteConfig.payment.activeMethod` to show/hide Chargily CTA
+- `submitButtonText` in `OrderSection` dynamically changes based on `activePaymentMethod`: `'cod'` → `'أكّد الطلب'`, `'chargily'` → `'ادفع إلكترونياً →'`
 
 ### Platform subscription (merchants pay 7aba)
 - `server/createSubscriptionCheckout.ts`: creates Chargily checkout with tier amount
 - `server/verifySubscriptionPayment.ts`: polls Chargily, updates `platformUsers.tier` on success
 - Requires: `VITE_CHARGILY_PUBLIC_KEY` (client) + `CHARGILY_SECRET_KEY` (server)
+- **Webhook Worker**: `https://7aba-webhook.mohessaid.workers.dev` — CF Worker `7aba-webhook` handles Chargily `checkout.paid` events, updates InstantDB `platformUsers.plan` via admin API
+- Set webhook URL in Chargily dashboard to: `https://7aba-webhook.mohessaid.workers.dev`
 
 ---
 
@@ -230,22 +232,25 @@ Page order in `apps/store/src/routes/index.tsx`: Hero → SocialProofBar → Fea
 ### apps/store
 | Variable | Purpose | Status |
 |---|---|---|
-| `VITE_INSTANTDB_APP_ID` | Store DB app ID | ✅ set (demo) |
-| `VITE_GOOGLE_CLIENT_ID` | Google OAuth for buyer auth | ❌ not set |
+| `VITE_INSTANT_APP_ID` | Store DB app ID | ✅ set (demo) |
+| `INSTANT_ADMIN_TOKEN` | Admin SDK (seed scripts only) | ✅ set |
+| `VITE_GOOGLE_CLIENT_ID` | Google OAuth for buyer auth | ✅ set |
+| `CHARGILY_SECRET_KEY` | Chargily server secret (when method=chargily) | ✅ set (test) |
+| `VITE_CHARGILY_PUBLIC_KEY` | Chargily public key (client-side) | ✅ set (test) |
+| `VITE_APP_URL` | App base URL for Chargily callbacks | ✅ set |
 | `VITE_META_PIXEL_ID` | Meta Pixel analytics | ❓ per merchant |
-| `INSTANTDB_ADMIN_TOKEN` | Admin SDK (seed scripts only) | ✅ set |
 
 ### apps/platform
 | Variable | Purpose | Status |
 |---|---|---|
 | `VITE_INSTANT_APP_ID` | Platform DB App ID | ✅ set |
 | `INSTANTDB_ADMIN_TOKEN` | Platform admin token | ✅ set |
-| `VITE_GOOGLE_CLIENT_ID` | Google OAuth for platform login | ❓ pending |
-| `VITE_CHARGILY_PUBLIC_KEY` | Chargily public key | ❓ pending |
-| `CHARGILY_SECRET_KEY` | Chargily server-side secret | ❓ pending |
-| `DOWNLOAD_STORE_SOURCE_URL` | Pro tier download URL | ❌ not set |
-| `DOWNLOAD_STORE_APP_URL` | Pro tier app download URL | ❌ not set |
-| `DOWNLOAD_PLATFORM_SOURCE_URL` | Agency tier download URL | ❌ not set |
+| `VITE_GOOGLE_CLIENT_ID` | Google OAuth for platform login | ✅ set |
+| `CHARGILY_PLATFORM_SECRET_KEY` | Chargily secret for subscriptions | ✅ set (test) |
+| `VITE_APP_URL` | App base URL (production: https://7aba.store) | ✅ set |
+| `DOWNLOAD_URL_STORE_SOURCE` | Pro tier store source download | ❌ optional (defaults to GitHub archive) |
+| `DOWNLOAD_URL_STORE_APP` | Pro tier app APK download | ❌ optional (defaults to GitHub archive) |
+| `DOWNLOAD_URL_PLATFORM_SOURCE` | Agency tier platform download | ❌ optional (defaults to GitHub archive) |
 
 ---
 
@@ -304,7 +309,9 @@ npx tsx seed-orders.ts          # Seed test orders (from apps/store/)
 - `^1.131.31` for `@tanstack/react-start` resolves to latest — must pin exact `1.131.31`
 - **Turbo binary may segfault** on some Linux systems — root `package.json` uses `pnpm -r --parallel run dev` as fallback
 - `apps/platform/src/lib/instantdb.ts` line 5 — `ImportMeta.env` TS error — pre-existing, do NOT touch
-- `apps/store/app/` — legacy duplicate directory of `apps/store/src/` — may have stale files, avoid editing
+- `apps/store/app/` — **DELETED** (was a legacy duplicate of `apps/store/src/`)
+- **TanStack Start v1.131.31 has NO `createAPIFileRoute`** — API/webhook endpoints must be Cloudflare Workers or `createServerFn`
+- CF Worker `7aba-webhook` at `https://7aba-webhook.mohessaid.workers.dev` — handles Chargily webhooks; vars stored as `plain_text` bindings (upgrade to secrets via CF dashboard for prod)
 
 ---
 
