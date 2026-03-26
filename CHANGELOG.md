@@ -3,13 +3,25 @@
 All notable changes to this project are documented here.  
 Format: `[version/commit] YYYY-MM-DD — description`
 
-> **Active HEAD:** `4bfd766` · **Live:** https://7aba.store · **Repo:** https://github.com/Ta9in/sellingpage
+> **Active HEAD:** `pending` · **Live:** https://7aba.store · **Repo:** https://github.com/Ta9in/sellingpage
 
 ---
 
 ## [Unreleased] — Pending
 
-- [ ] `buyer-auth-chargily` — pass buyer email/name into Chargily checkout metadata from `BuyerAuthModal`
+- [ ] Set Chargily webhook URL in Chargily dashboard: `https://7aba.store/api/webhook/chargily`
+- [ ] Set download URLs env vars when assets are ready: `DOWNLOAD_STORE_SOURCE_URL`, `DOWNLOAD_STORE_APP_URL`, `DOWNLOAD_PLATFORM_SOURCE_URL`
+
+---
+
+## [post-f40ddec] 2026-03-26 — Upgrade CF Worker secrets
+
+- `7aba-webhook` Worker: re-deployed via wrangler to remove plain_text bindings
+- All 3 env vars now stored as encrypted `secret_text` bindings:
+  - `CHARGILY_PLATFORM_SECRET_KEY` (Chargily test key)
+  - `INSTANTDB_ADMIN_TOKEN` (InstantDB platform admin token)
+  - `VITE_INSTANT_APP_ID` (platform DB app ID: `b9227417-...`)
+- Worker route `7aba.store/api/webhook/chargily` → `7aba-webhook` confirmed intact
 
 ---
 

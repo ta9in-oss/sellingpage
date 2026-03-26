@@ -311,7 +311,7 @@ npx tsx seed-orders.ts          # Seed test orders (from apps/store/)
 - `apps/platform/src/lib/instantdb.ts` line 5 — `ImportMeta.env` TS error — pre-existing, do NOT touch
 - `apps/store/app/` — **DELETED** (was a legacy duplicate of `apps/store/src/`)
 - **TanStack Start v1.131.31 has NO `createAPIFileRoute`** — API/webhook endpoints must be Cloudflare Workers or `createServerFn`
-- CF Worker `7aba-webhook` at `https://7aba-webhook.mohessaid.workers.dev` — handles Chargily webhooks; vars stored as `plain_text` bindings (upgrade to secrets via CF dashboard for prod)
+- CF Worker `7aba-webhook` at `https://7aba-webhook.mohessaid.workers.dev` — handles Chargily webhooks; all env vars are **encrypted secrets** (`secret_text` bindings)
 
 ---
 
