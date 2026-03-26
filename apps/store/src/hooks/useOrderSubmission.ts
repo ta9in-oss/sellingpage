@@ -137,6 +137,8 @@ export function useOrderSubmission(): UseOrderSubmissionReturn {
             orderId,
             totalAmount,
             customerName: formData.name.trim(),
+            customerEmail: formData.email?.trim() || undefined,
+            customerPhone: formData.phone?.trim() || undefined,
           }
         });
 

@@ -6,6 +6,8 @@ interface CreateCheckoutInput {
   orderId: string
   totalAmount: number
   customerName: string
+  customerEmail?: string
+  customerPhone?: string
 }
 
 export const createChargilyCheckout = createServerFn({ method: 'POST' })
@@ -28,9 +30,15 @@ export const createChargilyCheckout = createServerFn({ method: 'POST' })
       failure_url: `${baseUrl}/?payment=failed`,
       description: `طلب رقم ${data.orderNumber} - ${data.customerName}`,
       locale: 'ar',
+      customer: {
+        name: data.customerName,
+        ...(data.customerEmail ? { email: data.customerEmail } : {}),
+        ...(data.customerPhone ? { phone: data.customerPhone } : {}),
+      },
       metadata: {
         orderNumber: data.orderNumber,
         orderId: data.orderId,
+        customerEmail: data.customerEmail || '',
       },
     })
 

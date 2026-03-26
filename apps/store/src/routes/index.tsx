@@ -63,8 +63,8 @@ function Home() {
     setOrderError("");
     try {
       const result = await submitOrder({
-        name: orderData.name,
-        email: orderData.email || "",
+        name: buyerName || orderData.name,
+        email: buyerEmail || orderData.email || "",
         phone: orderData.phone,
         message: orderData.message || "",
         wilaya: orderData.wilaya,
