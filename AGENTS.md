@@ -28,7 +28,7 @@
 ### Cloudflare MCP
 - Use `cloudflare-mcp-execute` to deploy Workers/Pages, set env vars, manage DNS
 - **Account ID:** check via `cloudflare-mcp-execute` — do not hardcode
-- **Platform Pages project:** `7aba-platform` → custom domain `7aba.store`
+- **Platform Pages project:** `7aba-platform` → served at `7aba.store` via `7aba-proxy` Worker route
 - **CF token:** set by user as environment variable — never hardcode in files
 
 ### InstantDB MCP
@@ -312,6 +312,9 @@ npx tsx seed-orders.ts          # Seed test orders (from apps/store/)
 - `apps/store/app/` — **DELETED** (was a legacy duplicate of `apps/store/src/`)
 - **TanStack Start v1.131.31 has NO `createAPIFileRoute`** — API/webhook endpoints must be Cloudflare Workers or `createServerFn`
 - CF Worker `7aba-webhook` at `https://7aba-webhook.mohessaid.workers.dev` — handles Chargily webhooks; all env vars are **encrypted secrets** (`secret_text` bindings)
+- CF Worker `7aba-proxy` — reverse-proxies `7aba.store/*` → `7aba-platform.pages.dev` (DNS token lacked edit perms; proxy worker bypasses this)
+- CF Worker `7aba-demo-redirect` — `demo.7aba.store/*` → 301 to `7aba.store/demo`
+- Worker route priority: `7aba.store/api/webhook/chargily` (specific) > `7aba.store/*` (proxy) — webhook still hits `7aba-webhook` directly
 
 ---
 
