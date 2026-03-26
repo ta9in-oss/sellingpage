@@ -3,17 +3,29 @@
 All notable changes to this project are documented here.  
 Format: `[version/commit] YYYY-MM-DD — description`
 
-> **Active HEAD:** `f478c44` · **Live:** https://7aba.store · **Repo:** https://github.com/Ta9in/sellingpage
+> **Active HEAD:** `4bfd766` · **Live:** https://7aba.store · **Repo:** https://github.com/Ta9in/sellingpage
 
 ---
 
 ## [Unreleased] — Pending
 
-- [ ] Complete buyer auth flow — connect `BuyerAuthModal` to Chargily checkout (pass email/name)
-- [ ] Implement actual Cloudflare deployment from Deploy Wizard (`DeployingStep`)
-- [ ] Set download URLs env vars: `DOWNLOAD_STORE_SOURCE_URL`, `DOWNLOAD_STORE_APP_URL`, `DOWNLOAD_PLATFORM_SOURCE_URL`
-- [ ] Upgrade CF Worker `7aba-webhook` bindings to secrets in CF dashboard
-- [ ] Configure Chargily dashboard webhook URL: `https://7aba-webhook.mohessaid.workers.dev`
+- [ ] `buyer-auth-chargily` — pass buyer email/name into Chargily checkout metadata from `BuyerAuthModal`
+
+---
+
+## [4bfd766] 2026-03-26 — Domain routing + real CF deploy wizard
+
+**feat: 7aba.store domain wired, CF Pages deploy wizard uses real API**
+
+- `7aba.store` + `www.7aba.store` → `7aba-platform` CF Pages project (custom domains, pending DNS)
+- `demo.7aba.store/*` → CF Worker `7aba-demo-redirect` → 301 to `7aba.store/demo`
+- `7aba.store/api/webhook/chargily` → CF Worker `7aba-webhook` (Chargily payment events)
+- `ConnectServicesStep.tsx`: Added CF API Token field (stored in `stores.cfApiToken`)
+- New `src/server/deployStore.ts`:
+  - Verifies merchant CF credentials
+  - Creates CF Pages project in merchant's account linked to `github.com/Ta9in/sellingpage`
+  - Sets env vars: `VITE_INSTANT_APP_ID`, `INSTANT_ADMIN_TOKEN`, `VITE_APP_URL`, `CHARGILY_SECRET_KEY`
+- `DeployingStep.tsx`: Rewritten to call real `deployStore` server function
 
 ---
 
