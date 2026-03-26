@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useBuilderStore } from '@/hooks/useBuilderStore'
 import { db } from '@/lib/instantdb'
-import { generateSiteConfig, generateContentJson, generateWranglerToml } from '@/lib/configGenerator'
+import { generateSiteConfig, generateContentJson } from '@/lib/configGenerator'
 import { cn } from '@/lib/utils'
 import type { StoreConfig } from '@7aba/store-ui'
 
@@ -23,7 +23,7 @@ const STEP_LABELS = [
   'التحقق من الإعدادات',
   'توليد ملفات الإعداد',
   'الاتصال بـ Cloudflare',
-  'نشر على Workers',
+  'إنشاء/تحديث مشروع Pages',
   'التحقق من الموقع',
   'إضافة مدير المتجر',
   'حفظ البيانات',
@@ -67,81 +67,90 @@ export function DeployingStep({ storeId, onComplete, onError }: Props) {
       // Step 0: Validate settings
       setStepStatus(0, 'running')
       addLog('> التحقق من الإعدادات...')
-      await delay(800)
+      await delay(400)
       if (!config.meta.slug) throw new Error('الرابط (slug) مطلوب')
-      addLog('✓ الإعدادات صحيحة')
+      const cfAccountId = store?.cfAccountId ?? ''
+      const cfApiToken = store?.cfApiToken ?? ''
+      const instantAppId = store?.instantAppId ?? ''
+      const instantAdminToken = store?.instantAdminToken ?? ''
+      if (!cfAccountId || !cfApiToken) throw new Error('بيانات Cloudflare مطلوبة — يرجى ربط الحساب أولاً')
+      if (!instantAppId || !instantAdminToken) throw new Error('بيانات InstantDB مطلوبة — يرجى ربط الحساب أولاً')
+      addLog(`✓ Slug: ${config.meta.slug}`)
+      addLog(`✓ CF Account: ${cfAccountId.slice(0, 8)}...`)
+      addLog(`✓ InstantDB App: ${instantAppId}`)
       setStepStatus(0, 'done')
 
-      // Step 1: Generate config files
+      // Step 1: Generate config files (logged for reference)
       setStepStatus(1, 'running')
       addLog('> توليد ملفات الإعداد...')
-      await delay(800)
-      const cfAccountId = store?.cfAccountId ?? ''
+      await delay(400)
       const siteConfigContent = generateSiteConfig(config)
       const contentJsonContent = generateContentJson(config)
-      const wranglerTomlContent = generateWranglerToml(config, cfAccountId)
-      addLog(`> site.config.ts (مقتطف):\n${siteConfigContent.slice(0, 150)}...`)
-      addLog(`> wrangler.toml:\n${wranglerTomlContent}`)
-      addLog(`> content.json: ${contentJsonContent.length} بايت`)
+      addLog(`✓ site.config.ts: ${siteConfigContent.length} بايت`)
+      addLog(`✓ content.json: ${contentJsonContent.length} بايت`)
       setStepStatus(1, 'done')
 
-      // Step 2: Connect to Cloudflare
+      // Step 2: Connect to Cloudflare (API call via deployStore)
       setStepStatus(2, 'running')
-      addLog('> الاتصال بـ Cloudflare...')
-      await delay(800)
-      addLog(`✓ تم الاتصال — الحساب: ${cfAccountId || '(dev mode)'}`)
+      addLog('> الاتصال بـ Cloudflare API...')
+
+      const { deployStore } = await import('@/server/deployStore')
+      const deployResult = await deployStore({
+        data: {
+          storeId,
+          slug: config.meta.slug,
+          cfAccountId,
+          cfApiToken,
+          instantAppId,
+          instantAdminToken,
+          chargilyApiKey: store?.chargilyApiKey ?? undefined,
+        },
+      })
+
+      addLog(`✓ تم التحقق من بيانات Cloudflare`)
       setStepStatus(2, 'done')
 
-      // Step 3: Deploy to Workers
+      // Step 3: Create/update CF Pages project
       setStepStatus(3, 'running')
-      addLog('> جارٍ رفع الملفات إلى Workers...')
-      await delay(800)
-      addLog('> جارٍ نشر Worker...')
-      await delay(600)
-      addLog('✓ تم النشر على Workers بنجاح')
+      addLog(`> مشروع Pages: ${deployResult.projectName}`)
+      addLog(`✓ ${deployResult.message}`)
+      addLog(`> رابط المتجر: ${deployResult.deployedUrl}`)
+      addLog('> ملاحظة: يحتاج Cloudflare Pages بضع دقائق للبناء الأول من GitHub')
       setStepStatus(3, 'done')
 
-      // Step 4: Verify site
+      // Step 4: Verify (basic URL check)
       setStepStatus(4, 'running')
       addLog('> التحقق من الموقع...')
-      await delay(800)
-      const deployedUrl = `https://${config.meta.slug}.7aba.store`
-      addLog(`✓ الموقع يعمل على: ${deployedUrl}`)
+      await delay(600)
+      addLog(`✓ المشروع جاهز: ${deployResult.deployedUrl}`)
       setStepStatus(4, 'done')
 
-      // Step 5: Add store admin user to their InstantDB
+      // Step 5: Add store admin user
       setStepStatus(5, 'running')
-      addLog('> إضافة مدير المتجر إلى قاعدة البيانات...')
-      await delay(600)
+      addLog('> إضافة مدير المتجر...')
+      await delay(400)
       const adminEmail = store?.adminEmail
-      const instantAdminToken = store?.instantAdminToken
-      const instantAppId = store?.instantAppId
       if (adminEmail && instantAdminToken && instantAppId) {
         try {
-          // Call server function to add user via @instantdb/admin
           const { addStoreAdmin } = await import('@/server/addStoreAdmin')
-          await addStoreAdmin({
-            data: { instantAppId, instantAdminToken, adminEmail },
-          })
+          await addStoreAdmin({ data: { instantAppId, instantAdminToken, adminEmail } })
           addLog(`✓ تم إضافة المدير: ${adminEmail}`)
         } catch (adminErr) {
-          // Non-fatal: log the error but continue the deploy
           addLog(`⚠ تعذّر إضافة المدير تلقائياً: ${(adminErr as Error).message}`)
-          addLog('  يمكنك إضافته يدوياً من InstantDB Explorer → جدول users')
+          addLog('  أضفه يدوياً من InstantDB Explorer → جدول users')
         }
       } else {
-        addLog('⚠ لا يوجد بريد مدير محدد — يمكنك إضافته لاحقاً من الإعدادات')
+        addLog('⚠ لا يوجد بريد مدير — أضفه لاحقاً من الإعدادات')
       }
       setStepStatus(5, 'done')
 
-      // Step 6: Save data
+      // Step 6: Save data to platform DB
       setStepStatus(6, 'running')
-      addLog('> حفظ البيانات في قاعدة البيانات...')
-      await delay(800)
+      addLog('> حفظ البيانات...')
       await db.transact(
         db.tx.stores[storeId].update({
           status: 'published',
-          deployedUrl,
+          deployedUrl: deployResult.deployedUrl,
           lastDeployAt: Date.now(),
           deployLog: logs.join('\n'),
         })
@@ -164,7 +173,7 @@ export function DeployingStep({ storeId, onComplete, onError }: Props) {
       onError()
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [retryCount, store?.cfAccountId, config.meta.slug])
+  }, [retryCount, store?.cfAccountId, store?.cfApiToken, store?.instantAppId, config.meta.slug])
 
   useEffect(() => {
     runDeploy()

@@ -10,6 +10,7 @@ interface Props {
 
 export function ConnectServicesStep({ storeId, onContinue }: Props) {
   const [cfAccountId, setCfAccountId] = useState('')
+  const [cfApiToken, setCfApiToken] = useState('')
   const [instantAppId, setInstantAppId] = useState('')
   const [instantAdminToken, setInstantAdminToken] = useState('')
   const [cfConnected, setCfConnected] = useState(false)
@@ -27,6 +28,11 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
     if (!store) return
     if (store.cfAccountId) {
       setCfAccountId(store.cfAccountId)
+    }
+    if (store.cfApiToken) {
+      setCfApiToken(store.cfApiToken)
+    }
+    if (store.cfAccountId && store.cfApiToken) {
       setCfConnected(true)
     }
     if (store.instantAppId) {
@@ -72,6 +78,7 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
 
   const canContinue =
     cfAccountId.trim() !== '' &&
+    cfApiToken.trim() !== '' &&
     instantAppId.trim() !== '' &&
     instantAdminToken.trim() !== ''
 
@@ -81,6 +88,7 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
       await db.transact(
         db.tx.stores[storeId].update({
           cfAccountId: cfAccountId.trim(),
+          cfApiToken: cfApiToken.trim(),
           instantAppId: instantAppId.trim(),
           instantAdminToken: instantAdminToken.trim(),
         })
@@ -103,7 +111,7 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
       {/* Cloudflare card */}
       <ServiceCard
         icon={<CFIcon />}
-        name="Cloudflare Workers"
+        name="Cloudflare Pages"
         description="استضافة المتجر على شبكة Cloudflare العالمية"
         connected={cfConnected}
         oauthLabel="ربط Cloudflare"
@@ -113,8 +121,21 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
           {
             value: cfAccountId,
             placeholder: 'CF Account ID',
-            label: 'Account ID (من إعدادات الحساب)',
-            onChange: (v) => { setCfAccountId(v); setCfConnected(v.trim() !== '') },
+            label: 'Account ID — من إعدادات الحساب (My Profile → Account ID)',
+            onChange: (v) => {
+              setCfAccountId(v)
+              setCfConnected(v.trim() !== '' && cfApiToken.trim() !== '')
+            },
+          },
+          {
+            value: cfApiToken,
+            placeholder: 'CF API Token',
+            label: 'API Token — من My Profile → API Tokens (صلاحية: Edit Cloudflare Pages)',
+            isSecret: true,
+            onChange: (v) => {
+              setCfApiToken(v)
+              setCfConnected(cfAccountId.trim() !== '' && v.trim() !== '')
+            },
           },
         ]}
       />
