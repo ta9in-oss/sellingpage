@@ -3,10 +3,10 @@ import { Link } from '@tanstack/react-router'
 import { cn } from '@/lib/utils'
 
 const T = {
-  pricing: { ar: 'الأسعار', fr: 'Tarifs' },
-  howItWorks: { ar: 'كيف يعمل؟', fr: 'Comment ça marche?' },
-  demo: { ar: 'عرض تجريبي', fr: 'Démo' },
-  start: { ar: 'ابدأ الآن', fr: 'Commencer' },
+  pricing: { ar: 'الأسعار', fr: 'Tarifs', en: 'Pricing' },
+  howItWorks: { ar: 'كيف يعمل؟', fr: 'Comment ça marche?', en: 'How it works' },
+  demo: { ar: 'عرض تجريبي', fr: 'Démo', en: 'Demo' },
+  start: { ar: 'ابدأ الآن', fr: 'Commencer', en: 'Get started' },
 }
 
 export function Navbar() {
@@ -47,7 +47,7 @@ export function Navbar() {
             className="text-xs font-bold px-2.5 py-1.5 border-2 border-black bg-white hover:bg-yellow-400 transition-colors"
             aria-label="Toggle language"
           >
-            {lang === 'ar' ? 'FR' : 'عر'}
+            {lang === 'ar' ? 'FR' : lang === 'fr' ? 'EN' : 'عر'}
           </button>
           <Link
             to="/dashboard" search={{}}

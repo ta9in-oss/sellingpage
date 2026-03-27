@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
+import { useLang } from '@/hooks/useLang'
 import {
   ThemeProvider,
   HeroSection,
@@ -141,6 +142,7 @@ function DemoBanner() {
 }
 
 function DemoStorePage() {
+  const { dir } = useLang()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
 
@@ -158,7 +160,7 @@ function DemoStorePage() {
 
   return (
     <ThemeProvider value={brutalistTheme}>
-      <div dir="rtl" className="font-['Almarai',_sans-serif]">
+      <div dir={dir} className="font-['Almarai',_sans-serif]">
         <DemoBanner />
         <HeroSection content={HERO} onCtaClick={scrollToBuy} />
         <SocialProofBar rating={4.9} reviewCount={318} />

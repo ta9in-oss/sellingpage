@@ -3,27 +3,28 @@ import { Link } from '@tanstack/react-router'
 import { cn } from '@/lib/utils'
 
 const T = {
-  title: { ar: 'الأسعار', fr: 'Tarifs' },
+  title: { ar: 'الأسعار', fr: 'Tarifs', en: 'Pricing' },
   sub: {
     ar: 'دفع مرة واحدة. لا اشتراكات. لا مفاجآت.',
     fr: 'Payez une fois. Pas d\'abonnements. Pas de surprises.',
+    en: 'Pay once. No subscriptions. No surprises.',
   },
-  cta: { ar: 'اختر هذه الباقة', fr: 'Choisir ce forfait' },
-  once: { ar: 'دفع مرة واحدة', fr: 'Paiement unique' },
+  cta: { ar: 'اختر هذه الباقة', fr: 'Choisir ce forfait', en: 'Choose this plan' },
+  once: { ar: 'دفع مرة واحدة', fr: 'Paiement unique', en: 'One-time payment' },
 }
 
 const tiers = [
   {
     id: 'simple',
-    name: { ar: 'بسيط', fr: 'Simple' },
+    name: { ar: 'بسيط', fr: 'Simple', en: 'Simple' },
     dzd: '3,900',
     usd: '$29',
-    badge: { ar: 'الأكثر شيوعاً', fr: 'Le plus populaire' },
+    badge: { ar: 'الأكثر شيوعاً', fr: 'Le plus populaire', en: 'Most popular' },
     accent: true,
   },
   {
     id: 'pro',
-    name: { ar: 'احترافي', fr: 'Pro' },
+    name: { ar: 'احترافي', fr: 'Pro', en: 'Pro' },
     dzd: '14,900',
     usd: '$99',
     badge: null,
@@ -31,7 +32,7 @@ const tiers = [
   },
   {
     id: 'studio',
-    name: { ar: 'ستوديو', fr: 'Studio' },
+    name: { ar: 'ستوديو', fr: 'Studio', en: 'Studio' },
     dzd: '49,000',
     usd: '$299',
     badge: null,
@@ -39,7 +40,7 @@ const tiers = [
   },
   {
     id: 'partner',
-    name: { ar: 'راعي', fr: 'Partenaire' },
+    name: { ar: 'راعي', fr: 'Partenaire', en: 'Partner' },
     dzd: '99,000+',
     usd: '$500+',
     badge: null,

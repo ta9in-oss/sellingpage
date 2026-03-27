@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 import { BuilderLayout } from '@/components/builder/BuilderLayout'
 import { db } from '@/lib/instantdb'
 import { id } from '@instantdb/react'
+import { useLang } from '@/hooks/useLang'
 import type { User } from '@instantdb/react'
 
 export const Route = createFileRoute('/dashboard/builder')({
@@ -34,6 +35,7 @@ function CreateAndRedirect({
   plan: string
   user: User | null
 }) {
+  const { dir } = useLang()
   useEffect(() => {
     const newId = id()
     db.transact(
@@ -52,7 +54,7 @@ function CreateAndRedirect({
   }, [])
 
   return (
-    <div className="min-h-screen flex items-center justify-center" dir="rtl">
+    <div className="min-h-screen flex items-center justify-center" dir={dir}>
       <div className="text-center space-y-2">
         <div className="text-2xl animate-spin">⏳</div>
         <p className="text-zinc-500 text-sm">جارٍ إنشاء المتجر...</p>

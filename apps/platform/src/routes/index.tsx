@@ -8,6 +8,7 @@ import { FeatureGrid } from '@/components/marketing/FeatureGrid'
 import { SocialNumbers } from '@/components/marketing/SocialNumbers'
 import { PricingPreview } from '@/components/marketing/PricingPreview'
 import { Footer } from '@/components/marketing/Footer'
+import { useLang } from '@/hooks/useLang'
 
 const SITE_URL = 'https://7aba.store'
 
@@ -215,8 +216,9 @@ export const Route = createFileRoute('/')({
 })
 
 function LandingPage() {
+  const { dir } = useLang()
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen" dir={dir}>
       <Navbar />
       <HeroSection />
       <ComparisonTable />

@@ -13,7 +13,7 @@ import type { LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const T = {
-  title: { ar: 'كل ما تحتاجه لمتجرك', fr: 'Tout ce dont vous avez besoin' },
+  title: { ar: 'كل ما تحتاجه لمتجرك', fr: 'Tout ce dont vous avez besoin', en: 'Everything you need for your store' },
 }
 
 const iconMap: Record<string, LucideIcon> = {
@@ -32,78 +32,94 @@ const features = [
     icon: 'Zap',
     ar: 'نشر في دقيقتين',
     fr: 'Déployé en 2 min',
+    en: 'Deploy in 2 minutes',
     desc: {
       ar: 'Cloudflare Workers — أسرع CDN في العالم',
       fr: 'Cloudflare Workers — CDN le plus rapide',
+      en: 'Cloudflare Workers — fastest CDN worldwide',
     },
   },
   {
     icon: 'Shield',
     ar: 'ملكية كاملة',
     fr: 'Propriété totale',
+    en: 'Full ownership',
     desc: {
       ar: 'الكود والبيانات ملكك، لا أحد يستطيع إغلاق متجرك',
       fr: 'Code et données vous appartiennent',
+      en: 'Code and data are yours — nobody can shut your store down',
     },
   },
   {
     icon: 'Palette',
     ar: '3 قوالب احترافية',
     fr: '3 thèmes pro',
+    en: '3 pro themes',
     desc: {
       ar: 'بسيط، جريء، دافئ — كل واحد محسّن للبيع',
       fr: 'Simple, audacieux, chaleureux — optimisés pour vendre',
+      en: 'Simple, bold, warm — each optimised to sell',
     },
   },
   {
     icon: 'Languages',
     ar: 'عربي + فرنسي',
     fr: 'Arabe + Français',
+    en: 'Arabic + French',
     desc: {
       ar: 'واجهة RTL أصلية ودعم ثنائي اللغة',
       fr: 'Interface RTL native et bilinguisme',
+      en: 'Native RTL interface and bilingual support',
     },
   },
   {
     icon: 'Bell',
     ar: 'إشعارات الطلبات',
     fr: 'Notifications commandes',
+    en: 'Order notifications',
     desc: {
       ar: 'إشعارات فورية لكل طلب جديد',
       fr: 'Notifications en temps réel',
+      en: 'Real-time notifications for every new order',
     },
   },
   {
     icon: 'MapPin',
     ar: 'توصيل للجزائر',
     fr: 'Livraison Algérie',
+    en: 'Algeria delivery',
     desc: {
       ar: '58 ولاية ودوائرها كاملة في نموذج الطلب',
       fr: '58 wilayas dans le formulaire de commande',
+      en: 'All 58 wilayas in the order form',
     },
   },
   {
     icon: 'BarChart2',
     ar: 'تحليلات مدمجة',
     fr: 'Analytics intégrés',
+    en: 'Built-in analytics',
     desc: {
       ar: 'Google Analytics + Meta Pixel + Clarity',
       fr: 'Google Analytics + Meta Pixel + Clarity',
+      en: 'Google Analytics + Meta Pixel + Clarity',
     },
   },
   {
     icon: 'CreditCard',
     ar: 'لا عمولات أبداً',
     fr: 'Zéro commission',
+    en: 'Zero commission',
     desc: {
       ar: 'كل ريال من مبيعاتك يذهب إليك مباشرة',
       fr: 'Chaque dinar de vos ventes vous revient',
+      en: 'Every dinar from your sales goes directly to you',
     },
   },
 ]
 
 export function FeatureGrid() {
-  const { t, lang } = useLang()
+  const { t } = useLang()
 
   return (
     <section className="py-24 px-4 bg-white border-y-2 border-black">
@@ -127,7 +143,7 @@ export function FeatureGrid() {
                   <Icon className="w-5 h-5 text-black" strokeWidth={2} />
                 </div>
                 <h3 className="font-black text-black text-sm mb-1">
-                  {lang === 'ar' ? feature.ar : feature.fr}
+                  {t({ ar: feature.ar, fr: feature.fr, en: feature.en })}
                 </h3>
                 <p className="text-xs text-black/60 leading-relaxed">
                   {t(feature.desc)}

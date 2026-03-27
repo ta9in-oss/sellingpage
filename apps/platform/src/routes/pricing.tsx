@@ -24,18 +24,18 @@ export const Route = createFileRoute('/pricing')({
 })
 
 const T = {
-  hero: { ar: 'الأسعار', fr: 'Tarifs' },
-  sub: { ar: 'دفع مرة واحدة. لا اشتراكات. لا مفاجآت.', fr: "Payez une fois. Pas d'abonnements." },
-  once: { ar: 'دفعة واحدة', fr: 'Paiement unique' },
-  cta: { ar: 'ابدأ الآن', fr: 'Commencer' },
-  faq: { ar: 'الأسئلة الشائعة', fr: 'FAQ' },
-  back: { ar: 'العودة للرئيسية', fr: 'Retour à l\'accueil' },
+  hero: { ar: 'الأسعار', fr: 'Tarifs', en: 'Pricing' },
+  sub: { ar: 'دفع مرة واحدة. لا اشتراكات. لا مفاجآت.', fr: "Payez une fois. Pas d'abonnements.", en: 'Pay once. No subscriptions. No surprises.' },
+  once: { ar: 'دفعة واحدة', fr: 'Paiement unique', en: 'One-time payment' },
+  cta: { ar: 'ابدأ الآن', fr: 'Commencer', en: 'Get started' },
+  faq: { ar: 'الأسئلة الشائعة', fr: 'FAQ', en: 'FAQ' },
+  back: { ar: 'العودة للرئيسية', fr: 'Retour à l\'accueil', en: 'Back to home' },
 }
 
 const TIERS = [
   {
     id: 'starter' as const,
-    name: { ar: 'مبتدئ', fr: 'Starter' },
+    name: { ar: 'مبتدئ', fr: 'Starter', en: 'Starter' },
     price: '3,900',
     usd: '$29',
     accent: false,
@@ -43,23 +43,25 @@ const TIERS = [
     features: {
       ar: ['إنشاء ونشر المتاجر', 'نطاق مخصص عبر Cloudflare', 'لوحة إدارة الطلبات', 'دفع نقدي + Chargily', 'تحليلات Google Analytics'],
       fr: ['Créer et publier des boutiques', 'Domaine personnalisé Cloudflare', 'Tableau de bord commandes', 'Paiement cash + Chargily', 'Analytics Google'],
+      en: ['Create and publish stores', 'Custom domain (Cloudflare)', 'Orders dashboard', 'Cash + Chargily payment', 'Google Analytics'],
     },
   },
   {
     id: 'pro' as const,
-    name: { ar: 'احترافي', fr: 'Pro' },
+    name: { ar: 'احترافي', fr: 'Pro', en: 'Pro' },
     price: '14,900',
     usd: '$99',
     accent: true,
-    badge: { ar: 'الأكثر شيوعاً', fr: 'Populaire' },
+    badge: { ar: 'الأكثر شيوعاً', fr: 'Populaire', en: 'Most popular' },
     features: {
       ar: ['كل مزايا مبتدئ', 'تحميل كود المتجر (React)', 'تحميل كود التطبيق المحمول', 'دعم ذو أولوية'],
       fr: ['Tout Starter', 'Télécharger code boutique (React)', 'Télécharger code app mobile', 'Support prioritaire'],
+      en: ['Everything in Starter', 'Download store code (React)', 'Download mobile app code', 'Priority support'],
     },
   },
   {
     id: 'agency' as const,
-    name: { ar: 'وكالة', fr: 'Agence' },
+    name: { ar: 'وكالة', fr: 'Agence', en: 'Agency' },
     price: '49,000',
     usd: '$299',
     accent: false,
@@ -67,34 +69,35 @@ const TIERS = [
     features: {
       ar: ['كل مزايا احترافي', 'كود المنصة كاملاً', 'متاجر غير محدودة', 'دعم مباشر عبر واتساب'],
       fr: ['Tout Pro', 'Code plateforme complet', 'Boutiques illimitées', 'Support WhatsApp direct'],
+      en: ['Everything in Pro', 'Full platform source code', 'Unlimited stores', 'Direct WhatsApp support'],
     },
   },
 ]
 
 const FAQS = [
   {
-    q: { ar: 'هل الدفع مرة واحدة فعلاً؟', fr: 'Le paiement est-il vraiment unique?' },
-    a: { ar: 'نعم، تدفع مرة واحدة وتستخدم إلى الأبد. لا اشتراك شهري، لا مفاجآت.', fr: 'Oui, vous payez une fois et utilisez pour toujours.' },
+    q: { ar: 'هل الدفع مرة واحدة فعلاً؟', fr: 'Le paiement est-il vraiment unique?', en: 'Is it really a one-time payment?' },
+    a: { ar: 'نعم، تدفع مرة واحدة وتستخدم إلى الأبد. لا اشتراك شهري، لا مفاجآت.', fr: 'Oui, vous payez une fois et utilisez pour toujours.', en: 'Yes, you pay once and use forever. No monthly subscription, no surprises.' },
   },
   {
-    q: { ar: 'هل يمكنني الترقية لاحقاً؟', fr: 'Puis-je passer à un niveau supérieur?' },
-    a: { ar: 'نعم، يمكنك الترقية في أي وقت وتدفع الفرق فقط.', fr: 'Oui, vous pouvez passer à un niveau supérieur et ne payer que la différence.' },
+    q: { ar: 'هل يمكنني الترقية لاحقاً؟', fr: 'Puis-je passer à un niveau supérieur?', en: 'Can I upgrade later?' },
+    a: { ar: 'نعم، يمكنك الترقية في أي وقت وتدفع الفرق فقط.', fr: 'Oui, vous pouvez passer à un niveau supérieur et ne payer que la différence.', en: 'Yes, you can upgrade anytime and only pay the difference.' },
   },
   {
-    q: { ar: 'ما طرق الدفع المتاحة؟', fr: 'Quels modes de paiement sont disponibles?' },
-    a: { ar: 'ندعم Chargily Pay (بطاقة CIB، Dahabia) وسيتم إضافة طرق أخرى قريباً.', fr: 'Nous supportons Chargily Pay (CIB, Dahabia).' },
+    q: { ar: 'ما طرق الدفع المتاحة؟', fr: 'Quels modes de paiement sont disponibles?', en: 'What payment methods are available?' },
+    a: { ar: 'ندعم Chargily Pay (بطاقة CIB، Dahabia) وسيتم إضافة طرق أخرى قريباً.', fr: 'Nous supportons Chargily Pay (CIB, Dahabia).', en: 'We support Chargily Pay (CIB, Dahabia). More methods coming soon.' },
   },
   {
-    q: { ar: 'ماذا أحتاج لنشر متجري؟', fr: "De quoi ai-je besoin pour déployer ma boutique?" },
-    a: { ar: 'تحتاج حساب Cloudflare مجاني وحساب InstantDB مجاني — كلاهما سنساعدك بإعدادهم داخل المنصة.', fr: 'Vous avez besoin d\'un compte Cloudflare gratuit et d\'un compte InstantDB gratuit.' },
+    q: { ar: 'ماذا أحتاج لنشر متجري؟', fr: "De quoi ai-je besoin pour déployer ma boutique?", en: 'What do I need to deploy my store?' },
+    a: { ar: 'تحتاج حساب Cloudflare مجاني وحساب InstantDB مجاني — كلاهما سنساعدك بإعدادهم داخل المنصة.', fr: 'Vous avez besoin d\'un compte Cloudflare gratuit et d\'un compte InstantDB gratuit.', en: 'You need a free Cloudflare account and a free InstantDB account — we help you set both up inside the platform.' },
   },
 ]
 
 function PricingPage() {
-  const { t, lang } = useLang()
+  const { t, lang, dir } = useLang()
 
   return (
-    <div className="min-h-screen bg-white" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+    <div className="min-h-screen bg-white" dir={dir}>
       <Navbar />
 
       {/* Hero */}
@@ -132,7 +135,7 @@ function PricingPage() {
               </div>
 
               <ul className="flex-1 space-y-3 mb-8">
-                {(lang === 'ar' ? tier.features.ar : tier.features.fr).map((f) => (
+                {(lang === 'ar' ? tier.features.ar : lang === 'fr' ? tier.features.fr : tier.features.en).map((f) => (
                   <li key={f} className="flex items-start gap-2 text-sm text-black">
                     <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5 text-black" />
                     {f}

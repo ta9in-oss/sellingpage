@@ -3,13 +3,14 @@ import { Link } from '@tanstack/react-router'
 import { cn } from '@/lib/utils'
 
 const T = {
-  headline: { ar: 'أطلق متجرك الإلكتروني في دقيقتين', fr: 'Lancez votre boutique en 2 minutes' },
+  headline: { ar: 'أطلق متجرك الإلكتروني في دقيقتين', fr: 'Lancez votre boutique en 2 minutes', en: 'Launch your online store in 2 minutes' },
   sub: {
     ar: 'منصة بناء المتاجر للتجار الجزائريين. ادفع مرة واحدة، اكتسب كل شيء.',
     fr: 'La plateforme e-commerce pour les marchands algériens. Payez une fois, possédez tout.',
+    en: 'The e-commerce platform for Algerian merchants. Pay once, own everything.',
   },
-  cta1: { ar: 'ابدأ الآن', fr: 'Commencer maintenant' },
-  cta2: { ar: 'شوف مثال حي', fr: 'Voir un exemple' },
+  cta1: { ar: 'ابدأ الآن', fr: 'Commencer maintenant', en: 'Get started' },
+  cta2: { ar: 'شوف مثال حي', fr: 'Voir un exemple', en: 'Live demo' },
 }
 
 export function HeroSection() {

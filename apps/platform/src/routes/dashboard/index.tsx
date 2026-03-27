@@ -11,6 +11,7 @@ import { useState, useEffect } from 'react'
 import { db } from '@/lib/instantdb'
 import { id } from '@instantdb/react'
 import { cn } from '@/lib/utils'
+import { useLang } from '@/hooks/useLang'
 import { AuthModal } from '@/components/auth/AuthModal'
 import { StoreSettingsModal } from '@/components/dashboard/StoreSettingsModal'
 import { createSubscriptionCheckout } from '@/server/createSubscriptionCheckout'
@@ -34,9 +35,25 @@ export const Route = createFileRoute('/dashboard/')({
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 
+const DT = {
+  loginTitle: { ar: 'الدخول للوحة التحكم', fr: 'Accès au tableau de bord', en: 'Dashboard Login' },
+  loginBtn: { ar: 'تسجيل الدخول', fr: 'Se connecter', en: 'Sign in' },
+  choosePlan: { ar: 'اختر باقتك', fr: 'Choisissez votre forfait', en: 'Choose your plan' },
+  subscribeNow: { ar: 'اشترك الآن', fr: "S'abonner", en: 'Subscribe now' },
+  myStores: { ar: 'متاجرك', fr: 'Mes boutiques', en: 'My stores' },
+  newStore: { ar: 'متجر جديد', fr: 'Nouvelle boutique', en: 'New store' },
+  live: { ar: 'مباشر', fr: 'En ligne', en: 'Live' },
+  draft: { ar: 'مسودة', fr: 'Brouillon', en: 'Draft' },
+  edit: { ar: 'تعديل', fr: 'Modifier', en: 'Edit' },
+  deploy: { ar: 'نشر', fr: 'Déployer', en: 'Deploy' },
+  downloads: { ar: 'التحميلات', fr: 'Téléchargements', en: 'Downloads' },
+  logout: { ar: 'خروج', fr: 'Déconnexion', en: 'Sign out' },
+}
+
 function DashboardPage() {
   const { payment, tier, checkout_id, plan } = Route.useSearch()
   const { isLoading, user } = db.useAuth()
+  const { t, dir } = useLang()
   const [showAuth, setShowAuth] = useState(false)
 
   // Verify Chargily payment on return from checkout
@@ -62,10 +79,10 @@ function DashboardPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-4" dir="rtl">
+      <div className="min-h-screen flex items-center justify-center bg-background p-4" dir={dir}>
         {showAuth ? (
           <AuthModal
-            title="الدخول للوحة التحكم"
+            title={t(DT.loginTitle)}
             subtitle="أدخل معلوماتك لمتابعة"
             onClose={() => setShowAuth(false)}
           />
@@ -80,7 +97,7 @@ function DashboardPage() {
               onClick={() => setShowAuth(true)}
               className="px-6 py-3 bg-primary text-primary-foreground rounded-xl font-semibold hover:bg-primary/90 transition-colors"
             >
-              تسجيل الدخول
+              {t(DT.loginBtn)}
             </button>
           </div>
         )}
@@ -122,37 +139,50 @@ function AuthenticatedDashboard({ email, autoPlan }: { email: string; autoPlan?:
 
 const TIERS: {
   id: 'starter' | 'pro' | 'agency'
-  name: string
+  name: { ar: string; fr: string; en: string }
   price: string
   accent: boolean
-  features: string[]
+  features: { ar: string[]; fr: string[]; en: string[] }
 }[] = [
   {
     id: 'starter',
-    name: 'مبتدئ',
+    name: { ar: 'مبتدئ', fr: 'Starter', en: 'Starter' },
     price: '3,900 دج',
     accent: false,
-    features: ['إنشاء ونشر المتاجر', 'نطاق مخصص (Cloudflare)', 'لوحة إدارة الطلبات', 'دفع نقدي + Chargily'],
+    features: {
+      ar: ['إنشاء ونشر المتاجر', 'نطاق مخصص (Cloudflare)', 'لوحة إدارة الطلبات', 'دفع نقدي + Chargily', 'Google Analytics'],
+      fr: ['Créer et publier des boutiques', 'Domaine personnalisé (Cloudflare)', 'Tableau de bord commandes', 'Paiement cash + Chargily', 'Google Analytics'],
+      en: ['Create and publish stores', 'Custom domain (Cloudflare)', 'Orders dashboard', 'Cash + Chargily payment', 'Google Analytics'],
+    },
   },
   {
     id: 'pro',
-    name: 'احترافي',
+    name: { ar: 'احترافي', fr: 'Pro', en: 'Pro' },
     price: '14,900 دج',
     accent: true,
-    features: ['كل ما في مبتدئ', 'تحميل كود المتجر', 'تحميل كود التطبيق', 'دعم ذو أولوية'],
+    features: {
+      ar: ['كل ما في مبتدئ', 'تحميل كود المتجر', 'تحميل كود التطبيق', 'دعم ذو أولوية'],
+      fr: ['Tout Starter', 'Télécharger code boutique', 'Télécharger code app', 'Support prioritaire'],
+      en: ['Everything in Starter', 'Download store code', 'Download app code', 'Priority support'],
+    },
   },
   {
     id: 'agency',
-    name: 'وكالة',
+    name: { ar: 'وكالة', fr: 'Agence', en: 'Agency' },
     price: '49,000 دج',
     accent: false,
-    features: ['كل ما في احترافي', 'كود المنصة كاملاً', 'متاجر غير محدودة', 'دعم مباشر'],
+    features: {
+      ar: ['كل ما في احترافي', 'كود المنصة كاملاً', 'متاجر غير محدودة', 'دعم مباشر'],
+      fr: ['Tout Pro', 'Code plateforme complet', 'Boutiques illimitées', 'Support direct'],
+      en: ['Everything in Pro', 'Full platform source code', 'Unlimited stores', 'Direct support'],
+    },
   },
 ]
 
 function SubscriptionGate({ email, autoPlan }: { email: string; autoPlan?: string }) {
   const [loading, setLoading] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const { t, dir, lang } = useLang()
 
   const handleBuy = async (tier: 'starter' | 'pro' | 'agency') => {
     setLoading(tier)
@@ -178,30 +208,30 @@ function SubscriptionGate({ email, autoPlan }: { email: string; autoPlan?: strin
   }, [autoPlan])
 
   return (
-    <div className="min-h-screen bg-background p-6" dir="rtl">
+    <div className="min-h-screen bg-background p-6" dir={dir}>
       <DashboardHeader email={email} />
       <div className="max-w-5xl mx-auto mt-10 space-y-6">
         <div className="text-center space-y-2">
-          <h2 className="text-2xl font-bold">اختر باقتك</h2>
+          <h2 className="text-2xl font-bold">{t(DT.choosePlan)}</h2>
           <p className="text-muted-foreground">اشترك الآن للبدء في بناء متجرك الإلكتروني</p>
         </div>
         {error && <p className="text-destructive text-center text-sm">{error}</p>}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {TIERS.map((t) => (
+          {TIERS.map((tier) => (
             <div
-              key={t.id}
+              key={tier.id}
               className={cn(
                 'rounded-2xl border p-6 space-y-5 flex flex-col',
-                t.accent && 'border-primary shadow-lg',
+                tier.accent && 'border-primary shadow-lg',
               )}
             >
               <div>
-                <p className="font-bold text-lg">{t.name}</p>
-                <p className="text-2xl font-black mt-1">{t.price}</p>
+                <p className="font-bold text-lg">{t(tier.name)}</p>
+                <p className="text-2xl font-black mt-1">{tier.price}</p>
                 <p className="text-xs text-muted-foreground">دفعة واحدة</p>
               </div>
               <ul className="space-y-2 flex-1">
-                {t.features.map((f) => (
+                {(lang === 'ar' ? tier.features.ar : lang === 'fr' ? tier.features.fr : tier.features.en).map((f) => (
                   <li key={f} className="flex items-center gap-2 text-sm">
                     <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
                     {f}
@@ -209,20 +239,20 @@ function SubscriptionGate({ email, autoPlan }: { email: string; autoPlan?: strin
                 ))}
               </ul>
               <button
-                onClick={() => handleBuy(t.id)}
+                onClick={() => handleBuy(tier.id)}
                 disabled={!!loading}
                 className={cn(
                   'w-full py-3 rounded-xl font-semibold transition-colors',
-                  t.accent
+                  tier.accent
                     ? 'bg-primary text-primary-foreground hover:bg-primary/90'
                     : 'border border-border hover:bg-muted',
-                  loading === t.id && 'opacity-60 cursor-not-allowed',
+                  loading === tier.id && 'opacity-60 cursor-not-allowed',
                 )}
               >
-                {loading === t.id ? (
+                {loading === tier.id ? (
                   <Loader2 className="h-4 w-4 animate-spin mx-auto" />
                 ) : (
-                  'اشترك الآن'
+                  t(DT.subscribeNow)
                 )}
               </button>
             </div>
@@ -246,6 +276,7 @@ interface StoreSettingsData {
 
 function StoresDashboard({ email, tier }: { email: string; tier: string }) {
   const navigate = useNavigate()
+  const { t, dir } = useLang()
   const [settingsStore, setSettingsStore] = useState<StoreSettingsData | null>(null)
 
   const { data, isLoading } = db.useQuery({
@@ -273,19 +304,19 @@ function StoresDashboard({ email, tier }: { email: string; tier: string }) {
   }
 
   return (
-    <div className="min-h-screen bg-background p-6" dir="rtl">
+    <div className="min-h-screen bg-background p-6" dir={dir}>
       <DashboardHeader email={email} tier={tier} />
 
       <div className="max-w-6xl mx-auto mt-8 space-y-8">
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold">متاجرك</h2>
+            <h2 className="text-lg font-bold">{t(DT.myStores)}</h2>
             <button
               onClick={handleNewStore}
               className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors"
             >
               <Plus className="h-4 w-4" />
-              متجر جديد
+              {t(DT.newStore)}
             </button>
           </div>
 
@@ -353,6 +384,7 @@ function StoreCard({
   onSettings: () => void
 }) {
   const navigate = useNavigate()
+  const { t } = useLang()
   const name = store.config?.meta?.name || store.slug || store.id
   const status = store.status ?? 'draft'
 
@@ -371,7 +403,7 @@ function StoreCard({
               : 'bg-muted text-muted-foreground',
           )}
         >
-          {status === 'live' ? 'مباشر' : 'مسودة'}
+          {status === 'live' ? t(DT.live) : t(DT.draft)}
         </span>
       </div>
 
@@ -393,7 +425,7 @@ function StoreCard({
           className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg border text-sm hover:bg-muted transition-colors"
         >
           <Store className="h-3.5 w-3.5" />
-          تعديل
+          {t(DT.edit)}
         </button>
         <button
           onClick={() =>
@@ -405,7 +437,7 @@ function StoreCard({
           className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-primary text-primary-foreground text-sm hover:bg-primary/90 transition-colors"
         >
           <Rocket className="h-3.5 w-3.5" />
-          نشر
+          {t(DT.deploy)}
         </button>
         <button
           onClick={onSettings}
@@ -424,6 +456,7 @@ function StoreCard({
 function DownloadsPanel({ tier, userEmail }: { tier: string; userEmail: string }) {
   const [downloading, setDownloading] = useState<DownloadType | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const { t } = useLang()
 
   const handleDownload = async (downloadType: DownloadType) => {
     setDownloading(downloadType)
@@ -453,7 +486,7 @@ function DownloadsPanel({ tier, userEmail }: { tier: string; userEmail: string }
     <div className="rounded-2xl border p-6 space-y-4">
       <h3 className="font-bold text-lg flex items-center gap-2">
         <Download className="h-5 w-5 text-primary" />
-        التحميلات
+        {t(DT.downloads)}
       </h3>
       {error && <p className="text-destructive text-sm">{error}</p>}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -499,7 +532,12 @@ function EmptyStores({ onNew }: { onNew: () => void }) {
 // ─── Header ────────────────────────────────────────────────────────────────────
 
 function DashboardHeader({ email, tier }: { email: string; tier?: string }) {
-  const tierLabels: Record<string, string> = { starter: 'مبتدئ', pro: 'احترافي', agency: 'وكالة' }
+  const { t } = useLang()
+  const tierLabels: Record<string, { ar: string; fr: string; en: string }> = {
+    starter: { ar: 'مبتدئ', fr: 'Starter', en: 'Starter' },
+    pro: { ar: 'احترافي', fr: 'Pro', en: 'Pro' },
+    agency: { ar: 'وكالة', fr: 'Agence', en: 'Agency' },
+  }
 
   return (
     <header className="max-w-6xl mx-auto flex items-center justify-between gap-4">
@@ -510,7 +548,7 @@ function DashboardHeader({ email, tier }: { email: string; tier?: string }) {
         <span className="font-bold text-lg">7aba.store</span>
         {tier && (
           <span className="text-xs px-2 py-0.5 bg-primary/10 text-primary rounded-full">
-            {tierLabels[tier] ?? tier}
+            {tier in tierLabels ? t(tierLabels[tier]) : tier}
           </span>
         )}
       </div>
@@ -521,7 +559,7 @@ function DashboardHeader({ email, tier }: { email: string; tier?: string }) {
           className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <LogOut className="h-4 w-4" />
-          خروج
+          {t(DT.logout)}
         </button>
       </div>
     </header>

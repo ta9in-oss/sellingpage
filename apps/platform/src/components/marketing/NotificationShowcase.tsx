@@ -4,44 +4,46 @@ import { ShoppingBag, MapPin, Zap } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const T = {
-  badge: { ar: '🔥 ميزة حصرية — لا أحد في الجزائر يملكها', fr: '🔥 Exclusif — personne en Algérie ne l\'a' },
+  badge: { ar: '🔥 ميزة حصرية — لا أحد في الجزائر يملكها', fr: '🔥 Exclusif — personne en Algérie ne l\'a', en: '🔥 Exclusive — nobody in Algeria has it' },
   headline: {
     ar: 'زبائنك يشوفوا من اشترى قبلهم — تلقائياً',
     fr: 'Vos clients voient qui a acheté avant eux — automatiquement',
+    en: 'Your customers see who bought before them — automatically',
   },
   sub: {
     ar: 'كل مرة يزور حد متجرك، يشوف إشعارات صغيرة في الزاوية: "شخص من وهران طلب للتو" أو "5 أشخاص من ولايتك طلبوا هذا الأسبوع". هذا يخلق إلحاح حقيقي ويرفع معدل التحويل — مثل WiserNotify، لكن مدمج في متجرك مباشرة.',
     fr: 'À chaque visite, vos clients voient des notifications discrètes : "Quelqu\'un d\'Oran vient de commander" ou "5 personnes de votre wilaya ont commandé cette semaine". Crée une vraie urgence — comme WiserNotify, mais intégré gratuitement.',
+    en: 'Every visit, customers see small corner notifications: "Someone from Oran just ordered" or "5 people from your wilaya ordered this week". Creates real urgency — like WiserNotify, but built right into your store.',
   },
   features: [
-    { ar: 'إشعار "شخص من ولايتك طلب للتو"', fr: '"Quelqu\'un de ta wilaya vient de commander"' },
-    { ar: 'يتكيف مع مدينة الزائر', fr: 'S\'adapte à la ville du visiteur' },
-    { ar: 'يرفع معدل التحويل بشكل ملحوظ', fr: 'Booste le taux de conversion significativement' },
-    { ar: 'مدمج 100% — لا تطبيق خارجي', fr: '100% intégré — aucune app externe' },
+    { ar: 'إشعار "شخص من ولايتك طلب للتو"', fr: '"Quelqu\'un de ta wilaya vient de commander"', en: '"Someone from your wilaya just ordered"' },
+    { ar: 'يتكيف مع مدينة الزائر', fr: 'S\'adapte à la ville du visiteur', en: 'Adapts to the visitor\'s city' },
+    { ar: 'يرفع معدل التحويل بشكل ملحوظ', fr: 'Booste le taux de conversion significativement', en: 'Significantly boosts conversion rate' },
+    { ar: 'مدمج 100% — لا تطبيق خارجي', fr: '100% intégré — aucune app externe', en: '100% built-in — no external app' },
   ],
-  visitorSees: { ar: 'ما يراه الزائر في متجرك ↓', fr: 'Ce que voit le visiteur dans votre boutique ↓' },
+  visitorSees: { ar: 'ما يراه الزائر في متجرك ↓', fr: 'Ce que voit le visiteur dans votre boutique ↓', en: 'What the visitor sees in your store ↓' },
 }
 
 const mockNotifications = [
   {
     type: 'live' as const,
-    text: { ar: 'طلب جديد!', fr: 'Nouvelle commande!' },
-    desc: { ar: 'أحد سكان وهران قام بطلب 1 × صاكادو', fr: 'Quelqu\'un d\'Oran vient de commander 1 × Sac' },
-    sub: { ar: 'منذ لحظات', fr: 'il y a quelques instants' },
+    text: { ar: 'طلب جديد!', fr: 'Nouvelle commande!', en: 'New order!' },
+    desc: { ar: 'أحد سكان وهران قام بطلب 1 × صاكادو', fr: 'Quelqu\'un d\'Oran vient de commander 1 × Sac', en: 'Someone from Oran just ordered 1 × Bag' },
+    sub: { ar: 'منذ لحظات', fr: 'il y a quelques instants', en: 'moments ago' },
     bg: 'bg-green-500',
   },
   {
     type: 'wilaya' as const,
-    text: { ar: 'طلب من ولايتك!', fr: 'Commande de ta wilaya!' },
-    desc: { ar: 'أحد سكان ولايتك قام بطلب 2 × صاكادو', fr: 'Quelqu\'un de ta wilaya a commandé 2 × Sac' },
-    sub: { ar: 'أهل ولايتك يثقون بالمنتج! 💫', fr: 'Ta wilaya fait confiance au produit ! 💫' },
+    text: { ar: 'طلب من ولايتك!', fr: 'Commande de ta wilaya!', en: 'Order from your wilaya!' },
+    desc: { ar: 'أحد سكان ولايتك قام بطلب 2 × صاكادو', fr: 'Quelqu\'un de ta wilaya a commandé 2 × Sac', en: 'Someone from your wilaya ordered 2 × Bag' },
+    sub: { ar: 'أهل ولايتك يثقون بالمنتج! 💫', fr: 'Ta wilaya fait confiance au produit ! 💫', en: 'Your wilaya trusts this product! 💫' },
     bg: 'bg-cyan-500',
   },
   {
     type: 'recent' as const,
-    text: { ar: 'طلب حديث!', fr: 'Commande récente!' },
-    desc: { ar: 'أحد سكان قسنطينة قام بطلب 1 × صاكادو', fr: 'Quelqu\'un de Constantine a commandé 1 × Sac' },
-    sub: { ar: 'منذ 5 دقائق', fr: 'il y a 5 minutes' },
+    text: { ar: 'طلب حديث!', fr: 'Commande récente!', en: 'Recent order!' },
+    desc: { ar: 'أحد سكان قسنطينة قام بطلب 1 × صاكادو', fr: 'Quelqu\'un de Constantine a commandé 1 × Sac', en: 'Someone from Constantine ordered 1 × Bag' },
+    sub: { ar: 'منذ 5 دقائق', fr: 'il y a 5 minutes', en: '5 minutes ago' },
     bg: 'bg-blue-500',
   },
 ]

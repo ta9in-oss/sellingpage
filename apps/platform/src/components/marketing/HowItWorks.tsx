@@ -5,7 +5,7 @@ import { Palette, SlidersHorizontal, Bell, Rocket } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 const T = {
-  title: { ar: 'كيف يعمل؟', fr: 'Comment ça marche?' },
+  title: { ar: 'كيف يعمل؟', fr: 'Comment ça marche?', en: 'How it works?' },
 }
 
 const icons: Record<string, LucideIcon> = {
@@ -20,42 +20,50 @@ const steps = [
     icon: 'Palette',
     ar: 'اختر قالبك',
     fr: 'Choisissez votre thème',
+    en: 'Pick your template',
     desc: {
       ar: '3 قوالب بسيط، جريء، دافئ',
       fr: '3 thèmes optimisés pour vendre',
+      en: '3 themes: simple, bold, warm',
     },
   },
   {
     icon: 'SlidersHorizontal',
     ar: 'خصص محتواك',
     fr: 'Personnalisez le contenu',
+    en: 'Customize your content',
     desc: {
       ar: 'صور، نصوص، أسعار — كل شيء بصري',
       fr: 'Images, textes, prix — tout visuel',
+      en: 'Images, text, prices — all visual',
     },
   },
   {
     icon: 'Bell',
     ar: 'FOMO للزبائن — تلقائي',
     fr: 'FOMO automatique pour vos clients',
+    en: 'FOMO for customers — automatic',
     desc: {
       ar: 'زوار متجرك يشوفوا: "شخص من وهران طلب للتو" — يخلق إلحاح ويرفع المبيعات',
       fr: 'Les visiteurs voient : "Quelqu\'un d\'Oran vient de commander" — urgence automatique',
+      en: 'Visitors see: "Someone from Oran just ordered" — creates urgency, boosts sales',
     },
   },
   {
     icon: 'Rocket',
     ar: 'أطلق متجرك + داشبورد',
     fr: 'Lancez + Dashboard complet',
+    en: 'Launch + Dashboard',
     desc: {
       ar: 'نشر تلقائي على Cloudflare مع داشبورد لإدارة الطلبات',
       fr: 'Déploiement Cloudflare + dashboard pour gérer vos commandes',
+      en: 'Auto-deploy on Cloudflare with orders dashboard',
     },
   },
 ]
 
 export function HowItWorks() {
-  const { t, lang } = useLang()
+  const { t } = useLang()
   const [visible, setVisible] = useState(false)
   const ref = useRef<HTMLElement>(null)
 
@@ -109,7 +117,7 @@ export function HowItWorks() {
                 </div>
 
                 <h3 className="font-black text-black text-lg mb-2">
-                  {lang === 'ar' ? step.ar : step.fr}
+                  {t({ ar: step.ar, fr: step.fr, en: step.en })}
                 </h3>
                 <p className="text-black/60 text-sm leading-relaxed">
                   {t(step.desc)}

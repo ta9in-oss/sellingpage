@@ -1,8 +1,0 @@
-{
-  "version": 3,
-  "sources": ["../../../dist/_worker.js/index.js"],
-  "sourceRoot": "/home/mohessaid/workspaces/tanstack/sellingpage/apps/platform/.wrangler/tmp/pages-J76zyC/bundledWorker-0.5635442086777187.mjs",
-  "sourcesContent": ["globalThis._importMeta_={url:\"file:///_entry.js\",env:{}};export{c as default}from\"./chunks/nitro/nitro.mjs\";\n//# sourceMappingURL=index.js.map\n"],
-  "mappings": ";AAAyD,SAAY,SAAY;AAAjF,WAAW,eAAa,EAAC,KAAI,qBAAoB,KAAI,CAAC,EAAC;",
-  "names": []
-}

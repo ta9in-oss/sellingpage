@@ -1,19 +1,15 @@
-import { useState } from 'react'
+import { useLangContext, type Lang } from '@/context/LangContext'
+
+export type { Lang }
 
 export function useLang() {
-  const [lang, setLang] = useState<'ar' | 'fr'>(() =>
-    (typeof localStorage !== 'undefined'
-      ? (localStorage.getItem('lang') as 'ar' | 'fr')
-      : null) || 'ar'
-  )
+  const { lang, setLang, t, dir } = useLangContext()
+
   const toggle = () => {
-    const next = lang === 'ar' ? 'fr' : 'ar'
-    if (typeof localStorage !== 'undefined') localStorage.setItem('lang', next)
-    if (typeof document !== 'undefined') {
-      document.documentElement.dir = next === 'ar' ? 'rtl' : 'ltr'
-      document.documentElement.lang = next
-    }
+    const order: Lang[] = ['ar', 'fr', 'en']
+    const next = order[(order.indexOf(lang) + 1) % order.length]
     setLang(next)
   }
-  return { lang, toggle, t: (obj: { ar: string; fr: string }) => obj[lang] }
+
+  return { lang, toggle, t, dir }
 }

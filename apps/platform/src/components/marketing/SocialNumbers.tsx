@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from 'react'
 import { useLang } from '@/hooks/useLang'
 
 const stats = [
-  { value: 500, suffix: '+', ar: 'متجر منشور', fr: 'Boutiques lancées' },
-  { value: 99, suffix: '%', ar: 'رضا العملاء', fr: 'Satisfaction client' },
-  { value: 2, suffix: 'د', ar: 'متوسط وقت النشر', fr: 'Temps de déploiement' },
+  { value: 500, suffix: '+', ar: 'متجر منشور', fr: 'Boutiques lancées', en: '500+ stores launched' },
+  { value: 99, suffix: '%', ar: 'رضا العملاء', fr: 'Satisfaction client', en: '99% satisfaction' },
+  { value: 2, suffix: 'د', ar: 'متوسط وقت النشر', fr: 'Temps de déploiement', en: 'avg deploy time' },
 ]
 
 function useCountUp(target: number, duration = 1500, active: boolean) {
@@ -50,7 +50,7 @@ function StatCard({
 }
 
 export function SocialNumbers() {
-  const { lang } = useLang()
+  const { t } = useLang()
   const [active, setActive] = useState(false)
   const ref = useRef<HTMLElement>(null)
 
@@ -79,7 +79,7 @@ export function SocialNumbers() {
             key={i}
             value={stat.value}
             suffix={stat.suffix}
-            label={lang === 'ar' ? stat.ar : stat.fr}
+            label={t({ ar: stat.ar, fr: stat.fr, en: stat.en })}
             active={active}
           />
         ))}
