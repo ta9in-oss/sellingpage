@@ -18,6 +18,8 @@ interface AuthModalProps {
   subtitle?: string
 }
 
+const HAS_GOOGLE_AUTH = !!import.meta.env.VITE_GOOGLE_CLIENT_ID
+
 export function AuthModal({
   onClose,
   onSuccess,
@@ -116,25 +118,29 @@ export function AuthModal({
         {/* Step: choose method */}
         {step === 'choose' && (
           <div className="space-y-3">
-            <button
-              onClick={() => handleGoogleLogin()}
-              disabled={loading}
-              className={cn(
-                'w-full flex items-center justify-center gap-3 border-2 border-black py-3 text-sm font-bold',
-                'bg-white hover:bg-yellow-400 transition-colors shadow-[3px_3px_0px_0px_#000] hover:shadow-none',
-                'hover:translate-x-[3px] hover:translate-y-[3px]',
-                loading && 'opacity-60 cursor-not-allowed'
-              )}
-            >
-              <GoogleIcon />
-              المتابعة بـ Google
-            </button>
+            {HAS_GOOGLE_AUTH && (
+              <button
+                onClick={() => handleGoogleLogin()}
+                disabled={loading}
+                className={cn(
+                  'w-full flex items-center justify-center gap-3 border-2 border-black py-3 text-sm font-bold',
+                  'bg-white hover:bg-yellow-400 transition-colors shadow-[3px_3px_0px_0px_#000] hover:shadow-none',
+                  'hover:translate-x-[3px] hover:translate-y-[3px]',
+                  loading && 'opacity-60 cursor-not-allowed'
+                )}
+              >
+                <GoogleIcon />
+                المتابعة بـ Google
+              </button>
+            )}
 
-            <div className="flex items-center gap-3 text-xs text-zinc-400">
-              <div className="flex-1 h-px bg-zinc-200" />
-              <span>أو</span>
-              <div className="flex-1 h-px bg-zinc-200" />
-            </div>
+            {HAS_GOOGLE_AUTH && (
+              <div className="flex items-center gap-3 text-xs text-zinc-400">
+                <div className="flex-1 h-px bg-zinc-200" />
+                <span>أو</span>
+                <div className="flex-1 h-px bg-zinc-200" />
+              </div>
+            )}
 
             <button
               onClick={() => setStep('email')}
