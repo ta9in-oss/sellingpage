@@ -43,13 +43,27 @@ export const Route = createRootRoute({
 })
 
 function RootComponent() {
+  const children = (
+    <html lang="ar" dir="rtl" className="dark">
+      <head>
+        <HeadContent />
+      </head>
+      <body>
+        <Outlet />
+        <Scripts />
+      </body>
+    </html>
+  )
+
+  if (!GOOGLE_CLIENT_ID) return children
+
   return (
     <html lang="ar" dir="rtl" className="dark">
       <head>
         <HeadContent />
       </head>
       <body>
-        <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID ?? ''}>
+        <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
           <Outlet />
         </GoogleOAuthProvider>
         <Scripts />

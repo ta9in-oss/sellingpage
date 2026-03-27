@@ -23,10 +23,11 @@ import {
 } from 'lucide-react'
 
 export const Route = createFileRoute('/dashboard/')({
-  validateSearch: (search): { payment?: string; tier?: string; checkout_id?: string } => ({
+  validateSearch: (search): { payment?: string; tier?: string; checkout_id?: string; plan?: string } => ({
     payment: search.payment as string | undefined,
     tier: search.tier as string | undefined,
     checkout_id: search.checkout_id as string | undefined,
+    plan: search.plan as string | undefined,
   }),
   component: DashboardPage,
 })
@@ -34,7 +35,7 @@ export const Route = createFileRoute('/dashboard/')({
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 function DashboardPage() {
-  const { payment, tier, checkout_id } = Route.useSearch()
+  const { payment, tier, checkout_id, plan } = Route.useSearch()
   const { isLoading, user } = db.useAuth()
   const [showAuth, setShowAuth] = useState(false)
 
@@ -87,12 +88,12 @@ function DashboardPage() {
     )
   }
 
-  return <AuthenticatedDashboard email={user.email} />
+  return <AuthenticatedDashboard email={user.email} autoPlan={plan} />
 }
 
 // ─── Authenticated shell ───────────────────────────────────────────────────────
 
-function AuthenticatedDashboard({ email }: { email: string }) {
+function AuthenticatedDashboard({ email, autoPlan }: { email: string; autoPlan?: string }) {
   const { data, isLoading } = db.useQuery({
     platformUsers: { $: { where: { email } } },
   })
@@ -111,7 +112,7 @@ function AuthenticatedDashboard({ email }: { email: string }) {
   const tier = platformUser?.tier
 
   if (!tier) {
-    return <SubscriptionGate email={email} />
+    return <SubscriptionGate email={email} autoPlan={autoPlan} />
   }
 
   return <StoresDashboard email={email} tier={tier} />
@@ -149,7 +150,7 @@ const TIERS: {
   },
 ]
 
-function SubscriptionGate({ email }: { email: string }) {
+function SubscriptionGate({ email, autoPlan }: { email: string; autoPlan?: string }) {
   const [loading, setLoading] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -166,6 +167,15 @@ function SubscriptionGate({ email }: { email: string }) {
       setLoading(null)
     }
   }
+
+  // Auto-trigger checkout if plan was passed from pricing page
+  useEffect(() => {
+    const validPlans = ['starter', 'pro', 'agency'] as const
+    if (autoPlan && (validPlans as readonly string[]).includes(autoPlan)) {
+      handleBuy(autoPlan as 'starter' | 'pro' | 'agency')
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoPlan])
 
   return (
     <div className="min-h-screen bg-background p-6" dir="rtl">
