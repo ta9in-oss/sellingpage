@@ -31,9 +31,10 @@ jobs:
         working-directory: apps/platform
         env:
           CF_PAGES: '1'
-          VITE_INSTANT_APP_ID: ${{ secrets.PLATFORM_VITE_INSTANT_APP_ID }}
-          VITE_APP_URL: https://7aba-platform.pages.dev
-          VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
+          VITE_INSTANT_APP_ID: b9227417-33f4-4c3d-9c88-612e094aff89
+          VITE_APP_URL: https://7aba.store
+          VITE_GOOGLE_CLIENT_ID: 16915599620-b4cv7djgvok8agu1lpb2cbcdfjifbu93.apps.googleusercontent.com
+          VITE_CHARGILY_PUBLIC_KEY: test_pk_9MgGDzJQ03LZzxaGGEiShDsRz1BL4tCRBJFHJcEb
         run: pnpm build
 
       - name: Deploy platform to Cloudflare Pages
