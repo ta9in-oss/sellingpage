@@ -1,6 +1,9 @@
 // apps/platform/src/routes/dashboard/deploy.tsx
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useEffect } from 'react'
 import { DeployWizard } from '@/components/deploy/DeployWizard'
+import { db } from '@/lib/instantdb'
+import { Loader2 } from 'lucide-react'
 
 export const Route = createFileRoute('/dashboard/deploy')({
   validateSearch: (search) => ({
@@ -12,6 +15,31 @@ export const Route = createFileRoute('/dashboard/deploy')({
 
 function DeployPage() {
   const { storeId, tier } = Route.useSearch()
+  const navigate = useNavigate()
+  const { isLoading: authLoading, user } = db.useAuth()
+
+  const { data, isLoading: dataLoading } = db.useQuery(
+    user?.email ? { platformUsers: { $: { where: { email: user.email } } } } : null
+  )
+  const platformUser = (data?.platformUsers ?? [])[0] as { tier?: string } | undefined
+
+  useEffect(() => {
+    if (authLoading || (user && dataLoading)) return
+    if (!user || !platformUser?.tier) {
+      navigate({ to: '/dashboard', replace: true })
+    }
+  }, [authLoading, dataLoading, user, platformUser, navigate])
+
+  if (authLoading || (user && dataLoading)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+
+  if (!user || !platformUser?.tier) return null
+
   if (!storeId) {
     return (
       <div className="min-h-screen flex items-center justify-center">

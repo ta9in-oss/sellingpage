@@ -4,6 +4,7 @@ import { BuilderLayout } from '@/components/builder/BuilderLayout'
 import { db } from '@/lib/instantdb'
 import { id } from '@instantdb/react'
 import { useLang } from '@/hooks/useLang'
+import { Loader2 } from 'lucide-react'
 import type { User } from '@instantdb/react'
 
 export const Route = createFileRoute('/dashboard/builder')({
@@ -17,10 +18,38 @@ export const Route = createFileRoute('/dashboard/builder')({
 function BuilderPage() {
   const { storeId, plan } = Route.useSearch()
   const navigate = useNavigate()
-  const { user } = db.useAuth()
+  const { isLoading: authLoading, user } = db.useAuth()
+
+  // Query user tier only when we have an email
+  const { data, isLoading: dataLoading } = db.useQuery(
+    user?.email ? { platformUsers: { $: { where: { email: user.email } } } } : null
+  )
+  const platformUser = (data?.platformUsers ?? [])[0] as { tier?: string } | undefined
+
+  // Redirect unauthenticated or unpaid users to /dashboard
+  useEffect(() => {
+    if (authLoading || (user && dataLoading)) return
+    if (!user) {
+      navigate({ to: '/dashboard', replace: true })
+      return
+    }
+    if (!platformUser?.tier) {
+      navigate({ to: '/dashboard', replace: true })
+    }
+  }, [authLoading, dataLoading, user, platformUser, navigate])
+
+  if (authLoading || (user && dataLoading)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+
+  if (!user || !platformUser?.tier) return null
 
   if (storeId === 'new') {
-    return <CreateAndRedirect navigate={navigate} plan={plan} user={user ?? null} />
+    return <CreateAndRedirect navigate={navigate} plan={plan} user={user} />
   }
 
   return <BuilderLayout storeId={storeId} />
@@ -33,14 +62,14 @@ function CreateAndRedirect({
 }: {
   navigate: ReturnType<typeof useNavigate>
   plan: string
-  user: User | null
+  user: User
 }) {
   const { dir } = useLang()
   useEffect(() => {
     const newId = id()
     db.transact(
       db.tx.stores[newId].update({
-        userId: user?.id ?? '',
+        userId: user.id,
         slug: newId.slice(0, 8),
         config: { plan: plan || 'simple' },
         status: 'draft',

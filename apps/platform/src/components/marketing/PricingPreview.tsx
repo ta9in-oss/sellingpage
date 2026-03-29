@@ -54,8 +54,8 @@ export function PricingPreview() {
               </div>
 
               <Link
-                to="/dashboard/builder"
-                search={{ storeId: 'new', plan: tier.id }}
+                to="/dashboard"
+                search={{ plan: tier.id } as any}
                 className={cn(
                   'mt-auto text-center text-sm font-black py-2.5 border-2 border-black transition-all',
                   tier.accent
