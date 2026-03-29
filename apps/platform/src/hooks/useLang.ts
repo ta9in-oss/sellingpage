@@ -11,5 +11,5 @@ export function useLang() {
     setLang(next)
   }
 
-  return { lang, toggle, t, dir }
+  return { lang, setLang, toggle, t, dir }
 }

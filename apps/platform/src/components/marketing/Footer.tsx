@@ -1,14 +1,6 @@
 import { useLang } from '@/hooks/useLang'
 import { Link } from '@tanstack/react-router'
-
-const T = {
-  tagline: { ar: 'منصة التجارة الإلكترونية الجزائرية', fr: 'La plateforme e-commerce algérienne', en: 'Algerian e-commerce platform' },
-  copyright: { ar: '© 2026 7aba.store. جميع الحقوق محفوظة.', fr: '© 2026 7aba.store. Tous droits réservés.', en: '© 2026 7aba.store. All rights reserved.' },
-  support: { ar: 'الدعم عبر WhatsApp', fr: 'Support WhatsApp', en: 'WhatsApp support' },
-  pricing: { ar: 'الأسعار', fr: 'Tarifs', en: 'Pricing' },
-  howItWorks: { ar: 'كيف يعمل؟', fr: 'Comment ça marche?', en: 'How it works' },
-  demo: { ar: 'عرض تجريبي', fr: 'Démo', en: 'Demo' },
-}
+import { footer as T } from '@/locales'
 
 export function Footer() {
   const { t } = useLang()

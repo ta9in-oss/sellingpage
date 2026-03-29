@@ -45,7 +45,7 @@ export const Route = createRootRoute({
 
 function RootComponent() {
   return (
-    <html lang="ar" dir="rtl" className="dark">
+    <html className="dark" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>

@@ -1,52 +1,7 @@
 import { useLang } from '@/hooks/useLang'
 import { Link } from '@tanstack/react-router'
 import { cn } from '@/lib/utils'
-
-const T = {
-  title: { ar: 'الأسعار', fr: 'Tarifs', en: 'Pricing' },
-  sub: {
-    ar: 'دفع مرة واحدة. لا اشتراكات. لا مفاجآت.',
-    fr: 'Payez une fois. Pas d\'abonnements. Pas de surprises.',
-    en: 'Pay once. No subscriptions. No surprises.',
-  },
-  cta: { ar: 'اختر هذه الباقة', fr: 'Choisir ce forfait', en: 'Choose this plan' },
-  once: { ar: 'دفع مرة واحدة', fr: 'Paiement unique', en: 'One-time payment' },
-}
-
-const tiers = [
-  {
-    id: 'simple',
-    name: { ar: 'بسيط', fr: 'Simple', en: 'Simple' },
-    dzd: '3,900',
-    usd: '$29',
-    badge: { ar: 'الأكثر شيوعاً', fr: 'Le plus populaire', en: 'Most popular' },
-    accent: true,
-  },
-  {
-    id: 'pro',
-    name: { ar: 'احترافي', fr: 'Pro', en: 'Pro' },
-    dzd: '14,900',
-    usd: '$99',
-    badge: null,
-    accent: false,
-  },
-  {
-    id: 'studio',
-    name: { ar: 'ستوديو', fr: 'Studio', en: 'Studio' },
-    dzd: '49,000',
-    usd: '$299',
-    badge: null,
-    accent: false,
-  },
-  {
-    id: 'partner',
-    name: { ar: 'راعي', fr: 'Partenaire', en: 'Partner' },
-    dzd: '99,000+',
-    usd: '$500+',
-    badge: null,
-    accent: false,
-  },
-]
+import { pricingPreview as locale } from '@/locales'
 
 export function PricingPreview() {
   const { t } = useLang()
@@ -56,13 +11,13 @@ export function PricingPreview() {
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-3xl lg:text-4xl font-black text-black mb-3">
-            {t(T.title)}
+            {t(locale.title)}
           </h2>
-          <p className="text-lg text-black/60">{t(T.sub)}</p>
+          <p className="text-lg text-black/60">{t(locale.sub)}</p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {tiers.map((tier, i) => (
+          {locale.tiers.map((tier, i) => (
             <div
               key={i}
               className={cn(
@@ -94,7 +49,7 @@ export function PricingPreview() {
                   <span className="text-sm font-medium ms-1 text-black/60">DZD</span>
                 </div>
                 <div className="text-xs mt-0.5 text-black/60">
-                  {tier.usd} · {t(T.once)}
+                  {tier.usd} · {t(locale.once)}
                 </div>
               </div>
 
@@ -108,7 +63,7 @@ export function PricingPreview() {
                     : 'bg-yellow-400 text-black shadow-[2px_2px_0px_0px_#000] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]'
                 )}
               >
-                {t(T.cta)}
+                {t(locale.cta)}
               </Link>
             </div>
           ))}

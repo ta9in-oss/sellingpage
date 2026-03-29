@@ -3,10 +3,7 @@ import { useLang } from '@/hooks/useLang'
 import { cn } from '@/lib/utils'
 import { Palette, SlidersHorizontal, Bell, Rocket } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-
-const T = {
-  title: { ar: 'كيف يعمل؟', fr: 'Comment ça marche?', en: 'How it works?' },
-}
+import { howItWorks as locale } from '@/locales'
 
 const icons: Record<string, LucideIcon> = {
   Palette,
@@ -14,53 +11,6 @@ const icons: Record<string, LucideIcon> = {
   Bell,
   Rocket,
 }
-
-const steps = [
-  {
-    icon: 'Palette',
-    ar: 'اختر قالبك',
-    fr: 'Choisissez votre thème',
-    en: 'Pick your template',
-    desc: {
-      ar: '3 قوالب بسيط، جريء، دافئ',
-      fr: '3 thèmes optimisés pour vendre',
-      en: '3 themes: simple, bold, warm',
-    },
-  },
-  {
-    icon: 'SlidersHorizontal',
-    ar: 'خصص محتواك',
-    fr: 'Personnalisez le contenu',
-    en: 'Customize your content',
-    desc: {
-      ar: 'صور، نصوص، أسعار — كل شيء بصري',
-      fr: 'Images, textes, prix — tout visuel',
-      en: 'Images, text, prices — all visual',
-    },
-  },
-  {
-    icon: 'Bell',
-    ar: 'FOMO للزبائن — تلقائي',
-    fr: 'FOMO automatique pour vos clients',
-    en: 'FOMO for customers — automatic',
-    desc: {
-      ar: 'زوار متجرك يشوفوا: "شخص من وهران طلب للتو" — يخلق إلحاح ويرفع المبيعات',
-      fr: 'Les visiteurs voient : "Quelqu\'un d\'Oran vient de commander" — urgence automatique',
-      en: 'Visitors see: "Someone from Oran just ordered" — creates urgency, boosts sales',
-    },
-  },
-  {
-    icon: 'Rocket',
-    ar: 'أطلق متجرك + داشبورد',
-    fr: 'Lancez + Dashboard complet',
-    en: 'Launch + Dashboard',
-    desc: {
-      ar: 'نشر تلقائي على Cloudflare مع داشبورد لإدارة الطلبات',
-      fr: 'Déploiement Cloudflare + dashboard pour gérer vos commandes',
-      en: 'Auto-deploy on Cloudflare with orders dashboard',
-    },
-  },
-]
 
 export function HowItWorks() {
   const { t } = useLang()
@@ -84,15 +34,16 @@ export function HowItWorks() {
   return (
     <section id="how" ref={ref} className="py-24 px-4 bg-white border-y-2 border-black">
       <div className="max-w-5xl mx-auto">
-        <h2 className="text-4xl font-black text-black mb-16 border-r-4 border-yellow-400 pr-4 text-right">
-          {t(T.title)}
+        {/* Heading border flips with reading direction via logical properties */}
+        <h2 className="text-4xl font-black text-black mb-16 border-s-4 border-yellow-400 ps-4 text-start">
+          {t(locale.title)}
         </h2>
 
         <div className="relative grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Dashed connector on desktop */}
           <div className="hidden md:block absolute top-8 h-px border-t-2 border-dashed border-black left-[calc(12.5%+2rem)] right-[calc(12.5%+2rem)]" />
 
-          {steps.map((step, i) => {
+          {locale.steps.map((step, i) => {
             const Icon = icons[step.icon]
             return (
               <div
@@ -117,7 +68,7 @@ export function HowItWorks() {
                 </div>
 
                 <h3 className="font-black text-black text-lg mb-2">
-                  {t({ ar: step.ar, fr: step.fr, en: step.en })}
+                  {t(step.label)}
                 </h3>
                 <p className="text-black/60 text-sm leading-relaxed">
                   {t(step.desc)}

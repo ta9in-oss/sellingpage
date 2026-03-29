@@ -1,16 +1,11 @@
 import { useLang } from '@/hooks/useLang'
+import type { Lang } from '@/hooks/useLang'
 import { Link } from '@tanstack/react-router'
 import { cn } from '@/lib/utils'
-
-const T = {
-  pricing: { ar: 'الأسعار', fr: 'Tarifs', en: 'Pricing' },
-  howItWorks: { ar: 'كيف يعمل؟', fr: 'Comment ça marche?', en: 'How it works' },
-  demo: { ar: 'عرض تجريبي', fr: 'Démo', en: 'Demo' },
-  start: { ar: 'ابدأ الآن', fr: 'Commencer', en: 'Get started' },
-}
+import { navbar as T } from '@/locales'
 
 export function Navbar() {
-  const { lang, toggle, t } = useLang()
+  const { lang, setLang, t } = useLang()
 
   return (
     <header className="fixed top-0 inset-x-0 z-50 bg-white border-b-2 border-black">
@@ -42,13 +37,17 @@ export function Navbar() {
 
         {/* Right actions */}
         <div className="flex items-center gap-3">
-          <button
-            onClick={toggle}
-            className="text-xs font-bold px-2.5 py-1.5 border-2 border-black bg-white hover:bg-yellow-400 transition-colors"
-            aria-label="Toggle language"
+          {/* Language dropdown — shows all 3 options at once */}
+          <select
+            value={lang}
+            onChange={(e) => setLang(e.target.value as Lang)}
+            aria-label={t(T.langLabel)}
+            className="text-xs font-bold px-2.5 py-1.5 border-2 border-black bg-white hover:bg-yellow-400 transition-colors cursor-pointer"
           >
-            {lang === 'ar' ? 'FR' : lang === 'fr' ? 'EN' : 'عر'}
-          </button>
+            <option value="ar">عربي</option>
+            <option value="fr">Français</option>
+            <option value="en">English</option>
+          </select>
           <Link
             to="/dashboard" search={{}}
             className={cn(

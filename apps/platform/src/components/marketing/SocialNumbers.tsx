@@ -1,11 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLang } from '@/hooks/useLang'
-
-const stats = [
-  { value: 500, suffix: '+', ar: 'متجر منشور', fr: 'Boutiques lancées', en: '500+ stores launched' },
-  { value: 99, suffix: '%', ar: 'رضا العملاء', fr: 'Satisfaction client', en: '99% satisfaction' },
-  { value: 2, suffix: 'د', ar: 'متوسط وقت النشر', fr: 'Temps de déploiement', en: 'avg deploy time' },
-]
+import { socialNumbers as locale } from '@/locales'
 
 function useCountUp(target: number, duration = 1500, active: boolean) {
   const [count, setCount] = useState(0)
@@ -74,12 +69,12 @@ export function SocialNumbers() {
       className="py-24 px-4 bg-yellow-400 border-y-2 border-black"
     >
       <div className="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-12">
-        {stats.map((stat, i) => (
+        {locale.stats.map((stat, i) => (
           <StatCard
             key={i}
             value={stat.value}
             suffix={stat.suffix}
-            label={t({ ar: stat.ar, fr: stat.fr, en: stat.en })}
+            label={t(stat.label)}
             active={active}
           />
         ))}

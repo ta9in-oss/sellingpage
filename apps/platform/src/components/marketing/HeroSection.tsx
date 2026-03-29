@@ -1,17 +1,7 @@
 import { useLang } from '@/hooks/useLang'
 import { Link } from '@tanstack/react-router'
 import { cn } from '@/lib/utils'
-
-const T = {
-  headline: { ar: 'أطلق متجرك الإلكتروني في دقيقتين', fr: 'Lancez votre boutique en 2 minutes', en: 'Launch your online store in 2 minutes' },
-  sub: {
-    ar: 'منصة بناء المتاجر للتجار الجزائريين. ادفع مرة واحدة، اكتسب كل شيء.',
-    fr: 'La plateforme e-commerce pour les marchands algériens. Payez une fois, possédez tout.',
-    en: 'The e-commerce platform for Algerian merchants. Pay once, own everything.',
-  },
-  cta1: { ar: 'ابدأ الآن', fr: 'Commencer maintenant', en: 'Get started' },
-  cta2: { ar: 'شوف مثال حي', fr: 'Voir un exemple', en: 'Live demo' },
-}
+import { hero as T } from '@/locales'
 
 export function HeroSection() {
   const { t } = useLang()
@@ -33,8 +23,8 @@ export function HeroSection() {
           {t(T.headline)}
         </h1>
 
-        {/* Sub */}
-        <p className="text-xl text-black/70 max-w-2xl leading-relaxed font-medium border-r-4 border-yellow-400 pr-4 text-right">
+        {/* Sub — border flips with reading direction via logical properties */}
+        <p className="text-xl text-black/70 max-w-2xl leading-relaxed font-medium border-s-4 border-yellow-400 ps-4 text-start">
           {t(T.sub)}
         </p>
 

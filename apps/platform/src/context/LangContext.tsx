@@ -31,9 +31,9 @@ export function LangProvider({ children }: { children: ReactNode }) {
     document.documentElement.lang = lang
   }, [lang, dir])
 
-  // Falls back: en → fr → ar
+  // Falls back: selected lang → en → fr → ar
   const t = (obj: Partial<Record<Lang, string>> & { ar: string }): string =>
-    obj[lang] ?? obj['fr'] ?? obj['ar']
+    obj[lang] ?? obj['en'] ?? obj['fr'] ?? obj['ar']
 
   return (
     <LangContext.Provider value={{ lang, setLang, t, dir }}>
