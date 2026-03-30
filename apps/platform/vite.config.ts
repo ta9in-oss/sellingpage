@@ -15,6 +15,15 @@ export default defineConfig({
             server: {
                 // @ts-expect-error preset is valid at runtime
                 preset: process.env.CF_PAGES ? 'cloudflare-pages' : 'node-server',
+                // Allow Google OAuth popup communication on all routes
+                routeRules: {
+                    '/**': {
+                        headers: {
+                            'Cross-Origin-Opener-Policy': 'unsafe-none',
+                            'Cross-Origin-Embedder-Policy': 'unsafe-none',
+                        },
+                    },
+                },
             },
         }),
         viteReact(),
