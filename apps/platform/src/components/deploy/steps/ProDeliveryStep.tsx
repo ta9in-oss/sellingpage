@@ -3,6 +3,7 @@ import { cn } from '@/lib/utils'
 import { getDownloadUrl } from '@/server/getDownloadUrl'
 import type { DownloadType } from '@/server/getDownloadUrl'
 import { Download, Package, Smartphone, Code2 } from 'lucide-react'
+import { useLang } from '@/hooks/useLang'
 
 interface Props {
   storeId: string
@@ -10,7 +11,22 @@ interface Props {
   tier: 'starter' | 'pro' | 'agency'
 }
 
+const T = {
+  sourceCode: { ar: 'الكود المصدري', fr: 'Code source', en: 'Source code' },
+  sourceCodeDesc: { ar: 'احصل على كود متجرك ومنصتك', fr: 'Obtenez le code de votre boutique et de votre plateforme', en: 'Get the code for your store and platform' },
+  downloadFailed: { ar: 'تعذّر التحميل. أعد المحاولة.', fr: 'Échec du téléchargement. Réessayez.', en: 'Download failed. Please try again.' },
+  storeSourceLabel: { ar: 'كود المتجر (React)', fr: 'Code de la boutique (React)', en: 'Store code (React)' },
+  storeSourceDesc: { ar: 'كود مصدر متجرك بالكامل — TanStack Start + React 19', fr: 'Code source complet de votre boutique — TanStack Start + React 19', en: 'Full store source code — TanStack Start + React 19' },
+  storeAppLabel: { ar: 'كود تطبيق المتجر', fr: 'Code de l\'application mobile', en: 'Store app code' },
+  storeAppDesc: { ar: 'كود مصدر تطبيق الجوال للمتجر', fr: 'Code source de l\'application mobile de la boutique', en: 'Store mobile app source code' },
+  platformSourceLabel: { ar: 'كود المنصة الكاملة', fr: 'Code complet de la plateforme', en: 'Full platform code' },
+  platformSourceDesc: { ar: 'كود مصدر منصة حبة ستور بالكامل', fr: 'Code source complet de la plateforme 7aba Store', en: 'Full 7aba Store platform source code' },
+  downloading: { ar: 'جارٍ التحميل...', fr: 'Chargement...', en: 'Loading...' },
+  download: { ar: 'تحميل', fr: 'Télécharger', en: 'Download' },
+}
+
 export function ProDeliveryStep({ userEmail, tier }: Props) {
+  const { t } = useLang()
   const [downloading, setDownloading] = useState<DownloadType | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -28,7 +44,7 @@ export function ProDeliveryStep({ userEmail, tier }: Props) {
       a.click()
       document.body.removeChild(a)
     } catch (e: unknown) {
-      setError((e as Error)?.message ?? 'تعذّر التحميل. أعد المحاولة.')
+      setError((e as Error)?.message ?? t(T.downloadFailed))
     } finally {
       setDownloading(null)
     }
@@ -45,22 +61,22 @@ export function ProDeliveryStep({ userEmail, tier }: Props) {
   const items: DownloadItem[] = [
     {
       type: 'store-source',
-      label: 'كود المتجر (React)',
-      description: 'كود مصدر متجرك بالكامل — TanStack Start + React 19',
+      label: t(T.storeSourceLabel),
+      description: t(T.storeSourceDesc),
       icon: <Package className="h-5 w-5 text-white" />,
       tiers: ['pro', 'agency'],
     },
     {
       type: 'store-app',
-      label: 'كود تطبيق المتجر',
-      description: 'كود مصدر تطبيق الجوال للمتجر',
+      label: t(T.storeAppLabel),
+      description: t(T.storeAppDesc),
       icon: <Smartphone className="h-5 w-5 text-white" />,
       tiers: ['pro', 'agency'],
     },
     {
       type: 'platform-source',
-      label: 'كود المنصة الكاملة',
-      description: 'كود مصدر منصة حبة ستور بالكامل',
+      label: t(T.platformSourceLabel),
+      description: t(T.platformSourceDesc),
       icon: <Code2 className="h-5 w-5 text-white" />,
       tiers: ['agency'],
     },
@@ -71,10 +87,8 @@ export function ProDeliveryStep({ userEmail, tier }: Props) {
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-lg font-bold">الكود المصدري</h2>
-        <p className="text-sm text-muted-foreground mt-1">
-          احصل على كود متجرك ومنصتك
-        </p>
+        <h2 className="text-lg font-bold">{t(T.sourceCode)}</h2>
+        <p className="text-sm text-muted-foreground mt-1">{t(T.sourceCodeDesc)}</p>
       </div>
 
       {error && (
@@ -106,12 +120,12 @@ export function ProDeliveryStep({ userEmail, tier }: Props) {
               {downloading === item.type ? (
                 <>
                   <span className="animate-spin text-xs">⏳</span>
-                  <span>جارٍ التحميل...</span>
+                  <span>{t(T.downloading)}</span>
                 </>
               ) : (
                 <>
                   <Download className="h-4 w-4" />
-                  <span>تحميل</span>
+                  <span>{t(T.download)}</span>
                 </>
               )}
             </button>
@@ -131,4 +145,3 @@ function GitHubIcon() {
 }
 // Keep export to avoid TS unused warning
 export { GitHubIcon as _GitHubIcon }
-

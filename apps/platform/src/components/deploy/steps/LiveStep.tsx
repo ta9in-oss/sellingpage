@@ -3,13 +3,31 @@ import { useNavigate } from '@tanstack/react-router'
 import { db } from '@/lib/instantdb'
 import { cn } from '@/lib/utils'
 import { Copy, CheckCircle2, ExternalLink } from 'lucide-react'
+import { useLang } from '@/hooks/useLang'
 
 interface Props {
   storeId: string
 }
 
+const T = {
+  storeIsLive: { ar: 'متجرك الآن يعمل على الإنترنت! 🎉', fr: 'Votre boutique est en ligne ! 🎉', en: 'Your store is live! 🎉' },
+  shareAndReceive: { ar: 'شارك رابطك واستقبل طلباتك', fr: 'Partagez votre lien et recevez vos commandes', en: 'Share your link and receive orders' },
+  storeUrl: { ar: 'رابط المتجر', fr: 'Lien de la boutique', en: 'Store URL' },
+  copyUrl: { ar: 'نسخ الرابط', fr: 'Copier le lien', en: 'Copy link' },
+  shareWhatsapp: { ar: 'مشاركة عبر واتساب', fr: 'Partager via WhatsApp', en: 'Share via WhatsApp' },
+  whatsappText: { ar: 'اكتشف متجري الجديد:', fr: 'Découvrez ma nouvelle boutique:', en: 'Check out my new store:' },
+  adminCredentials: { ar: 'بيانات دخول لوحة التحكم', fr: 'Identifiants du tableau de bord', en: 'Dashboard credentials' },
+  adminCredentialsHint: { ar: 'أرسل هذه المعلومات لمدير المتجر حتى يتمكن من الدخول ومتابعة الطلبات', fr: 'Envoyez ces informations à l\'administrateur pour qu\'il puisse se connecter et suivre les commandes', en: 'Send this info to the store admin so they can log in and track orders' },
+  adminEmail: { ar: 'البريد الإلكتروني للمدير', fr: 'E-mail de l\'administrateur', en: 'Admin email' },
+  dashboardUrl: { ar: 'رابط لوحة التحكم', fr: 'Lien du tableau de bord', en: 'Dashboard URL' },
+  howToLogin: { ar: 'كيف يسجل الدخول؟', fr: 'Comment se connecter ?', en: 'How to log in?' },
+  loginInstructions: { ar: 'يزور رابط لوحة التحكم، يدخل بريده الإلكتروني، ويستقبل رمز الدخول على بريده.', fr: "Visitez le lien du tableau de bord, entrez votre e-mail et recevez le code d'accès.", en: 'Visit the dashboard link, enter your email, and receive the access code by email.' },
+  backToDashboard: { ar: 'العودة للوحة التحكم', fr: 'Retour au tableau de bord', en: 'Back to dashboard' },
+}
+
 export function LiveStep({ storeId }: Props) {
   const navigate = useNavigate()
+  const { t } = useLang()
   const [copiedUrl, setCopiedUrl] = useState(false)
   const [copiedEmail, setCopiedEmail] = useState(false)
   const [checkmarkVisible, setCheckmarkVisible] = useState(false)
@@ -33,7 +51,7 @@ export function LiveStep({ storeId }: Props) {
   }
 
   const dashboardUrl = deployedUrl ? `${deployedUrl}/dashboard` : ''
-  const whatsappText = `اكتشف متجري الجديد: ${deployedUrl}`
+  const whatsappText = `${t(T.whatsappText)} ${deployedUrl}`
 
   return (
     <div className="flex flex-col items-center gap-6 py-4 text-center">
@@ -50,14 +68,14 @@ export function LiveStep({ storeId }: Props) {
       </div>
 
       <div>
-        <h2 className="text-2xl font-bold">متجرك الآن يعمل على الإنترنت! 🎉</h2>
-        <p className="text-muted-foreground text-sm mt-1">شارك رابطك واستقبل طلباتك</p>
+        <h2 className="text-2xl font-bold">{t(T.storeIsLive)}</h2>
+        <p className="text-muted-foreground text-sm mt-1">{t(T.shareAndReceive)}</p>
       </div>
 
       {/* Store URL */}
       {deployedUrl ? (
         <div className="w-full max-w-md space-y-3 text-right" dir="rtl">
-          <p className="text-sm font-semibold">رابط المتجر</p>
+          <p className="text-sm font-semibold">{t(T.storeUrl)}</p>
           <div className="flex items-center gap-2" dir="ltr">
             <a
               href={deployedUrl}
@@ -70,7 +88,7 @@ export function LiveStep({ storeId }: Props) {
             <button
               onClick={() => copyText(deployedUrl, setCopiedUrl)}
               className="p-2 border rounded-lg hover:bg-muted transition-colors shrink-0"
-              title="نسخ الرابط"
+              title={t(T.copyUrl)}
             >
               {copiedUrl ? <CheckCircle2 size={16} className="text-green-500" /> : <Copy size={16} />}
             </button>
@@ -91,7 +109,7 @@ export function LiveStep({ storeId }: Props) {
             rel="noopener noreferrer"
             className="w-full flex items-center justify-center py-2.5 rounded-lg text-sm font-semibold bg-[#25D366] text-white hover:bg-[#1ebe5b] transition-colors"
           >
-            مشاركة عبر واتساب
+            {t(T.shareWhatsapp)}
           </a>
         </div>
       ) : (
@@ -103,15 +121,13 @@ export function LiveStep({ storeId }: Props) {
         <div className="w-full max-w-md border-2 border-yellow-400 bg-yellow-50 rounded-xl p-5 text-right space-y-3" dir="rtl">
           <div className="flex items-center gap-2">
             <span className="text-lg">🔑</span>
-            <p className="font-bold text-sm">بيانات دخول لوحة التحكم</p>
+            <p className="font-bold text-sm">{t(T.adminCredentials)}</p>
           </div>
-          <p className="text-xs text-muted-foreground">
-            أرسل هذه المعلومات لمدير المتجر حتى يتمكن من الدخول ومتابعة الطلبات
-          </p>
+          <p className="text-xs text-muted-foreground">{t(T.adminCredentialsHint)}</p>
 
           {/* Admin email */}
           <div className="space-y-1">
-            <p className="text-xs font-medium text-muted-foreground">البريد الإلكتروني للمدير</p>
+            <p className="text-xs font-medium text-muted-foreground">{t(T.adminEmail)}</p>
             <div className="flex items-center gap-2" dir="ltr">
               <span className="flex-1 px-3 py-2 bg-white border rounded-lg text-sm font-mono truncate">
                 {adminEmail}
@@ -128,7 +144,7 @@ export function LiveStep({ storeId }: Props) {
           {/* Dashboard URL */}
           {dashboardUrl && (
             <div className="space-y-1">
-              <p className="text-xs font-medium text-muted-foreground">رابط لوحة التحكم</p>
+              <p className="text-xs font-medium text-muted-foreground">{t(T.dashboardUrl)}</p>
               <div className="flex items-center gap-2" dir="ltr">
                 <a
                   href={dashboardUrl}
@@ -151,7 +167,7 @@ export function LiveStep({ storeId }: Props) {
           )}
 
           <div className="text-xs text-muted-foreground bg-white border rounded-lg p-3">
-            <strong>كيف يسجل الدخول؟</strong> يزور رابط لوحة التحكم، يدخل بريده الإلكتروني، ويستقبل رمز الدخول على بريده.
+            <strong>{t(T.howToLogin)}</strong> {t(T.loginInstructions)}
           </div>
         </div>
       )}
@@ -161,7 +177,7 @@ export function LiveStep({ storeId }: Props) {
         onClick={() => navigate({ to: '/dashboard', search: {} })}
         className="w-full max-w-md py-3 rounded-lg font-semibold text-sm bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
       >
-        العودة للوحة التحكم
+        {t(T.backToDashboard)}
       </button>
     </div>
   )

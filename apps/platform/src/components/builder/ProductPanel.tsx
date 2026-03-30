@@ -1,9 +1,21 @@
 import { useBuilderStore } from '@/hooks/useBuilderStore'
 import { cn } from '@/lib/utils'
 import { Plus, Trash2, Package } from 'lucide-react'
+import { useLang } from '@/hooks/useLang'
+
+const T = {
+  product: { ar: 'المنتج', fr: 'Produit', en: 'Product' },
+  productName: { ar: 'اسم المنتج', fr: 'Nom du produit', en: 'Product name' },
+  productNamePlaceholder: { ar: 'مثال: حقيبة ظهر فاخرة', fr: 'Ex: Sac à dos de luxe', en: 'Ex: Premium backpack' },
+  price: { ar: 'السعر', fr: 'Prix', en: 'Price' },
+  productImages: { ar: 'صور المنتج', fr: 'Images du produit', en: 'Product images' },
+  addImageUrl: { ar: 'إضافة رابط', fr: 'Ajouter un lien', en: 'Add URL' },
+  noImages: { ar: 'أضف رابط صورة لعرض صور المنتج في المعاينة', fr: "Ajoutez une URL d'image pour afficher les images dans l'aperçu", en: 'Add an image URL to show product images in the preview' },
+}
 
 export function ProductPanel() {
   const { config, updateProduct } = useBuilderStore()
+  const { t } = useLang()
   const { name, price, currency, images } = config.product
 
   const addImage = () => {
@@ -23,25 +35,25 @@ export function ProductPanel() {
     <div className="space-y-5 p-4" dir="rtl">
       <div className="flex items-center gap-2 pb-1 border-b border-zinc-100">
         <Package size={14} className="text-zinc-400" />
-        <h2 className="font-bold text-sm text-zinc-500 uppercase tracking-wide">المنتج</h2>
+        <h2 className="font-bold text-sm text-zinc-500 uppercase tracking-wide">{t(T.product)}</h2>
       </div>
 
       {/* Product Name */}
       <div className="space-y-1">
-        <label className="block text-sm font-medium">اسم المنتج</label>
+        <label className="block text-sm font-medium">{t(T.productName)}</label>
         <input
           type="text"
           value={name}
           onChange={(e) => updateProduct({ name: e.target.value })}
           className="w-full rounded border border-zinc-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
-          placeholder="مثال: حقيبة ظهر فاخرة"
+          placeholder={t(T.productNamePlaceholder)}
           dir="rtl"
         />
       </div>
 
       {/* Price + Currency */}
       <div className="space-y-1">
-        <label className="block text-sm font-medium">السعر</label>
+        <label className="block text-sm font-medium">{t(T.price)}</label>
         <div className="flex gap-2">
           <input
             type="number"
@@ -71,7 +83,7 @@ export function ProductPanel() {
       {/* Product Images */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <label className="block text-sm font-medium">صور المنتج</label>
+          <label className="block text-sm font-medium">{t(T.productImages)}</label>
           <button
             onClick={addImage}
             disabled={images.length >= 8}
@@ -80,13 +92,13 @@ export function ProductPanel() {
               images.length >= 8 ? 'opacity-40 cursor-not-allowed' : 'hover:border-zinc-900'
             )}
           >
-            <Plus size={12} /> إضافة رابط
+            <Plus size={12} /> {t(T.addImageUrl)}
           </button>
         </div>
 
         {images.length === 0 && (
           <p className="text-xs text-zinc-400 text-center py-3 border border-dashed border-zinc-200 rounded">
-            أضف رابط صورة لعرض صور المنتج في المعاينة
+            {t(T.noImages)}
           </p>
         )}
 

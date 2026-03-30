@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils'
 import { X, Eye, EyeOff, Save, Loader2 } from 'lucide-react'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
+import { useLang } from '@/hooks/useLang'
 
 interface StoreSettingsModalProps {
   storeId: string
@@ -22,12 +23,32 @@ interface StoreSettingsModalProps {
   onClose: () => void
 }
 
+const T = {
+  deploySettings: { ar: 'إعدادات النشر', fr: 'Paramètres de déploiement', en: 'Deployment settings' },
+  close: { ar: 'إغلاق', fr: 'Fermer', en: 'Close' },
+  cfSettings: { ar: 'إعدادات Cloudflare', fr: 'Paramètres Cloudflare', en: 'Cloudflare settings' },
+  cfAccountIdHint: { ar: 'من', fr: 'Depuis', en: 'From' },
+  cfAccountIdHint2: { ar: '← Workers & Pages ← نظرة عامة ← Account ID', fr: '← Workers & Pages ← Vue d\'ensemble ← Account ID', en: '← Workers & Pages ← Overview ← Account ID' },
+  cfApiTokenHint: { ar: 'يجب أن يكون لديه صلاحية', fr: 'Doit avoir la permission', en: 'Must have permission' },
+  cfApiTokenHint2: { ar: '(Profile → API Tokens → Create Token)', fr: '(Profile → API Tokens → Créer un token)', en: '(Profile → API Tokens → Create Token)' },
+  instantSettings: { ar: 'إعدادات InstantDB', fr: 'Paramètres InstantDB', en: 'InstantDB settings' },
+  instantAppIdHint: { ar: 'من', fr: 'Depuis', en: 'From' },
+  instantAppIdHint2: { ar: '← اختر تطبيقك ← App Settings', fr: '← Choisissez votre application ← App Settings', en: '← Choose your app ← App Settings' },
+  instantAdminTokenHint: { ar: 'Admin token للوصول الخلفي إلى بيانات متجرك.', fr: 'Admin token pour l\'accès backend aux données de votre boutique.', en: 'Admin token for backend access to your store data.' },
+  cancel: { ar: 'إلغاء', fr: 'Annuler', en: 'Cancel' },
+  savingSettings: { ar: 'جارٍ الحفظ...', fr: 'Enregistrement...', en: 'Saving...' },
+  savedSettings: { ar: '✓ تم الحفظ', fr: '✓ Enregistré', en: '✓ Saved' },
+  saveSettings: { ar: 'حفظ الإعدادات', fr: 'Enregistrer', en: 'Save settings' },
+  saveFailed: { ar: 'تعذر الحفظ. حاول مجدداً.', fr: 'Impossible d\'enregistrer. Réessayez.', en: 'Failed to save. Please try again.' },
+}
+
 export function StoreSettingsModal({
   storeId,
   storeName,
   initialValues,
   onClose,
 }: StoreSettingsModalProps) {
+  const { t } = useLang()
   const [cfAccountId, setCfAccountId] = useState(initialValues.cfAccountId ?? '')
   const [cfApiToken, setCfApiToken] = useState(initialValues.cfApiToken ?? '')
   const [instantAppId, setInstantAppId] = useState(initialValues.instantAppId ?? '')
@@ -61,7 +82,7 @@ export function StoreSettingsModal({
       setSaved(true)
       setTimeout(() => setSaved(false), 2500)
     } catch (e: unknown) {
-      setError((e as Error)?.message ?? 'تعذر الحفظ. حاول مجدداً.')
+      setError((e as Error)?.message ?? t(T.saveFailed))
     } finally {
       setSaving(false)
     }
@@ -77,13 +98,13 @@ export function StoreSettingsModal({
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b-2 border-black">
           <div>
-            <h2 className="text-lg font-black">إعدادات النشر</h2>
+            <h2 className="text-lg font-black">{t(T.deploySettings)}</h2>
             <p className="text-xs text-zinc-500 mt-0.5">{storeName}</p>
           </div>
           <button
             onClick={onClose}
             className="p-1.5 border-2 border-transparent hover:border-black transition-colors"
-            aria-label="إغلاق"
+            aria-label={t(T.close)}
           >
             <X size={16} />
           </button>
@@ -96,7 +117,7 @@ export function StoreSettingsModal({
               <div className="w-6 h-6 bg-[#F6821F] flex items-center justify-center shrink-0">
                 <span className="text-white text-xs font-black">CF</span>
               </div>
-              <h3 className="font-black text-sm">إعدادات Cloudflare</h3>
+              <h3 className="font-black text-sm">{t(T.cfSettings)}</h3>
             </div>
             <div className="border-2 border-black p-4 space-y-3 bg-zinc-50">
               <div className="space-y-1">
@@ -109,11 +130,11 @@ export function StoreSettingsModal({
                   className="text-sm font-mono"
                 />
                 <p className="text-[11px] text-zinc-400">
-                  من{' '}
+                  {t(T.cfAccountIdHint)}{' '}
                   <a href="https://dash.cloudflare.com" target="_blank" rel="noopener noreferrer" className="underline">
                     dash.cloudflare.com
                   </a>{' '}
-                  ← Workers & Pages ← نظرة عامة ← Account ID
+                  {t(T.cfAccountIdHint2)}
                 </p>
               </div>
               <div className="space-y-1">
@@ -136,7 +157,7 @@ export function StoreSettingsModal({
                   </button>
                 </div>
                 <p className="text-[11px] text-zinc-400">
-                  يجب أن يكون لديه صلاحية <strong>Cloudflare Pages: Edit</strong> (Profile → API Tokens → Create Token)
+                  {t(T.cfApiTokenHint)} <strong>Cloudflare Pages: Edit</strong> {t(T.cfApiTokenHint2)}
                 </p>
               </div>
             </div>
@@ -148,7 +169,7 @@ export function StoreSettingsModal({
               <div className="w-6 h-6 bg-black flex items-center justify-center shrink-0">
                 <span className="text-yellow-400 text-xs font-black">DB</span>
               </div>
-              <h3 className="font-black text-sm">إعدادات InstantDB</h3>
+              <h3 className="font-black text-sm">{t(T.instantSettings)}</h3>
             </div>
             <div className="border-2 border-black p-4 space-y-3 bg-zinc-50">
               <div className="space-y-1">
@@ -161,11 +182,11 @@ export function StoreSettingsModal({
                   className="text-sm font-mono"
                 />
                 <p className="text-[11px] text-zinc-400">
-                  من{' '}
+                  {t(T.instantAppIdHint)}{' '}
                   <a href="https://instantdb.com/dash" target="_blank" rel="noopener noreferrer" className="underline">
                     instantdb.com/dash
                   </a>{' '}
-                  ← اختر تطبيقك ← App Settings
+                  {t(T.instantAppIdHint2)}
                 </p>
               </div>
               <div className="space-y-1">
@@ -187,7 +208,7 @@ export function StoreSettingsModal({
                     {showInstantToken ? <EyeOff size={14} /> : <Eye size={14} />}
                   </button>
                 </div>
-                <p className="text-[11px] text-zinc-400">Admin token للوصول الخلفي إلى بيانات متجرك.</p>
+                <p className="text-[11px] text-zinc-400">{t(T.instantAdminTokenHint)}</p>
               </div>
             </div>
           </section>
@@ -200,7 +221,7 @@ export function StoreSettingsModal({
         {/* Footer */}
         <div className="flex items-center justify-between p-5 border-t-2 border-black">
           <button onClick={onClose} className="text-sm font-bold text-zinc-500 hover:text-black">
-            إلغاء
+            {t(T.cancel)}
           </button>
           <button
             onClick={handleSave}
@@ -214,11 +235,11 @@ export function StoreSettingsModal({
             )}
           >
             {saving ? (
-              <><Loader2 size={14} className="animate-spin" /> جارٍ الحفظ...</>
+              <><Loader2 size={14} className="animate-spin" /> {t(T.savingSettings)}</>
             ) : saved ? (
-              '✓ تم الحفظ'
+              t(T.savedSettings)
             ) : (
-              <><Save size={14} /> حفظ الإعدادات</>
+              <><Save size={14} /> {t(T.saveSettings)}</>
             )}
           </button>
         </div>

@@ -8,26 +8,48 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { loadGoogleFont, FONT_OPTIONS } from '@/lib/googleFonts'
+import { useLang } from '@/hooks/useLang'
 
-const PRESET_LABELS: Record<string, string> = {
-  brutalist: 'بسيط',
-  acquisition: 'جريء',
-  warm: 'دافئ',
+const T = {
+  themeSettings: { ar: 'إعدادات القالب', fr: 'Paramètres du thème', en: 'Theme settings' },
+  colors: { ar: 'الألوان', fr: 'Couleurs', en: 'Colors' },
+  fonts: { ar: 'الخطوط', fr: 'Polices', en: 'Fonts' },
+  bodyFont: { ar: 'خط النص', fr: 'Police du texte', en: 'Body font' },
+  headingFont: { ar: 'خط العناوين', fr: 'Police des titres', en: 'Heading font' },
+  bodyPreview: { ar: 'معاينة: المنتج الأفضل في السوق', fr: 'Aperçu: Le meilleur produit du marché', en: 'Preview: The best product on the market' },
+  headingPreview: { ar: 'معاينة: عنوان رئيسي', fr: 'Aperçu: Titre principal', en: 'Preview: Main heading' },
+  borderRadius: { ar: 'استدارة الزوايا', fr: 'Rayon des coins', en: 'Border radius' },
+  direction: { ar: 'الاتجاه', fr: 'Direction', en: 'Direction' },
+  colorPrimary: { ar: 'الأساسي', fr: 'Primaire', en: 'Primary' },
+  colorAccent: { ar: 'التمييز', fr: 'Accent', en: 'Accent' },
+  colorBackground: { ar: 'الخلفية', fr: 'Arrière-plan', en: 'Background' },
+  colorForeground: { ar: 'النص', fr: 'Texte', en: 'Foreground' },
+  colorBorder: { ar: 'الحدود', fr: 'Bordure', en: 'Border' },
+  presetSimple: { ar: 'بسيط', fr: 'Simple', en: 'Simple' },
+  presetBold: { ar: 'جريء', fr: 'Audacieux', en: 'Bold' },
+  presetWarm: { ar: 'دافئ', fr: 'Chaleureux', en: 'Warm' },
 }
-
-const COLOR_LABELS: Array<{ key: keyof Theme['colors']; label: string }> = [
-  { key: 'primary', label: 'الأساسي' },
-  { key: 'accent', label: 'التمييز' },
-  { key: 'background', label: 'الخلفية' },
-  { key: 'foreground', label: 'النص' },
-  { key: 'border', label: 'الحدود' },
-]
 
 const RADIUS_OPTIONS = ['0px', '4px', '8px', '12px', '9999px']
 
 export function ThemePanel() {
   const { config, updateTheme } = useBuilderStore()
   const { theme } = config
+  const { t } = useLang()
+
+  const PRESET_LABELS: Record<string, string> = {
+    brutalist: t(T.presetSimple),
+    acquisition: t(T.presetBold),
+    warm: t(T.presetWarm),
+  }
+
+  const COLOR_LABELS: Array<{ key: keyof Theme['colors']; label: string }> = [
+    { key: 'primary', label: t(T.colorPrimary) },
+    { key: 'accent', label: t(T.colorAccent) },
+    { key: 'background', label: t(T.colorBackground) },
+    { key: 'foreground', label: t(T.colorForeground) },
+    { key: 'border', label: t(T.colorBorder) },
+  ]
 
   // Local color state — updates instantly for swatch preview without hitting Zustand
   const [localColors, setLocalColors] = useState(theme.colors)
@@ -78,7 +100,7 @@ export function ThemePanel() {
     <div className="p-4 space-y-5" dir="rtl">
       {/* Preset cards */}
       <div>
-        <p className="text-xs font-bold text-zinc-500 uppercase tracking-wide mb-3">إعدادات القالب</p>
+        <p className="text-xs font-bold text-zinc-500 uppercase tracking-wide mb-3">{t(T.themeSettings)}</p>
         <div className="grid grid-cols-3 gap-2">
           {presets.map((preset) => (
             <button
@@ -108,7 +130,7 @@ export function ThemePanel() {
 
       {/* Color overrides — real color picker */}
       <div>
-        <p className="text-xs font-bold text-zinc-500 uppercase tracking-wide mb-3">الألوان</p>
+        <p className="text-xs font-bold text-zinc-500 uppercase tracking-wide mb-3">{t(T.colors)}</p>
         <div className="space-y-3">
           {COLOR_LABELS.map(({ key, label }) => (
             <div key={key} className="flex items-center gap-2">
@@ -167,11 +189,11 @@ export function ThemePanel() {
 
       {/* Typography — Google Fonts with font preview */}
       <div>
-        <p className="text-xs font-bold text-zinc-500 uppercase tracking-wide mb-3">الخطوط</p>
+        <p className="text-xs font-bold text-zinc-500 uppercase tracking-wide mb-3">{t(T.fonts)}</p>
         <div className="space-y-3">
           {/* Body font */}
           <div className="space-y-1">
-            <Label className="text-xs">خط النص</Label>
+            <Label className="text-xs">{t(T.bodyFont)}</Label>
             <div className="border border-zinc-200 rounded overflow-hidden">
               <select
                 value={currentBodyFont}
@@ -187,13 +209,13 @@ export function ThemePanel() {
               </select>
             </div>
             <p className="text-xs text-zinc-400 mt-1" style={{ fontFamily: `${currentBodyFont}, sans-serif` }}>
-              معاينة: المنتج الأفضل في السوق
+              {t(T.bodyPreview)}
             </p>
           </div>
 
           {/* Heading font */}
           <div className="space-y-1">
-            <Label className="text-xs">خط العناوين</Label>
+            <Label className="text-xs">{t(T.headingFont)}</Label>
             <div className="border border-zinc-200 rounded overflow-hidden">
               <select
                 value={currentHeadingFont}
@@ -209,7 +231,7 @@ export function ThemePanel() {
               </select>
             </div>
             <p className="text-sm font-bold text-zinc-700 mt-1" style={{ fontFamily: `${currentHeadingFont}, sans-serif` }}>
-              معاينة: عنوان رئيسي
+              {t(T.headingPreview)}
             </p>
           </div>
         </div>
@@ -219,7 +241,7 @@ export function ThemePanel() {
 
       {/* Border radius */}
       <div>
-        <p className="text-xs font-bold text-zinc-500 uppercase tracking-wide mb-3">استدارة الزوايا</p>
+        <p className="text-xs font-bold text-zinc-500 uppercase tracking-wide mb-3">{t(T.borderRadius)}</p>
         <div className="flex gap-1">
           {RADIUS_OPTIONS.map((r) => (
             <Button
@@ -239,7 +261,7 @@ export function ThemePanel() {
 
       {/* Direction */}
       <div>
-        <p className="text-xs font-bold text-zinc-500 uppercase tracking-wide mb-3">الاتجاه</p>
+        <p className="text-xs font-bold text-zinc-500 uppercase tracking-wide mb-3">{t(T.direction)}</p>
         <div className="flex gap-2">
           {(['rtl', 'ltr'] as const).map((dir) => (
             <Button

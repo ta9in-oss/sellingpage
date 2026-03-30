@@ -2,13 +2,32 @@ import { useState, useEffect, useRef } from 'react'
 import { db } from '@/lib/instantdb'
 import { cn } from '@/lib/utils'
 import { ExternalLink } from 'lucide-react'
+import { useLang } from '@/hooks/useLang'
 
 interface Props {
   storeId: string
   onContinue: () => void
 }
 
+const T = {
+  connectServices: { ar: 'ربط الخدمات', fr: 'Connecter les services', en: 'Connect Services' },
+  connectServicesDesc: { ar: 'اربط حساباتك لنشر متجرك تلقائياً على بنيتك التحتية', fr: 'Connectez vos comptes pour déployer automatiquement votre boutique sur votre infrastructure', en: 'Connect your accounts to automatically deploy your store on your infrastructure' },
+  cfDescription: { ar: 'استضافة المتجر على شبكة Cloudflare العالمية', fr: 'Hébergement de la boutique sur le réseau mondial Cloudflare', en: 'Store hosting on Cloudflare\'s global network' },
+  cfOAuth: { ar: 'ربط Cloudflare', fr: 'Connecter Cloudflare', en: 'Connect Cloudflare' },
+  cfAccountIdLabel: { ar: 'Account ID — من إعدادات الحساب (My Profile → Account ID)', fr: 'Account ID — depuis les paramètres du compte (My Profile → Account ID)', en: 'Account ID — from account settings (My Profile → Account ID)' },
+  cfApiTokenLabel: { ar: 'API Token — من My Profile → API Tokens (صلاحية: Edit Cloudflare Pages)', fr: 'API Token — depuis My Profile → API Tokens (permission : Edit Cloudflare Pages)', en: 'API Token — from My Profile → API Tokens (permission: Edit Cloudflare Pages)' },
+  instantDescription: { ar: 'قاعدة بيانات لحظية لطلبات المتجر والمستخدمين', fr: 'Base de données temps réel pour les commandes et les utilisateurs', en: 'Real-time database for store orders and users' },
+  instantOAuth: { ar: 'ربط InstantDB', fr: 'Connecter InstantDB', en: 'Connect InstantDB' },
+  instantAdminTokenLabel: { ar: 'Admin Token — من إعدادات التطبيق → Admin', fr: 'Admin Token — depuis les paramètres de l\'application → Admin', en: 'Admin Token — from app settings → Admin' },
+  whereToFind: { ar: 'أين أجد هذه البيانات؟', fr: 'Où trouver ces données ?', en: 'Where do I find this?' },
+  connected: { ar: 'متصل', fr: 'Connecté', en: 'Connected' },
+  notConnected: { ar: 'غير متصل', fr: 'Non connecté', en: 'Not connected' },
+  saving: { ar: 'جارٍ الحفظ...', fr: 'Enregistrement...', en: 'Saving...' },
+  continue: { ar: 'تابع', fr: 'Continuer', en: 'Continue' },
+}
+
 export function ConnectServicesStep({ storeId, onContinue }: Props) {
+  const { t } = useLang()
   const [cfAccountId, setCfAccountId] = useState('')
   const [cfApiToken, setCfApiToken] = useState('')
   const [instantAppId, setInstantAppId] = useState('')
@@ -102,26 +121,27 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-bold">ربط الخدمات</h2>
-        <p className="text-sm text-muted-foreground mt-1">
-          اربط حساباتك لنشر متجرك تلقائياً على بنيتك التحتية
-        </p>
+        <h2 className="text-lg font-bold">{t(T.connectServices)}</h2>
+        <p className="text-sm text-muted-foreground mt-1">{t(T.connectServicesDesc)}</p>
       </div>
 
       {/* Cloudflare card */}
       <ServiceCard
         icon={<CFIcon />}
         name="Cloudflare Pages"
-        description="استضافة المتجر على شبكة Cloudflare العالمية"
+        description={t(T.cfDescription)}
         connected={cfConnected}
-        oauthLabel="ربط Cloudflare"
+        connectedLabel={t(T.connected)}
+        notConnectedLabel={t(T.notConnected)}
+        oauthLabel={t(T.cfOAuth)}
         onOAuth={openCFOAuth}
         docUrl="https://dash.cloudflare.com/profile/api-tokens"
+        whereToFindLabel={t(T.whereToFind)}
         fields={[
           {
             value: cfAccountId,
             placeholder: 'CF Account ID',
-            label: 'Account ID — من إعدادات الحساب (My Profile → Account ID)',
+            label: t(T.cfAccountIdLabel),
             onChange: (v) => {
               setCfAccountId(v)
               setCfConnected(v.trim() !== '' && cfApiToken.trim() !== '')
@@ -130,7 +150,7 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
           {
             value: cfApiToken,
             placeholder: 'CF API Token',
-            label: 'API Token — من My Profile → API Tokens (صلاحية: Edit Cloudflare Pages)',
+            label: t(T.cfApiTokenLabel),
             isSecret: true,
             onChange: (v) => {
               setCfApiToken(v)
@@ -144,11 +164,14 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
       <ServiceCard
         icon={<InstantIcon />}
         name="InstantDB"
-        description="قاعدة بيانات لحظية لطلبات المتجر والمستخدمين"
+        description={t(T.instantDescription)}
         connected={instantConnected}
-        oauthLabel="ربط InstantDB"
+        connectedLabel={t(T.connected)}
+        notConnectedLabel={t(T.notConnected)}
+        oauthLabel={t(T.instantOAuth)}
         onOAuth={openInstantOAuth}
         docUrl="https://instantdb.com/dash"
+        whereToFindLabel={t(T.whereToFind)}
         fields={[
           {
             value: instantAppId,
@@ -162,7 +185,7 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
           {
             value: instantAdminToken,
             placeholder: 'Admin Token (UUID)',
-            label: 'Admin Token — من إعدادات التطبيق → Admin',
+            label: t(T.instantAdminTokenLabel),
             isSecret: true,
             onChange: (v) => {
               setInstantAdminToken(v)
@@ -182,7 +205,7 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
             : 'bg-muted text-muted-foreground cursor-not-allowed'
         )}
       >
-        {saving ? 'جارٍ الحفظ...' : 'تابع'}
+        {saving ? t(T.saving) : t(T.continue)}
       </button>
     </div>
   )
@@ -201,9 +224,12 @@ interface ServiceCardProps {
   name: string
   description: string
   connected: boolean
+  connectedLabel: string
+  notConnectedLabel: string
   oauthLabel: string
   onOAuth: () => void
   docUrl: string
+  whereToFindLabel: string
   fields: FieldDef[]
 }
 
@@ -212,9 +238,12 @@ function ServiceCard({
   name,
   description,
   connected,
+  connectedLabel,
+  notConnectedLabel,
   oauthLabel,
   onOAuth,
   docUrl,
+  whereToFindLabel,
   fields,
 }: ServiceCardProps) {
   return (
@@ -234,7 +263,7 @@ function ServiceCard({
           )}
         >
           <span className={cn('w-2 h-2 rounded-full', connected ? 'bg-green-500' : 'bg-gray-300')} />
-          {connected ? 'متصل' : 'غير متصل'}
+          {connected ? connectedLabel : notConnectedLabel}
         </div>
       </div>
 
@@ -252,7 +281,7 @@ function ServiceCard({
           className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
         >
           <ExternalLink size={12} />
-          أين أجد هذه البيانات؟
+          {whereToFindLabel}
         </a>
       </div>
 
@@ -291,4 +320,3 @@ function InstantIcon() {
     </div>
   )
 }
-

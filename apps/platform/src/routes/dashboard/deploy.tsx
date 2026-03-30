@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { DeployWizard } from '@/components/deploy/DeployWizard'
 import { db } from '@/lib/instantdb'
 import { Loader2 } from 'lucide-react'
+import { useLang } from '@/hooks/useLang'
 
 export const Route = createFileRoute('/dashboard/deploy')({
   validateSearch: (search) => ({
@@ -13,9 +14,14 @@ export const Route = createFileRoute('/dashboard/deploy')({
   component: DeployPage,
 })
 
+const T = {
+  storeIdRequired: { ar: 'معرف المتجر مطلوب', fr: 'ID boutique requis', en: 'Store ID required' },
+}
+
 function DeployPage() {
   const { storeId, tier } = Route.useSearch()
   const navigate = useNavigate()
+  const { t } = useLang()
   const { isLoading: authLoading, user } = db.useAuth()
 
   const { data, isLoading: dataLoading } = db.useQuery(
@@ -43,7 +49,7 @@ function DeployPage() {
   if (!storeId) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-muted-foreground">معرف المتجر مطلوب</p>
+        <p className="text-muted-foreground">{t(T.storeIdRequired)}</p>
       </div>
     )
   }

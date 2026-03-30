@@ -6,6 +6,7 @@ import { SetupAdminStep } from './steps/SetupAdminStep'
 import { DeployingStep } from './steps/DeployingStep'
 import { LiveStep } from './steps/LiveStep'
 import { ProDeliveryStep } from './steps/ProDeliveryStep'
+import { useLang } from '@/hooks/useLang'
 
 interface Props {
   storeId: string
@@ -17,22 +18,38 @@ interface Props {
 // Pro/Agency additionally get source code delivery on the live step
 type WizardStep = 'review' | 'connect' | 'admin-setup' | 'deploying' | 'live'
 
-const STEPS: { key: WizardStep; label: string }[] = [
-  { key: 'review', label: 'المراجعة' },
-  { key: 'connect', label: 'الخدمات' },
-  { key: 'admin-setup', label: 'المدير' },
-  { key: 'deploying', label: 'النشر' },
-  { key: 'live', label: 'مكتمل' },
-]
+const T = {
+  deployStore: { ar: 'نشر المتجر', fr: 'Déployer la boutique', en: 'Deploy Store' },
+  tierStarter: { ar: 'خطة المبتدئ', fr: 'Formule Débutant', en: 'Starter plan' },
+  tierPro: { ar: 'خطة الاحترافي', fr: 'Formule Pro', en: 'Pro plan' },
+  tierAgency: { ar: 'خطة الوكالة', fr: 'Formule Agence', en: 'Agency plan' },
+  stepReview: { ar: 'المراجعة', fr: 'Révision', en: 'Review' },
+  stepConnect: { ar: 'الخدمات', fr: 'Services', en: 'Services' },
+  stepAdmin: { ar: 'المدير', fr: 'Admin', en: 'Admin' },
+  stepDeploy: { ar: 'النشر', fr: 'Déploiement', en: 'Deploy' },
+  stepLive: { ar: 'مكتمل', fr: 'Terminé', en: 'Done' },
+}
 
 export function DeployWizard({ storeId, tier, userEmail }: Props) {
+  const { t } = useLang()
   const isProOrAgency = tier === 'pro' || tier === 'agency'
   const [currentStep, setCurrentStep] = useState(0)
   const [showProDelivery, setShowProDelivery] = useState(false)
 
+  const STEPS: { key: WizardStep; label: string }[] = [
+    { key: 'review', label: t(T.stepReview) },
+    { key: 'connect', label: t(T.stepConnect) },
+    { key: 'admin-setup', label: t(T.stepAdmin) },
+    { key: 'deploying', label: t(T.stepDeploy) },
+    { key: 'live', label: t(T.stepLive) },
+  ]
+
   const advance = () => setCurrentStep((s) => Math.min(s + 1, STEPS.length - 1))
 
   const currentKey = STEPS[currentStep].key
+
+  const tierLabel =
+    tier === 'starter' ? t(T.tierStarter) : tier === 'pro' ? t(T.tierPro) : t(T.tierAgency)
 
   const renderStep = () => {
     if (currentKey === 'review') {
@@ -75,10 +92,8 @@ export function DeployWizard({ storeId, tier, userEmail }: Props) {
     <div className="max-w-xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold">نشر المتجر</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          {tier === 'starter' ? 'خطة المبتدئ' : tier === 'pro' ? 'خطة الاحترافي' : 'خطة الوكالة'}
-        </p>
+        <h1 className="text-2xl font-bold">{t(T.deployStore)}</h1>
+        <p className="text-sm text-muted-foreground mt-1">{tierLabel}</p>
       </div>
 
       {/* Step indicator */}

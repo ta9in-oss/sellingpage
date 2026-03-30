@@ -15,6 +15,10 @@ export const Route = createFileRoute('/dashboard/builder')({
   component: BuilderPage,
 })
 
+const T = {
+  creatingStore: { ar: 'جارٍ إنشاء المتجر...', fr: 'Création de la boutique...', en: 'Creating store...' },
+}
+
 function BuilderPage() {
   const { storeId, plan } = Route.useSearch()
   const navigate = useNavigate()
@@ -64,7 +68,7 @@ function CreateAndRedirect({
   plan: string
   user: User
 }) {
-  const { dir } = useLang()
+  const { dir, t } = useLang()
   useEffect(() => {
     const newId = id()
     db.transact(
@@ -86,7 +90,7 @@ function CreateAndRedirect({
     <div className="min-h-screen flex items-center justify-center" dir={dir}>
       <div className="text-center space-y-2">
         <div className="text-2xl animate-spin">⏳</div>
-        <p className="text-zinc-500 text-sm">جارٍ إنشاء المتجر...</p>
+        <p className="text-zinc-500 text-sm">{t(T.creatingStore)}</p>
       </div>
     </div>
   )

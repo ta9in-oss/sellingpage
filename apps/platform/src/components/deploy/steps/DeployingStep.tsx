@@ -4,6 +4,7 @@ import { db } from '@/lib/instantdb'
 import { generateSiteConfig, generateContentJson } from '@/lib/configGenerator'
 import { cn } from '@/lib/utils'
 import type { StoreConfig } from '@7aba/store-ui'
+import { useLang } from '@/hooks/useLang'
 
 interface Props {
   storeId: string
@@ -19,24 +20,38 @@ interface DeployStep {
   status: StepStatus
 }
 
-const STEP_LABELS = [
-  'التحقق من الإعدادات',
-  'توليد ملفات الإعداد',
-  'الاتصال بـ Cloudflare',
-  'إنشاء/تحديث مشروع Pages',
-  'التحقق من الموقع',
-  'إضافة مدير المتجر',
-  'حفظ البيانات',
-]
-
-const initialSteps = (): DeployStep[] =>
-  STEP_LABELS.map((label, id) => ({ id, label, status: 'pending' as StepStatus }))
+const T = {
+  step0: { ar: 'التحقق من الإعدادات', fr: 'Vérification des paramètres', en: 'Validating settings' },
+  step1: { ar: 'توليد ملفات الإعداد', fr: 'Génération des fichiers de configuration', en: 'Generating config files' },
+  step2: { ar: 'الاتصال بـ Cloudflare', fr: 'Connexion à Cloudflare', en: 'Connecting to Cloudflare' },
+  step3: { ar: 'إنشاء/تحديث مشروع Pages', fr: 'Création/mise à jour du projet Pages', en: 'Creating/updating Pages project' },
+  step4: { ar: 'التحقق من الموقع', fr: 'Vérification du site', en: 'Verifying site' },
+  step5: { ar: 'إضافة مدير المتجر', fr: 'Ajout de l\'administrateur', en: 'Adding store admin' },
+  step6: { ar: 'حفظ البيانات', fr: 'Sauvegarde des données', en: 'Saving data' },
+  deployFailed: { ar: 'فشلت عملية النشر. يرجى التحقق من الإعدادات والمحاولة مجدداً.', fr: 'Le déploiement a échoué. Vérifiez les paramètres et réessayez.', en: 'Deployment failed. Please check your settings and try again.' },
+  retry: { ar: 'حاول مجدداً', fr: 'Réessayer', en: 'Try again' },
+}
 
 function delay(ms: number) {
   return new Promise<void>((resolve) => setTimeout(resolve, ms))
 }
 
 export function DeployingStep({ storeId, onComplete, onError }: Props) {
+  const { t } = useLang()
+
+  const STEP_LABELS = [
+    t(T.step0),
+    t(T.step1),
+    t(T.step2),
+    t(T.step3),
+    t(T.step4),
+    t(T.step5),
+    t(T.step6),
+  ]
+
+  const initialSteps = (): DeployStep[] =>
+    STEP_LABELS.map((label, id) => ({ id, label, status: 'pending' as StepStatus }))
+
   const builderConfig = useBuilderStore((s) => s.config)
   const [steps, setSteps] = useState<DeployStep[]>(initialSteps)
   const [logs, setLogs] = useState<string[]>([])
@@ -218,12 +233,12 @@ export function DeployingStep({ storeId, onComplete, onError }: Props) {
       {/* Retry button on error */}
       {hasError && (
         <div className="flex flex-col items-center gap-3 py-2">
-          <p className="text-sm text-destructive">فشلت عملية النشر. يرجى التحقق من الإعدادات والمحاولة مجدداً.</p>
+          <p className="text-sm text-destructive">{t(T.deployFailed)}</p>
           <button
             onClick={() => setRetryCount((c) => c + 1)}
             className="px-5 py-2.5 rounded-lg border font-semibold text-sm hover:bg-muted transition-colors"
           >
-            حاول مجدداً
+            {t(T.retry)}
           </button>
         </div>
       )}

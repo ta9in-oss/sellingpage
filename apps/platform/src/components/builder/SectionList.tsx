@@ -36,17 +36,9 @@ import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Card } from '@/components/ui/card'
 import { createPortal } from 'react-dom'
+import { useLang } from '@/hooks/useLang'
 
 type SectionType = Section['type']
-
-const SECTION_LABELS: Record<SectionType, string> = {
-  hero: 'قسم البطل',
-  features: 'المميزات',
-  testimonials: 'آراء العملاء',
-  faq: 'الأسئلة الشائعة',
-  guarantee: 'الضمان',
-  'order-form': 'نموذج الطلب',
-}
 
 const SECTION_ICONS: Record<SectionType, React.ComponentType<{ size?: number; className?: string }>> = {
   hero: Sparkles,
@@ -59,12 +51,29 @@ const SECTION_ICONS: Record<SectionType, React.ComponentType<{ size?: number; cl
 
 const ADDABLE_TYPES: SectionType[] = ['hero', 'features', 'testimonials', 'faq', 'guarantee', 'order-form']
 
+const T = {
+  sections: { ar: 'الأقسام', fr: 'Sections', en: 'Sections' },
+  noSections: { ar: 'لا توجد أقسام. أضف قسمًا.', fr: 'Aucune section. Ajoutez-en une.', en: 'No sections. Add one.' },
+  drag: { ar: 'سحب', fr: 'Glisser', en: 'Drag' },
+  deleteSection: { ar: 'حذف القسم', fr: 'Supprimer la section', en: 'Delete section' },
+  addSection: { ar: 'إضافة قسم', fr: 'Ajouter une section', en: 'Add section' },
+  sectionHero: { ar: 'قسم البطل', fr: 'Section héros', en: 'Hero section' },
+  sectionFeatures: { ar: 'المميزات', fr: 'Fonctionnalités', en: 'Features' },
+  sectionTestimonials: { ar: 'آراء العملاء', fr: 'Avis clients', en: 'Testimonials' },
+  sectionFaq: { ar: 'الأسئلة الشائعة', fr: 'FAQ', en: 'FAQ' },
+  sectionGuarantee: { ar: 'الضمان', fr: 'Garantie', en: 'Guarantee' },
+  sectionOrderForm: { ar: 'نموذج الطلب', fr: 'Formulaire de commande', en: 'Order form' },
+}
+
 interface SortableSectionCardProps {
   section: Section
   isSelected: boolean
   onSelect: () => void
   onRemove: () => void
   isDragOverlay?: boolean
+  sectionLabels: Record<SectionType, string>
+  dragLabel: string
+  deleteLabel: string
 }
 
 function SortableSectionCard({
@@ -73,6 +82,9 @@ function SortableSectionCard({
   onSelect,
   onRemove,
   isDragOverlay = false,
+  sectionLabels,
+  dragLabel,
+  deleteLabel,
 }: SortableSectionCardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: section.id,
@@ -105,13 +117,13 @@ function SortableSectionCard({
           'text-zinc-300 hover:text-zinc-600 shrink-0 cursor-grab active:cursor-grabbing',
           isDragOverlay && 'cursor-grabbing text-zinc-600'
         )}
-        aria-label="سحب"
+        aria-label={dragLabel}
       >
         <GripVertical size={14} />
       </button>
 
       <Icon size={14} className="text-zinc-500 shrink-0" />
-      <span className="flex-1 text-sm font-medium truncate">{SECTION_LABELS[section.type]}</span>
+      <span className="flex-1 text-sm font-medium truncate">{sectionLabels[section.type]}</span>
 
       <Badge variant="outline" className="text-[10px] px-1 py-0 h-4 shrink-0">
         {section.type}
@@ -126,7 +138,7 @@ function SortableSectionCard({
             e.stopPropagation()
             onRemove()
           }}
-          aria-label="حذف القسم"
+          aria-label={deleteLabel}
         >
           <Trash2 size={13} />
         </Button>
@@ -138,9 +150,19 @@ function SortableSectionCard({
 export function SectionList() {
   const { config, selectedSectionId, selectSection, removeSection, reorderSections, addSection } =
     useBuilderStore()
+  const { t } = useLang()
   const [showAddMenu, setShowAddMenu] = useState(false)
   const [activeId, setActiveId] = useState<string | null>(null)
   const [isClient, setIsClient] = useState(false)
+
+  const SECTION_LABELS: Record<SectionType, string> = {
+    hero: t(T.sectionHero),
+    features: t(T.sectionFeatures),
+    testimonials: t(T.sectionTestimonials),
+    faq: t(T.sectionFaq),
+    guarantee: t(T.sectionGuarantee),
+    'order-form': t(T.sectionOrderForm),
+  }
 
   useEffect(() => {
     setIsClient(true)
@@ -172,18 +194,21 @@ export function SectionList() {
       isSelected={selectedSectionId === section.id}
       onSelect={() => selectSection(section.id)}
       onRemove={() => removeSection(section.id)}
+      sectionLabels={SECTION_LABELS}
+      dragLabel={t(T.drag)}
+      deleteLabel={t(T.deleteSection)}
     />
   ))
 
   return (
     <div className="flex flex-col h-full">
       <div className="px-3 py-3 border-b border-zinc-200">
-        <span className="text-xs font-bold text-zinc-500 uppercase tracking-wide">الأقسام</span>
+        <span className="text-xs font-bold text-zinc-500 uppercase tracking-wide">{t(T.sections)}</span>
       </div>
 
       <ScrollArea className="flex-1 p-2">
         {config.sections.length === 0 && (
-          <p className="text-xs text-zinc-400 text-center py-4">لا توجد أقسام. أضف قسمًا.</p>
+          <p className="text-xs text-zinc-400 text-center py-4">{t(T.noSections)}</p>
         )}
         {isClient ? (
           <DndContext
@@ -208,6 +233,9 @@ export function SectionList() {
                     onSelect={() => {}}
                     onRemove={() => {}}
                     isDragOverlay
+                    sectionLabels={SECTION_LABELS}
+                    dragLabel={t(T.drag)}
+                    deleteLabel={t(T.deleteSection)}
                   />
                 )}
               </DragOverlay>,
@@ -226,7 +254,7 @@ export function SectionList() {
           size="sm"
         >
           <Plus size={14} />
-          إضافة قسم
+          {t(T.addSection)}
         </Button>
 
         {showAddMenu && (

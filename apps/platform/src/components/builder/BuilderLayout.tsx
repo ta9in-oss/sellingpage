@@ -21,6 +21,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { useLang } from '@/hooks/useLang'
 
 interface BuilderLayoutProps {
   storeId: string
@@ -28,37 +29,61 @@ interface BuilderLayoutProps {
 
 type SettingsTab = 'theme' | 'product' | 'notifications' | 'site' | 'payment'
 
+const T = {
+  siteDataSeo: { ar: 'بيانات الموقع والـ SEO', fr: 'Données du site & SEO', en: 'Site Data & SEO' },
+  tabTitle: { ar: 'عنوان التاب (title)', fr: 'Titre de l\'onglet (title)', en: 'Tab title (title)' },
+  tabTitlePlaceholder: { ar: 'مثال: حقيبة ظهر للمدرسة | متجرك', fr: 'Ex: Sac à dos scolaire | Votre boutique', en: 'Ex: School backpack | Your Store' },
+  tabTitleHint: { ar: 'يظهر في تاب المتصفح ونتائج البحث', fr: 'Apparaît dans l\'onglet du navigateur et les résultats de recherche', en: 'Shown in browser tab and search results' },
+  descriptionLabel: { ar: 'الوصف (description)', fr: 'Description (description)', en: 'Description (description)' },
+  descriptionPlaceholder: { ar: 'مثال: اطلب حقيبتك الآن بتوصيل مجاني لجميع ولايات الجزائر.', fr: 'Ex: Commandez votre sac maintenant avec livraison gratuite.', en: 'Ex: Order your bag now with free shipping.' },
+  descriptionHint: { ar: 'يظهر تحت الرابط في نتائج جوجل (130-160 حرف مثالي)', fr: 'Apparaît sous le lien dans les résultats Google (130-160 caractères idéal)', en: 'Shown below the link in Google results (130-160 chars ideal)' },
+  slugLabel: { ar: 'رابط المتجر (slug)', fr: 'Lien de la boutique (slug)', en: 'Store slug (slug)' },
+  tabTheme: { ar: 'الثيم', fr: 'Thème', en: 'Theme' },
+  tabProduct: { ar: 'المنتج', fr: 'Produit', en: 'Product' },
+  tabNotifications: { ar: 'الإشعارات', fr: 'Notifications', en: 'Notifications' },
+  tabPayment: { ar: 'الدفع', fr: 'Paiement', en: 'Payment' },
+  tabSite: { ar: 'الموقع', fr: 'Site', en: 'Site' },
+  storeName: { ar: 'اسم المتجر', fr: 'Nom de la boutique', en: 'Store name' },
+  saving: { ar: 'جارٍ الحفظ...', fr: 'Enregistrement...', en: 'Saving...' },
+  saved: { ar: 'تم الحفظ', fr: 'Enregistré', en: 'Saved' },
+  deployStore: { ar: 'نشر المتجر', fr: 'Déployer la boutique', en: 'Deploy Store' },
+  mobileSections: { ar: 'الأقسام', fr: 'Sections', en: 'Sections' },
+  mobilePreview: { ar: 'المعاينة', fr: 'Aperçu', en: 'Preview' },
+  mobileSettings: { ar: 'الإعدادات', fr: 'Paramètres', en: 'Settings' },
+}
+
 function SitePanel() {
   const { config, updateMeta } = useBuilderStore()
   const { meta } = config
+  const { t } = useLang()
   return (
     <div className="p-4 space-y-4" dir="rtl">
-      <p className="text-xs font-bold text-zinc-500 uppercase tracking-wide">بيانات الموقع والـ SEO</p>
+      <p className="text-xs font-bold text-zinc-500 uppercase tracking-wide">{t(T.siteDataSeo)}</p>
       <div className="space-y-1">
-        <Label className="text-xs">عنوان التاب (title)</Label>
+        <Label className="text-xs">{t(T.tabTitle)}</Label>
         <Input
           value={meta.siteTitle ?? ''}
           onChange={(e) => updateMeta({ siteTitle: e.target.value })}
-          placeholder="مثال: حقيبة ظهر للمدرسة | متجرك"
+          placeholder={t(T.tabTitlePlaceholder)}
           className="text-sm"
           dir="rtl"
         />
-        <p className="text-[11px] text-zinc-400">يظهر في تاب المتصفح ونتائج البحث</p>
+        <p className="text-[11px] text-zinc-400">{t(T.tabTitleHint)}</p>
       </div>
       <div className="space-y-1">
-        <Label className="text-xs">الوصف (description)</Label>
+        <Label className="text-xs">{t(T.descriptionLabel)}</Label>
         <Textarea
           value={meta.siteDescription ?? ''}
           onChange={(e) => updateMeta({ siteDescription: e.target.value })}
-          placeholder="مثال: اطلب حقيبتك الآن بتوصيل مجاني لجميع ولايات الجزائر."
+          placeholder={t(T.descriptionPlaceholder)}
           className="text-sm resize-none"
           rows={3}
           dir="rtl"
         />
-        <p className="text-[11px] text-zinc-400">يظهر تحت الرابط في نتائج جوجل (130-160 حرف مثالي)</p>
+        <p className="text-[11px] text-zinc-400">{t(T.descriptionHint)}</p>
       </div>
       <div className="space-y-1">
-        <Label className="text-xs">رابط المتجر (slug)</Label>
+        <Label className="text-xs">{t(T.slugLabel)}</Label>
         <Input
           value={meta.slug ?? ''}
           onChange={(e) => updateMeta({ slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-') })}
@@ -74,6 +99,7 @@ function SitePanel() {
 
 function RightPanel() {
   const { config, selectedSectionId } = useBuilderStore()
+  const { t } = useLang()
   const [settingsTab, setSettingsTab] = useState<SettingsTab>('theme')
 
   if (!selectedSectionId) {
@@ -82,11 +108,11 @@ function RightPanel() {
         {/* Tab bar */}
         <div className="flex border-b-2 border-black shrink-0">
           {([
-            { key: 'theme' as const, label: 'الثيم', Icon: Palette },
-            { key: 'product' as const, label: 'المنتج', Icon: Package },
-            { key: 'notifications' as const, label: 'الإشعارات', Icon: Bell },
-            { key: 'payment' as const, label: 'الدفع', Icon: CreditCard },
-            { key: 'site' as const, label: 'الموقع', Icon: Globe },
+            { key: 'theme' as const, label: t(T.tabTheme), Icon: Palette },
+            { key: 'product' as const, label: t(T.tabProduct), Icon: Package },
+            { key: 'notifications' as const, label: t(T.tabNotifications), Icon: Bell },
+            { key: 'payment' as const, label: t(T.tabPayment), Icon: CreditCard },
+            { key: 'site' as const, label: t(T.tabSite), Icon: Globe },
           ]).map(({ key, label, Icon }) => (
             <button
               key={key}
@@ -141,6 +167,7 @@ export function BuilderLayout({ storeId }: BuilderLayoutProps) {
   const { config, isSaving, hydrateConfig, updateMeta, saveToInstantDB, selectedSectionId } =
     useBuilderStore()
   const navigate = useNavigate()
+  const { t } = useLang()
   const [mobileTab, setMobileTab] = useState<MobileTab>('preview')
   const hasHydratedRef = useRef(false)
 
@@ -177,9 +204,9 @@ export function BuilderLayout({ storeId }: BuilderLayoutProps) {
   }, [config, storeId])
 
   const MOBILE_TABS: { key: MobileTab; label: string }[] = [
-    { key: 'sections', label: 'الأقسام' },
-    { key: 'preview', label: 'المعاينة' },
-    { key: 'settings', label: 'الإعدادات' },
+    { key: 'sections', label: t(T.mobileSections) },
+    { key: 'preview', label: t(T.mobilePreview) },
+    { key: 'settings', label: t(T.mobileSettings) },
   ]
 
   return (
@@ -192,8 +219,8 @@ export function BuilderLayout({ storeId }: BuilderLayoutProps) {
           onChange={(e) => updateMeta({ name: e.target.value })}
           className="max-w-[200px] h-8 text-sm font-bold border-2 border-black rounded-none shadow-none focus-visible:ring-yellow-400"
           dir="rtl"
-          placeholder="اسم المتجر"
-          aria-label="اسم المتجر"
+          placeholder={t(T.storeName)}
+          aria-label={t(T.storeName)}
           id="store-name-input"
         />
 
@@ -201,12 +228,12 @@ export function BuilderLayout({ storeId }: BuilderLayoutProps) {
           {isSaving ? (
             <>
               <Loader2 size={12} className="animate-spin" />
-              جارٍ الحفظ...
+              {t(T.saving)}
             </>
           ) : (
             <>
               <Check size={12} className="text-green-600" />
-              تم الحفظ
+              {t(T.saved)}
             </>
           )}
         </div>
@@ -217,7 +244,7 @@ export function BuilderLayout({ storeId }: BuilderLayoutProps) {
           className="gap-1.5 rounded-none border-2 border-black bg-yellow-400 text-black hover:bg-black hover:text-yellow-400 font-black shadow-[2px_2px_0px_0px_#000] hover:shadow-none transition-all"
         >
           <Rocket size={13} />
-          نشر المتجر
+          {t(T.deployStore)}
         </Button>
       </header>
 
