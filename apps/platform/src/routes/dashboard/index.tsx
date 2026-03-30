@@ -57,17 +57,19 @@ function DashboardPage() {
   const [showAuth, setShowAuth] = useState(false)
 
   // Verify Chargily payment on return from checkout
+  // checkoutId is stored in DB before redirect (no {checkout_id} placeholder — Chargily rejects it)
   useEffect(() => {
-    if (payment === 'success' && tier && checkout_id && user?.email) {
+    const checkoutId = platformUser?.checkoutId || checkout_id
+    if (payment === 'success' && tier && checkoutId && user?.email) {
       verifySubscriptionPayment({
         data: {
-          checkoutId: checkout_id,
+          checkoutId,
           tier: tier as 'starter' | 'pro' | 'agency',
           userEmail: user.email,
         },
       }).catch(console.error)
     }
-  }, [payment, tier, checkout_id, user?.email])
+  }, [payment, tier, checkout_id, platformUser?.checkoutId, user?.email])
 
   if (isLoading) {
     return (
@@ -116,7 +118,7 @@ function AuthenticatedDashboard({ email, autoPlan }: { email: string; autoPlan?:
   })
 
   const platformUser = (data?.platformUsers ?? [])[0] as
-    | { id: string; email: string; tier?: string } | undefined
+    | { id: string; email: string; tier?: string; checkoutId?: string } | undefined
 
   if (isLoading) {
     return (
