@@ -22,9 +22,9 @@ const _schema = i.schema({
     platformUsers: i.entity({
       email: i.string().unique().indexed(),
       name: i.string().optional(),
-      tier: i.string(),
+      tier: i.string().optional(),
       checkoutId: i.string().optional(),
-      purchasedAt: i.date(),
+      purchasedAt: i.date().optional(),
       createdAt: i.date().optional(),
     }),
     stores: i.entity({
