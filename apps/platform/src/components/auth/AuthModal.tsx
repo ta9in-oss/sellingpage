@@ -120,7 +120,6 @@ export function AuthModal({
                 <GoogleLogin
                   onSuccess={handleGoogleSuccess}
                   onError={() => setError('فشل تسجيل الدخول عبر Google. حاول مجدداً.')}
-                  width="100%"
                   size="large"
                   text="continue_with"
                   locale="ar"
