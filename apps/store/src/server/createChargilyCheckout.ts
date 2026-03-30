@@ -1,5 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
-import { ChargilyClient } from '@chargily/chargily-pay'
+import { createChargilyCustomer, createChargilyCheckout as chargilyCheckout } from './chargilyApi'
 
 interface CreateCheckoutInput {
   orderNumber: string
@@ -16,21 +16,15 @@ export const createChargilyCheckout = createServerFn({ method: 'POST' })
     const secretKey = process.env.CHARGILY_SECRET_KEY
     if (!secretKey) throw new Error('CHARGILY_SECRET_KEY not configured')
 
-    const client = new ChargilyClient({
-      api_key: secretKey,
-      mode: secretKey.startsWith('test_') ? 'test' : 'live',
-    })
-
     const baseUrl = process.env.VITE_APP_URL || 'http://localhost:3000'
 
-    // Chargily API requires customer_id — create or find customer first
-    const customer = await client.createCustomer({
-      name: data.customerName,
-      ...(data.customerEmail ? { email: data.customerEmail } : {}),
-      ...(data.customerPhone ? { phone: data.customerPhone } : {}),
-    })
+    const customer = await createChargilyCustomer(
+      secretKey,
+      data.customerName,
+      data.customerEmail || `${data.orderNumber}@store.local`,
+    )
 
-    const checkout = await client.createCheckout({
+    const checkout = await chargilyCheckout(secretKey, {
       amount: data.totalAmount,
       currency: 'dzd',
       success_url: `${baseUrl}/success?orderNumber=${encodeURIComponent(data.orderNumber)}`,
@@ -45,8 +39,5 @@ export const createChargilyCheckout = createServerFn({ method: 'POST' })
       },
     })
 
-    return {
-      checkoutUrl: checkout.checkout_url,
-      checkoutId: checkout.id,
-    }
+    return { checkoutUrl: checkout.checkout_url, checkoutId: checkout.id }
   })

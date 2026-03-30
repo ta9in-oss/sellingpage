@@ -1,6 +1,9 @@
 import { createServerFn } from '@tanstack/react-start'
-import { ChargilyClient } from '@chargily/chargily-pay'
 import { init, id } from '@instantdb/admin'
+import {
+  createChargilyCustomer,
+  createChargilyCheckout,
+} from './chargilyApi'
 
 interface SubscriptionCheckoutInput {
   tier: 'starter' | 'pro' | 'agency'
@@ -26,24 +29,15 @@ export const createSubscriptionCheckout = createServerFn({ method: 'POST' })
     const secretKey = process.env.CHARGILY_PLATFORM_SECRET_KEY
     if (!secretKey) throw new Error('CHARGILY_PLATFORM_SECRET_KEY not configured')
 
-    const client = new ChargilyClient({
-      api_key: secretKey,
-      mode: secretKey.startsWith('test_') ? 'test' : 'live',
-    })
-
     const baseUrl = process.env.VITE_APP_URL || 'http://localhost:3001'
     const amount = TIER_PRICES[data.tier]
-
     if (!amount) throw new Error(`Unknown tier: ${data.tier}`)
 
-    // Create customer so their identity appears in Chargily dashboard
-    const customer = await client.createCustomer({
-      name: data.userEmail,
-      email: data.userEmail,
-    })
+    // Create customer (identity shown in Chargily dashboard)
+    const customer = await createChargilyCustomer(secretKey, data.userEmail, data.userEmail)
 
-    // Success URL without {checkout_id} — Chargily rejects curly braces as invalid URL
-    const checkout = await client.createCheckout({
+    // {checkout_id} placeholder is rejected by Chargily — checkoutId stored in DB instead
+    const checkout = await createChargilyCheckout(secretKey, {
       amount,
       currency: 'dzd',
       success_url: `${baseUrl}/dashboard?payment=success&tier=${data.tier}`,
@@ -58,9 +52,9 @@ export const createSubscriptionCheckout = createServerFn({ method: 'POST' })
       },
     })
 
-    const checkoutId = checkout.id as string
+    const checkoutId = checkout.id
 
-    // Persist checkoutId to platformUsers so the success handler can verify without URL param
+    // Persist checkoutId so the success handler can verify without URL param
     const adminDb = init({
       appId: process.env.VITE_INSTANT_APP_ID!,
       adminToken: process.env.INSTANTDB_ADMIN_TOKEN!,
@@ -72,9 +66,7 @@ export const createSubscriptionCheckout = createServerFn({ method: 'POST' })
     const existing = (result.platformUsers as { id: string }[] | undefined)?.[0]
 
     if (existing) {
-      await adminDb.transact([
-        adminDb.tx.platformUsers[existing.id].update({ checkoutId }),
-      ])
+      await adminDb.transact([adminDb.tx.platformUsers[existing.id].update({ checkoutId })])
     } else {
       const newId = id()
       await adminDb.transact([
@@ -85,8 +77,5 @@ export const createSubscriptionCheckout = createServerFn({ method: 'POST' })
       ])
     }
 
-    return {
-      checkoutUrl: checkout.checkout_url,
-      checkoutId,
-    }
+    return { checkoutUrl: checkout.checkout_url, checkoutId }
   })
