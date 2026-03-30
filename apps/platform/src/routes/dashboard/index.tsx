@@ -56,21 +56,6 @@ function DashboardPage() {
   const { t, dir } = useLang()
   const [showAuth, setShowAuth] = useState(false)
 
-  // Verify Chargily payment on return from checkout
-  // checkoutId is stored in DB before redirect (no {checkout_id} placeholder — Chargily rejects it)
-  useEffect(() => {
-    const checkoutId = platformUser?.checkoutId || checkout_id
-    if (payment === 'success' && tier && checkoutId && user?.email) {
-      verifySubscriptionPayment({
-        data: {
-          checkoutId,
-          tier: tier as 'starter' | 'pro' | 'agency',
-          userEmail: user.email,
-        },
-      }).catch(console.error)
-    }
-  }, [payment, tier, checkout_id, platformUser?.checkoutId, user?.email])
-
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -107,18 +92,45 @@ function DashboardPage() {
     )
   }
 
-  return <AuthenticatedDashboard email={user.email} autoPlan={plan} />
+  return <AuthenticatedDashboard email={user.email} autoPlan={plan} payment={payment} paymentTier={tier} checkoutIdParam={checkout_id} />
 }
 
 // ─── Authenticated shell ───────────────────────────────────────────────────────
 
-function AuthenticatedDashboard({ email, autoPlan }: { email: string; autoPlan?: string }) {
+function AuthenticatedDashboard({
+  email,
+  autoPlan,
+  payment,
+  paymentTier,
+  checkoutIdParam,
+}: {
+  email: string
+  autoPlan?: string
+  payment?: string
+  paymentTier?: string
+  checkoutIdParam?: string
+}) {
   const { data, isLoading } = db.useQuery({
     platformUsers: { $: { where: { email } } },
   })
 
   const platformUser = (data?.platformUsers ?? [])[0] as
     | { id: string; email: string; tier?: string; checkoutId?: string } | undefined
+
+  // Verify Chargily payment on return from checkout
+  // checkoutId is stored in DB before redirect (no {checkout_id} placeholder — Chargily rejects it)
+  useEffect(() => {
+    const checkoutId = platformUser?.checkoutId || checkoutIdParam
+    if (payment === 'success' && paymentTier && checkoutId && email) {
+      verifySubscriptionPayment({
+        data: {
+          checkoutId,
+          tier: paymentTier as 'starter' | 'pro' | 'agency',
+          userEmail: email,
+        },
+      }).catch(console.error)
+    }
+  }, [payment, paymentTier, checkoutIdParam, platformUser?.checkoutId, email])
 
   if (isLoading) {
     return (
