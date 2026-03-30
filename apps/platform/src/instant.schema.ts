@@ -1,34 +1,88 @@
-// apps/platform/src/instant.schema.ts
-import { i } from '@instantdb/react'
+// Docs: https://www.instantdb.com/docs/modeling-data
 
-const schema = i.schema({
+import { i } from "@instantdb/react";
+
+const _schema = i.schema({
   entities: {
+    $files: i.entity({
+      path: i.string().unique().indexed(),
+      url: i.string(),
+    }),
+    $streams: i.entity({
+      abortReason: i.string().optional(),
+      clientId: i.string().unique().indexed(),
+      done: i.boolean().optional(),
+      size: i.number().optional(),
+    }),
+    $users: i.entity({
+      email: i.string().unique().indexed().optional(),
+      imageURL: i.string().optional(),
+      type: i.string().optional(),
+    }),
     platformUsers: i.entity({
       email: i.string().unique().indexed(),
-      /** 'starter' | 'pro' | 'agency' — null/missing means no subscription */
+      name: i.string().optional(),
       tier: i.string(),
-      /** Chargily checkout ID that was verified for this purchase */
-      checkoutId: i.string(),
+      checkoutId: i.string().optional(),
       purchasedAt: i.date(),
+      createdAt: i.date().optional(),
     }),
     stores: i.entity({
-      userId: i.string().indexed(),
-      slug: i.string().unique().indexed(),
-      config: i.json(),
-      status: i.string().indexed(),
+      adminEmail: i.string(),
       cfAccountId: i.string(),
-      cfApiToken: i.string(),
-      instantAppId: i.string(),
-      instantAdminToken: i.string(),  // admin token for merchant's InstantDB app
-      adminEmail: i.string(),         // email of the store's first admin user
-      chargilyApiKey: i.string(),     // Chargily Pay secret key (stored encrypted)
+      cfApiToken: i.string().optional(),
+      cfWorkerUrl: i.string().optional(),
+      chargilyApiKey: i.string().optional(),
+      config: i.any(),
+      createdAt: i.date().optional(),
       deployedUrl: i.string(),
-      lastDeployAt: i.date(),
       deployLog: i.string(),
+      instantAdminToken: i.string(),
+      instantAppId: i.string(),
+      lastDeployAt: i.date(),
+      name: i.string().optional(),
+      ownerId: i.string().optional(),
+      slug: i.string().unique().indexed(),
+      status: i.string().indexed(),
+      updatedAt: i.date().optional(),
+      userId: i.string().indexed(),
     }),
   },
-})
+  links: {
+    $streams$files: {
+      forward: {
+        on: "$streams",
+        has: "many",
+        label: "$files",
+      },
+      reverse: {
+        on: "$files",
+        has: "one",
+        label: "$stream",
+        onDelete: "cascade",
+      },
+    },
+    $usersLinkedPrimaryUser: {
+      forward: {
+        on: "$users",
+        has: "one",
+        label: "linkedPrimaryUser",
+        onDelete: "cascade",
+      },
+      reverse: {
+        on: "$users",
+        has: "many",
+        label: "linkedGuestUsers",
+      },
+    },
+  },
+  rooms: {},
+});
 
-export default schema
-export type AppSchema = typeof schema
+// This helps TypeScript display nicer intellisense
+type _AppSchema = typeof _schema;
+interface AppSchema extends _AppSchema {}
+const schema: AppSchema = _schema;
 
+export type { AppSchema };
+export default schema;

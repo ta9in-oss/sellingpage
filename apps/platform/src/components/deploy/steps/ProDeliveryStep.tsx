@@ -1,143 +1,122 @@
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
+import { getDownloadUrl } from '@/server/getDownloadUrl'
+import type { DownloadType } from '@/server/getDownloadUrl'
+import { Download, Package, Smartphone, Code2 } from 'lucide-react'
 
 interface Props {
   storeId: string
+  userEmail: string
+  tier: 'starter' | 'pro' | 'agency'
 }
 
-// Stubs — full implementation will use TanStack Start server functions
-async function createGitHubRepo(_storeId: string): Promise<{ repoUrl: string }> {
-  await new Promise((r) => setTimeout(r, 1200))
-  return { repoUrl: `https://github.com/your-org/${_storeId}` }
-}
+export function ProDeliveryStep({ userEmail, tier }: Props) {
+  const [downloading, setDownloading] = useState<DownloadType | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
-async function downloadStoreZip(_storeId: string): Promise<{ status: 'coming_soon' }> {
-  await new Promise((r) => setTimeout(r, 600))
-  return { status: 'coming_soon' }
-}
-
-export function ProDeliveryStep({ storeId }: Props) {
-  const [ghConnecting, setGhConnecting] = useState(false)
-  const [ghConnected, setGhConnected] = useState(false)
-  const [repoUrl, setRepoUrl] = useState('')
-
-  const [zipLoading, setZipLoading] = useState(false)
-  const [zipStatus, setZipStatus] = useState<'idle' | 'coming_soon'>('idle')
-
-  const githubOAuthUrl = `https://github.com/login/oauth/authorize?client_id=YOUR_GITHUB_CLIENT_ID&scope=repo&state=${encodeURIComponent(storeId)}`
-
-  const handleGitHub = async () => {
-    setGhConnecting(true)
+  const handleDownload = async (downloadType: DownloadType) => {
+    setDownloading(downloadType)
+    setError(null)
     try {
-      // Open OAuth popup
-      const popup = window.open(githubOAuthUrl, 'github-oauth', 'width=620,height=720,noopener')
-      if (!popup) {
-        // Fallback: simulate connection for dev
-        const result = await createGitHubRepo(storeId)
-        setRepoUrl(result.repoUrl)
-        setGhConnected(true)
-      }
-      // Real implementation: listen for postMessage from /auth/github callback
+      const result = await getDownloadUrl({ data: { downloadType, userEmail } })
+      const a = document.createElement('a')
+      a.href = result.url
+      a.target = '_blank'
+      a.rel = 'noopener noreferrer'
+      a.download = ''
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+    } catch (e: unknown) {
+      setError((e as Error)?.message ?? 'تعذّر التحميل. أعد المحاولة.')
     } finally {
-      setGhConnecting(false)
+      setDownloading(null)
     }
   }
 
-  const handleDownloadZip = async () => {
-    setZipLoading(true)
-    try {
-      const result = await downloadStoreZip(storeId)
-      setZipStatus(result.status)
-    } finally {
-      setZipLoading(false)
-    }
+  type DownloadItem = {
+    type: DownloadType
+    label: string
+    description: string
+    icon: React.ReactNode
+    tiers: string[]
   }
+
+  const items: DownloadItem[] = [
+    {
+      type: 'store-source',
+      label: 'كود المتجر (React)',
+      description: 'كود مصدر متجرك بالكامل — TanStack Start + React 19',
+      icon: <Package className="h-5 w-5 text-white" />,
+      tiers: ['pro', 'agency'],
+    },
+    {
+      type: 'store-app',
+      label: 'كود تطبيق المتجر',
+      description: 'كود مصدر تطبيق الجوال للمتجر',
+      icon: <Smartphone className="h-5 w-5 text-white" />,
+      tiers: ['pro', 'agency'],
+    },
+    {
+      type: 'platform-source',
+      label: 'كود المنصة الكاملة',
+      description: 'كود مصدر منصة حبة ستور بالكامل',
+      icon: <Code2 className="h-5 w-5 text-white" />,
+      tiers: ['agency'],
+    },
+  ]
+
+  const available = items.filter((item) => item.tiers.includes(tier))
 
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-lg font-bold">خيارات التسليم المتقدمة</h2>
+        <h2 className="text-lg font-bold">الكود المصدري</h2>
         <p className="text-sm text-muted-foreground mt-1">
-          احصل على الكود المصدري لمتجرك
+          احصل على كود متجرك ومنصتك
         </p>
       </div>
 
-      {/* GitHub card */}
-      <div className="border rounded-xl p-5 space-y-4">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-zinc-900 rounded-lg flex items-center justify-center shrink-0">
-            <GitHubIcon />
-          </div>
-          <div>
-            <p className="font-semibold text-sm">GitHub Repository</p>
-            <p className="text-xs text-muted-foreground">كود المتجر كمستودع خاص</p>
-          </div>
+      {error && (
+        <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+          {error}
         </div>
+      )}
 
-        {!ghConnected ? (
-          <button
-            onClick={handleGitHub}
-            disabled={ghConnecting}
-            className={cn(
-              'px-4 py-2 text-sm border rounded-lg font-medium transition-colors',
-              ghConnecting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-muted'
-            )}
-          >
-            {ghConnecting ? 'جارٍ الاتصال...' : 'ربط GitHub'}
-          </button>
-        ) : (
-          <div className="space-y-2">
-            <div className="flex items-center gap-1.5 text-xs text-green-600 font-medium">
-              <span className="w-2 h-2 rounded-full bg-green-500" />
-              متصل
+      <div className="space-y-3">
+        {available.map((item) => (
+          <div key={item.type} className="border rounded-xl p-4 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 bg-zinc-900 rounded-lg flex items-center justify-center shrink-0">
+                {item.icon}
+              </div>
+              <div>
+                <p className="font-semibold text-sm">{item.label}</p>
+                <p className="text-xs text-muted-foreground">{item.description}</p>
+              </div>
             </div>
-            <div className="flex items-center gap-2" dir="ltr">
-              <span className="flex-1 px-3 py-2 text-xs bg-muted rounded-lg font-mono truncate">
-                {repoUrl}
-              </span>
-              <a
-                href={repoUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-3 py-2 text-xs border rounded-lg hover:bg-muted transition-colors shrink-0 font-medium"
-              >
-                افتح على GitHub
-              </a>
-            </div>
+            <button
+              onClick={() => handleDownload(item.type)}
+              disabled={!!downloading}
+              className={cn(
+                'flex items-center gap-2 px-4 py-2 text-sm border rounded-lg font-medium transition-colors shrink-0',
+                downloading === item.type ? 'opacity-50 cursor-not-allowed' : 'hover:bg-muted'
+              )}
+            >
+              {downloading === item.type ? (
+                <>
+                  <span className="animate-spin text-xs">⏳</span>
+                  <span>جارٍ التحميل...</span>
+                </>
+              ) : (
+                <>
+                  <Download className="h-4 w-4" />
+                  <span>تحميل</span>
+                </>
+              )}
+            </button>
           </div>
-        )}
-      </div>
-
-      {/* ZIP download card */}
-      <div className="border rounded-xl p-5 space-y-4">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center shrink-0">
-            <span className="text-white text-xs font-bold">ZIP</span>
-          </div>
-          <div>
-            <p className="font-semibold text-sm">ملف ZIP</p>
-            <p className="text-xs text-muted-foreground">تحميل كامل ملفات المتجر</p>
-          </div>
-        </div>
-
-        <button
-          onClick={handleDownloadZip}
-          disabled={zipLoading || zipStatus === 'coming_soon'}
-          className={cn(
-            'px-4 py-2 text-sm border rounded-lg font-medium transition-colors',
-            zipLoading || zipStatus === 'coming_soon'
-              ? 'opacity-50 cursor-not-allowed'
-              : 'hover:bg-muted'
-          )}
-        >
-          {zipLoading ? 'جارٍ التحضير...' : 'تحميل كملف ZIP'}
-        </button>
-
-        {zipStatus === 'coming_soon' && (
-          <p className="text-xs text-muted-foreground bg-muted px-3 py-2 rounded-lg">
-            🔜 قريباً — سيتوفر هذا الخيار قريباً
-          </p>
-        )}
+        ))}
       </div>
     </div>
   )
@@ -150,3 +129,6 @@ function GitHubIcon() {
     </svg>
   )
 }
+// Keep export to avoid TS unused warning
+export { GitHubIcon as _GitHubIcon }
+

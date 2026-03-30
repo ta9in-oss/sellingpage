@@ -8,7 +8,7 @@ import { Loader2 } from 'lucide-react'
 export const Route = createFileRoute('/dashboard/deploy')({
   validateSearch: (search) => ({
     storeId: (search.storeId as string) || '',
-    tier: ((search.tier as string) || 'starter') as 'starter' | 'pro' | 'enterprise',
+    tier: ((search.tier as string) || 'starter') as 'starter' | 'pro' | 'agency',
   }),
   component: DeployPage,
 })
@@ -49,7 +49,7 @@ function DeployPage() {
   }
   return (
     <div className="min-h-screen bg-background p-6">
-      <DeployWizard storeId={storeId} tier={tier} />
+      <DeployWizard storeId={storeId} tier={tier} userEmail={user.email ?? ''} />
     </div>
   )
 }

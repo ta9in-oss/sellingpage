@@ -431,7 +431,7 @@ function StoreCard({
           onClick={() =>
             navigate({
               to: '/dashboard/deploy',
-              search: { storeId: store.id, tier: tier as 'starter' | 'pro' | 'enterprise' },
+              search: { storeId: store.id, tier: tier as 'starter' | 'pro' | 'agency' },
             })
           }
           className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-primary text-primary-foreground text-sm hover:bg-primary/90 transition-colors"

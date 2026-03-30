@@ -9,11 +9,12 @@ import { ProDeliveryStep } from './steps/ProDeliveryStep'
 
 interface Props {
   storeId: string
-  tier: 'starter' | 'pro' | 'enterprise'
+  tier: 'starter' | 'pro' | 'agency'
+  userEmail: string
 }
 
 // All tiers: review → connect → admin-setup → deploying → live
-// Pro/Enterprise additionally get source code delivery on the live step
+// Pro/Agency additionally get source code delivery on the live step
 type WizardStep = 'review' | 'connect' | 'admin-setup' | 'deploying' | 'live'
 
 const STEPS: { key: WizardStep; label: string }[] = [
@@ -24,8 +25,8 @@ const STEPS: { key: WizardStep; label: string }[] = [
   { key: 'live', label: 'مكتمل' },
 ]
 
-export function DeployWizard({ storeId, tier }: Props) {
-  const isProOrEnterprise = tier === 'pro' || tier === 'enterprise'
+export function DeployWizard({ storeId, tier, userEmail }: Props) {
+  const isProOrAgency = tier === 'pro' || tier === 'agency'
   const [currentStep, setCurrentStep] = useState(0)
   const [showProDelivery, setShowProDelivery] = useState(false)
 
@@ -49,7 +50,7 @@ export function DeployWizard({ storeId, tier }: Props) {
           storeId={storeId}
           onComplete={() => {
             advance()
-            if (isProOrEnterprise) setShowProDelivery(true)
+            if (isProOrAgency) setShowProDelivery(true)
           }}
           onError={() => {/* stay on this step, error state shown inside DeployingStep */}}
         />
@@ -61,7 +62,7 @@ export function DeployWizard({ storeId, tier }: Props) {
           <LiveStep storeId={storeId} />
           {showProDelivery && (
             <div className="border-t pt-6">
-              <ProDeliveryStep storeId={storeId} />
+              <ProDeliveryStep storeId={storeId} userEmail={userEmail} tier={tier} />
             </div>
           )}
         </div>
@@ -76,7 +77,7 @@ export function DeployWizard({ storeId, tier }: Props) {
       <div className="mb-8">
         <h1 className="text-2xl font-bold">نشر المتجر</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          {tier === 'starter' ? 'خطة المبتدئ' : tier === 'pro' ? 'خطة الاحترافي' : 'خطة المؤسسات'}
+          {tier === 'starter' ? 'خطة المبتدئ' : tier === 'pro' ? 'خطة الاحترافي' : 'خطة الوكالة'}
         </p>
       </div>
 
