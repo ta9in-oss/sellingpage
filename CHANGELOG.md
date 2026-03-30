@@ -3,7 +3,7 @@
 All notable changes to this project are documented here.  
 Format: `[version/commit] YYYY-MM-DD — description`
 
-> **Active HEAD:** `71b4557` · **Live:** https://7aba.store · **Repo:** https://github.com/Ta9in/sellingpage
+> **Active HEAD:** `38bc0af` · **Live:** https://7aba.store · **Repo:** https://github.com/Ta9in/sellingpage
 
 ---
 
@@ -11,6 +11,16 @@ Format: `[version/commit] YYYY-MM-DD — description`
 
 - [ ] Set Chargily webhook URL in Chargily dashboard: `https://7aba.store/api/webhook/chargily`
 - [ ] Set download URLs env vars when assets are ready: `DOWNLOAD_STORE_SOURCE_URL`, `DOWNLOAD_STORE_APP_URL`, `DOWNLOAD_PLATFORM_SOURCE_URL`
+
+---
+
+## [38bc0af] 2026-03-31 — Builder crash fix
+
+**fix(builder): SortableSectionCard crash — handleNewStore used invalid config**
+- Root cause: `handleNewStore` stored `sections: ['hero', 'order']` (strings, wrong type) instead of proper `StoreConfig` Section objects
+- Fix: store `useBuilderStore.getState().config` as the initial store config
+- Add fallback icon (`LayoutGrid`) in `SortableSectionCard` for unknown section types  
+- Tighten `BuilderLayout` hydration check: only hydrate if sections array contains objects (not strings) and theme is an object
 
 ---
 

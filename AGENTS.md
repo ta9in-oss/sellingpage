@@ -2,7 +2,7 @@
 
 > **For AI agents:** Read this file at the start of every session. Update it when you make structural changes, add/remove dependencies, or change conventions. Keep entries concise — one line where possible. Do NOT add prose or explanations that already exist in code. Update the `Last updated` field on every write.
 
-**Last updated:** 2026-03-30  
+**Last updated:** 2026-03-31  
 **Project:** حبة ستور (7aba.store) — Algerian e-commerce platform (store builder + selling page)  
 **Repo:** https://github.com/Ta9in/sellingpage  
 **Monorepo:** pnpm workspaces + Turborepo — `apps/store`, `apps/platform`, `packages/store-ui`
@@ -316,6 +316,7 @@ npx tsx seed-orders.ts          # Seed test orders (from apps/store/)
 - CF Worker `7aba-proxy` — reverse-proxies `7aba.store/*` → `7aba-platform.pages.dev`; injects `Cross-Origin-Opener-Policy: unsafe-none` on all responses (required for Google OAuth popup)
 - CF Worker `7aba-demo-redirect` — `demo.7aba.store/*` → 301 to `7aba.store/demo`
 - Worker route priority: `7aba.store/api/webhook/chargily` (specific) > `7aba.store/*` (proxy) — webhook still hits `7aba-webhook` directly
+- **`handleNewStore`** in `dashboard/index.tsx` must pass `useBuilderStore.getState().config` (full StoreConfig) when creating a store — never a partial/manual config. Wrong section shapes crash `SortableSectionCard`.
 - **Chargily API v2 does NOT accept inline `customer` objects** in `createCheckout` — always call `createCustomer()` first, then pass `customer_id` to `createCheckout()`
 - **Google OAuth**: `clientName: 'google-web'` must be registered in InstantDB dash API — cannot use `instant-cli` for this; use `POST /dash/apps/{id}/oauth_service_providers` then `POST /dash/apps/{id}/oauth_clients`
 - **InstantDB personal token** for dash API calls: `REDACTED` (at `~/.config/instantdb-prod-nodejs/a`)
