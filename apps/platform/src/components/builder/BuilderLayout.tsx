@@ -182,8 +182,12 @@ export function BuilderLayout({ storeId }: BuilderLayoutProps) {
       try {
         const parsed =
           typeof store.config === 'string' ? JSON.parse(store.config) : store.config
-        // Only hydrate if the config is a complete StoreConfig (has sections + theme)
-        if (parsed?.sections && Array.isArray(parsed.sections) && parsed?.theme) {
+        // Only hydrate if the config is a complete StoreConfig (has sections array with objects + theme)
+        const hasValidSections = Array.isArray(parsed?.sections) &&
+          parsed.sections.length > 0 &&
+          typeof parsed.sections[0] === 'object' &&
+          parsed.sections[0] !== null
+        if (hasValidSections && parsed?.theme && typeof parsed.theme === 'object') {
           hydrateConfig(parsed as StoreConfig)
           hasHydratedRef.current = true
         }

@@ -96,7 +96,7 @@ function SortableSectionCard({
     opacity: isDragging && !isDragOverlay ? 0.3 : 1,
   }
 
-  const Icon = SECTION_ICONS[section.type]
+  const Icon = SECTION_ICONS[section.type] ?? LayoutGrid
 
   return (
     <Card

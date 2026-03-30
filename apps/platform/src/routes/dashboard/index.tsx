@@ -22,6 +22,7 @@ import {
   Plus, Settings, ExternalLink, LogOut, Store, Rocket,
   Download, Package, Smartphone, Code2, Loader2, CheckCircle2,
 } from 'lucide-react'
+import { useBuilderStore } from '@/hooks/useBuilderStore'
 
 export const Route = createFileRoute('/dashboard/')({
   validateSearch: (search): { payment?: string; tier?: string; checkout_id?: string; plan?: string } => ({
@@ -305,19 +306,14 @@ function StoresDashboard({ email, tier }: { email: string; tier: string }) {
     setCreating(true)
     try {
       const storeId = id()
+      const defaultConfig = useBuilderStore.getState().config
       await db.transact(
         db.tx.stores[storeId].update({
           userId: email,
           slug: `store-${storeId.slice(0, 8)}`,
           status: 'draft',
           createdAt: new Date(),
-          config: {
-            meta: { name: 'متجر جديد', description: '' },
-            theme: 'brutalist',
-            sections: ['hero', 'order'],
-            product: {},
-            payment: { method: 'cod' },
-          },
+          config: defaultConfig,
         }),
       )
       navigate({ to: '/dashboard/builder', search: { storeId, plan: '' } })
