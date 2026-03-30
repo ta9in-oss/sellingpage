@@ -35,6 +35,12 @@ export const createSubscriptionCheckout = createServerFn({ method: 'POST' })
 
     if (!amount) throw new Error(`Unknown tier: ${data.tier}`)
 
+    // Create customer so their identity appears in Chargily dashboard
+    const customer = await client.createCustomer({
+      name: data.userEmail,
+      email: data.userEmail,
+    })
+
     const checkout = await client.createCheckout({
       amount,
       currency: 'dzd',
@@ -43,6 +49,7 @@ export const createSubscriptionCheckout = createServerFn({ method: 'POST' })
       failure_url: `${baseUrl}/dashboard?payment=failed`,
       description: `اشتراك باقة ${TIER_NAMES[data.tier]} - 7aba.store`,
       locale: 'ar',
+      customer_id: customer.id,
       metadata: {
         tier: data.tier,
         userId: data.userId,

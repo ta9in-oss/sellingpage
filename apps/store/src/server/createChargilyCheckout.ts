@@ -23,6 +23,13 @@ export const createChargilyCheckout = createServerFn({ method: 'POST' })
 
     const baseUrl = process.env.VITE_APP_URL || 'http://localhost:3000'
 
+    // Chargily API requires customer_id — create or find customer first
+    const customer = await client.createCustomer({
+      name: data.customerName,
+      ...(data.customerEmail ? { email: data.customerEmail } : {}),
+      ...(data.customerPhone ? { phone: data.customerPhone } : {}),
+    })
+
     const checkout = await client.createCheckout({
       amount: data.totalAmount,
       currency: 'dzd',
@@ -30,11 +37,7 @@ export const createChargilyCheckout = createServerFn({ method: 'POST' })
       failure_url: `${baseUrl}/?payment=failed`,
       description: `طلب رقم ${data.orderNumber} - ${data.customerName}`,
       locale: 'ar',
-      customer: {
-        name: data.customerName,
-        ...(data.customerEmail ? { email: data.customerEmail } : {}),
-        ...(data.customerPhone ? { phone: data.customerPhone } : {}),
-      },
+      customer_id: customer.id,
       metadata: {
         orderNumber: data.orderNumber,
         orderId: data.orderId,

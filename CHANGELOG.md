@@ -3,7 +3,7 @@
 All notable changes to this project are documented here.  
 Format: `[version/commit] YYYY-MM-DD — description`
 
-> **Active HEAD:** `pending` · **Live:** https://7aba.store · **Repo:** https://github.com/Ta9in/sellingpage
+> **Active HEAD:** `71b4557` · **Live:** https://7aba.store · **Repo:** https://github.com/Ta9in/sellingpage
 
 ---
 
@@ -11,6 +11,24 @@ Format: `[version/commit] YYYY-MM-DD — description`
 
 - [ ] Set Chargily webhook URL in Chargily dashboard: `https://7aba.store/api/webhook/chargily`
 - [ ] Set download URLs env vars when assets are ready: `DOWNLOAD_STORE_SOURCE_URL`, `DOWNLOAD_STORE_APP_URL`, `DOWNLOAD_PLATFORM_SOURCE_URL`
+
+---
+
+## [pending] 2026-03-30 — Chargily 422 fix, tier mismatch, schema, COOP headers
+
+**fix: Chargily createCustomer → customer_id pattern; agency tier; InstantDB schema**
+
+- `apps/store/src/server/createChargilyCheckout.ts`: Removed invalid inline `customer` field — call `createCustomer()` first, use `customer_id` in checkout (Chargily API v2 does not accept inline customer objects)
+- `apps/platform/src/server/createSubscriptionCheckout.ts`: Same fix — `createCustomer()` + `customer_id` for platform subscription checkouts
+- `apps/platform/src/components/deploy/DeployWizard.tsx`: Fixed `enterprise` → `agency` tier mismatch; pass `userEmail` down to `ProDeliveryStep`
+- `apps/platform/src/components/deploy/steps/ProDeliveryStep.tsx`: Replaced all stubs with real `getDownloadUrl` server function calls (store-source, store-app, platform-source); tier-gated per plan
+- `apps/platform/src/instant.schema.ts`: Added missing schema fields — `stores.cfApiToken`, `stores.cfWorkerUrl`, `stores.chargilyApiKey`, `stores.name`, `stores.ownerId`, `stores.createdAt`, `stores.updatedAt`; `platformUsers.name`, `platformUsers.checkoutId`, `platformUsers.createdAt` — pushed to InstantDB
+- `apps/platform/src/routes/dashboard/deploy.tsx`: Updated tier type to `'starter' | 'pro' | 'agency'`; passes `user.email` to DeployWizard
+- `apps/platform/src/routes/dashboard/index.tsx`: Fixed `agency` cast (was `enterprise`)
+- `apps/platform/src/components/auth/AuthModal.tsx`: Added `nonce` to Google OAuth `signInWithIdToken` for replay protection
+- `apps/platform/vite.config.ts`: `routeRules` for COOP headers (redundant but kept)
+- **Infrastructure**: `7aba-proxy` CF Worker updated to inject `Cross-Origin-Opener-Policy: unsafe-none` + `Cross-Origin-Embedder-Policy: unsafe-none` on all responses — Google OAuth popup unblocked
+- **Infrastructure**: InstantDB `google-web` OAuth client registered (`clientName: 'google-web'`) for app `b9227417-33f4-4c3d-9c88-612e094aff89`; authorized origins `7aba.store` + `localhost:3001`
 
 ---
 

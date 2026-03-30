@@ -2,7 +2,7 @@
 
 > **For AI agents:** Read this file at the start of every session. Update it when you make structural changes, add/remove dependencies, or change conventions. Keep entries concise — one line where possible. Do NOT add prose or explanations that already exist in code. Update the `Last updated` field on every write.
 
-**Last updated:** 2026-03-24  
+**Last updated:** 2026-03-30  
 **Project:** حبة ستور (7aba.store) — Algerian e-commerce platform (store builder + selling page)  
 **Repo:** https://github.com/Ta9in/sellingpage  
 **Monorepo:** pnpm workspaces + Turborepo — `apps/store`, `apps/platform`, `packages/store-ui`
@@ -181,11 +181,12 @@ Page order in `apps/store/src/routes/index.tsx`: Hero → SocialProofBar → Fea
 - Config set via `PaymentPanel` in builder (NOT customer-facing)
 - `configGenerator.ts` writes this to `site.config.ts` when deploying a store
 - `submitButtonText` in `OrderSection` dynamically changes based on `activePaymentMethod`: `'cod'` → `'أكّد الطلب'`, `'chargily'` → `'ادفع إلكترونياً →'`
+- **Chargily pattern**: `createCustomer()` first → get `customer.id` → pass `customer_id` to `createCheckout()` — Chargily v2 does NOT accept inline `customer` objects in checkout
 
 ### Platform subscription (merchants pay 7aba)
-- `server/createSubscriptionCheckout.ts`: creates Chargily checkout with tier amount
+- `server/createSubscriptionCheckout.ts`: `createCustomer()` then `createCheckout()` with `customer_id`
 - `server/verifySubscriptionPayment.ts`: polls Chargily, updates `platformUsers.tier` on success
-- Requires: `VITE_CHARGILY_PUBLIC_KEY` (client) + `CHARGILY_SECRET_KEY` (server)
+- Requires: `CHARGILY_PLATFORM_SECRET_KEY` (server-only — no public key needed)
 - **Webhook Worker**: `https://7aba-webhook.mohessaid.workers.dev` — CF Worker `7aba-webhook` handles Chargily `checkout.paid` events, updates InstantDB `platformUsers.plan` via admin API
 - Set webhook URL in Chargily dashboard to: `https://7aba-webhook.mohessaid.workers.dev`
 
@@ -312,9 +313,12 @@ npx tsx seed-orders.ts          # Seed test orders (from apps/store/)
 - `apps/store/app/` — **DELETED** (was a legacy duplicate of `apps/store/src/`)
 - **TanStack Start v1.131.31 has NO `createAPIFileRoute`** — API/webhook endpoints must be Cloudflare Workers or `createServerFn`
 - CF Worker `7aba-webhook` at `https://7aba-webhook.mohessaid.workers.dev` — handles Chargily webhooks; all env vars are **encrypted secrets** (`secret_text` bindings)
-- CF Worker `7aba-proxy` — reverse-proxies `7aba.store/*` → `7aba-platform.pages.dev` (DNS token lacked edit perms; proxy worker bypasses this)
+- CF Worker `7aba-proxy` — reverse-proxies `7aba.store/*` → `7aba-platform.pages.dev`; injects `Cross-Origin-Opener-Policy: unsafe-none` on all responses (required for Google OAuth popup)
 - CF Worker `7aba-demo-redirect` — `demo.7aba.store/*` → 301 to `7aba.store/demo`
 - Worker route priority: `7aba.store/api/webhook/chargily` (specific) > `7aba.store/*` (proxy) — webhook still hits `7aba-webhook` directly
+- **Chargily API v2 does NOT accept inline `customer` objects** in `createCheckout` — always call `createCustomer()` first, then pass `customer_id` to `createCheckout()`
+- **Google OAuth**: `clientName: 'google-web'` must be registered in InstantDB dash API — cannot use `instant-cli` for this; use `POST /dash/apps/{id}/oauth_service_providers` then `POST /dash/apps/{id}/oauth_clients`
+- **InstantDB personal token** for dash API calls: `REDACTED` (at `~/.config/instantdb-prod-nodejs/a`)
 
 ---
 
