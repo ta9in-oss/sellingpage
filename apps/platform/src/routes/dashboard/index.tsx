@@ -298,23 +298,35 @@ function StoresDashboard({ email, tier }: { email: string; tier: string }) {
   })
   const stores = (data?.stores ?? []) as any[]
 
+  const [creating, setCreating] = useState(false)
+
   const handleNewStore = async () => {
-    const storeId = id()
-    await db.transact(
-      db.tx.stores[storeId].update({
-        userId: email,
-        slug: `store-${storeId.slice(0, 8)}`,
-        status: 'draft',
-        config: {
-          meta: { name: 'متجر جديد', description: '' },
-          theme: 'brutalist',
-          sections: ['hero', 'order'],
-          product: {},
-          payment: { method: 'cod' },
-        },
-      }),
-    )
-    navigate({ to: '/dashboard/builder', search: { storeId, plan: '' } })
+    if (creating) return
+    setCreating(true)
+    try {
+      const storeId = id()
+      await db.transact(
+        db.tx.stores[storeId].update({
+          userId: email,
+          slug: `store-${storeId.slice(0, 8)}`,
+          status: 'draft',
+          createdAt: new Date(),
+          config: {
+            meta: { name: 'متجر جديد', description: '' },
+            theme: 'brutalist',
+            sections: ['hero', 'order'],
+            product: {},
+            payment: { method: 'cod' },
+          },
+        }),
+      )
+      navigate({ to: '/dashboard/builder', search: { storeId, plan: '' } })
+    } catch (err) {
+      console.error('Failed to create store:', err)
+      alert('فشل إنشاء المتجر. حاول مجددًا.')
+    } finally {
+      setCreating(false)
+    }
   }
 
   return (
@@ -327,9 +339,10 @@ function StoresDashboard({ email, tier }: { email: string; tier: string }) {
             <h2 className="text-lg font-bold">{t(DT.myStores)}</h2>
             <button
               onClick={handleNewStore}
-              className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors"
+              disabled={creating}
+              className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors disabled:opacity-60"
             >
-              <Plus className="h-4 w-4" />
+              {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
               {t(DT.newStore)}
             </button>
           </div>
