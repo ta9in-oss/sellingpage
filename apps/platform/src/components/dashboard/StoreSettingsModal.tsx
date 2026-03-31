@@ -6,7 +6,7 @@
 import { useState, useEffect } from 'react'
 import { db } from '@/lib/instantdb'
 import { cn } from '@/lib/utils'
-import { X, Eye, EyeOff, Save, Loader2 } from 'lucide-react'
+import { X, Eye, EyeOff, Save, Loader2, Trash2 } from 'lucide-react'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { useLang } from '@/hooks/useLang'
@@ -21,6 +21,7 @@ interface StoreSettingsModalProps {
     instantAdminToken?: string
   }
   onClose: () => void
+  onDeleted?: () => void
 }
 
 const T = {
@@ -40,6 +41,11 @@ const T = {
   savedSettings: { ar: '✓ تم الحفظ', fr: '✓ Enregistré', en: '✓ Saved' },
   saveSettings: { ar: 'حفظ الإعدادات', fr: 'Enregistrer', en: 'Save settings' },
   saveFailed: { ar: 'تعذر الحفظ. حاول مجدداً.', fr: 'Impossible d\'enregistrer. Réessayez.', en: 'Failed to save. Please try again.' },
+  deleteStore: { ar: 'حذف المتجر', fr: 'Supprimer la boutique', en: 'Delete store' },
+  deleteConfirm: { ar: 'هل أنت متأكد؟ سيتم حذف المتجر بشكل نهائي.', fr: 'Êtes-vous sûr? La boutique sera supprimée définitivement.', en: 'Are you sure? The store will be permanently deleted.' },
+  confirmDelete: { ar: 'نعم، احذف المتجر', fr: 'Oui, supprimer', en: 'Yes, delete store' },
+  deleting: { ar: 'جارٍ الحذف...', fr: 'Suppression...', en: 'Deleting...' },
+  dangerZone: { ar: 'منطقة الخطر', fr: 'Zone dangereuse', en: 'Danger Zone' },
 }
 
 export function StoreSettingsModal({
@@ -47,8 +53,9 @@ export function StoreSettingsModal({
   storeName,
   initialValues,
   onClose,
+  onDeleted,
 }: StoreSettingsModalProps) {
-  const { t } = useLang()
+  const { t, dir } = useLang()
   const [cfAccountId, setCfAccountId] = useState(initialValues.cfAccountId ?? '')
   const [cfApiToken, setCfApiToken] = useState(initialValues.cfApiToken ?? '')
   const [instantAppId, setInstantAppId] = useState(initialValues.instantAppId ?? '')
@@ -58,6 +65,8 @@ export function StoreSettingsModal({
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   // Close on Escape
   useEffect(() => {
@@ -88,10 +97,22 @@ export function StoreSettingsModal({
     }
   }
 
+  const handleDelete = async () => {
+    setDeleting(true)
+    try {
+      await db.transact(db.tx.stores[storeId].delete())
+      onDeleted?.()
+      onClose()
+    } catch (e: unknown) {
+      setError((e as Error)?.message ?? 'Failed to delete')
+      setDeleting(false)
+    }
+  }
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
-      dir="rtl"
+      dir={dir}
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
     >
       <div className="bg-white border-2 border-black shadow-[6px_6px_0px_0px_#000] w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
@@ -216,6 +237,36 @@ export function StoreSettingsModal({
           {error && (
             <div className="border-2 border-red-400 bg-red-50 p-3 text-sm text-red-700">{error}</div>
           )}
+
+          {/* Danger zone */}
+          <section className="border-2 border-red-300 p-4 space-y-3 bg-red-50">
+            <h3 className="font-black text-sm text-red-700">{t(T.dangerZone)}</h3>
+            {showDeleteConfirm ? (
+              <div className="space-y-3">
+                <p className="text-sm text-red-700">{t(T.deleteConfirm)}</p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleDelete}
+                    disabled={deleting}
+                    className="flex-1 flex items-center justify-center gap-2 py-2 border-2 border-red-600 bg-red-600 text-white text-sm font-black hover:bg-red-700 disabled:opacity-60 transition-colors"
+                  >
+                    {deleting ? <><Loader2 size={14} className="animate-spin" />{t(T.deleting)}</> : t(T.confirmDelete)}
+                  </button>
+                  <button onClick={() => setShowDeleteConfirm(false)} className="flex-1 py-2 border-2 border-zinc-300 text-sm font-bold hover:border-zinc-500 transition-colors">
+                    {t(T.cancel)}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                className="flex items-center gap-2 text-sm font-bold text-red-600 hover:text-red-800 transition-colors"
+              >
+                <Trash2 size={14} />
+                {t(T.deleteStore)}
+              </button>
+            )}
+          </section>
         </div>
 
         {/* Footer */}

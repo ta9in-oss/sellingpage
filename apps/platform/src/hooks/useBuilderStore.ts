@@ -25,7 +25,7 @@ interface BuilderActions {
   hydrateConfig: (config: StoreConfig) => void
 }
 
-const defaultConfig: StoreConfig = {
+export const defaultConfig: StoreConfig = {
   meta: {
     name: 'متجري',
     slug: '',

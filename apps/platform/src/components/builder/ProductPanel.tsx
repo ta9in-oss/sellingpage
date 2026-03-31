@@ -1,7 +1,8 @@
 import { useBuilderStore } from '@/hooks/useBuilderStore'
 import { cn } from '@/lib/utils'
-import { Plus, Trash2, Package } from 'lucide-react'
+import { Plus, Package } from 'lucide-react'
 import { useLang } from '@/hooks/useLang'
+import { ImageUpload } from './ImageUpload'
 
 const T = {
   product: { ar: 'المنتج', fr: 'Produit', en: 'Product' },
@@ -9,18 +10,15 @@ const T = {
   productNamePlaceholder: { ar: 'مثال: حقيبة ظهر فاخرة', fr: 'Ex: Sac à dos de luxe', en: 'Ex: Premium backpack' },
   price: { ar: 'السعر', fr: 'Prix', en: 'Price' },
   productImages: { ar: 'صور المنتج', fr: 'Images du produit', en: 'Product images' },
-  addImageUrl: { ar: 'إضافة رابط', fr: 'Ajouter un lien', en: 'Add URL' },
-  noImages: { ar: 'أضف رابط صورة لعرض صور المنتج في المعاينة', fr: "Ajoutez une URL d'image pour afficher les images dans l'aperçu", en: 'Add an image URL to show product images in the preview' },
+  addImage: { ar: 'إضافة صورة', fr: 'Ajouter une image', en: 'Add image' },
+  imageN: { ar: 'صورة', fr: 'Image', en: 'Image' },
 }
 
 export function ProductPanel() {
   const { config, updateProduct } = useBuilderStore()
-  const { t } = useLang()
+  const { t, dir } = useLang()
   const { name, price, currency, images } = config.product
-
-  const addImage = () => {
-    updateProduct({ images: [...images, ''] })
-  }
+  const storeDir = config.meta.rtl ? 'rtl' : 'ltr'
 
   const updateImage = (i: number, val: string) => {
     const next = images.map((img, idx) => (idx === i ? val : img))
@@ -32,7 +30,7 @@ export function ProductPanel() {
   }
 
   return (
-    <div className="space-y-5 p-4" dir="rtl">
+    <div className="space-y-5 p-4" dir={dir}>
       <div className="flex items-center gap-2 pb-1 border-b border-zinc-100">
         <Package size={14} className="text-zinc-400" />
         <h2 className="font-bold text-sm text-zinc-500 uppercase tracking-wide">{t(T.product)}</h2>
@@ -47,7 +45,7 @@ export function ProductPanel() {
           onChange={(e) => updateProduct({ name: e.target.value })}
           className="w-full rounded border border-zinc-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
           placeholder={t(T.productNamePlaceholder)}
-          dir="rtl"
+          dir={storeDir}
         />
       </div>
 
@@ -80,58 +78,41 @@ export function ProductPanel() {
         </div>
       </div>
 
-      {/* Product Images */}
-      <div className="space-y-2">
+      {/* Product Images — up to 3, each with upload widget */}
+      <div className="space-y-3">
         <div className="flex items-center justify-between">
           <label className="block text-sm font-medium">{t(T.productImages)}</label>
-          <button
-            onClick={addImage}
-            disabled={images.length >= 8}
-            className={cn(
-              'flex items-center gap-1 text-xs px-2 py-1 border border-zinc-200 rounded transition-colors',
-              images.length >= 8 ? 'opacity-40 cursor-not-allowed' : 'hover:border-zinc-900'
-            )}
-          >
-            <Plus size={12} /> {t(T.addImageUrl)}
-          </button>
+          {images.length < 3 && (
+            <button
+              onClick={() => updateProduct({ images: [...images, ''] })}
+              className="flex items-center gap-1 text-xs px-2 py-1 border border-zinc-200 rounded hover:border-zinc-900 transition-colors"
+            >
+              <Plus size={12} /> {t(T.addImage)}
+            </button>
+          )}
         </div>
+
+        {images.map((img, i) => (
+          <div key={i} className="border border-zinc-200 rounded p-3">
+            <ImageUpload
+              label={`${t(T.imageN)} ${i + 1}`}
+              value={img}
+              onChange={(url) => {
+                if (!url) removeImage(i)
+                else updateImage(i, url)
+              }}
+            />
+          </div>
+        ))}
 
         {images.length === 0 && (
-          <p className="text-xs text-zinc-400 text-center py-3 border border-dashed border-zinc-200 rounded">
-            {t(T.noImages)}
-          </p>
+          <button
+            onClick={() => updateProduct({ images: [''] })}
+            className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-zinc-200 rounded text-sm text-zinc-400 hover:border-zinc-400 hover:text-zinc-600 transition-colors"
+          >
+            <Plus size={14} /> {t(T.addImage)}
+          </button>
         )}
-
-        <div className="space-y-2">
-          {images.map((img, i) => (
-            <div key={i} className="flex gap-2 items-start">
-              <div className="flex-1 space-y-1">
-                <input
-                  type="url"
-                  value={img}
-                  onChange={(e) => updateImage(i, e.target.value)}
-                  className="w-full rounded border border-zinc-300 px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-zinc-900"
-                  placeholder="https://example.com/image.jpg"
-                  dir="ltr"
-                />
-                {img && (
-                  <img
-                    src={img}
-                    alt=""
-                    className="w-full h-20 object-cover rounded border border-zinc-200"
-                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
-                  />
-                )}
-              </div>
-              <button
-                onClick={() => removeImage(i)}
-                className="mt-1 text-red-400 hover:text-red-600 shrink-0"
-              >
-                <Trash2 size={14} />
-              </button>
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   )

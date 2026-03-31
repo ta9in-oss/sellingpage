@@ -389,6 +389,7 @@ function StoresDashboard({ email, tier }: { email: string; tier: string }) {
             instantAdminToken: settingsStore.instantAdminToken,
           }}
           onClose={() => setSettingsStore(null)}
+          onDeleted={() => setSettingsStore(null)}
         />
       )}
     </div>

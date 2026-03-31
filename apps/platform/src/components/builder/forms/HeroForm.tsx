@@ -1,16 +1,14 @@
 import { useBuilderStore } from '@/hooks/useBuilderStore'
 import { cn } from '@/lib/utils'
 import { useLang } from '@/hooks/useLang'
-import { ImageIcon } from 'lucide-react'
+import { ImageUpload } from '../ImageUpload'
 
 const T = {
   heroSection: { ar: 'قسم البطل', fr: 'Section héros', en: 'Hero Section' },
   headline: { ar: 'العنوان الرئيسي', fr: 'Titre principal', en: 'Main headline' },
   subheadline: { ar: 'العنوان الفرعي', fr: 'Sous-titre', en: 'Subheadline' },
   ctaButton: { ar: 'نص الزر', fr: 'Texte du bouton', en: 'Button text' },
-  heroImage: { ar: 'رابط صورة المنتج', fr: 'URL de l\'image produit', en: 'Product image URL' },
-  heroImageHint: { ar: 'الصق رابط الصورة (https://...)', fr: 'Collez l\'URL de l\'image', en: 'Paste an image URL (https://...)' },
-  imagePreview: { ar: 'معاينة الصورة', fr: 'Aperçu de l\'image', en: 'Image preview' },
+  heroImage: { ar: 'صورة المنتج', fr: 'Image du produit', en: 'Product image' },
 }
 
 export function HeroForm() {
@@ -61,30 +59,11 @@ export function HeroForm() {
         />
       </div>
 
-      <div className="space-y-1">
-        <label className="block text-sm font-medium">{t(T.heroImage)}</label>
-        <input
-          type="url"
-          value={section.image ?? ''}
-          onChange={(e) => update({ image: e.target.value })}
-          placeholder="https://..."
-          className={inputClass}
-          dir="ltr"
-        />
-        <p className="text-[11px] text-zinc-400">{t(T.heroImageHint)}</p>
-        {section.image ? (
-          <img
-            src={section.image}
-            alt={t(T.imagePreview)}
-            className="mt-2 w-full h-32 object-cover rounded border border-zinc-200"
-            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
-          />
-        ) : (
-          <div className="mt-2 w-full h-20 border-2 border-dashed border-zinc-200 rounded flex items-center justify-center text-zinc-300">
-            <ImageIcon size={24} />
-          </div>
-        )}
-      </div>
+      <ImageUpload
+        label={t(T.heroImage)}
+        value={section.image ?? ''}
+        onChange={(url) => update({ image: url })}
+      />
     </div>
   )
 }

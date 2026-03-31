@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useBuilderStore } from '@/hooks/useBuilderStore'
+import { useBuilderStore, defaultConfig } from '@/hooks/useBuilderStore'
 import { db } from '@/lib/instantdb'
 import { cn } from '@/lib/utils'
 import { SectionList } from './SectionList'
@@ -195,9 +195,11 @@ export function BuilderLayout({ storeId }: BuilderLayoutProps) {
   const [mobileTab, setMobileTab] = useState<MobileTab>('preview')
   const hasHydratedRef = useRef(false)
 
-  // Reset store to default state on mount so stale data from previous store doesn't bleed in
+  // Reset store to default state on storeId change so stale data from previous store doesn't bleed in
   useEffect(() => {
     useBuilderStore.setState({ selectedSectionId: null })
+    hydrateConfig(defaultConfig)
+    hasHydratedRef.current = false
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storeId])
 
