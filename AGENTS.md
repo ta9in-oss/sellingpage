@@ -330,3 +330,17 @@ npx tsx seed-orders.ts          # Seed test orders (from apps/store/)
 - **How to update:** Edit in place — replace stale lines, don't append duplicates.
 - **Frequency:** Once per meaningful work session (not per file edit).
 - **Token discipline:** Max ~30 lines per section. Use bullet points. No paragraphs.
+
+---
+
+## Feedback & Review Protocol
+
+When the user provides feedback, reviews, bug reports, or critique on completed work:
+
+1. **Incorporate immediately** — treat feedback as the highest-priority task. Do not defer it to "next session."
+2. **Fix first, then continue** — address all reported issues before resuming work on pending features.
+3. **Acknowledge the feedback** — briefly confirm what was reported and what will be fixed.
+4. **Do not forget remaining features** — after applying fixes, resume the plan from where it left off. Check `plan.md` and SQL todos to pick up the next pending item.
+5. **Update plan.md** if the feedback changes scope, approach, or priority of remaining work.
+6. **Test after fixing** — run a build and/or Playwright smoke test after applying feedback-driven changes.
+7. **Commit fixes separately** — use a `fix:` or `refactor:` commit prefix distinct from feature commits.
