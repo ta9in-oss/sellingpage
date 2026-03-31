@@ -17,6 +17,9 @@ import { OrderFormForm } from './forms/OrderFormForm'
 import { SocialProofForm } from './forms/SocialProofForm'
 import { CtaForm } from './forms/CtaForm'
 import { BenefitsForm } from './forms/BenefitsForm'
+import { ValueStackForm } from './forms/ValueStackForm'
+import { ProductCarouselForm } from './forms/ProductCarouselForm'
+import { FooterForm } from './forms/FooterForm'
 import { useNavigate } from '@tanstack/react-router'
 import type { StoreConfig, Section } from '@7aba/store-ui'
 import { Loader2, Check, Rocket, Palette, Package, Bell, Globe, CreditCard } from 'lucide-react'
@@ -181,6 +184,9 @@ function RightPanel() {
     case 'social-proof': return <SocialProofForm />
     case 'cta': return <CtaForm />
     case 'benefits': return <BenefitsForm />
+    case 'value-stack': return <ValueStackForm sectionId={section.id} />
+    case 'product-carousel': return <ProductCarouselForm sectionId={section.id} />
+    case 'footer': return <FooterForm sectionId={section.id} />
     default: return <ThemePanel />
   }
 }

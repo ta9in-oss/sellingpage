@@ -32,6 +32,9 @@ import {
   Zap,
   Megaphone,
   Star,
+  Layers,
+  Images,
+  Baseline,
 } from 'lucide-react'
 import type { Section } from '@7aba/store-ui'
 import { Button } from '@/components/ui/button'
@@ -53,9 +56,12 @@ const SECTION_ICONS: Record<SectionType, React.ComponentType<{ size?: number; cl
   'social-proof': Zap,
   cta: Megaphone,
   benefits: Star,
+  'value-stack': Layers,
+  'product-carousel': Images,
+  footer: Baseline,
 }
 
-const ADDABLE_TYPES: SectionType[] = ['hero', 'features', 'testimonials', 'faq', 'guarantee', 'order-form', 'social-proof', 'cta', 'benefits']
+const ADDABLE_TYPES: SectionType[] = ['hero', 'features', 'testimonials', 'faq', 'guarantee', 'order-form', 'social-proof', 'cta', 'benefits', 'value-stack', 'product-carousel', 'footer']
 
 const T = {
   sections: { ar: 'الأقسام', fr: 'Sections', en: 'Sections' },
@@ -69,6 +75,12 @@ const T = {
   sectionFaq: { ar: 'الأسئلة الشائعة', fr: 'FAQ', en: 'FAQ' },
   sectionGuarantee: { ar: 'الضمان', fr: 'Garantie', en: 'Guarantee' },
   sectionOrderForm: { ar: 'نموذج الطلب', fr: 'Formulaire de commande', en: 'Order form' },
+  sectionSocialProof: { ar: 'إثبات اجتماعي', fr: 'Preuve sociale', en: 'Social proof' },
+  sectionCta: { ar: 'دعوة للعمل', fr: 'Appel à l\'action', en: 'Call to action' },
+  sectionBenefits: { ar: 'المزايا', fr: 'Avantages', en: 'Benefits' },
+  sectionValueStack: { ar: 'قيمة المنتج', fr: 'Valeur produit', en: 'Value stack' },
+  sectionProductCarousel: { ar: 'صور المنتج', fr: 'Carrousel produit', en: 'Product carousel' },
+  sectionFooter: { ar: 'الذيل', fr: 'Pied de page', en: 'Footer' },
 }
 
 interface SortableSectionCardProps {
@@ -168,9 +180,12 @@ export function SectionList() {
     faq: t(T.sectionFaq),
     guarantee: t(T.sectionGuarantee),
     'order-form': t(T.sectionOrderForm),
-    'social-proof': t({ ar: 'شريط الثقة', fr: 'Barre de confiance', en: 'Social Proof' }),
-    cta: t({ ar: 'الدعوة للعمل', fr: 'Appel à l\'action', en: 'Call to Action' }),
-    benefits: t({ ar: 'الفوائد', fr: 'Avantages', en: 'Benefits' }),
+    'social-proof': t(T.sectionSocialProof),
+    cta: t(T.sectionCta),
+    benefits: t(T.sectionBenefits),
+    'value-stack': t(T.sectionValueStack),
+    'product-carousel': t(T.sectionProductCarousel),
+    footer: t(T.sectionFooter),
   }
 
   useEffect(() => {

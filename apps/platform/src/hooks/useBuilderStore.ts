@@ -153,6 +153,34 @@ function createDefaultSection(type: Section['type']): Section {
           { icon: '🔒', title: 'أمان الدفع', description: 'دفع عند الاستلام' },
         ],
       }
+    case 'value-stack':
+      return {
+        id: nanoid(),
+        type: 'value-stack',
+        ctaText: 'اطلب الآن',
+        items: [
+          { icon: 'package', title: 'المنتج الأساسي', description: 'الحزمة الكاملة', value: '3,990 دج', isFree: false },
+          { icon: 'gift', title: 'هدية مجانية', description: 'مع كل طلب', value: '990 دج', isFree: true },
+          { icon: 'shield', title: 'ضمان الجودة', description: '7 أيام استرداد', value: '990 دج', isFree: true },
+        ],
+      }
+    case 'product-carousel':
+      return {
+        id: nanoid(),
+        type: 'product-carousel',
+        title: 'صور المنتج',
+      }
+    case 'footer':
+      return {
+        id: nanoid(),
+        type: 'footer',
+        storeName: 'متجري',
+        tagline: 'أفضل المنتجات بأفضل الأسعار',
+        phone: '',
+        email: '',
+        whatsapp: '',
+        copyright: '',
+      }
   }
 }
 

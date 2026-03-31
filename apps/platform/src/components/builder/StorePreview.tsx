@@ -12,6 +12,9 @@ import {
   SocialProofBar,
   CTASection,
   BenefitsSection,
+  ValueStackSection,
+  ProductCarousel,
+  FooterSection,
 } from '@7aba/store-ui'
 import type { Section, StoreConfig } from '@7aba/store-ui'
 import type {
@@ -154,6 +157,45 @@ function SectionRenderer({ section, config }: { section: Section; config: StoreC
             { icon: '🔒', title: 'أمان الدفع', description: 'دفع عند الاستلام' },
           ]
       return <BenefitsSection benefits={benefits} />
+    }
+
+    case 'value-stack': {
+      const s = section as any
+      return (
+        <ValueStackSection
+          price={config.product.price ?? 2990}
+          items={s.items}
+          ctaText={s.ctaText}
+        />
+      )
+    }
+
+    case 'product-carousel': {
+      const images: ProductImage[] = (config.product.images ?? []).length > 0
+        ? config.product.images.map((img: any, i: number) => ({
+            id: i + 1,
+            image: img.src ?? img,
+            title: img.alt ?? config.product.name ?? 'صورة المنتج',
+            bgColor: img.bgColor ?? 'bg-gray-100',
+          }))
+        : PLACEHOLDER_IMAGES
+      return <ProductCarousel products={images} />
+    }
+
+    case 'footer': {
+      const s = section as any
+      return (
+        <FooterSection
+          content={{
+            storeName: s.storeName ?? config.meta.siteName ?? 'متجري',
+            tagline: s.tagline,
+            phone: s.phone,
+            email: s.email,
+            whatsapp: s.whatsapp,
+            copyright: s.copyright,
+          }}
+        />
+      )
     }
 
     default:

@@ -1,55 +1,43 @@
-import { Check, ShoppingCart, Package, Truck, RotateCcw, Headphones } from 'lucide-react';
+import { Check, ShoppingCart, Package, Truck, RotateCcw, Headphones, Gift, Shield } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { cn } from '../../lib/utils';
 
-interface ValueItem {
-    icon: React.ElementType;
-    title: string;
-    description: string;
-    retailValue?: string;
-    isFree?: boolean;
+const ICON_MAP: Record<string, React.ElementType> = {
+  package: Package,
+  truck: Truck,
+  return: RotateCcw,
+  support: Headphones,
+  gift: Gift,
+  shield: Shield,
+}
+
+export interface ValueStackItem {
+  icon?: string
+  title: string
+  description: string
+  value?: string
+  isFree?: boolean
 }
 
 interface ValueStackSectionProps {
     price: number;
+    ctaText?: string;
+    items?: ValueStackItem[];
     onCtaClick?: () => void;
     className?: string;
 }
 
-export function ValueStackSection({ price, onCtaClick, className }: ValueStackSectionProps) {
+const DEFAULT_ITEMS: ValueStackItem[] = [
+  { icon: 'package', title: 'المنتج الأساسي', description: 'منتج عالي الجودة مصنوع من أفضل المواد.', value: '', isFree: false },
+  { icon: 'truck', title: 'توصيل مجاني', description: 'يوصلك لعنوانك في كامل الوطن بلا مصاريف زايدة.', value: '500 دج', isFree: true },
+  { icon: 'return', title: 'ضمان الإرجاع 7 أيام', description: 'ما عجبكش؟ رجّعها بلا شروط في 7 أيام.', value: '0 دج', isFree: true },
+  { icon: 'support', title: 'دعم مباشر', description: 'فريقنا متوفر لمساعدتك. رد سريع مضمون.', value: '0 دج', isFree: true },
+]
+
+export function ValueStackSection({ price, ctaText, items, onCtaClick, className }: ValueStackSectionProps) {
     const theme = useTheme();
     const isDark = theme.mode === 'dark';
-
-    const items: ValueItem[] = [
-        {
-            icon: Package,
-            title: 'صاكادو — حقيبة ظهر بذراع واحدة',
-            description: 'مصنوعة 100% بوليستار. خفيفة، قوية، تحمي حوايجك من الماء. مثالية للدراسة والسبور والخرجات.',
-            retailValue: '3500 دج',
-            isFree: false,
-        },
-        {
-            icon: Truck,
-            title: 'توصيل مجاني',
-            description: 'يوصلك لعنوانك مباشرة في كامل 58 ولاية. بلا تنقل بلا مصاريف زايدة.',
-            retailValue: '500 دج',
-            isFree: true,
-        },
-        {
-            icon: RotateCcw,
-            title: 'ضمان الإرجاع 7 أيام',
-            description: 'ما عجبكش؟ رجّعها بلا شروط في 7 أيام. ما تخلصش شي.',
-            retailValue: '0 دج',
-            isFree: true,
-        },
-        {
-            icon: Headphones,
-            title: 'دعم مباشر على واتساب',
-            description: 'فريقنا متوفر باش يساعدك في الطلب والتوصيل. رد سريع مضمون.',
-            retailValue: '0 دج',
-            isFree: true,
-        },
-    ];
+    const displayItems = items && items.length > 0 ? items : DEFAULT_ITEMS
 
     const handleCta = () => {
         if (onCtaClick) {
@@ -87,8 +75,8 @@ export function ValueStackSection({ price, onCtaClick, className }: ValueStackSe
 
                 {/* Value Items */}
                 <div className="space-y-4 mb-8">
-                    {items.map((item, index) => {
-                        const Icon = item.icon;
+                    {displayItems.map((item, index) => {
+                        const Icon = ICON_MAP[item.icon ?? ''] ?? Package
                         const isMainProduct = index === 0;
                         return (
                             <div
@@ -153,7 +141,7 @@ export function ValueStackSection({ price, onCtaClick, className }: ValueStackSe
                                                 className="text-sm font-black shrink-0"
                                                 style={{ color: theme.colors.accent }}
                                             >
-                                                {item.retailValue}
+                                                {item.value ?? ''}
                                             </span>
                                         )}
                                     </div>
@@ -228,7 +216,7 @@ export function ValueStackSection({ price, onCtaClick, className }: ValueStackSe
                     }}
                 >
                     <ShoppingCart className="w-6 h-6" strokeWidth={3} />
-                    اطلب دك قبل ما تخلاص
+                    {ctaText || 'اطلب الآن'}
                 </button>
 
                 {/* Trust micro-copy */}
