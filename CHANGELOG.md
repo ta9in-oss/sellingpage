@@ -3,7 +3,7 @@
 All notable changes to this project are documented here.  
 Format: `[version/commit] YYYY-MM-DD — description`
 
-> **Active HEAD:** `38bc0af` · **Live:** https://7aba.store · **Repo:** https://github.com/Ta9in/sellingpage
+> **Active HEAD:** `a346bd7` · **Live:** https://7aba.store · **Repo:** https://github.com/Ta9in/sellingpage
 
 ---
 
@@ -11,6 +11,31 @@ Format: `[version/commit] YYYY-MM-DD — description`
 
 - [ ] Set Chargily webhook URL in Chargily dashboard: `https://7aba.store/api/webhook/chargily`
 - [ ] Set download URLs env vars when assets are ready: `DOWNLOAD_STORE_SOURCE_URL`, `DOWNLOAD_STORE_APP_URL`, `DOWNLOAD_PLATFORM_SOURCE_URL`
+
+---
+
+## [a346bd7] 2026-03-31 — Builder image upload, delete store, state reset
+
+**feat(builder): image upload, delete store, state reset, more i18n**
+- `ImageUpload` component: drag-drop or click, canvas resize to 800px wide, base64 storage, URL fallback
+- `HeroForm`: replaced URL input with `ImageUpload`
+- `ProductPanel`: `ImageUpload` for product images (max 3), dir from `useLang`, storeDir for product name
+- `StoreSettingsModal`: delete store with confirmation (danger zone), dir from `useLang`, `onDeleted` callback
+- `BuilderLayout`: reset to `defaultConfig` on storeId change (no more state bleed between stores)
+- `defaultConfig` exported from `useBuilderStore`
+
+---
+
+## [fe3d566] 2026-03-31 — Builder RTL/LTR, new section types, full i18n
+
+**feat(builder): RTL/LTR support, new section types, full i18n**
+- `BuilderLayout`: `dir` from `useLang()` (platform UI language), locale selector (ar/fr/en) in SitePanel
+- `StorePreview`: zoom control (40/55/75/100%), click-to-select sections (yellow ring), store locale direction
+- Section types: `social-proof`, `cta`, `benefits` added to `Section` union in `packages/store-ui/src/types/index.ts`
+- `useBuilderStore`: `createDefaultSection` for 3 new types
+- `SectionList`: icons + labels for social-proof (Zap), cta (Megaphone), benefits (Star) — all addable
+- All 9 forms use `useLang()` for i18n; content inputs use `storeDir` (config.meta.rtl)
+- New forms: `SocialProofForm`, `CtaForm`, `BenefitsForm`
 
 ---
 
