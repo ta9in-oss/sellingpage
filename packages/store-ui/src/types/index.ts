@@ -51,6 +51,9 @@ export type Section =
   | { id: string; type: 'faq'; items: { q: string; a: string }[] }
   | { id: string; type: 'guarantee'; items: { title: string; description: string; icon: string }[] }
   | { id: string; type: 'order-form'; submitLabel: string; fields: FormField[] }
+  | { id: string; type: 'social-proof'; rating?: number; reviewCount?: number }
+  | { id: string; type: 'cta'; headline: string; subheadline: string; cta: string }
+  | { id: string; type: 'benefits'; items: { icon: string; title: string; description: string }[] }
 
 export interface FormField {
   id: string

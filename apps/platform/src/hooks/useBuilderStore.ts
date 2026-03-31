@@ -128,6 +128,31 @@ function createDefaultSection(type: Section['type']): Section {
           { id: nanoid(), label: 'رقم الهاتف', type: 'phone', required: true },
         ],
       }
+    case 'social-proof':
+      return {
+        id: nanoid(),
+        type: 'social-proof',
+        rating: 4.9,
+        reviewCount: 300,
+      }
+    case 'cta':
+      return {
+        id: nanoid(),
+        type: 'cta',
+        headline: 'اطلب الآن وادفع عند الاستلام',
+        subheadline: 'توصيل مجاني لجميع الولايات',
+        cta: 'اطلب الآن',
+      }
+    case 'benefits':
+      return {
+        id: nanoid(),
+        type: 'benefits',
+        items: [
+          { icon: '🚀', title: 'توصيل سريع', description: 'خلال 48-72 ساعة' },
+          { icon: '💯', title: 'ضمان الجودة', description: '7 أيام استرداد' },
+          { icon: '🔒', title: 'أمان الدفع', description: 'دفع عند الاستلام' },
+        ],
+      }
   }
 }
 

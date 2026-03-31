@@ -14,6 +14,9 @@ import { TestimonialsForm } from './forms/TestimonialsForm'
 import { FaqForm } from './forms/FaqForm'
 import { GuaranteeForm } from './forms/GuaranteeForm'
 import { OrderFormForm } from './forms/OrderFormForm'
+import { SocialProofForm } from './forms/SocialProofForm'
+import { CtaForm } from './forms/CtaForm'
+import { BenefitsForm } from './forms/BenefitsForm'
 import { useNavigate } from '@tanstack/react-router'
 import type { StoreConfig, Section } from '@7aba/store-ui'
 import { Loader2, Check, Rocket, Palette, Package, Bell, Globe, CreditCard } from 'lucide-react'
@@ -31,34 +34,59 @@ type SettingsTab = 'theme' | 'product' | 'notifications' | 'site' | 'payment'
 
 const T = {
   siteDataSeo: { ar: 'بيانات الموقع والـ SEO', fr: 'Données du site & SEO', en: 'Site Data & SEO' },
-  tabTitle: { ar: 'عنوان التاب (title)', fr: 'Titre de l\'onglet (title)', en: 'Tab title (title)' },
-  tabTitlePlaceholder: { ar: 'مثال: حقيبة ظهر للمدرسة | متجرك', fr: 'Ex: Sac à dos scolaire | Votre boutique', en: 'Ex: School backpack | Your Store' },
-  tabTitleHint: { ar: 'يظهر في تاب المتصفح ونتائج البحث', fr: 'Apparaît dans l\'onglet du navigateur et les résultats de recherche', en: 'Shown in browser tab and search results' },
-  descriptionLabel: { ar: 'الوصف (description)', fr: 'Description (description)', en: 'Description (description)' },
-  descriptionPlaceholder: { ar: 'مثال: اطلب حقيبتك الآن بتوصيل مجاني لجميع ولايات الجزائر.', fr: 'Ex: Commandez votre sac maintenant avec livraison gratuite.', en: 'Ex: Order your bag now with free shipping.' },
-  descriptionHint: { ar: 'يظهر تحت الرابط في نتائج جوجل (130-160 حرف مثالي)', fr: 'Apparaît sous le lien dans les résultats Google (130-160 caractères idéal)', en: 'Shown below the link in Google results (130-160 chars ideal)' },
-  slugLabel: { ar: 'رابط المتجر (slug)', fr: 'Lien de la boutique (slug)', en: 'Store slug (slug)' },
+  tabTitle: { ar: 'عنوان التاب', fr: 'Titre de l\'onglet', en: 'Tab title' },
+  tabTitlePlaceholder: { ar: 'مثال: حقيبة ظهر | متجرك', fr: 'Ex: Sac à dos | Boutique', en: 'Ex: Backpack | Your Store' },
+  tabTitleHint: { ar: 'يظهر في تاب المتصفح ونتائج البحث', fr: 'Affiché dans l\'onglet et les résultats', en: 'Shown in browser tab and search results' },
+  descriptionLabel: { ar: 'وصف الموقع', fr: 'Description', en: 'Description' },
+  descriptionPlaceholder: { ar: 'مثال: اطلب منتجك الآن بتوصيل مجاني.', fr: 'Ex: Commandez avec livraison gratuite.', en: 'Ex: Order now with free shipping.' },
+  descriptionHint: { ar: 'يظهر في نتائج جوجل (130-160 حرف مثالي)', fr: 'Résultats Google (130-160 caractères idéal)', en: 'Google results (130-160 chars ideal)' },
+  slugLabel: { ar: 'رابط المتجر', fr: 'Lien de la boutique', en: 'Store URL slug' },
   tabTheme: { ar: 'الثيم', fr: 'Thème', en: 'Theme' },
   tabProduct: { ar: 'المنتج', fr: 'Produit', en: 'Product' },
-  tabNotifications: { ar: 'الإشعارات', fr: 'Notifications', en: 'Notifications' },
+  tabNotifications: { ar: 'إشعارات', fr: 'Notifs', en: 'Notifs' },
   tabPayment: { ar: 'الدفع', fr: 'Paiement', en: 'Payment' },
   tabSite: { ar: 'الموقع', fr: 'Site', en: 'Site' },
   storeName: { ar: 'اسم المتجر', fr: 'Nom de la boutique', en: 'Store name' },
   saving: { ar: 'جارٍ الحفظ...', fr: 'Enregistrement...', en: 'Saving...' },
   saved: { ar: 'تم الحفظ', fr: 'Enregistré', en: 'Saved' },
-  deployStore: { ar: 'نشر المتجر', fr: 'Déployer la boutique', en: 'Deploy Store' },
+  deployStore: { ar: 'نشر المتجر', fr: 'Déployer', en: 'Deploy' },
   mobileSections: { ar: 'الأقسام', fr: 'Sections', en: 'Sections' },
   mobilePreview: { ar: 'المعاينة', fr: 'Aperçu', en: 'Preview' },
   mobileSettings: { ar: 'الإعدادات', fr: 'Paramètres', en: 'Settings' },
+  storeLocale: { ar: 'لغة المتجر', fr: 'Langue de la boutique', en: 'Store language' },
+  storeLocaleHint: { ar: 'يحدد اتجاه النص في المتجر (يمين→يسار للعربية)', fr: 'Détermine la direction du texte (droite-gauche pour l\'arabe)', en: 'Sets text direction in the store (RTL for Arabic)' },
 }
 
 function SitePanel() {
   const { config, updateMeta } = useBuilderStore()
   const { meta } = config
-  const { t } = useLang()
+  const { t, dir } = useLang()
   return (
-    <div className="p-4 space-y-4" dir="rtl">
+    <div className="p-4 space-y-4" dir={dir}>
       <p className="text-xs font-bold text-zinc-500 uppercase tracking-wide">{t(T.siteDataSeo)}</p>
+
+      {/* Store locale / direction */}
+      <div className="space-y-2">
+        <Label className="text-xs">{t(T.storeLocale)}</Label>
+        <div className="flex gap-2">
+          {(['ar', 'fr', 'en'] as const).map((locale) => (
+            <button
+              key={locale}
+              onClick={() => updateMeta({ locale, rtl: locale === 'ar' })}
+              className={cn(
+                'flex-1 py-1.5 text-xs font-bold border-2 rounded transition-all',
+                meta.locale === locale
+                  ? 'border-black bg-black text-white'
+                  : 'border-zinc-200 hover:border-zinc-400'
+              )}
+            >
+              {locale === 'ar' ? '🇩🇿 عربي' : locale === 'fr' ? '🇫🇷 FR' : '🇺🇸 EN'}
+            </button>
+          ))}
+        </div>
+        <p className="text-[11px] text-zinc-400">{t(T.storeLocaleHint)}</p>
+      </div>
+
       <div className="space-y-1">
         <Label className="text-xs">{t(T.tabTitle)}</Label>
         <Input
@@ -66,7 +94,7 @@ function SitePanel() {
           onChange={(e) => updateMeta({ siteTitle: e.target.value })}
           placeholder={t(T.tabTitlePlaceholder)}
           className="text-sm"
-          dir="rtl"
+          dir={meta.rtl ? 'rtl' : 'ltr'}
         />
         <p className="text-[11px] text-zinc-400">{t(T.tabTitleHint)}</p>
       </div>
@@ -78,7 +106,7 @@ function SitePanel() {
           placeholder={t(T.descriptionPlaceholder)}
           className="text-sm resize-none"
           rows={3}
-          dir="rtl"
+          dir={meta.rtl ? 'rtl' : 'ltr'}
         />
         <p className="text-[11px] text-zinc-400">{t(T.descriptionHint)}</p>
       </div>
@@ -91,7 +119,7 @@ function SitePanel() {
           className="text-sm font-mono"
           dir="ltr"
         />
-        <p className="text-[11px] text-zinc-400">haba.store/<strong>{meta.slug || 'my-store'}</strong></p>
+        <p className="text-[11px] text-zinc-400">7aba.store/<strong>{meta.slug || 'my-store'}</strong></p>
       </div>
     </div>
   )
@@ -99,14 +127,14 @@ function SitePanel() {
 
 function RightPanel() {
   const { config, selectedSectionId } = useBuilderStore()
-  const { t } = useLang()
+  const { t, dir } = useLang()
   const [settingsTab, setSettingsTab] = useState<SettingsTab>('theme')
 
   if (!selectedSectionId) {
     return (
       <div className="flex flex-col h-full">
         {/* Tab bar */}
-        <div className="flex border-b-2 border-black shrink-0">
+        <div className="flex border-b-2 border-black shrink-0" dir={dir}>
           {([
             { key: 'theme' as const, label: t(T.tabTheme), Icon: Palette },
             { key: 'product' as const, label: t(T.tabProduct), Icon: Package },
@@ -144,20 +172,16 @@ function RightPanel() {
   if (!section) return <ThemePanel />
 
   switch (section.type) {
-    case 'hero':
-      return <HeroForm />
-    case 'features':
-      return <FeaturesForm />
-    case 'testimonials':
-      return <TestimonialsForm />
-    case 'faq':
-      return <FaqForm />
-    case 'guarantee':
-      return <GuaranteeForm />
-    case 'order-form':
-      return <OrderFormForm />
-    default:
-      return <ThemePanel />
+    case 'hero': return <HeroForm />
+    case 'features': return <FeaturesForm />
+    case 'testimonials': return <TestimonialsForm />
+    case 'faq': return <FaqForm />
+    case 'guarantee': return <GuaranteeForm />
+    case 'order-form': return <OrderFormForm />
+    case 'social-proof': return <SocialProofForm />
+    case 'cta': return <CtaForm />
+    case 'benefits': return <BenefitsForm />
+    default: return <ThemePanel />
   }
 }
 
@@ -167,9 +191,15 @@ export function BuilderLayout({ storeId }: BuilderLayoutProps) {
   const { config, isSaving, hydrateConfig, updateMeta, saveToInstantDB, selectedSectionId } =
     useBuilderStore()
   const navigate = useNavigate()
-  const { t } = useLang()
+  const { t, dir } = useLang()
   const [mobileTab, setMobileTab] = useState<MobileTab>('preview')
   const hasHydratedRef = useRef(false)
+
+  // Reset store to default state on mount so stale data from previous store doesn't bleed in
+  useEffect(() => {
+    useBuilderStore.setState({ selectedSectionId: null })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storeId])
 
   // Load store data from InstantDB
   const { data } = db.useQuery({
@@ -201,7 +231,7 @@ export function BuilderLayout({ storeId }: BuilderLayoutProps) {
   // Auto-save on config change — skip the initial render before any user change
   const configRef = useRef(config)
   useEffect(() => {
-    if (configRef.current === config) return // skip if config object hasn't changed
+    if (configRef.current === config) return
     configRef.current = config
     saveToInstantDB(storeId, db)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -214,7 +244,7 @@ export function BuilderLayout({ storeId }: BuilderLayoutProps) {
   ]
 
   return (
-    <div className="min-h-screen flex flex-col bg-white" dir="rtl">
+    <div className="min-h-screen flex flex-col bg-white" dir={dir}>
       {/* Top bar — brutalist */}
       <header className="h-14 border-b-2 border-black flex items-center px-4 gap-3 shrink-0 bg-white">
         <Input
@@ -222,23 +252,16 @@ export function BuilderLayout({ storeId }: BuilderLayoutProps) {
           value={config.meta.name}
           onChange={(e) => updateMeta({ name: e.target.value })}
           className="max-w-[200px] h-8 text-sm font-bold border-2 border-black rounded-none shadow-none focus-visible:ring-yellow-400"
-          dir="rtl"
+          dir={config.meta.rtl ? 'rtl' : 'ltr'}
           placeholder={t(T.storeName)}
           aria-label={t(T.storeName)}
-          id="store-name-input"
         />
 
         <div className="flex items-center gap-1 text-xs text-zinc-500 ms-auto">
           {isSaving ? (
-            <>
-              <Loader2 size={12} className="animate-spin" />
-              {t(T.saving)}
-            </>
+            <><Loader2 size={12} className="animate-spin" />{t(T.saving)}</>
           ) : (
-            <>
-              <Check size={12} className="text-green-600" />
-              {t(T.saved)}
-            </>
+            <><Check size={12} className="text-green-600" />{t(T.saved)}</>
           )}
         </div>
 
@@ -252,9 +275,9 @@ export function BuilderLayout({ storeId }: BuilderLayoutProps) {
         </Button>
       </header>
 
-      {/* Desktop: three-column layout */}
+      {/* Desktop: three-column layout — direction-aware */}
       <div className="flex-1 hidden lg:flex overflow-hidden">
-        {/* Left panel */}
+        {/* Sections panel — start side (left in LTR, right in RTL) */}
         <aside className="w-60 border-e-2 border-black shrink-0 overflow-y-auto flex flex-col bg-white">
           <SectionList />
         </aside>
@@ -264,7 +287,7 @@ export function BuilderLayout({ storeId }: BuilderLayoutProps) {
           <StorePreview />
         </main>
 
-        {/* Right panel */}
+        {/* Settings panel — end side (right in LTR, left in RTL) */}
         <aside className="w-80 border-s-2 border-black shrink-0 overflow-y-auto bg-white">
           <RightPanel />
         </aside>
@@ -274,29 +297,21 @@ export function BuilderLayout({ storeId }: BuilderLayoutProps) {
       <div className="flex-1 flex flex-col lg:hidden overflow-hidden">
         <div className="flex-1 overflow-hidden">
           {mobileTab === 'sections' && (
-            <div className="h-full overflow-y-auto">
-              <SectionList />
-            </div>
+            <div className="h-full overflow-y-auto"><SectionList /></div>
           )}
           {mobileTab === 'preview' && (
-            <div className="h-full overflow-hidden">
-              <StorePreview />
-            </div>
+            <div className="h-full overflow-hidden"><StorePreview /></div>
           )}
           {mobileTab === 'settings' && (
-            <div className="h-full overflow-y-auto">
-              <RightPanel />
-            </div>
+            <div className="h-full overflow-y-auto"><RightPanel /></div>
           )}
         </div>
-
-        {/* Mobile tab bar */}
         <nav className="h-12 border-t-2 border-black flex shrink-0">
           {MOBILE_TABS.map(({ key, label }) => (
             <Button
               key={key}
               variant={mobileTab === key ? 'default' : 'ghost'}
-              onClick={() => setMobileTab(key)}
+              onClick={() => setMobileTab(key as MobileTab)}
               className={cn(
                 'flex-1 rounded-none h-full text-sm font-bold border-0',
                 mobileTab === key

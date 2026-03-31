@@ -29,6 +29,9 @@ import {
   HelpCircle,
   ShieldCheck,
   ClipboardList,
+  Zap,
+  Megaphone,
+  Star,
 } from 'lucide-react'
 import type { Section } from '@7aba/store-ui'
 import { Button } from '@/components/ui/button'
@@ -47,9 +50,12 @@ const SECTION_ICONS: Record<SectionType, React.ComponentType<{ size?: number; cl
   faq: HelpCircle,
   guarantee: ShieldCheck,
   'order-form': ClipboardList,
+  'social-proof': Zap,
+  cta: Megaphone,
+  benefits: Star,
 }
 
-const ADDABLE_TYPES: SectionType[] = ['hero', 'features', 'testimonials', 'faq', 'guarantee', 'order-form']
+const ADDABLE_TYPES: SectionType[] = ['hero', 'features', 'testimonials', 'faq', 'guarantee', 'order-form', 'social-proof', 'cta', 'benefits']
 
 const T = {
   sections: { ar: 'الأقسام', fr: 'Sections', en: 'Sections' },
@@ -162,6 +168,9 @@ export function SectionList() {
     faq: t(T.sectionFaq),
     guarantee: t(T.sectionGuarantee),
     'order-form': t(T.sectionOrderForm),
+    'social-proof': t({ ar: 'شريط الثقة', fr: 'Barre de confiance', en: 'Social Proof' }),
+    cta: t({ ar: 'الدعوة للعمل', fr: 'Appel à l\'action', en: 'Call to Action' }),
+    benefits: t({ ar: 'الفوائد', fr: 'Avantages', en: 'Benefits' }),
   }
 
   useEffect(() => {

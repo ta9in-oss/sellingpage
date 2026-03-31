@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useBuilderStore } from '@/hooks/useBuilderStore'
 import { loadGoogleFont } from '@/lib/googleFonts'
 import {
@@ -9,6 +9,9 @@ import {
   TestimonialSection,
   FeatureGrid,
   OrderSection,
+  SocialProofBar,
+  CTASection,
+  BenefitsSection,
 } from '@7aba/store-ui'
 import type { Section, StoreConfig } from '@7aba/store-ui'
 import type {
@@ -19,9 +22,14 @@ import type {
   Feature,
   ProductImage,
 } from '@7aba/store-ui'
+import { cn } from '@/lib/utils'
+import { ZoomIn, ZoomOut } from 'lucide-react'
 
+type Zoom = 40 | 55 | 75 | 100
 
-// Placeholder product images used when merchant hasn't uploaded images yet
+const ZOOM_STEPS: Zoom[] = [40, 55, 75, 100]
+
+// Placeholder product images
 const PLACEHOLDER_IMAGES: ProductImage[] = [
   { id: 1, image: '/bagpack_002.png', title: 'صورة المنتج', bgColor: 'bg-black text-white' },
   { id: 2, image: '/bagpack_003.png', title: 'صورة المنتج', bgColor: 'bg-yellow-400 text-black' },
@@ -33,7 +41,7 @@ function SectionRenderer({ section, config }: { section: Section; config: StoreC
     case 'hero': {
       const content: HeroContent = {
         title: [section.headline || 'عنوان منتجك هنا'],
-        description: section.subheadline || 'صف منتجك في سطر أو سطرين. اجذب انتباه الزبون.',
+        description: section.subheadline || 'صف منتجك في سطر أو سطرين.',
         ctaText: section.cta || 'اطلب الآن',
         ctaLink: '#buy',
         image: section.image || '/bagpack_001.png',
@@ -73,34 +81,27 @@ function SectionRenderer({ section, config }: { section: Section; config: StoreC
         : [
             { id: 1, name: 'أحمد بن علي', location: 'الجزائر', comment: 'منتج رائع! جودة ممتازة وتوصيل سريع', rating: 5 },
             { id: 2, name: 'فاطمة الزهراء', location: 'وهران', comment: 'راضية بزاف على الشراء، ننصح بيه', rating: 5 },
-            { id: 3, name: 'محمد الأمين', location: 'قسنطينة', comment: 'المنتج كيما في الصور، سرعة التوصيل ممتازة', rating: 5 },
           ]
       return <TestimonialSection testimonials={testimonials} />
     }
 
     case 'faq': {
       const faqs: FAQItem[] = section.items.length > 0
-        ? section.items.map((item, i) => ({
-            id: i + 1,
-            question: item.q,
-            answer: item.a,
-          }))
+        ? section.items.map((item, i) => ({ id: i + 1, question: item.q, answer: item.a }))
         : [
-            { id: 1, question: 'كيفاش نطلب؟', answer: 'اكتب معلوماتك في الاستمارة وانتظر التأكيد.' },
-            { id: 2, question: 'واش التوصيل مجاني؟', answer: 'إيه! التوصيل مجاني لكامل الوطن.' },
-            { id: 3, question: 'كيفاش الدفع؟', answer: 'الدفع عند الاستلام فقط.' },
+            { id: 1, question: 'كيفاش نطلب؟', answer: 'اكتب معلوماتك في الاستمارة.' },
+            { id: 2, question: 'واش التوصيل مجاني؟', answer: 'إيه! لكامل الوطن.' },
           ]
       return <FAQSection faqs={faqs} />
     }
 
     case 'guarantee': {
-      // Support new items[] format; fall back gracefully for old text+icon format
       const guarantees: Guarantee[] = section.items && section.items.length > 0
         ? section.items.map((item) => ({ icon: item.icon, title: item.title, description: item.description }))
         : [
-            { icon: 'truck', title: 'توصيل مجاني', description: 'توصيل مجاني لجميع الولايات' },
-            { icon: 'refresh', title: 'إرجاع مجاني', description: 'عندك 7 أيام باش ترجع المنتج' },
-            { icon: 'shield', title: 'ضمان الجودة', description: 'ضمان استرداد الأموال خلال 7 أيام' },
+            { icon: 'truck', title: 'توصيل مجاني', description: 'لجميع الولايات' },
+            { icon: 'refresh', title: 'إرجاع مجاني', description: 'خلال 7 أيام' },
+            { icon: 'shield', title: 'ضمان الجودة', description: 'استرداد الأموال' },
           ]
       return <GuaranteeSection guarantees={guarantees} />
     }
@@ -124,15 +125,47 @@ function SectionRenderer({ section, config }: { section: Section; config: StoreC
       )
     }
 
+    case 'social-proof': {
+      const s = section as any
+      return <SocialProofBar reviewCount={s.reviewCount ?? 300} rating={s.rating ?? 4.9} />
+    }
+
+    case 'cta': {
+      const s = section as any
+      return (
+        <CTASection
+          cta={{
+            title: s.headline || 'اطلب الآن وادفع عند الاستلام',
+            subtitle: s.subheadline || 'توصيل مجاني لجميع الولايات',
+            buttonText: s.cta || 'اطلب الآن',
+            urgent: true,
+          }}
+        />
+      )
+    }
+
+    case 'benefits': {
+      const s = section as any
+      const benefits = (s.items ?? []).length > 0
+        ? s.items
+        : [
+            { icon: '🚀', title: 'توصيل سريع', description: 'خلال 48-72 ساعة' },
+            { icon: '💯', title: 'ضمان الجودة', description: '7 أيام استرداد' },
+            { icon: '🔒', title: 'أمان الدفع', description: 'دفع عند الاستلام' },
+          ]
+      return <BenefitsSection benefits={benefits} />
+    }
+
     default:
       return null
   }
 }
 
 export function StorePreview() {
-  const { config } = useBuilderStore()
+  const { config, selectedSectionId, selectSection } = useBuilderStore()
+  const [zoom, setZoom] = useState<Zoom>(55)
 
-  // Load theme fonts whenever they change
+  // Load theme fonts
   useEffect(() => {
     loadGoogleFont(config.theme.typography.fontFamily)
     if (config.theme.typography.headingFont) {
@@ -140,33 +173,93 @@ export function StorePreview() {
     }
   }, [config.theme.typography.fontFamily, config.theme.typography.headingFont])
 
+  const zoomIndex = ZOOM_STEPS.indexOf(zoom)
+  const canZoomIn = zoomIndex < ZOOM_STEPS.length - 1
+  const canZoomOut = zoomIndex > 0
+
+  // Calculate the height compensation for transform scale
+  // When scaled down, the element's layout height is unchanged but visually smaller
+  // We compensate by setting a negative margin-bottom = naturalHeight * (1 - scale)
+  // Since we use overflow-auto, we just let the scaled content define scroll height via a wrapper trick
+  const scale = zoom / 100
+
   return (
-    <div className="flex flex-col h-full">
-      {/* Scale wrapper */}
-      <div className="flex-1 overflow-auto bg-zinc-100 flex justify-center p-4">
+    <div className="flex flex-col h-full bg-zinc-100">
+      {/* Zoom toolbar */}
+      <div className="flex items-center justify-center gap-2 py-1.5 bg-zinc-200 border-b border-zinc-300 shrink-0">
+        <button
+          onClick={() => setZoom(ZOOM_STEPS[zoomIndex - 1])}
+          disabled={!canZoomOut}
+          className="p-1 rounded hover:bg-zinc-300 disabled:opacity-40 disabled:cursor-not-allowed"
+          aria-label="Zoom out"
+        >
+          <ZoomOut size={14} />
+        </button>
+        <span className="text-xs font-mono text-zinc-600 w-10 text-center">{zoom}%</span>
+        <button
+          onClick={() => setZoom(ZOOM_STEPS[zoomIndex + 1])}
+          disabled={!canZoomIn}
+          className="p-1 rounded hover:bg-zinc-300 disabled:opacity-40 disabled:cursor-not-allowed"
+          aria-label="Zoom in"
+        >
+          <ZoomIn size={14} />
+        </button>
+      </div>
+
+      {/* Scrollable preview area */}
+      <div className="flex-1 overflow-auto flex justify-center p-4">
+        {/* Scale container — uses the zoom trick with padding-bottom to handle height correctly */}
         <div
           style={{
-            width: '1200px',
-            transform: 'scale(0.55)',
-            transformOrigin: 'top center',
-            marginBottom: '-45%',
+            width: `${1200 * scale}px`,
+            minHeight: '100%',
+            flexShrink: 0,
           }}
         >
           <div
-            className="border-4 border-black overflow-hidden shadow-[4px_4px_0px_0px_#000] bg-white"
-            style={{ fontFamily: config.theme.typography.fontFamily }}
+            style={{
+              width: '1200px',
+              transform: `scale(${scale})`,
+              transformOrigin: 'top left',
+            }}
           >
-            <ThemeProvider value={config.theme}>
-              {config.sections.length === 0 ? (
-                <div className="flex items-center justify-center h-64 text-zinc-400 text-lg">
-                  لا توجد أقسام — أضف قسمًا من القائمة
-                </div>
-              ) : (
-                config.sections.map((section) => (
-                  <SectionRenderer key={section.id} section={section} config={config} />
-                ))
-              )}
-            </ThemeProvider>
+            <div
+              className="border-4 border-black overflow-hidden shadow-[4px_4px_0px_0px_#000] bg-white"
+              style={{ fontFamily: config.theme.typography.fontFamily }}
+              dir={config.meta.rtl ? 'rtl' : 'ltr'}
+            >
+              <ThemeProvider value={config.theme}>
+                {config.sections.length === 0 ? (
+                  <div className="flex items-center justify-center h-64 text-zinc-400 text-lg">
+                    {config.meta.rtl
+                      ? 'لا توجد أقسام — أضف قسمًا من القائمة'
+                      : 'No sections — add one from the sidebar'}
+                  </div>
+                ) : (
+                  config.sections.map((section) => (
+                    <div
+                      key={section.id}
+                      onClick={() => selectSection(section.id)}
+                      className={cn(
+                        'relative cursor-pointer transition-all',
+                        selectedSectionId === section.id
+                          ? 'ring-4 ring-inset ring-yellow-400'
+                          : 'hover:ring-2 hover:ring-inset hover:ring-zinc-300'
+                      )}
+                      title={section.type}
+                    >
+                      <SectionRenderer section={section} config={config} />
+                      {/* Section type label on hover/select */}
+                      {selectedSectionId === section.id && (
+                        <div className="absolute top-0 start-0 bg-yellow-400 text-black text-xs font-bold px-2 py-0.5 z-10">
+                          {section.type}
+                        </div>
+                      )}
+                    </div>
+                  ))
+                )}
+              </ThemeProvider>
+            </div>
           </div>
         </div>
       </div>
