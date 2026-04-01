@@ -3,7 +3,7 @@
 All notable changes to this project are documented here.  
 Format: `[version/commit] YYYY-MM-DD — description`
 
-> **Active HEAD:** `a346bd7` · **Live:** https://7aba.store · **Repo:** https://github.com/Ta9in/sellingpage
+> **Active HEAD:** `2826e90` · **Live:** https://7aba.store · **Repo:** https://github.com/Ta9in/sellingpage
 
 ---
 
@@ -11,6 +11,29 @@ Format: `[version/commit] YYYY-MM-DD — description`
 
 - [ ] Set Chargily webhook URL in Chargily dashboard: `https://7aba.store/api/webhook/chargily`
 - [ ] Set download URLs env vars when assets are ready: `DOWNLOAD_STORE_SOURCE_URL`, `DOWNLOAD_STORE_APP_URL`, `DOWNLOAD_PLATFORM_SOURCE_URL`
+
+---
+
+## [2826e90] 2026-04-01 — Builder UI shadcn cleanup
+
+**refactor(builder): remove brutalist styling from builder shell UI**
+- `BuilderLayout` header: `border-border`, standard shadcn `Input`, default `Button` variant
+- `BuilderLayout` sidebars: `border-border`, `bg-background` / `bg-muted`
+- Right panel tab bar: `bg-accent` active state instead of `bg-yellow-400`
+- Mobile bottom nav: `bg-accent` active state instead of `bg-yellow-400`
+
+---
+
+## [4ce7e84] 2026-04-01 — Shadcn forms, ThemesShowcase, pricing page, payment 'both'
+
+**feat: shadcn forms migration, ThemesShowcase, pricing page, payment both option**
+- All 12 builder forms migrated from `inputClass` hand-rolled CSS → shadcn `Input`/`Textarea`/`Label`/`Button`
+- `PaymentPanel`: 3-column toggle (COD / Chargily / Both), clean shadcn ring-primary selected state
+- `StorePreview`: features section uses `section.title` prop (not hardcoded Arabic)
+- `types/index.ts`: `features` section gets `title?: string`; `activeMethod` adds `'both'`
+- `ThemesShowcase` marketing component: shows 3 theme mini-previews + COD/Chargily/Both payment cards
+- `pricing.tsx`: full pricing page (was stub) — 3 tiers, FAQs with themes + payment copy
+- Landing page: `ThemesShowcase` inserted between `FeatureGrid` and `SocialNumbers`
 
 ---
 

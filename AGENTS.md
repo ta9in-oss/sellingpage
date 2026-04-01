@@ -2,7 +2,7 @@
 
 > **For AI agents:** Read this file at the start of every session. Update it when you make structural changes, add/remove dependencies, or change conventions. Keep entries concise — one line where possible. Do NOT add prose or explanations that already exist in code. Update the `Last updated` field on every write.
 
-**Last updated:** 2026-03-31  
+**Last updated:** 2026-04-01  
 **Project:** حبة ستور (7aba.store) — Algerian e-commerce platform (store builder + selling page)  
 **Repo:** https://github.com/Ta9in/sellingpage  
 **Monorepo:** pnpm workspaces + Turborepo — `apps/store`, `apps/platform`, `packages/store-ui`
@@ -160,7 +160,7 @@ sellingpage/                  ← monorepo root
 |---|---|---|
 | HeroSection | HeroSection.tsx | ✓ |
 | SocialProofBar | SocialProofBar.tsx | ✓ |
-| FeatureGrid | FeatureGrid.tsx | ✓ |
+| FeatureGrid | FeatureGrid.tsx | ✓ (accepts `title?: string`) |
 | BenefitsSection | BenefitsSection.tsx | ✓ |
 | ValueStackSection | ValueStackSection.tsx | ✓ |
 | TestimonialSection | TestimonialSection.tsx | ✓ |
@@ -169,6 +169,7 @@ sellingpage/                  ← monorepo root
 | OrderSection | OrderSection.tsx | ✓ |
 | FAQSection | FAQSection.tsx | ✓ |
 | ProductCarousel | ProductCarousel.tsx | ✗ (uses bgColor Tailwind from content.json) |
+| FooterSection | FooterSection.tsx | ✓ (NEW) |
 
 Page order in `apps/store/src/routes/index.tsx`: Hero → SocialProofBar → FeatureGrid → Benefits → ValueStack → Testimonials → CTA → Guarantees → Order (`#buy`) → FAQs
 
