@@ -2,7 +2,7 @@
 
 > **For AI agents:** Read this file at the start of every session. Update it when you make structural changes, add/remove dependencies, or change conventions. Keep entries concise — one line where possible. Do NOT add prose or explanations that already exist in code. Update the `Last updated` field on every write.
 
-**Last updated:** 2026-04-01  
+**Last updated:** 2026-04-01 (one-click service linking)  
 **Project:** حبة ستور (7aba.store) — Algerian e-commerce platform (store builder + selling page)  
 **Repo:** https://github.com/Ta9in/sellingpage  
 **Monorepo:** pnpm workspaces + Turborepo — `apps/store`, `apps/platform`, `packages/store-ui`
@@ -212,6 +212,7 @@ Page order in `apps/store/src/routes/index.tsx`: Hero → SocialProofBar → Fea
 | `/dashboard` | `dashboard/index.tsx` | Auth gate → subscription gate → merchant dashboard |
 | `/dashboard/builder` | `dashboard/builder.tsx` | Store builder (`?storeId=`) |
 | `/dashboard/deploy` | `dashboard/deploy.tsx` | Deploy wizard (`?tier=free|pro`) |
+| `/auth/cloudflare` | `auth/cloudflare.tsx` | CF OAuth popup callback — exchanges code, postMessages creds to opener |
 
 ---
 
@@ -247,9 +248,12 @@ Page order in `apps/store/src/routes/index.tsx`: Hero → SocialProofBar → Fea
 |---|---|---|
 | `VITE_INSTANT_APP_ID` | Platform DB App ID | ✅ set |
 | `INSTANTDB_ADMIN_TOKEN` | Platform admin token | ✅ set |
+| `INSTANTDB_PLATFORM_PERSONAL_TOKEN` | Personal token — auto-provisions store databases | ✅ set |
 | `VITE_GOOGLE_CLIENT_ID` | Google OAuth for platform login | ✅ set |
 | `CHARGILY_PLATFORM_SECRET_KEY` | Chargily secret for subscriptions | ✅ set (test) |
 | `VITE_APP_URL` | App base URL (production: https://7aba.store) | ✅ set |
+| `VITE_CF_OAUTH_CLIENT_ID` | CF OAuth client ID (one-click CF linking) | ❌ register at dash.cloudflare.com/profile/developer-applications |
+| `CF_OAUTH_CLIENT_SECRET` | CF OAuth client secret (server-only) | ❌ register at dash.cloudflare.com/profile/developer-applications |
 | `DOWNLOAD_URL_STORE_SOURCE` | Pro tier store source download | ❌ optional (defaults to GitHub archive) |
 | `DOWNLOAD_URL_STORE_APP` | Pro tier app APK download | ❌ optional (defaults to GitHub archive) |
 | `DOWNLOAD_URL_PLATFORM_SOURCE` | Agency tier platform download | ❌ optional (defaults to GitHub archive) |
@@ -321,6 +325,9 @@ npx tsx seed-orders.ts          # Seed test orders (from apps/store/)
 - **Chargily API v2 does NOT accept inline `customer` objects** in `createCheckout` — always call `createCustomer()` first, then pass `customer_id` to `createCheckout()`
 - **Google OAuth**: `clientName: 'google-web'` must be registered in InstantDB dash API — cannot use `instant-cli` for this; use `POST /dash/apps/{id}/oauth_service_providers` then `POST /dash/apps/{id}/oauth_clients`
 - **InstantDB personal token** for dash API calls: `REDACTED` (at `~/.config/instantdb-prod-nodejs/a`)
+- **InstantDB app creation API**: `POST https://api.instantdb.com/dash/apps` — must supply `id` (UUID), `title`, `admin_token` (UUID) in body + `Authorization: Bearer {personal_token}`. Response: `{"app": {..., "admin-token": "...", "id": "..."}}` (note hyphen in `admin-token`)
+- **CF OAuth**: `ConnectServicesStep` shows OAuth button when `VITE_CF_OAUTH_CLIENT_ID` is set; falls back to manual entry. Callback route at `/auth/cloudflare`. Requires registering app at dash.cloudflare.com/profile/developer-applications — scopes: `account:read workers:write workers_kv:write workers_routes:write zone:read dns:write`
+- **InstantDB auto-provision**: `autoProvisionInstantDB` server fn uses `INSTANTDB_PLATFORM_PERSONAL_TOKEN` to create store apps automatically — merchants never need an InstantDB account
 
 ---
 

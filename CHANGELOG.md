@@ -3,14 +3,27 @@
 All notable changes to this project are documented here.  
 Format: `[version/commit] YYYY-MM-DD — description`
 
-> **Active HEAD:** `2826e90` · **Live:** https://7aba.store · **Repo:** https://github.com/Ta9in/sellingpage
+> **Active HEAD:** `f111ec8` · **Live:** https://7aba.store · **Repo:** https://github.com/Ta9in/sellingpage
 
 ---
 
 ## [Unreleased] — Pending
 
+- [ ] Register CF OAuth app at dash.cloudflare.com/profile/developer-applications, set `VITE_CF_OAUTH_CLIENT_ID` + `CF_OAUTH_CLIENT_SECRET`
 - [ ] Set Chargily webhook URL in Chargily dashboard: `https://7aba.store/api/webhook/chargily`
 - [ ] Set download URLs env vars when assets are ready: `DOWNLOAD_STORE_SOURCE_URL`, `DOWNLOAD_STORE_APP_URL`, `DOWNLOAD_PLATFORM_SOURCE_URL`
+
+---
+
+## [f111ec8] 2026-04-01 — One-click service linking
+
+**feat: auto-provision InstantDB + Cloudflare OAuth flow**
+- `autoProvisionInstantDB.ts`: server fn generates random UUID appId + adminToken, creates InstantDB app via platform personal token — merchants need no InstantDB account
+- `exchangeCloudflareOAuth.ts`: server fn exchanges CF OAuth code for access_token + accountId (client secret stays server-side)
+- `/auth/cloudflare` route: popup OAuth callback — exchanges code, `postMessage` creds back to opener, auto-closes
+- `ConnectServicesStep` redesigned: InstantDB card shows as "auto-managed by 7aba" with advanced toggle; CF card has OAuth button (primary) + manual entry fallback
+- `auto-provision` runs at Continue click if InstantDB not already provisioned
+- Added `INSTANTDB_PLATFORM_PERSONAL_TOKEN` + commented `VITE_CF_OAUTH_CLIENT_ID` / `CF_OAUTH_CLIENT_SECRET` to `.env.example`
 
 ---
 
