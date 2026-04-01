@@ -1,6 +1,8 @@
 import { useBuilderStore } from '@/hooks/useBuilderStore'
-import { cn } from '@/lib/utils'
 import { useLang } from '@/hooks/useLang'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
 import { ImageUpload } from '../ImageUpload'
 
 const T = {
@@ -20,41 +22,36 @@ export function HeroForm() {
 
   const storeDir = config.meta.rtl ? 'rtl' : 'ltr'
   const update = (patch: Record<string, unknown>) => updateSection(section.id, patch)
-  const inputClass = 'w-full rounded border border-zinc-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900'
 
   return (
     <div className="space-y-4 p-4" dir={dir}>
-      <h2 className="font-bold text-sm text-zinc-500 uppercase tracking-wide">{t(T.heroSection)}</h2>
+      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t(T.heroSection)}</p>
 
-      <div className="space-y-1">
-        <label className="block text-sm font-medium">{t(T.headline)}</label>
-        <input
-          type="text"
+      <div className="space-y-1.5">
+        <Label>{t(T.headline)}</Label>
+        <Input
           value={section.headline}
           onChange={(e) => update({ headline: e.target.value })}
-          className={inputClass}
           dir={storeDir}
         />
       </div>
 
-      <div className="space-y-1">
-        <label className="block text-sm font-medium">{t(T.subheadline)}</label>
-        <textarea
+      <div className="space-y-1.5">
+        <Label>{t(T.subheadline)}</Label>
+        <Textarea
           value={section.subheadline}
           onChange={(e) => update({ subheadline: e.target.value })}
           rows={3}
-          className={cn(inputClass, 'resize-none')}
+          className="resize-none"
           dir={storeDir}
         />
       </div>
 
-      <div className="space-y-1">
-        <label className="block text-sm font-medium">{t(T.ctaButton)}</label>
-        <input
-          type="text"
+      <div className="space-y-1.5">
+        <Label>{t(T.ctaButton)}</Label>
+        <Input
           value={section.cta}
           onChange={(e) => update({ cta: e.target.value })}
-          className={inputClass}
           dir={storeDir}
         />
       </div>

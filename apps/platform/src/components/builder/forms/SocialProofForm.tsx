@@ -1,5 +1,7 @@
 import { useBuilderStore } from '@/hooks/useBuilderStore'
 import { useLang } from '@/hooks/useLang'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 const T = {
   socialProof: { ar: 'شريط الثقة', fr: 'Barre de confiance', en: 'Social Proof Bar' },
@@ -17,19 +19,18 @@ export function SocialProofForm() {
 
   const s = section as any
   const update = (patch: Record<string, unknown>) => updateSection(section.id, patch)
-  const inputClass = 'w-full rounded border border-zinc-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900'
 
   return (
     <div className="space-y-4 p-4" dir={dir}>
-      <h2 className="font-bold text-sm text-zinc-500 uppercase tracking-wide">{t(T.socialProof)}</h2>
-      <p className="text-xs text-zinc-400 bg-zinc-50 p-3 rounded border border-zinc-200">{t(T.hint)}</p>
-      <div className="space-y-1">
-        <label className="block text-sm font-medium">{t(T.ratingLabel)}</label>
-        <input type="number" min="1" max="5" step="0.1" value={s.rating ?? 4.9} onChange={(e) => update({ rating: parseFloat(e.target.value) })} className={inputClass} />
+      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t(T.socialProof)}</p>
+      <p className="text-xs text-muted-foreground bg-muted p-3 rounded border">{t(T.hint)}</p>
+      <div className="space-y-1.5">
+        <Label>{t(T.ratingLabel)}</Label>
+        <Input type="number" min="1" max="5" step="0.1" value={s.rating ?? 4.9} onChange={(e) => update({ rating: parseFloat(e.target.value) })} />
       </div>
-      <div className="space-y-1">
-        <label className="block text-sm font-medium">{t(T.reviewCountLabel)}</label>
-        <input type="number" min="0" value={s.reviewCount ?? 300} onChange={(e) => update({ reviewCount: parseInt(e.target.value) })} className={inputClass} />
+      <div className="space-y-1.5">
+        <Label>{t(T.reviewCountLabel)}</Label>
+        <Input type="number" min="0" value={s.reviewCount ?? 300} onChange={(e) => update({ reviewCount: parseInt(e.target.value) })} />
       </div>
     </div>
   )

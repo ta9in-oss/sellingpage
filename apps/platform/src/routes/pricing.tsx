@@ -1,95 +1,138 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { CheckCircle2, ArrowLeft } from 'lucide-react'
-import { ComparisonTable } from '@/components/marketing/ComparisonTable'
-import { Footer } from '@/components/marketing/Footer'
-import { Navbar } from '@/components/marketing/Navbar'
 import { useLang } from '@/hooks/useLang'
+import { Navbar } from '@/components/marketing/Navbar'
+import { Footer } from '@/components/marketing/Footer'
+import { Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-const TITLE = 'الأسعار — 7aba.store'
-const DESC = 'دفع مرة واحدة. لا اشتراكات. لا مفاجآت. ابنِ متجرك الإلكتروني الجزائري بسعر يبدأ من 3,900 دج.'
-
 export const Route = createFileRoute('/pricing')({
-  head: () => ({
-    meta: [
-      { title: TITLE },
-      { name: 'description', content: DESC },
-      { property: 'og:title', content: TITLE },
-      { property: 'og:description', content: DESC },
-      { name: 'twitter:title', content: TITLE },
-      { name: 'twitter:description', content: DESC },
-    ],
-  }),
   component: PricingPage,
 })
 
-const T = {
-  hero: { ar: 'الأسعار', fr: 'Tarifs', en: 'Pricing' },
-  sub: { ar: 'دفع مرة واحدة. لا اشتراكات. لا مفاجآت.', fr: "Payez une fois. Pas d'abonnements.", en: 'Pay once. No subscriptions. No surprises.' },
-  once: { ar: 'دفعة واحدة', fr: 'Paiement unique', en: 'One-time payment' },
-  cta: { ar: 'ابدأ الآن', fr: 'Commencer', en: 'Get started' },
-  faq: { ar: 'الأسئلة الشائعة', fr: 'FAQ', en: 'FAQ' },
-  back: { ar: 'العودة للرئيسية', fr: 'Retour à l\'accueil', en: 'Back to home' },
-}
-
-const TIERS = [
+const tiers = [
   {
-    id: 'starter' as const,
+    id: 'starter',
     name: { ar: 'مبتدئ', fr: 'Starter', en: 'Starter' },
-    price: '3,900',
-    usd: '$29',
-    accent: false,
+    price: { ar: '3,900 دج', fr: '3 900 DZD', en: '3,900 DZD' },
     badge: null,
+    accent: false,
     features: {
-      ar: ['إنشاء ونشر المتاجر', 'نطاق مخصص عبر Cloudflare', 'لوحة إدارة الطلبات', 'دفع نقدي + Chargily', 'تحليلات Google Analytics'],
-      fr: ['Créer et publier des boutiques', 'Domaine personnalisé Cloudflare', 'Tableau de bord commandes', 'Paiement cash + Chargily', 'Analytics Google'],
-      en: ['Create and publish stores', 'Custom domain (Cloudflare)', 'Orders dashboard', 'Cash + Chargily payment', 'Google Analytics'],
+      ar: [
+        'إنشاء ونشر عدد غير محدود من المتاجر',
+        'محرر بصري كامل (12 نوع قسم)',
+        '3 ثيمات احترافية + تخصيص كامل',
+        'دفع عند الاستلام (COD) — مجاني دائماً',
+        'دفع إلكتروني Chargily Pay (CIB، Dahabia)',
+        'نطاق مخصص عبر Cloudflare',
+        'لوحة إدارة الطلبات',
+        'Google Analytics + Meta Pixel',
+      ],
+      fr: [
+        'Créer et publier des boutiques illimitées',
+        'Éditeur visuel complet (12 types de sections)',
+        '3 thèmes professionnels + personnalisation',
+        'Paiement à la livraison (COD) — toujours gratuit',
+        'Paiement en ligne Chargily Pay (CIB, Dahabia)',
+        'Domaine personnalisé via Cloudflare',
+        'Tableau de bord commandes',
+        'Google Analytics + Meta Pixel',
+      ],
+      en: [
+        'Create and publish unlimited stores',
+        'Full visual builder (12 section types)',
+        '3 professional themes + full customisation',
+        'Cash on Delivery (COD) — always free',
+        'Online payment via Chargily Pay (CIB, Dahabia)',
+        'Custom domain via Cloudflare',
+        'Orders management dashboard',
+        'Google Analytics + Meta Pixel',
+      ],
     },
   },
   {
-    id: 'pro' as const,
+    id: 'pro',
     name: { ar: 'احترافي', fr: 'Pro', en: 'Pro' },
-    price: '14,900',
-    usd: '$99',
+    price: { ar: '14,900 دج', fr: '14 900 DZD', en: '14,900 DZD' },
+    badge: { ar: 'الأكثر شيوعاً', fr: 'Le plus populaire', en: 'Most popular' },
     accent: true,
-    badge: { ar: 'الأكثر شيوعاً', fr: 'Populaire', en: 'Most popular' },
     features: {
-      ar: ['كل مزايا مبتدئ', 'تحميل كود المتجر (React)', 'تحميل كود التطبيق المحمول', 'دعم ذو أولوية'],
-      fr: ['Tout Starter', 'Télécharger code boutique (React)', 'Télécharger code app mobile', 'Support prioritaire'],
-      en: ['Everything in Starter', 'Download store code (React)', 'Download mobile app code', 'Priority support'],
+      ar: [
+        'كل ما في الباقة المبتدئة',
+        'تحميل كود مصدر المتجر فوراً',
+        'تحميل كود تطبيق المتجر (Android)',
+        'دعم ذو أولوية',
+      ],
+      fr: [
+        'Tout ce qui est dans Starter',
+        'Télécharger le code source de la boutique',
+        'Télécharger le code de l\'app boutique (Android)',
+        'Support prioritaire',
+      ],
+      en: [
+        'Everything in Starter',
+        'Download store source code instantly',
+        'Download store app source code (Android)',
+        'Priority support',
+      ],
     },
   },
   {
-    id: 'agency' as const,
+    id: 'agency',
     name: { ar: 'وكالة', fr: 'Agence', en: 'Agency' },
-    price: '49,000',
-    usd: '$299',
-    accent: false,
+    price: { ar: '49,000 دج', fr: '49 000 DZD', en: '49,000 DZD' },
     badge: null,
+    accent: false,
     features: {
-      ar: ['كل مزايا احترافي', 'كود المنصة كاملاً', 'متاجر غير محدودة', 'دعم مباشر عبر واتساب'],
-      fr: ['Tout Pro', 'Code plateforme complet', 'Boutiques illimitées', 'Support WhatsApp direct'],
-      en: ['Everything in Pro', 'Full platform source code', 'Unlimited stores', 'Direct WhatsApp support'],
+      ar: [
+        'كل ما في الباقة الاحترافية',
+        'كود المنصة الكاملة (هذه المنصة)',
+        'متاجر غير محدودة',
+        'دعم مباشر',
+      ],
+      fr: [
+        'Tout ce qui est dans Pro',
+        'Code source complet de la plateforme',
+        'Boutiques illimitées',
+        'Support direct',
+      ],
+      en: [
+        'Everything in Pro',
+        'Full platform source code (this platform)',
+        'Unlimited stores',
+        'Direct support',
+      ],
     },
   },
 ]
 
-const FAQS = [
+const faqs = [
   {
     q: { ar: 'هل الدفع مرة واحدة فعلاً؟', fr: 'Le paiement est-il vraiment unique?', en: 'Is it really a one-time payment?' },
-    a: { ar: 'نعم، تدفع مرة واحدة وتستخدم إلى الأبد. لا اشتراك شهري، لا مفاجآت.', fr: 'Oui, vous payez une fois et utilisez pour toujours.', en: 'Yes, you pay once and use forever. No monthly subscription, no surprises.' },
+    a: { ar: 'نعم. تدفع مرة واحدة وتحصل على الوصول كاملاً بدون اشتراك شهري أو سنوي.', fr: "Oui. Vous payez une seule fois et obtenez un accès complet sans abonnement mensuel ou annuel.", en: 'Yes. You pay once and get full access with no monthly or annual subscription.' },
   },
   {
-    q: { ar: 'هل يمكنني الترقية لاحقاً؟', fr: 'Puis-je passer à un niveau supérieur?', en: 'Can I upgrade later?' },
-    a: { ar: 'نعم، يمكنك الترقية في أي وقت وتدفع الفرق فقط.', fr: 'Oui, vous pouvez passer à un niveau supérieur et ne payer que la différence.', en: 'Yes, you can upgrade anytime and only pay the difference.' },
+    q: { ar: 'ما طرق الدفع المتاحة في متاجري؟', fr: 'Quels modes de paiement sont disponibles dans mes boutiques?', en: 'What payment methods are available in my stores?' },
+    a: {
+      ar: 'متجرك يدعم طريقتين: الدفع عند الاستلام (COD) مجاناً دائماً، ودفع إلكتروني عبر Chargily Pay (بطاقة CIB، Dahabia). تختار الطريقة أو تفعّل الاثنتين معاً من المحرر.',
+      fr: "Votre boutique supporte deux méthodes : Paiement à la livraison (COD) toujours gratuit, et paiement en ligne via Chargily Pay (CIB, Dahabia). Activez l'une ou les deux depuis l'éditeur.",
+      en: 'Your store supports two methods: Cash on Delivery (COD) always free, and online payment via Chargily Pay (CIB, Dahabia). Choose one or enable both from the builder.',
+    },
   },
   {
-    q: { ar: 'ما طرق الدفع المتاحة؟', fr: 'Quels modes de paiement sont disponibles?', en: 'What payment methods are available?' },
-    a: { ar: 'ندعم Chargily Pay (بطاقة CIB، Dahabia) وسيتم إضافة طرق أخرى قريباً.', fr: 'Nous supportons Chargily Pay (CIB, Dahabia).', en: 'We support Chargily Pay (CIB, Dahabia). More methods coming soon.' },
+    q: { ar: 'هل يمكنني تخصيص ثيم المتجر؟', fr: 'Puis-je personnaliser le thème de ma boutique?', en: 'Can I customise my store theme?' },
+    a: {
+      ar: 'نعم، جميع الباقات بما فيها المبتدئة تتيح تخصيص الثيم كاملاً من المحرر البصري. 3 ثيمات جاهزة: جريء، داكن، دافئ.',
+      fr: "Oui, tous les abonnements y compris Starter permettent la personnalisation complète du thème depuis l'éditeur visuel. 3 thèmes prêts : Audacieux, Sombre, Chaleureux.",
+      en: 'Yes, all plans including Starter allow full theme customisation from the visual builder. 3 ready themes: Brutalist, Dark, Warm.',
+    },
   },
   {
-    q: { ar: 'ماذا أحتاج لنشر متجري؟', fr: "De quoi ai-je besoin pour déployer ma boutique?", en: 'What do I need to deploy my store?' },
-    a: { ar: 'تحتاج حساب Cloudflare مجاني وحساب InstantDB مجاني — كلاهما سنساعدك بإعدادهم داخل المنصة.', fr: 'Vous avez besoin d\'un compte Cloudflare gratuit et d\'un compte InstantDB gratuit.', en: 'You need a free Cloudflare account and a free InstantDB account — we help you set both up inside the platform.' },
+    q: { ar: 'ماذا أحتاج لنشر متجري؟', fr: 'De quoi ai-je besoin pour déployer ma boutique?', en: 'What do I need to deploy my store?' },
+    a: {
+      ar: 'تحتاج حساب Cloudflare مجاني وحساب InstantDB مجاني — المنصة ستساعدك على إعدادهم خطوة بخطوة.',
+      fr: "Vous avez besoin d'un compte Cloudflare gratuit et d'un compte InstantDB gratuit — la plateforme vous guide étape par étape.",
+      en: 'You need a free Cloudflare account and a free InstantDB account — the platform guides you step by step.',
+    },
   },
 ]
 
@@ -101,84 +144,73 @@ function PricingPage() {
       <Navbar />
 
       {/* Hero */}
-      <section className="py-20 px-4 text-center border-b-2 border-black">
-        <div className="max-w-2xl mx-auto">
-          <h1 className="text-5xl lg:text-6xl font-black text-black mb-4">{t(T.hero)}</h1>
-          <p className="text-xl text-black/60">{t(T.sub)}</p>
-        </div>
+      <section className="py-24 px-4 bg-black text-white text-center border-b-4 border-yellow-400">
+        <h1 className="text-4xl md:text-5xl font-black mb-4">
+          {t({ ar: 'الأسعار', fr: 'Tarifs', en: 'Pricing' })}
+        </h1>
+        <p className="text-white/60 text-lg max-w-lg mx-auto">
+          {t({ ar: 'دفع مرة واحدة. لا اشتراكات. لا مفاجآت.', fr: "Payez une fois. Pas d'abonnements. Pas de surprises.", en: 'Pay once. No subscriptions. No surprises.' })}
+        </p>
       </section>
 
       {/* Tiers */}
-      <section className="py-16 px-4 bg-white">
+      <section className="py-20 px-4 bg-white">
         <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
-          {TIERS.map((tier) => (
+          {tiers.map((tier) => (
             <div
               key={tier.id}
               className={cn(
-                'relative flex flex-col p-8 border-2 border-black',
-                tier.accent
-                  ? 'bg-yellow-400 shadow-[6px_6px_0px_0px_#000]'
-                  : 'bg-white shadow-[4px_4px_0px_0px_#000]',
+                'border-2 border-black p-6 flex flex-col gap-6 relative',
+                tier.accent ? 'bg-yellow-400' : 'bg-white',
               )}
             >
               {tier.badge && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-black text-yellow-400 text-xs font-bold px-3 py-1 whitespace-nowrap">
+                <span className="absolute -top-3 start-4 bg-black text-white text-xs font-black px-3 py-1">
                   {t(tier.badge)}
                 </span>
               )}
-
-              <h2 className="text-xl font-black text-black mb-1">{t(tier.name)}</h2>
-              <div className="mb-6">
-                <span className="text-4xl font-black text-black">{tier.price}</span>
-                <span className="text-sm text-black/60 ms-1">DZD</span>
-                <div className="text-xs text-black/50 mt-0.5">{tier.usd} · {t(T.once)}</div>
+              <div>
+                <p className="font-black text-xl text-black">{t(tier.name)}</p>
+                <p className="text-3xl font-black text-black mt-1">{t(tier.price)}</p>
+                <p className="text-xs text-black/50 mt-0.5">{t({ ar: 'دفع مرة واحدة', fr: 'Paiement unique', en: 'One-time payment' })}</p>
               </div>
-
-              <ul className="flex-1 space-y-3 mb-8">
-                {(lang === 'ar' ? tier.features.ar : lang === 'fr' ? tier.features.fr : tier.features.en).map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-sm text-black">
-                    <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5 text-black" />
+              <ul className="space-y-2 flex-1">
+                {tier.features[lang].map((f, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-black">
+                    <Check size={14} className="mt-0.5 shrink-0 text-black" strokeWidth={3} />
                     {f}
                   </li>
                 ))}
               </ul>
-
               <Link
                 to="/dashboard"
-                search={{ plan: tier.id } as any}
+                search={{ plan: tier.id }}
                 className={cn(
-                  'text-center font-black py-3 border-2 border-black text-sm transition-all',
+                  'block text-center font-black py-2.5 border-2 border-black transition-all text-sm',
                   tier.accent
-                    ? 'bg-black text-yellow-400 hover:bg-zinc-900'
-                    : 'bg-yellow-400 text-black hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] shadow-[3px_3px_0px_0px_#000]',
+                    ? 'bg-black text-white hover:bg-zinc-800'
+                    : 'bg-white text-black hover:bg-yellow-400',
                 )}
               >
-                {t(T.cta)}
+                {t({ ar: 'اشترك الآن', fr: 'S\'abonner', en: 'Subscribe now' })}
               </Link>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Comparison */}
-      <ComparisonTable />
-
-      {/* FAQ */}
-      <section className="py-16 px-4 bg-white border-y-2 border-black">
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl font-black text-black text-center mb-10">{t(T.faq)}</h2>
-          <div className="space-y-4">
-            {FAQS.map((faq, i) => (
-              <details
-                key={i}
-                className="border-2 border-black p-5 group cursor-pointer select-none"
-              >
-                <summary className="font-bold text-black list-none flex justify-between items-center">
-                  {t(faq.q)}
-                  <ArrowLeft className="h-4 w-4 shrink-0 group-open:rotate-90 transition-transform" />
-                </summary>
-                <p className="mt-3 text-sm text-black/70 leading-relaxed">{t(faq.a)}</p>
-              </details>
+      {/* FAQs */}
+      <section className="py-20 px-4 bg-zinc-50 border-t-2 border-black">
+        <div className="max-w-2xl mx-auto">
+          <h2 className="text-3xl font-black text-black mb-10 text-start">
+            {t({ ar: 'أسئلة شائعة', fr: 'Questions fréquentes', en: 'Frequently Asked Questions' })}
+          </h2>
+          <div className="space-y-6">
+            {faqs.map((faq, i) => (
+              <div key={i} className="border-2 border-black bg-white p-5">
+                <p className="font-black text-black mb-2">{t(faq.q)}</p>
+                <p className="text-black/60 text-sm leading-relaxed">{t(faq.a)}</p>
+              </div>
             ))}
           </div>
         </div>

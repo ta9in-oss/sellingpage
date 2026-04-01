@@ -2,6 +2,10 @@ import { useBuilderStore } from '@/hooks/useBuilderStore'
 import { cn } from '@/lib/utils'
 import { Plus, Trash2 } from 'lucide-react'
 import { useLang } from '@/hooks/useLang'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
+import { Button } from '@/components/ui/button'
 
 const ICON_OPTIONS = [
   { value: 'truck', emoji: '🚚', label: { ar: 'توصيل', fr: 'Livraison', en: 'Delivery' } },
@@ -32,35 +36,35 @@ export function GuaranteeForm() {
   const storeDir = config.meta.rtl ? 'rtl' : 'ltr'
   const items = section.items ?? []
   const update = (newItems: typeof items) => updateSection(section.id, { items: newItems })
-  const inputClass = 'w-full rounded border border-zinc-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900'
 
   return (
     <div className="space-y-4 p-4" dir={dir}>
       <div className="flex items-center justify-between">
-        <h2 className="font-bold text-sm text-zinc-500 uppercase tracking-wide">{t(T.guarantees)}</h2>
-        <button onClick={() => { if (items.length < 6) update([...items, { title: t({ ar: 'ضمان جديد', fr: 'Nouvelle garantie', en: 'New guarantee' }), description: t({ ar: 'اكتب الوصف', fr: 'Description', en: 'Description' }), icon: 'shield' }]) }}
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t(T.guarantees)}</p>
+        <Button variant="outline" size="sm"
+          onClick={() => { if (items.length < 6) update([...items, { title: t({ ar: 'ضمان جديد', fr: 'Nouvelle garantie', en: 'New guarantee' }), description: t({ ar: 'اكتب الوصف', fr: 'Description', en: 'Description' }), icon: 'shield' }]) }}
           disabled={items.length >= 6}
-          className={cn('flex items-center gap-1 text-xs px-2 py-1 border border-zinc-200 rounded transition-colors', items.length >= 6 ? 'opacity-40 cursor-not-allowed' : 'hover:border-zinc-900 hover:bg-zinc-50')}>
+          className="gap-1">
           <Plus size={12} /> {t(T.add)}
-        </button>
+        </Button>
       </div>
 
       {items.map((item, i) => (
-        <div key={i} className="border border-zinc-200 rounded p-3 space-y-3">
+        <div key={i} className="border border-border rounded p-3 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-zinc-400">{t(T.guarantee)} {i + 1}</span>
-            <button onClick={() => { if (items.length > 1) update(items.filter((_, idx) => idx !== i)) }} disabled={items.length <= 1} className="text-red-400 hover:text-red-600 disabled:opacity-30"><Trash2 size={14} /></button>
+            <span className="text-xs font-medium text-muted-foreground">{t(T.guarantee)} {i + 1}</span>
+            <Button variant="ghost" size="sm" onClick={() => { if (items.length > 1) update(items.filter((_, idx) => idx !== i)) }} disabled={items.length <= 1} className="text-destructive h-7 w-7 p-0"><Trash2 size={14} /></Button>
           </div>
-          <div className="space-y-1">
-            <label className="block text-xs font-medium">{t(T.titleLabel)}</label>
-            <input type="text" value={item.title} onChange={(e) => update(items.map((it, idx) => idx === i ? { ...it, title: e.target.value } : it))} className={inputClass} dir={storeDir} />
+          <div className="space-y-1.5">
+            <Label className="text-xs">{t(T.titleLabel)}</Label>
+            <Input value={item.title} onChange={(e) => update(items.map((it, idx) => idx === i ? { ...it, title: e.target.value } : it))} dir={storeDir} />
           </div>
-          <div className="space-y-1">
-            <label className="block text-xs font-medium">{t(T.descriptionLabel)}</label>
-            <textarea value={item.description} onChange={(e) => update(items.map((it, idx) => idx === i ? { ...it, description: e.target.value } : it))} rows={2} className={cn(inputClass, 'resize-none')} dir={storeDir} />
+          <div className="space-y-1.5">
+            <Label className="text-xs">{t(T.descriptionLabel)}</Label>
+            <Textarea value={item.description} onChange={(e) => update(items.map((it, idx) => idx === i ? { ...it, description: e.target.value } : it))} rows={2} className="resize-none" dir={storeDir} />
           </div>
-          <div className="space-y-1">
-            <label className="block text-xs font-medium">{t(T.iconLabel)}</label>
+          <div className="space-y-1.5">
+            <Label className="text-xs">{t(T.iconLabel)}</Label>
             <div className="grid grid-cols-3 gap-1">
               {ICON_OPTIONS.map(({ value, emoji, label }) => (
                 <button key={value} onClick={() => update(items.map((it, idx) => idx === i ? { ...it, icon: value } : it))}

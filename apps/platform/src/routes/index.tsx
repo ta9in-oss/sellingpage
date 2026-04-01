@@ -8,6 +8,7 @@ import { FeatureGrid } from '@/components/marketing/FeatureGrid'
 import { SocialNumbers } from '@/components/marketing/SocialNumbers'
 import { PricingPreview } from '@/components/marketing/PricingPreview'
 import { Footer } from '@/components/marketing/Footer'
+import { ThemesShowcase } from '@/components/marketing/ThemesShowcase'
 import { useLang } from '@/hooks/useLang'
 
 const SITE_URL = 'https://7aba.store'
@@ -225,6 +226,7 @@ function LandingPage() {
       <HowItWorks />
       <NotificationShowcase />
       <FeatureGrid />
+      <ThemesShowcase />
       <SocialNumbers />
       <PricingPreview />
       <Footer />

@@ -70,7 +70,7 @@ function SectionRenderer({ section, config }: { section: Section; config: StoreC
             { image: '/bagpack_003.png', title: 'ميزة ثانية', description: 'اكتب وصف هذه الميزة هنا', bgColor: 'bg-white text-black' },
             { image: '/bagpack_004.png', title: 'ميزة ثالثة', description: 'اكتب وصف هذه الميزة هنا', bgColor: 'bg-black text-white' },
           ]
-      return <FeatureGrid title="المميزات" features={features} />
+      return <FeatureGrid title={(section as any).title || 'المميزات'} features={features} />
     }
 
     case 'testimonials': {

@@ -38,7 +38,7 @@ export interface StoreConfig {
   }
   payment?: {
     /** Which payment method is active for this store. Configured by the merchant, not shown to buyers. */
-    activeMethod: 'cod' | 'chargily'
+    activeMethod: 'cod' | 'chargily' | 'both'
     /** Chargily Pay API key — stored in platform DB and deployed as Worker secret, not in client bundle. */
     chargilyApiKey?: string
   }
@@ -46,7 +46,7 @@ export interface StoreConfig {
 
 export type Section =
   | { id: string; type: 'hero'; headline: string; subheadline: string; cta: string; image?: string }
-  | { id: string; type: 'features'; items: { icon: string; title: string; body: string }[] }
+  | { id: string; type: 'features'; title?: string; items: { icon: string; title: string; body: string }[] }
   | { id: string; type: 'testimonials'; items: { name: string; text: string; rating: number }[] }
   | { id: string; type: 'faq'; items: { q: string; a: string }[] }
   | { id: string; type: 'guarantee'; items: { title: string; description: string; icon: string }[] }
