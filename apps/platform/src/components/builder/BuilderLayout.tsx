@@ -137,7 +137,7 @@ function RightPanel() {
     return (
       <div className="flex flex-col h-full">
         {/* Tab bar */}
-        <div className="flex border-b-2 border-black shrink-0" dir={dir}>
+        <div className="flex border-b border-border shrink-0" dir={dir}>
           {([
             { key: 'theme' as const, label: t(T.tabTheme), Icon: Palette },
             { key: 'product' as const, label: t(T.tabProduct), Icon: Package },
@@ -149,10 +149,10 @@ function RightPanel() {
               key={key}
               onClick={() => setSettingsTab(key)}
               className={cn(
-                'flex-1 flex flex-col items-center gap-0.5 py-2 text-xs font-bold transition-colors border-e border-black last:border-e-0',
+                'flex-1 flex flex-col items-center gap-0.5 py-2 text-xs font-medium transition-colors border-e border-border last:border-e-0',
                 settingsTab === key
-                  ? 'bg-yellow-400 text-black'
-                  : 'bg-white text-zinc-500 hover:bg-zinc-50'
+                  ? 'bg-accent text-accent-foreground'
+                  : 'bg-background text-muted-foreground hover:bg-muted'
               )}
             >
               <Icon size={14} />
@@ -253,19 +253,19 @@ export function BuilderLayout({ storeId }: BuilderLayoutProps) {
 
   return (
     <div className="min-h-screen flex flex-col bg-white" dir={dir}>
-      {/* Top bar — brutalist */}
-      <header className="h-14 border-b-2 border-black flex items-center px-4 gap-3 shrink-0 bg-white">
+      {/* Top bar */}
+      <header className="h-14 border-b border-border flex items-center px-4 gap-3 shrink-0 bg-background">
         <Input
           type="text"
           value={config.meta.name}
           onChange={(e) => updateMeta({ name: e.target.value })}
-          className="max-w-[200px] h-8 text-sm font-bold border-2 border-black rounded-none shadow-none focus-visible:ring-yellow-400"
+          className="max-w-[200px] h-8 text-sm font-medium"
           dir={config.meta.rtl ? 'rtl' : 'ltr'}
           placeholder={t(T.storeName)}
           aria-label={t(T.storeName)}
         />
 
-        <div className="flex items-center gap-1 text-xs text-zinc-500 ms-auto">
+        <div className="flex items-center gap-1 text-xs text-muted-foreground ms-auto">
           {isSaving ? (
             <><Loader2 size={12} className="animate-spin" />{t(T.saving)}</>
           ) : (
@@ -276,7 +276,7 @@ export function BuilderLayout({ storeId }: BuilderLayoutProps) {
         <Button
           size="sm"
           onClick={() => navigate({ to: '/dashboard/deploy', search: { storeId, tier: 'starter' } })}
-          className="gap-1.5 rounded-none border-2 border-black bg-yellow-400 text-black hover:bg-black hover:text-yellow-400 font-black shadow-[2px_2px_0px_0px_#000] hover:shadow-none transition-all"
+          className="gap-1.5"
         >
           <Rocket size={13} />
           {t(T.deployStore)}
@@ -286,17 +286,17 @@ export function BuilderLayout({ storeId }: BuilderLayoutProps) {
       {/* Desktop: three-column layout — direction-aware */}
       <div className="flex-1 hidden lg:flex overflow-hidden">
         {/* Sections panel — start side (left in LTR, right in RTL) */}
-        <aside className="w-60 border-e-2 border-black shrink-0 overflow-y-auto flex flex-col bg-white">
+        <aside className="w-60 border-e border-border shrink-0 overflow-y-auto flex flex-col bg-background">
           <SectionList />
         </aside>
 
         {/* Center: preview */}
-        <main className="flex-1 overflow-hidden bg-zinc-100">
+        <main className="flex-1 overflow-hidden bg-muted/40">
           <StorePreview />
         </main>
 
         {/* Settings panel — end side (right in LTR, left in RTL) */}
-        <aside className="w-80 border-s-2 border-black shrink-0 overflow-y-auto bg-white">
+        <aside className="w-80 border-s border-border shrink-0 overflow-y-auto bg-background">
           <RightPanel />
         </aside>
       </div>
@@ -314,17 +314,17 @@ export function BuilderLayout({ storeId }: BuilderLayoutProps) {
             <div className="h-full overflow-y-auto"><RightPanel /></div>
           )}
         </div>
-        <nav className="h-12 border-t-2 border-black flex shrink-0">
+        <nav className="h-12 border-t border-border flex shrink-0">
           {MOBILE_TABS.map(({ key, label }) => (
             <Button
               key={key}
-              variant={mobileTab === key ? 'default' : 'ghost'}
+              variant={mobileTab === key ? 'secondary' : 'ghost'}
               onClick={() => setMobileTab(key as MobileTab)}
               className={cn(
-                'flex-1 rounded-none h-full text-sm font-bold border-0',
+                'flex-1 rounded-none h-full text-sm font-medium border-0',
                 mobileTab === key
-                  ? 'bg-yellow-400 text-black hover:bg-yellow-400'
-                  : 'bg-white text-black hover:bg-zinc-100'
+                  ? 'bg-accent text-accent-foreground'
+                  : 'text-muted-foreground hover:bg-muted'
               )}
             >
               {label}
