@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as DashboardDeployRouteImport } from './routes/dashboard/deploy'
 import { Route as DashboardBuilderRouteImport } from './routes/dashboard/builder'
+import { Route as AuthCloudflareRouteImport } from './routes/auth/cloudflare'
 
 const PricingRoute = PricingRouteImport.update({
   id: '/pricing',
@@ -46,11 +47,17 @@ const DashboardBuilderRoute = DashboardBuilderRouteImport.update({
   path: '/dashboard/builder',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthCloudflareRoute = AuthCloudflareRouteImport.update({
+  id: '/auth/cloudflare',
+  path: '/auth/cloudflare',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/demo': typeof DemoRoute
   '/pricing': typeof PricingRoute
+  '/auth/cloudflare': typeof AuthCloudflareRoute
   '/dashboard/builder': typeof DashboardBuilderRoute
   '/dashboard/deploy': typeof DashboardDeployRoute
   '/dashboard': typeof DashboardIndexRoute
@@ -59,6 +66,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/demo': typeof DemoRoute
   '/pricing': typeof PricingRoute
+  '/auth/cloudflare': typeof AuthCloudflareRoute
   '/dashboard/builder': typeof DashboardBuilderRoute
   '/dashboard/deploy': typeof DashboardDeployRoute
   '/dashboard': typeof DashboardIndexRoute
@@ -68,6 +76,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/demo': typeof DemoRoute
   '/pricing': typeof PricingRoute
+  '/auth/cloudflare': typeof AuthCloudflareRoute
   '/dashboard/builder': typeof DashboardBuilderRoute
   '/dashboard/deploy': typeof DashboardDeployRoute
   '/dashboard/': typeof DashboardIndexRoute
@@ -78,6 +87,7 @@ export interface FileRouteTypes {
     | '/'
     | '/demo'
     | '/pricing'
+    | '/auth/cloudflare'
     | '/dashboard/builder'
     | '/dashboard/deploy'
     | '/dashboard'
@@ -86,6 +96,7 @@ export interface FileRouteTypes {
     | '/'
     | '/demo'
     | '/pricing'
+    | '/auth/cloudflare'
     | '/dashboard/builder'
     | '/dashboard/deploy'
     | '/dashboard'
@@ -94,6 +105,7 @@ export interface FileRouteTypes {
     | '/'
     | '/demo'
     | '/pricing'
+    | '/auth/cloudflare'
     | '/dashboard/builder'
     | '/dashboard/deploy'
     | '/dashboard/'
@@ -103,6 +115,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DemoRoute: typeof DemoRoute
   PricingRoute: typeof PricingRoute
+  AuthCloudflareRoute: typeof AuthCloudflareRoute
   DashboardBuilderRoute: typeof DashboardBuilderRoute
   DashboardDeployRoute: typeof DashboardDeployRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
@@ -152,6 +165,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardBuilderRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/cloudflare': {
+      id: '/auth/cloudflare'
+      path: '/auth/cloudflare'
+      fullPath: '/auth/cloudflare'
+      preLoaderRoute: typeof AuthCloudflareRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -159,6 +179,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DemoRoute: DemoRoute,
   PricingRoute: PricingRoute,
+  AuthCloudflareRoute: AuthCloudflareRoute,
   DashboardBuilderRoute: DashboardBuilderRoute,
   DashboardDeployRoute: DashboardDeployRoute,
   DashboardIndexRoute: DashboardIndexRoute,
