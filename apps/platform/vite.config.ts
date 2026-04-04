@@ -7,6 +7,10 @@ import viteReact from '@vitejs/plugin-react'
 export default defineConfig({
     server: {
         port: 3001,
+        headers: {
+            'Cross-Origin-Opener-Policy': 'unsafe-none',
+            'Cross-Origin-Embedder-Policy': 'unsafe-none',
+        },
     },
     plugins: [
         tsConfigPaths(),

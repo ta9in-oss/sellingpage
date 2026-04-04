@@ -27,7 +27,7 @@ export function FooterForm({ sectionId }: FooterFormProps) {
   const section = config.sections.find((s) => s.id === sectionId) as any
   if (!section) return null
 
-  const update = (patch: object) => updateSection(sectionId, patch)
+  const update = (patch: Record<string, unknown>) => updateSection(sectionId, patch)
 
   return (
     <div className="space-y-4" dir={dir}>

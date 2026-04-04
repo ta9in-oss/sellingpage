@@ -32,7 +32,7 @@ export function ValueStackForm({ sectionId }: ValueStackFormProps) {
 
   const items = section.items ?? []
 
-  const update = (patch: object) => updateSection(sectionId, patch)
+  const update = (patch: Record<string, unknown>) => updateSection(sectionId, patch)
 
   const updateItem = (index: number, field: string, value: string | boolean) => {
     const newItems = items.map((item: any, i: number) =>

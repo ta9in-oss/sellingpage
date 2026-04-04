@@ -26,6 +26,11 @@ const _schema = i.schema({
       checkoutId: i.string().optional(),
       purchasedAt: i.date().optional(),
       createdAt: i.date().optional(),
+      // Global deployment credentials — apply to all stores by default
+      cfAccountId: i.string().optional(),
+      cfApiToken: i.string().optional(),
+      instantAppId: i.string().optional(),
+      instantAdminToken: i.string().optional(),
     }),
     stores: i.entity({
       adminEmail: i.string().optional(),

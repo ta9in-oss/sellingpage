@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { db } from '@/lib/instantdb'
 import { cn } from '@/lib/utils'
-import { ExternalLink, ChevronDown, ChevronUp, Check, Sparkles } from 'lucide-react'
+import { ExternalLink, ChevronDown, ChevronUp, Check, Sparkles, Globe } from 'lucide-react'
 import { useLang } from '@/hooks/useLang'
 import { autoProvisionInstantDB } from '@/server/autoProvisionInstantDB'
 import { Button } from '@/components/ui/button'
@@ -18,7 +18,6 @@ const T = {
     fr: 'Connectez Cloudflare pour déployer — la base de données est gérée automatiquement',
     en: 'Connect Cloudflare to deploy — the database is managed automatically by us',
   },
-  // Cloudflare
   cfTitle: { ar: 'Cloudflare', fr: 'Cloudflare', en: 'Cloudflare' },
   cfDescription: {
     ar: 'استضافة المتجر على شبكة Cloudflare العالمية',
@@ -39,7 +38,16 @@ const T = {
     fr: 'OAuth non configuré — utilisez la saisie manuelle',
     en: 'OAuth not configured — use manual entry',
   },
-  // InstantDB
+  fromAccountCreds: {
+    ar: 'من إعدادات الحساب',
+    fr: 'Depuis les paramètres du compte',
+    en: 'From account settings',
+  },
+  saveToAccount: {
+    ar: 'حفظ هذه البيانات في إعدادات الحساب (لجميع المتاجر)',
+    fr: 'Sauvegarder dans les paramètres du compte (tous les projets)',
+    en: 'Save to account settings (use for all stores)',
+  },
   instantTitle: { ar: 'قاعدة البيانات (InstantDB)', fr: 'Base de données (InstantDB)', en: 'Database (InstantDB)' },
   instantAutoDesc: {
     ar: 'سيتم إنشاء قاعدة البيانات تلقائياً عند النشر — لا تحتاج لإجراء أي شيء',
@@ -54,7 +62,6 @@ const T = {
   },
   instantAppIdLabel: { ar: 'App ID', fr: 'App ID', en: 'App ID' },
   instantAdminTokenLabel: { ar: 'Admin Token', fr: 'Admin Token', en: 'Admin Token' },
-  // Common
   connected: { ar: 'متصل ✓', fr: 'Connecté ✓', en: 'Connected ✓' },
   notConnected: { ar: 'غير متصل', fr: 'Non connecté', en: 'Not connected' },
   saving: { ar: 'جارٍ الحفظ...', fr: 'Enregistrement...', en: 'Saving...' },
@@ -65,12 +72,15 @@ const T = {
 
 export function ConnectServicesStep({ storeId, onContinue }: Props) {
   const { t } = useLang()
+  const { user } = db.useAuth()
+
   const [cfAccountId, setCfAccountId] = useState('')
   const [cfApiToken, setCfApiToken] = useState('')
   const [cfConnected, setCfConnected] = useState(false)
   const [showManualCF, setShowManualCF] = useState(false)
+  const [usingAccountCreds, setUsingAccountCreds] = useState(false)
+  const [saveToAccount, setSaveToAccount] = useState(false)
 
-  // InstantDB advanced mode (optional — default is auto-provision)
   const [useOwnInstant, setUseOwnInstant] = useState(false)
   const [instantAppId, setInstantAppId] = useState('')
   const [instantAdminToken, setInstantAdminToken] = useState('')
@@ -89,21 +99,36 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
     stores: { $: { where: { id: storeId } } },
   })
 
-  // Hydrate from existing store data
+  const { data: userData } = db.useQuery(
+    user?.email
+      ? { platformUsers: { $: { where: { email: user.email } } } }
+      : null
+  )
+
+  // Hydrate: prefer per-store creds, fall back to account-level creds
   useEffect(() => {
     const store = storeData?.stores?.[0]
-    if (!store) return
-    if (store.cfAccountId) setCfAccountId(store.cfAccountId as string)
-    if (store.cfApiToken) setCfApiToken(store.cfApiToken as string)
-    if (store.cfAccountId && store.cfApiToken) setCfConnected(true)
-    if (store.instantAppId) {
+    const platformUser = (userData as any)?.platformUsers?.[0]
+
+    if (store?.cfAccountId) {
+      setCfAccountId(store.cfAccountId as string)
+      setCfApiToken((store.cfApiToken as string) ?? '')
+      setCfConnected(true)
+      setUsingAccountCreds(false)
+    } else if (platformUser?.cfAccountId) {
+      setCfAccountId(platformUser.cfAccountId as string)
+      setCfApiToken((platformUser.cfApiToken as string) ?? '')
+      setCfConnected(true)
+      setUsingAccountCreds(true)
+      setShowManualCF(true)
+    }
+
+    if (store?.instantAppId) {
       setInstantAppId(store.instantAppId as string)
       setInstantAdminToken((store.instantAdminToken as string) ?? '')
-      // If already provisioned, don't need to re-provision
     }
-  }, [storeData])
+  }, [storeData, userData])
 
-  // Listen for Cloudflare OAuth popup callback
   useEffect(() => {
     const handler = (e: MessageEvent) => {
       if (e.origin !== window.location.origin) return
@@ -112,6 +137,7 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
         setCfAccountId(accountId)
         setCfApiToken(apiToken)
         setCfConnected(true)
+        setUsingAccountCreds(false)
         popupRef.current?.close()
       }
     }
@@ -137,7 +163,6 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
       let appId = instantAppId
       let adminToken = instantAdminToken
 
-      // Auto-provision InstantDB if not using custom
       const alreadyProvisioned = storeData?.stores?.[0]?.instantAppId
       if (!useOwnInstant && !alreadyProvisioned) {
         const store = storeData?.stores?.[0]
@@ -155,6 +180,18 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
           instantAdminToken: adminToken.trim(),
         })
       )
+
+      // Optionally persist to account-level platformUsers
+      const platformUser = (userData as any)?.platformUsers?.[0]
+      if (saveToAccount && user?.email && platformUser?.id) {
+        await db.transact(
+          (db.tx.platformUsers as any)[platformUser.id].update({
+            cfAccountId: cfAccountId.trim(),
+            cfApiToken: cfApiToken.trim(),
+          })
+        )
+      }
+
       onContinue()
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err)
@@ -175,7 +212,7 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
         <p className="text-sm text-muted-foreground mt-1">{t(T.connectServicesDesc)}</p>
       </div>
 
-      {/* ── InstantDB card — auto-managed ── */}
+      {/* ── InstantDB card ── */}
       <div className="border rounded-xl p-4 space-y-3">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -191,7 +228,6 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
           </span>
         </div>
 
-        {/* Advanced toggle */}
         <button
           onClick={() => setUseOwnInstant(!useOwnInstant)}
           className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
@@ -202,25 +238,12 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
 
         {useOwnInstant && (
           <div className="space-y-3 pt-1">
-            <ManualField
-              label={t(T.instantAppIdLabel)}
-              value={instantAppId}
-              placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-              onChange={setInstantAppId}
-            />
-            <ManualField
-              label={t(T.instantAdminTokenLabel)}
-              value={instantAdminToken}
-              placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-              onChange={setInstantAdminToken}
-              isSecret
-            />
+            <ManualField label={t(T.instantAppIdLabel)} value={instantAppId} placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" onChange={setInstantAppId} />
+            <ManualField label={t(T.instantAdminTokenLabel)} value={instantAdminToken} placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" onChange={setInstantAdminToken} isSecret />
           </div>
         )}
 
-        {instantProvisionError && (
-          <p className="text-xs text-red-500 mt-1">{instantProvisionError}</p>
-        )}
+        {instantProvisionError && <p className="text-xs text-red-500 mt-1">{instantProvisionError}</p>}
       </div>
 
       {/* ── Cloudflare card ── */}
@@ -233,44 +256,32 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
               <p className="text-xs text-muted-foreground">{t(T.cfDescription)}</p>
             </div>
           </div>
-          <span
-            className={cn(
-              'flex items-center gap-1.5 text-xs font-medium shrink-0',
-              cfConnected ? 'text-green-600' : 'text-muted-foreground'
+          <div className="flex flex-col items-end gap-1 shrink-0">
+            <span className={cn('flex items-center gap-1.5 text-xs font-medium', cfConnected ? 'text-green-600' : 'text-muted-foreground')}>
+              <span className={cn('w-2 h-2 rounded-full', cfConnected ? 'bg-green-500' : 'bg-gray-300')} />
+              {cfConnected ? t(T.connected) : t(T.notConnected)}
+            </span>
+            {usingAccountCreds && cfConnected && (
+              <span className="flex items-center gap-1 text-xs text-blue-600 font-medium">
+                <Globe size={10} />
+                {t(T.fromAccountCreds)}
+              </span>
             )}
-          >
-            <span className={cn('w-2 h-2 rounded-full', cfConnected ? 'bg-green-500' : 'bg-gray-300')} />
-            {cfConnected ? t(T.connected) : t(T.notConnected)}
-          </span>
+          </div>
         </div>
 
-        {/* Primary: OAuth button */}
         {cfOAuthAvailable ? (
-          <Button
-            variant="default"
-            size="sm"
-            onClick={openCFOAuth}
-            className="w-full gap-2"
-            disabled={cfConnected}
-          >
+          <Button variant="default" size="sm" onClick={openCFOAuth} className="w-full gap-2" disabled={cfConnected}>
             <CFIcon size={14} />
             {cfConnected ? t(T.connected) : t(T.cfOAuth)}
           </Button>
         ) : (
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled
-              className="gap-1.5 opacity-60"
-            >
-              {t(T.cfOAuth)}
-            </Button>
+            <Button variant="outline" size="sm" disabled className="gap-1.5 opacity-60">{t(T.cfOAuth)}</Button>
             <p className="text-xs text-muted-foreground">{t(T.cfOAuthNotConfigured)}</p>
           </div>
         )}
 
-        {/* Manual entry toggle */}
         <button
           onClick={() => setShowManualCF(!showManualCF)}
           className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
@@ -285,30 +296,19 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
               label={t(T.cfAccountIdLabel)}
               value={cfAccountId}
               placeholder="abc123..."
-              onChange={(v) => {
-                setCfAccountId(v)
-                setCfConnected(v.trim() !== '' && cfApiToken.trim() !== '')
-              }}
+              onChange={(v) => { setCfAccountId(v); setUsingAccountCreds(false); setCfConnected(v.trim() !== '' && cfApiToken.trim() !== '') }}
             />
             <div>
               <ManualField
                 label={t(T.cfApiTokenLabel)}
                 value={cfApiToken}
                 placeholder="••••••••••••••••••••"
-                onChange={(v) => {
-                  setCfApiToken(v)
-                  setCfConnected(cfAccountId.trim() !== '' && v.trim() !== '')
-                }}
+                onChange={(v) => { setCfApiToken(v); setUsingAccountCreds(false); setCfConnected(cfAccountId.trim() !== '' && v.trim() !== '') }}
                 isSecret
               />
               <p className="text-xs text-muted-foreground mt-1">{t(T.cfTokenHint)}</p>
             </div>
-            <a
-              href="https://dash.cloudflare.com/profile/api-tokens"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-            >
+            <a href="https://dash.cloudflare.com/profile/api-tokens" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
               <ExternalLink size={11} />
               {t(T.whereToFind)}
             </a>
@@ -316,46 +316,28 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
         )}
       </div>
 
-      {saveError && (
-        <p className="text-xs text-red-500">
-          {t(T.error)}: {saveError}
-        </p>
+      {cfConnected && !usingAccountCreds && (
+        <label className="flex items-center gap-2 text-sm cursor-pointer select-none">
+          <input type="checkbox" checked={saveToAccount} onChange={(e) => setSaveToAccount(e.target.checked)} className="rounded border-border" />
+          <span className="text-muted-foreground">{t(T.saveToAccount)}</span>
+        </label>
       )}
 
-      <Button
-        onClick={handleContinue}
-        disabled={!canContinue || saving}
-        className="w-full"
-        size="lg"
-      >
+      {saveError && <p className="text-xs text-red-500">{t(T.error)}: {saveError}</p>}
+
+      <Button onClick={handleContinue} disabled={!canContinue || saving} className="w-full" size="lg">
         {saving ? (
           <span className="flex items-center gap-2">
             <span className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
             {t(T.saving)}
           </span>
-        ) : (
-          t(T.continue)
-        )}
+        ) : t(T.continue)}
       </Button>
     </div>
   )
 }
 
-// ── Small helpers ──────────────────────────────────────────────────────────
-
-function ManualField({
-  label,
-  value,
-  placeholder,
-  onChange,
-  isSecret,
-}: {
-  label: string
-  value: string
-  placeholder: string
-  onChange: (v: string) => void
-  isSecret?: boolean
-}) {
+function ManualField({ label, value, placeholder, onChange, isSecret }: { label: string; value: string; placeholder: string; onChange: (v: string) => void; isSecret?: boolean }) {
   return (
     <div>
       <label className="block text-xs text-muted-foreground mb-1">{label}</label>
@@ -380,11 +362,7 @@ function CFIcon({ size }: { size?: number }) {
       </svg>
     )
   }
-  return (
-    <div className="w-9 h-9 bg-orange-500 rounded-lg flex items-center justify-center shrink-0 text-white text-xs font-bold">
-      CF
-    </div>
-  )
+  return <div className="w-9 h-9 bg-orange-500 rounded-lg flex items-center justify-center shrink-0 text-white text-xs font-bold">CF</div>
 }
 
 function InstantIcon() {

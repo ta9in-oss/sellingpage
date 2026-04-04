@@ -6,6 +6,7 @@ import { id } from '@instantdb/react'
 import { useLang } from '@/hooks/useLang'
 import { Loader2 } from 'lucide-react'
 import type { User } from '@instantdb/react'
+import { useBuilderStore } from '@/hooks/useBuilderStore'
 
 export const Route = createFileRoute('/dashboard/builder')({
   validateSearch: (search) => ({
@@ -71,12 +72,16 @@ function CreateAndRedirect({
   const { dir, t } = useLang()
   useEffect(() => {
     const newId = id()
+    // Use defaultConfig so the builder always hydrates a valid StoreConfig (not { plan: 'simple' })
+    const config = useBuilderStore.getState().config
     db.transact(
       db.tx.stores[newId].update({
-        userId: user.id,
+        userId: user.email ?? user.id,
         slug: newId.slice(0, 8),
-        config: { plan: plan || 'simple' },
+        config,
         status: 'draft',
+        createdAt: new Date(),
+        ...(plan ? { plan } : {}),
       })
     ).then(() => {
       navigate({ to: '/dashboard/builder', search: { storeId: newId, plan: '' }, replace: true })

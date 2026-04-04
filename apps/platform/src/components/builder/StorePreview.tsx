@@ -187,7 +187,7 @@ function SectionRenderer({ section, config }: { section: Section; config: StoreC
       return (
         <FooterSection
           content={{
-            storeName: s.storeName ?? config.meta.siteName ?? 'متجري',
+            storeName: s.storeName ?? config.meta.siteTitle ?? 'متجري',
             tagline: s.tagline,
             phone: s.phone,
             email: s.email,
