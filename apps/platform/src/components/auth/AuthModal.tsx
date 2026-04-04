@@ -61,8 +61,6 @@ export function AuthModal({
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [sentTo, setSentTo] = useState('')
-  const [nonce] = useState(() => crypto.randomUUID())
-
   const displayTitle = title ?? t(T.defaultTitle)
   const displaySubtitle = subtitle ?? t(T.defaultSubtitle)
 
@@ -80,7 +78,6 @@ export function AuthModal({
       await db.auth.signInWithIdToken({
         clientName: 'google-web',
         idToken,
-        nonce,
       } as Parameters<typeof db.auth.signInWithIdToken>[0])
 
       // Decode email from JWT payload (base64 middle segment)
@@ -156,7 +153,6 @@ export function AuthModal({
                   text="continue_with"
                   locale="ar"
                   useOneTap={false}
-                  nonce={nonce}
                 />
               </div>
             )}
