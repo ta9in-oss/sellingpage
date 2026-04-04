@@ -27,12 +27,18 @@ function DeployPage() {
   const { data, isLoading: dataLoading } = db.useQuery(
     user?.email ? { platformUsers: { $: { where: { email: user.email } } } } : null
   )
-  const platformUser = (data?.platformUsers ?? [])[0] as { tier?: string } | undefined
+  const platformUser = (data?.platformUsers ?? [])[0] as
+    | { tier?: string; cfAccountId?: string } | undefined
 
   useEffect(() => {
     if (authLoading || (user && dataLoading)) return
     if (!user || !platformUser?.tier) {
       navigate({ to: '/dashboard', replace: true })
+      return
+    }
+    // Gate: require CF credentials before deployment
+    if (!platformUser?.cfAccountId) {
+      navigate({ to: '/dashboard/settings', search: { from: 'deploy' } as any, replace: true })
     }
   }, [authLoading, dataLoading, user, platformUser, navigate])
 

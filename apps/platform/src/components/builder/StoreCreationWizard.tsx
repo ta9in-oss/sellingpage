@@ -1,10 +1,11 @@
 /**
- * StoreCreationWizard — 2-step modal for creating a new store.
+ * StoreCreationWizard — 2-step full-page wizard for creating a new store.
  *
- * Step 1: Store info  — name, slug, locale, SEO title/description
+ * Step 1: Store info  — name, identifier, locale, SEO title/description
  * Step 2: Product     — name, price, currency, images
  *
  * On finish: creates a valid StoreConfig in InstantDB then navigates to the builder.
+ * On cancel: calls onCancel (typically navigates back to /dashboard).
  */
 import { useState, useCallback } from 'react'
 import { db } from '@/lib/instantdb'
@@ -22,9 +23,9 @@ import { useLang } from '@/hooks/useLang'
 import { Loader2, Plus, X, ArrowRight, ArrowLeft, Store, Package } from 'lucide-react'
 import type { StoreConfig } from '@7aba/store-ui'
 
-interface StoreCreationWizardProps {
+export interface StoreCreationWizardProps {
   userEmail: string
-  onClose: () => void
+  onCancel: () => void
 }
 
 type Step = 1 | 2
@@ -34,19 +35,19 @@ const T = {
   createStore: { ar: 'إنشاء متجر جديد', fr: 'Créer une boutique', en: 'Create new store' },
   step1Label: { ar: 'معلومات المتجر', fr: 'Infos boutique', en: 'Store info' },
   step2Label: { ar: 'المنتج', fr: 'Produit', en: 'Product' },
-  next: { ar: 'التالي →', fr: 'Suivant →', en: 'Next →' },
-  back: { ar: '← رجوع', fr: '← Retour', en: '← Back' },
+  next: { ar: 'التالي', fr: 'Suivant', en: 'Next' },
+  back: { ar: 'رجوع', fr: 'Retour', en: 'Back' },
+  backToDashboard: { ar: 'العودة للوحة التحكم', fr: 'Retour au tableau de bord', en: 'Back to dashboard' },
   creating: { ar: 'جارٍ الإنشاء...', fr: 'Création...', en: 'Creating...' },
-  createAndOpen: { ar: 'إنشاء وفتح المبني →', fr: 'Créer et ouvrir →', en: 'Create & Open Builder →' },
-  close: { ar: 'إغلاق', fr: 'Fermer', en: 'Close' },
+  createAndOpen: { ar: 'إنشاء وفتح المبني', fr: 'Créer et ouvrir', en: 'Create & Open Builder' },
   // Step 1
   storeName: { ar: 'اسم المتجر *', fr: 'Nom de la boutique *', en: 'Store name *' },
   storeNamePlaceholder: { ar: 'مثال: متجر كيكة أمي', fr: 'Ex: Boutique Kakua', en: 'Ex: My Awesome Store' },
-  slugLabel: { ar: 'رابط المتجر (Slug)', fr: 'URL slug', en: 'URL slug' },
-  slugHint: { ar: 'يظهر في رابط متجرك: 7aba.store/', fr: 'Apparaîtra dans l\'URL: 7aba.store/', en: 'Will appear in your URL: 7aba.store/' },
+  slugLabel: { ar: 'معرف المتجر', fr: 'Identifiant', en: 'Store identifier' },
+  slugHint: { ar: 'حروف إنجليزية وأرقام وشرطات فقط', fr: 'Lettres, chiffres et tirets uniquement', en: 'Lowercase letters, numbers and hyphens only' },
   locale: { ar: 'لغة المتجر', fr: 'Langue', en: 'Store language' },
   seoTitle: { ar: 'عنوان المتصفح (SEO)', fr: 'Titre du navigateur (SEO)', en: 'Browser title (SEO)' },
-  seoTitleHint: { ar: 'يظهر في تاب المتصفح ونتائج Google', fr: 'Affiché dans l\'onglet et Google', en: 'Shown in browser tab and Google results' },
+  seoTitleHint: { ar: 'يظهر في تاب المتصفح ونتائج Google', fr: "Affiché dans l'onglet et Google", en: 'Shown in browser tab and Google results' },
   seoDesc: { ar: 'وصف الموقع (SEO)', fr: 'Description (SEO)', en: 'Site description (SEO)' },
   seoDescHint: { ar: '130-160 حرف للحصول على أفضل ظهور في Google', fr: '130-160 caractères pour le meilleur référencement', en: '130-160 chars for best Google display' },
   // Step 2
@@ -56,28 +57,30 @@ const T = {
   currency: { ar: 'العملة', fr: 'Devise', en: 'Currency' },
   productImages: { ar: 'صور المنتج', fr: 'Images du produit', en: 'Product images' },
   addImage: { ar: 'إضافة صورة', fr: 'Ajouter une image', en: 'Add image' },
-  imageHint: { ar: 'أضف حتى 5 صور للمنتج — تظهر في الكاروسيل', fr: 'Ajoutez jusqu\'à 5 images — affichées dans le carrousel', en: 'Add up to 5 product images — shown in carousel' },
+  imageHint: { ar: 'أضف حتى 5 صور للمنتج — تظهر في الكاروسيل', fr: "Ajoutez jusqu'à 5 images — affichées dans le carrousel", en: 'Add up to 5 product images — shown in carousel' },
   removeImage: { ar: 'حذف', fr: 'Supprimer', en: 'Remove' },
   // Validation
-  nameRequired: { ar: 'اسم المتجر مطلوب', fr: 'Nom de la boutique requis', en: 'Store name is required' },
-  productNameRequired: { ar: 'اسم المنتج مطلوب', fr: 'Nom du produit requis', en: 'Product name is required' },
-  priceInvalid: { ar: 'أدخل سعراً صحيحاً', fr: 'Entrez un prix valide', en: 'Enter a valid price' },
-  error: { ar: 'حدث خطأ. حاول مجدداً.', fr: 'Une erreur s\'est produite.', en: 'An error occurred. Please try again.' },
+  nameRequired: { ar: 'اسم المتجر مطلوب', fr: 'Le nom est requis', en: 'Store name is required' },
+  productNameRequired: { ar: 'اسم المنتج مطلوب', fr: 'Le nom du produit est requis', en: 'Product name is required' },
+  priceInvalid: { ar: 'أدخل سعراً صحيحاً', fr: 'Prix invalide', en: 'Enter a valid price' },
+  error: { ar: 'حدث خطأ. حاول مجدداً.', fr: 'Une erreur est survenue.', en: 'An error occurred. Try again.' },
 }
 
 function generateSlug(name: string): string {
-  return name
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, '-')
-    .replace(/[^a-z0-9-]/g, '')
-    .slice(0, 30)
-    || nanoid(6)
+  return (
+    name
+      .toLowerCase()
+      .replace(/[\u0600-\u06FF]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 40) || 'store-' + nanoid(6).toLowerCase()
+  )
 }
 
-export function StoreCreationWizard({ userEmail, onClose }: StoreCreationWizardProps) {
+export function StoreCreationWizard({ userEmail, onCancel }: StoreCreationWizardProps) {
   const navigate = useNavigate()
   const { t, dir } = useLang()
+  const isRtl = dir === 'rtl'
 
   const [step, setStep] = useState<Step>(1)
   const [creating, setCreating] = useState(false)
@@ -154,7 +157,6 @@ export function StoreCreationWizard({ userEmail, onClose }: StoreCreationWizardP
           currency,
           images,
         },
-        // Pre-fill hero headline with product name
         sections: baseConfig.sections.map((s) =>
           s.type === 'hero'
             ? { ...s, headline: productName.trim() || s.headline }
@@ -175,7 +177,6 @@ export function StoreCreationWizard({ userEmail, onClose }: StoreCreationWizardP
         })
       )
 
-      onClose()
       navigate({ to: '/dashboard/builder', search: { storeId, plan: '' } })
     } catch {
       setError(t(T.error))
@@ -184,15 +185,29 @@ export function StoreCreationWizard({ userEmail, onClose }: StoreCreationWizardP
     }
   }
 
+  // Arrows adapt to text direction
+  const NextIcon = isRtl ? ArrowLeft : ArrowRight
+  const BackIcon = isRtl ? ArrowRight : ArrowLeft
+  const stepSeparator = isRtl ? '←' : '→'
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" dir={dir}>
-      <div className="bg-background border border-border rounded-2xl shadow-2xl w-full max-w-lg flex flex-col max-h-[90vh]">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-border shrink-0">
-          <div>
-            <h2 className="text-lg font-bold">{t(T.createStore)}</h2>
+    <div className="min-h-screen bg-background py-8 px-4" dir={dir}>
+      <div className="max-w-lg mx-auto">
+        {/* Back to dashboard */}
+        <button
+          onClick={onCancel}
+          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors"
+        >
+          <BackIcon size={16} />
+          {t(T.backToDashboard)}
+        </button>
+
+        <div className="bg-card border border-border rounded-2xl shadow-sm">
+          {/* Header */}
+          <div className="px-6 pt-5 pb-4 border-b border-border">
+            <h2 className="text-xl font-bold">{t(T.createStore)}</h2>
             {/* Step indicator */}
-            <div className="flex items-center gap-2 mt-1.5">
+            <div className="flex items-center gap-2 mt-2">
               {([1, 2] as const).map((s) => (
                 <div key={s} className="flex items-center gap-1.5">
                   <div
@@ -210,85 +225,83 @@ export function StoreCreationWizard({ userEmail, onClose }: StoreCreationWizardP
                   <span className={cn('text-xs', s === step ? 'font-semibold' : 'text-muted-foreground')}>
                     {s === 1 ? t(T.step1Label) : t(T.step2Label)}
                   </span>
-                  {s < 2 && <span className="text-muted-foreground text-xs">→</span>}
+                  {s < 2 && <span className="text-muted-foreground text-xs">{stepSeparator}</span>}
                 </div>
               ))}
             </div>
           </div>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground p-1 rounded" aria-label={t(T.close)}>
-            <X size={20} />
-          </button>
-        </div>
 
-        {/* Body */}
-        <div className="flex-1 overflow-y-auto px-6 py-5">
-          {step === 1 && (
-            <Step1
-              storeName={storeName}
-              slug={slug}
-              locale={locale}
-              seoTitle={seoTitle}
-              seoDesc={seoDesc}
-              onNameChange={handleNameChange}
-              onSlugChange={handleSlugChange}
-              onLocaleChange={setLocale}
-              onSeoTitleChange={setSeoTitle}
-              onSeoDescChange={setSeoDesc}
-              storeDir={locale === 'ar' ? 'rtl' : 'ltr'}
-              t={t}
-            />
-          )}
-          {step === 2 && (
-            <Step2
-              productName={productName}
-              price={price}
-              currency={currency}
-              images={images}
-              onProductNameChange={setProductName}
-              onPriceChange={setPrice}
-              onCurrencyChange={setCurrency}
-              onImagesChange={setImages}
-              storeDir={locale === 'ar' ? 'rtl' : 'ltr'}
-              t={t}
-            />
-          )}
+          {/* Body */}
+          <div className="px-6 py-5">
+            {step === 1 && (
+              <Step1
+                storeName={storeName}
+                slug={slug}
+                locale={locale}
+                seoTitle={seoTitle}
+                seoDesc={seoDesc}
+                onNameChange={handleNameChange}
+                onSlugChange={handleSlugChange}
+                onLocaleChange={setLocale}
+                onSeoTitleChange={setSeoTitle}
+                onSeoDescChange={setSeoDesc}
+                storeDir={locale === 'ar' ? 'rtl' : 'ltr'}
+                t={t}
+              />
+            )}
+            {step === 2 && (
+              <Step2
+                productName={productName}
+                price={price}
+                currency={currency}
+                images={images}
+                onProductNameChange={setProductName}
+                onPriceChange={setPrice}
+                onCurrencyChange={setCurrency}
+                onImagesChange={setImages}
+                storeDir={locale === 'ar' ? 'rtl' : 'ltr'}
+                t={t}
+              />
+            )}
 
-          {error && (
-            <p className="mt-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">{error}</p>
-          )}
-        </div>
+            {error && (
+              <p className="mt-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">{error}</p>
+            )}
+          </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-border shrink-0 gap-3">
-          {step === 2 ? (
-            <Button variant="ghost" size="sm" onClick={() => { setStep(1); setError(null) }} className="gap-1.5">
-              <ArrowLeft size={14} />
-              {t(T.back)}
-            </Button>
-          ) : (
-            <div />
-          )}
+          {/* Footer */}
+          <div className="flex items-center justify-between px-6 py-4 border-t border-border gap-3">
+            {step === 2 ? (
+              <Button variant="ghost" size="sm" onClick={() => { setStep(1); setError(null) }} className="gap-1.5">
+                <BackIcon size={14} />
+                {t(T.back)}
+              </Button>
+            ) : (
+              <div />
+            )}
 
-          {step === 1 && (
-            <Button onClick={goToStep2} className="gap-1.5 ms-auto">
-              {t(T.next)}
-              <ArrowRight size={14} />
-            </Button>
-          )}
-          {step === 2 && (
-            <Button onClick={handleCreate} disabled={creating} className="gap-1.5">
-              {creating ? (
-                <>
-                  <Loader2 size={14} className="animate-spin" />
-                  {t(T.creating)}
-                </>
-              ) : (
-                <>
-                  {t(T.createAndOpen)}
-                </>
-              )}
-            </Button>
-          )}
+            {step === 1 && (
+              <Button onClick={goToStep2} className="gap-1.5 ms-auto">
+                {t(T.next)}
+                <NextIcon size={14} />
+              </Button>
+            )}
+            {step === 2 && (
+              <Button onClick={handleCreate} disabled={creating} className="gap-1.5">
+                {creating ? (
+                  <>
+                    <Loader2 size={14} className="animate-spin" />
+                    {t(T.creating)}
+                  </>
+                ) : (
+                  <>
+                    {t(T.createAndOpen)}
+                    <NextIcon size={14} />
+                  </>
+                )}
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -337,20 +350,14 @@ function Step1({
 
       <div className="space-y-1.5">
         <Label>{t(T.slugLabel)}</Label>
-        <div className="flex items-center gap-0 border border-input rounded-md overflow-hidden focus-within:ring-1 focus-within:ring-ring">
-          <span className="px-3 py-2 bg-muted text-muted-foreground text-sm border-e border-input shrink-0 font-mono">
-            7aba.store/
-          </span>
-          <input
-            type="text"
-            value={slug}
-            onChange={(e) => onSlugChange(e.target.value)}
-            className="flex-1 px-3 py-2 text-sm font-mono bg-background focus:outline-none"
-            dir="ltr"
-            placeholder="my-store"
-          />
-        </div>
-        <p className="text-xs text-muted-foreground">{t(T.slugHint)}<strong>{slug || 'my-store'}</strong></p>
+        <Input
+          value={slug}
+          onChange={(e) => onSlugChange(e.target.value)}
+          className="font-mono text-sm"
+          dir="ltr"
+          placeholder="my-store"
+        />
+        <p className="text-xs text-muted-foreground">{t(T.slugHint)}</p>
       </div>
 
       <div className="space-y-1.5">

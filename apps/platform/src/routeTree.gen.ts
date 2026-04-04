@@ -13,6 +13,8 @@ import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as DemoRouteImport } from './routes/demo'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
+import { Route as DashboardSettingsRouteImport } from './routes/dashboard/settings'
+import { Route as DashboardNewStoreRouteImport } from './routes/dashboard/new-store'
 import { Route as DashboardDeployRouteImport } from './routes/dashboard/deploy'
 import { Route as DashboardBuilderRouteImport } from './routes/dashboard/builder'
 import { Route as AuthCloudflareRouteImport } from './routes/auth/cloudflare'
@@ -35,6 +37,16 @@ const IndexRoute = IndexRouteImport.update({
 const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/dashboard/',
   path: '/dashboard/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardSettingsRoute = DashboardSettingsRouteImport.update({
+  id: '/dashboard/settings',
+  path: '/dashboard/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardNewStoreRoute = DashboardNewStoreRouteImport.update({
+  id: '/dashboard/new-store',
+  path: '/dashboard/new-store',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardDeployRoute = DashboardDeployRouteImport.update({
@@ -60,6 +72,8 @@ export interface FileRoutesByFullPath {
   '/auth/cloudflare': typeof AuthCloudflareRoute
   '/dashboard/builder': typeof DashboardBuilderRoute
   '/dashboard/deploy': typeof DashboardDeployRoute
+  '/dashboard/new-store': typeof DashboardNewStoreRoute
+  '/dashboard/settings': typeof DashboardSettingsRoute
   '/dashboard': typeof DashboardIndexRoute
 }
 export interface FileRoutesByTo {
@@ -69,6 +83,8 @@ export interface FileRoutesByTo {
   '/auth/cloudflare': typeof AuthCloudflareRoute
   '/dashboard/builder': typeof DashboardBuilderRoute
   '/dashboard/deploy': typeof DashboardDeployRoute
+  '/dashboard/new-store': typeof DashboardNewStoreRoute
+  '/dashboard/settings': typeof DashboardSettingsRoute
   '/dashboard': typeof DashboardIndexRoute
 }
 export interface FileRoutesById {
@@ -79,6 +95,8 @@ export interface FileRoutesById {
   '/auth/cloudflare': typeof AuthCloudflareRoute
   '/dashboard/builder': typeof DashboardBuilderRoute
   '/dashboard/deploy': typeof DashboardDeployRoute
+  '/dashboard/new-store': typeof DashboardNewStoreRoute
+  '/dashboard/settings': typeof DashboardSettingsRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRouteTypes {
@@ -90,6 +108,8 @@ export interface FileRouteTypes {
     | '/auth/cloudflare'
     | '/dashboard/builder'
     | '/dashboard/deploy'
+    | '/dashboard/new-store'
+    | '/dashboard/settings'
     | '/dashboard'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -99,6 +119,8 @@ export interface FileRouteTypes {
     | '/auth/cloudflare'
     | '/dashboard/builder'
     | '/dashboard/deploy'
+    | '/dashboard/new-store'
+    | '/dashboard/settings'
     | '/dashboard'
   id:
     | '__root__'
@@ -108,6 +130,8 @@ export interface FileRouteTypes {
     | '/auth/cloudflare'
     | '/dashboard/builder'
     | '/dashboard/deploy'
+    | '/dashboard/new-store'
+    | '/dashboard/settings'
     | '/dashboard/'
   fileRoutesById: FileRoutesById
 }
@@ -118,6 +142,8 @@ export interface RootRouteChildren {
   AuthCloudflareRoute: typeof AuthCloudflareRoute
   DashboardBuilderRoute: typeof DashboardBuilderRoute
   DashboardDeployRoute: typeof DashboardDeployRoute
+  DashboardNewStoreRoute: typeof DashboardNewStoreRoute
+  DashboardSettingsRoute: typeof DashboardSettingsRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
 }
 
@@ -151,6 +177,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/settings': {
+      id: '/dashboard/settings'
+      path: '/dashboard/settings'
+      fullPath: '/dashboard/settings'
+      preLoaderRoute: typeof DashboardSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/new-store': {
+      id: '/dashboard/new-store'
+      path: '/dashboard/new-store'
+      fullPath: '/dashboard/new-store'
+      preLoaderRoute: typeof DashboardNewStoreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard/deploy': {
       id: '/dashboard/deploy'
       path: '/dashboard/deploy'
@@ -182,6 +222,8 @@ const rootRouteChildren: RootRouteChildren = {
   AuthCloudflareRoute: AuthCloudflareRoute,
   DashboardBuilderRoute: DashboardBuilderRoute,
   DashboardDeployRoute: DashboardDeployRoute,
+  DashboardNewStoreRoute: DashboardNewStoreRoute,
+  DashboardSettingsRoute: DashboardSettingsRoute,
   DashboardIndexRoute: DashboardIndexRoute,
 }
 export const routeTree = rootRouteImport

@@ -4,7 +4,8 @@
  * Flow:
  *   1. Not authed → show AuthModal
  *   2. Authed, no subscription → show SubscriptionGate (pricing page inline)
- *   3. Authed + subscribed → show StoresDashboard + DownloadsPanel
+ *   3. Authed, no CF/InstantDB creds + first visit → show OnboardingWelcome
+ *   4. Authed + subscribed + onboarded → show StoresDashboard
  */
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
@@ -13,7 +14,6 @@ import { cn } from '@/lib/utils'
 import { useLang } from '@/hooks/useLang'
 import { AuthModal } from '@/components/auth/AuthModal'
 import { StoreSettingsModal } from '@/components/dashboard/StoreSettingsModal'
-import { StoreCreationWizard } from '@/components/builder/StoreCreationWizard'
 import { createSubscriptionCheckout } from '@/server/createSubscriptionCheckout'
 import { verifySubscriptionPayment } from '@/server/verifySubscriptionPayment'
 import { getDownloadUrl } from '@/server/getDownloadUrl'
@@ -21,7 +21,7 @@ import type { DownloadType } from '@/server/getDownloadUrl'
 import {
   Plus, Settings, ExternalLink, LogOut, Store, Rocket,
   Download, Package, Smartphone, Code2, Loader2, CheckCircle2,
-  Globe, Key, ChevronDown, ChevronUp, Save,
+  Globe, Key, ChevronDown, ChevronUp, Save, AlertCircle, ArrowRight, ArrowLeft,
 } from 'lucide-react'
 
 export const Route = createFileRoute('/dashboard/')({
@@ -49,6 +49,7 @@ const DT = {
   deploy: { ar: 'نشر', fr: 'Déployer', en: 'Deploy' },
   downloads: { ar: 'التحميلات', fr: 'Téléchargements', en: 'Downloads' },
   logout: { ar: 'خروج', fr: 'Déconnexion', en: 'Sign out' },
+  settings: { ar: 'الإعدادات', fr: 'Paramètres', en: 'Settings' },
 }
 
 function DashboardPage() {
@@ -114,12 +115,12 @@ function AuthenticatedDashboard({
   const { data, isLoading } = db.useQuery({
     platformUsers: { $: { where: { email } } },
   })
+  const navigate = useNavigate()
 
   const platformUser = (data?.platformUsers ?? [])[0] as
-    | { id: string; email: string; tier?: string; checkoutId?: string } | undefined
+    | { id: string; email: string; tier?: string; checkoutId?: string; cfAccountId?: string; cfApiToken?: string } | undefined
 
   // Verify Chargily payment on return from checkout
-  // checkoutId is stored in DB before redirect (no {checkout_id} placeholder — Chargily rejects it)
   useEffect(() => {
     const checkoutId = platformUser?.checkoutId || checkoutIdParam
     if (payment === 'success' && paymentTier && checkoutId && email) {
@@ -147,7 +148,168 @@ function AuthenticatedDashboard({
     return <SubscriptionGate email={email} autoPlan={autoPlan} />
   }
 
-  return <StoresDashboard email={email} tier={tier} platformUserId={platformUser?.id} />
+  // Show onboarding welcome page to new users who haven't configured credentials
+  const hasCreds = !!(platformUser?.cfAccountId)
+  const onboardingDismissed = typeof window !== 'undefined'
+    && localStorage.getItem('7aba:setup_dismissed') === '1'
+
+  if (!hasCreds && !onboardingDismissed) {
+    return (
+      <OnboardingWelcome
+        email={email}
+        tier={tier}
+        platformUserId={platformUser?.id}
+        onDone={() => {
+          // creds saved → re-render will pick them up via db.useQuery
+        }}
+        onSkip={() => {
+          localStorage.setItem('7aba:setup_dismissed', '1')
+          navigate({ to: '/dashboard' })
+        }}
+      />
+    )
+  }
+
+  return <StoresDashboard email={email} tier={tier} platformUserId={platformUser?.id} hasCreds={hasCreds} />
+}
+
+// ─── Onboarding welcome ────────────────────────────────────────────────────────
+
+function OnboardingWelcome({
+  email,
+  tier,
+  platformUserId,
+  onDone,
+  onSkip,
+}: {
+  email: string
+  tier: string
+  platformUserId?: string
+  onDone: () => void
+  onSkip: () => void
+}) {
+  const navigate = useNavigate()
+  const { dir } = useLang()
+  const [saving, setSaving] = useState(false)
+  const [fields, setFields] = useState({ cfAccountId: '', cfApiToken: '', instantAppId: '', instantAdminToken: '' })
+
+  const handleSave = async () => {
+    if (!platformUserId || !fields.cfAccountId || !fields.cfApiToken) return
+    setSaving(true)
+    try {
+      await db.transact(
+        (db.tx.platformUsers as any)[platformUserId].update({
+          cfAccountId: fields.cfAccountId.trim(),
+          cfApiToken: fields.cfApiToken.trim(),
+          instantAppId: fields.instantAppId.trim() || null,
+          instantAdminToken: fields.instantAdminToken.trim() || null,
+        })
+      )
+      onDone()
+      navigate({ to: '/dashboard' })
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center p-4" dir={dir}>
+      <div className="w-full max-w-lg space-y-6">
+        <div className="text-center space-y-2">
+          <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto">
+            <span className="text-primary-foreground font-black text-2xl">7</span>
+          </div>
+          <h1 className="text-2xl font-bold">مرحباً بك في 7aba.store! 🎉</h1>
+          <p className="text-muted-foreground text-sm">
+            لنشر متاجرك، نحتاج بيانات Cloudflare الخاصة بك مرة واحدة فقط. يمكنك تخطي هذه الخطوة الآن وإضافتها لاحقاً من الإعدادات.
+          </p>
+        </div>
+
+        <div className="bg-card border border-border rounded-2xl p-6 space-y-4">
+          <h2 className="font-bold flex items-center gap-2">
+            <Key size={16} className="text-primary" />
+            بيانات Cloudflare
+          </h2>
+          <p className="text-xs text-muted-foreground">
+            احصل على البيانات من{" "}
+            <a href="https://dash.cloudflare.com/profile/api-tokens" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+              dash.cloudflare.com/profile/api-tokens
+            </a>
+          </p>
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium">Account ID <span className="text-destructive">*</span></label>
+              <input
+                type="text"
+                dir="ltr"
+                value={fields.cfAccountId}
+                onChange={(e) => setFields((f) => ({ ...f, cfAccountId: e.target.value }))}
+                placeholder="abc123..."
+                className="w-full border border-input bg-background rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium">API Token <span className="text-destructive">*</span></label>
+              <input
+                type="password"
+                dir="ltr"
+                value={fields.cfApiToken}
+                onChange={(e) => setFields((f) => ({ ...f, cfApiToken: e.target.value }))}
+                placeholder="••••••••"
+                className="w-full border border-input bg-background rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+          </div>
+
+          <h2 className="font-bold flex items-center gap-2 pt-2">
+            <Globe size={16} className="text-primary" />
+            بيانات InstantDB <span className="text-xs font-normal text-muted-foreground">(اختياري — يُنشأ تلقائياً)</span>
+          </h2>
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium">App ID</label>
+              <input
+                type="text"
+                dir="ltr"
+                value={fields.instantAppId}
+                onChange={(e) => setFields((f) => ({ ...f, instantAppId: e.target.value }))}
+                placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                className="w-full border border-input bg-background rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium">Admin Token</label>
+              <input
+                type="password"
+                dir="ltr"
+                value={fields.instantAdminToken}
+                onChange={(e) => setFields((f) => ({ ...f, instantAdminToken: e.target.value }))}
+                placeholder="••••••••"
+                className="w-full border border-input bg-background rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="flex gap-3">
+          <button
+            onClick={handleSave}
+            disabled={saving || !fields.cfAccountId || !fields.cfApiToken}
+            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+            حفظ والمتابعة
+          </button>
+          <button
+            onClick={onSkip}
+            className="px-4 py-3 rounded-xl border border-border text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+          >
+            تخطي الآن
+          </button>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 // ─── Subscription gate ─────────────────────────────────────────────────────────
@@ -213,7 +375,6 @@ function SubscriptionGate({ email, autoPlan }: { email: string; autoPlan?: strin
     }
   }
 
-  // Auto-trigger checkout if plan was passed from pricing page
   useEffect(() => {
     const validPlans = ['starter', 'pro', 'agency'] as const
     if (autoPlan && (validPlans as readonly string[]).includes(autoPlan)) {
@@ -289,163 +450,20 @@ interface StoreSettingsData {
   instantAdminToken?: string
 }
 
-function AccountSettingsPanel({ email, platformUserId }: { email: string; platformUserId?: string }) {
-  const { data } = db.useQuery(
-    platformUserId ? { platformUsers: { $: { where: { email } } } } : null,
-  )
-  const platformUser = (data?.platformUsers ?? [])[0] as any
-
-  const [open, setOpen] = useState(false)
-  const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
-  const [fields, setFields] = useState({
-    cfAccountId: '',
-    cfApiToken: '',
-    instantAppId: '',
-    instantAdminToken: '',
-  })
-
-  useEffect(() => {
-    if (platformUser) {
-      setFields({
-        cfAccountId: platformUser.cfAccountId ?? '',
-        cfApiToken: platformUser.cfApiToken ?? '',
-        instantAppId: platformUser.instantAppId ?? '',
-        instantAdminToken: platformUser.instantAdminToken ?? '',
-      })
-    }
-  }, [platformUser?.id])
-
-  const hasCreds = !!(platformUser?.cfAccountId || platformUser?.cfApiToken)
-
-  const handleSave = async () => {
-    if (!platformUserId) return
-    setSaving(true)
-    try {
-      await db.transact(
-        (db.tx.platformUsers as any)[platformUserId].update({
-          cfAccountId: fields.cfAccountId || null,
-          cfApiToken: fields.cfApiToken || null,
-          instantAppId: fields.instantAppId || null,
-          instantAdminToken: fields.instantAdminToken || null,
-        }),
-      )
-      setSaved(true)
-      setTimeout(() => setSaved(false), 2500)
-    } catch (e) {
-      console.error('Failed to save account creds:', e)
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  return (
-    <div className="rounded-2xl border">
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between p-5 text-right"
-      >
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center">
-            <Key className="h-4 w-4 text-muted-foreground" />
-          </div>
-          <div className="text-right">
-            <p className="font-semibold text-sm">إعدادات الحساب</p>
-            <p className="text-xs text-muted-foreground">
-              {hasCreds ? '✓ بيانات Cloudflare محفوظة — تُستخدم في جميع المتاجر' : 'أضف بيانات Cloudflare مرة واحدة لجميع المتاجر'}
-            </p>
-          </div>
-        </div>
-        {open ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
-      </button>
-
-      {open && (
-        <div className="px-5 pb-5 space-y-4 border-t pt-4">
-          <p className="text-xs text-muted-foreground">
-            هذه البيانات تُستخدم تلقائياً عند نشر أي متجر جديد. لا تحتاج لإدخالها في كل مرة.
-          </p>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <label className="text-xs font-medium flex items-center gap-1.5">
-                <Globe className="h-3 w-3" /> Cloudflare Account ID
-              </label>
-              <input
-                type="text"
-                value={fields.cfAccountId}
-                onChange={(e) => setFields((f) => ({ ...f, cfAccountId: e.target.value }))}
-                placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-                className="w-full px-3 py-2 rounded-lg border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-                dir="ltr"
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-xs font-medium flex items-center gap-1.5">
-                <Key className="h-3 w-3" /> Cloudflare API Token
-              </label>
-              <input
-                type="password"
-                value={fields.cfApiToken}
-                onChange={(e) => setFields((f) => ({ ...f, cfApiToken: e.target.value }))}
-                placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-                className="w-full px-3 py-2 rounded-lg border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-                dir="ltr"
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-xs font-medium flex items-center gap-1.5">
-                <Globe className="h-3 w-3" /> InstantDB App ID
-                <span className="text-muted-foreground font-normal">(اختياري)</span>
-              </label>
-              <input
-                type="text"
-                value={fields.instantAppId}
-                onChange={(e) => setFields((f) => ({ ...f, instantAppId: e.target.value }))}
-                placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-                className="w-full px-3 py-2 rounded-lg border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-                dir="ltr"
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-xs font-medium flex items-center gap-1.5">
-                <Key className="h-3 w-3" /> InstantDB Admin Token
-                <span className="text-muted-foreground font-normal">(اختياري)</span>
-              </label>
-              <input
-                type="password"
-                value={fields.instantAdminToken}
-                onChange={(e) => setFields((f) => ({ ...f, instantAdminToken: e.target.value }))}
-                placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-                className="w-full px-3 py-2 rounded-lg border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-                dir="ltr"
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 pt-1">
-            <button
-              onClick={handleSave}
-              disabled={saving || !platformUserId}
-              className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors disabled:opacity-60"
-            >
-              {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
-              حفظ
-            </button>
-            {saved && <span className="text-sm text-green-600 dark:text-green-400 flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5" /> تم الحفظ</span>}
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
-
-function StoresDashboard({ email, tier, platformUserId }: { email: string; tier: string; platformUserId?: string }) {
+function StoresDashboard({
+  email,
+  tier,
+  platformUserId,
+  hasCreds,
+}: {
+  email: string
+  tier: string
+  platformUserId?: string
+  hasCreds: boolean
+}) {
   const { t, dir } = useLang()
+  const navigate = useNavigate()
   const [settingsStore, setSettingsStore] = useState<StoreSettingsData | null>(null)
-  const [showWizard, setShowWizard] = useState(false)
 
   const { data, isLoading } = db.useQuery({
     stores: { $: { where: { userId: email } } },
@@ -457,14 +475,11 @@ function StoresDashboard({ email, tier, platformUserId }: { email: string; tier:
       <DashboardHeader email={email} tier={tier} />
 
       <div className="max-w-6xl mx-auto mt-8 space-y-8">
-        {/* Account-level credential settings */}
-        <AccountSettingsPanel email={email} platformUserId={platformUserId} />
-
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold">{t(DT.myStores)}</h2>
             <button
-              onClick={() => setShowWizard(true)}
+              onClick={() => navigate({ to: '/dashboard/new-store' })}
               className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors"
             >
               <Plus className="h-4 w-4" />
@@ -477,7 +492,7 @@ function StoresDashboard({ email, tier, platformUserId }: { email: string; tier:
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
           ) : stores.length === 0 ? (
-            <EmptyStores onNew={() => setShowWizard(true)} />
+            <EmptyStores onNew={() => navigate({ to: '/dashboard/new-store' })} />
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {stores.map((store: any) => (
@@ -485,6 +500,7 @@ function StoresDashboard({ email, tier, platformUserId }: { email: string; tier:
                   key={store.id}
                   store={store}
                   tier={tier}
+                  hasCreds={hasCreds}
                   onSettings={() =>
                     setSettingsStore({
                       id: store.id,
@@ -521,13 +537,6 @@ function StoresDashboard({ email, tier, platformUserId }: { email: string; tier:
           onDeleted={() => setSettingsStore(null)}
         />
       )}
-
-      {showWizard && (
-        <StoreCreationWizard
-          userEmail={email}
-          onClose={() => setShowWizard(false)}
-        />
-      )}
     </div>
   )
 }
@@ -537,23 +546,37 @@ function StoresDashboard({ email, tier, platformUserId }: { email: string; tier:
 function StoreCard({
   store,
   tier,
+  hasCreds,
   onSettings,
 }: {
   store: any
   tier: string
+  hasCreds: boolean
   onSettings: () => void
 }) {
   const navigate = useNavigate()
-  const { t } = useLang()
+  const { t, dir } = useLang()
+  const isRtl = dir === 'rtl'
   const name = store.config?.meta?.name || store.slug || store.id
   const status = store.status ?? 'draft'
+
+  const handleDeploy = () => {
+    if (!hasCreds) {
+      navigate({ to: '/dashboard/settings', search: { from: 'deploy' } as any })
+      return
+    }
+    navigate({
+      to: '/dashboard/deploy',
+      search: { storeId: store.id, tier: tier as 'starter' | 'pro' | 'agency' },
+    })
+  }
 
   return (
     <div className="rounded-2xl border bg-card p-5 flex flex-col gap-4">
       <div className="flex items-start justify-between">
         <div className="min-w-0">
           <p className="font-bold truncate">{name}</p>
-          <p className="text-xs text-muted-foreground mt-0.5">/{store.slug}</p>
+          <p className="text-xs text-muted-foreground mt-0.5 font-mono">{store.slug}</p>
         </div>
         <span
           className={cn(
@@ -579,6 +602,13 @@ function StoreCard({
         </a>
       )}
 
+      {!hasCreds && (
+        <div className="flex items-start gap-2 text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 rounded-lg px-3 py-2">
+          <AlertCircle size={13} className="shrink-0 mt-0.5" />
+          <span>يلزم إعداد Cloudflare للنشر</span>
+        </div>
+      )}
+
       <div className="flex items-center gap-2 mt-auto">
         <button
           onClick={() => navigate({ to: '/dashboard/builder', search: { storeId: store.id, plan: '' } })}
@@ -588,13 +618,13 @@ function StoreCard({
           {t(DT.edit)}
         </button>
         <button
-          onClick={() =>
-            navigate({
-              to: '/dashboard/deploy',
-              search: { storeId: store.id, tier: tier as 'starter' | 'pro' | 'agency' },
-            })
-          }
-          className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-primary text-primary-foreground text-sm hover:bg-primary/90 transition-colors"
+          onClick={handleDeploy}
+          className={cn(
+            'flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm transition-colors',
+            hasCreds
+              ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+              : 'bg-amber-500 text-white hover:bg-amber-600'
+          )}
         >
           <Rocket className="h-3.5 w-3.5" />
           {t(DT.deploy)}
@@ -693,6 +723,7 @@ function EmptyStores({ onNew }: { onNew: () => void }) {
 
 function DashboardHeader({ email, tier }: { email: string; tier?: string }) {
   const { t } = useLang()
+  const navigate = useNavigate()
   const tierLabels: Record<string, { ar: string; fr: string; en: string }> = {
     starter: { ar: 'مبتدئ', fr: 'Starter', en: 'Starter' },
     pro: { ar: 'احترافي', fr: 'Pro', en: 'Pro' },
@@ -714,6 +745,13 @@ function DashboardHeader({ email, tier }: { email: string; tier?: string }) {
       </div>
       <div className="flex items-center gap-3">
         <p className="text-sm text-muted-foreground hidden sm:block">{email}</p>
+        <button
+          onClick={() => navigate({ to: '/dashboard/settings', search: {} as any })}
+          className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+          title={t(DT.settings)}
+        >
+          <Settings className="h-4 w-4" />
+        </button>
         <button
           onClick={() => db.auth.signOut()}
           className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
