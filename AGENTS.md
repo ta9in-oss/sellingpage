@@ -306,6 +306,7 @@ npx tsx seed-orders.ts          # Seed test orders (from apps/store/)
 
 ## Known Gotchas
 
+- **Vite HMR stale module cache** — symptom: "does not provide an export named 'X'" even though file is correct. Fix: `touch <affected-file> <importer-file>` then hard-refresh browser (Ctrl+Shift+R). If still broken, restart dev server. This recurs whenever a file is significantly rewritten.
 - `apps/store/src/routes/index.tsx` — **5 pre-existing nullability TS errors** — hard rule: never modify business logic here
 - `dashboard.tsx` (store) is 45 KB — read in sections, not all at once
 - `algeria-locations.json` is 1.4 MB — import via `useAlgeriaLocations()` hook only (dynamic import)
