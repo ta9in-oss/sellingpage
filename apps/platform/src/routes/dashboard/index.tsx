@@ -604,8 +604,8 @@ function StoreCard({
       )}
 
       {!hasCreds && (
-        <div className="flex items-start gap-2 text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 rounded-lg px-3 py-2">
-          <AlertCircle size={13} className="shrink-0 mt-0.5" />
+        <div className="flex items-start gap-2 text-xs text-muted-foreground bg-muted rounded-lg px-3 py-2 border border-border">
+          <AlertCircle size={13} className="shrink-0 mt-0.5 text-foreground/60" />
           <span>يلزم إعداد Cloudflare للنشر</span>
         </div>
       )}
@@ -624,7 +624,7 @@ function StoreCard({
             'flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm transition-colors',
             hasCreds
               ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-              : 'bg-amber-500 text-white hover:bg-amber-600'
+              : 'bg-muted text-muted-foreground border border-border hover:bg-accent'
           )}
         >
           <Rocket className="h-3.5 w-3.5" />
@@ -723,7 +723,7 @@ function EmptyStores({ onNew }: { onNew: () => void }) {
 // ─── Header ────────────────────────────────────────────────────────────────────
 
 function DashboardHeader({ email, tier }: { email: string; tier?: string }) {
-  const { t } = useLang()
+  const { t, toggle, lang } = useLang()
   const navigate = useNavigate()
   const tierLabels: Record<string, { ar: string; fr: string; en: string }> = {
     starter: { ar: 'مبتدئ', fr: 'Starter', en: 'Starter' },
@@ -752,6 +752,13 @@ function DashboardHeader({ email, tier }: { email: string; tier?: string }) {
           title={t(DT.settings)}
         >
           <Settings className="h-4 w-4" />
+        </button>
+        <button
+          onClick={() => toggle()}
+          className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors text-xs font-semibold min-w-[28px]"
+          title="Switch language"
+        >
+          {lang === 'ar' ? 'AR' : lang === 'fr' ? 'FR' : 'EN'}
         </button>
         <button
           onClick={() => db.auth.signOut()}

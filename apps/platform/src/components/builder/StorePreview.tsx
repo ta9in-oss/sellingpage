@@ -249,7 +249,7 @@ export function StorePreview() {
       </div>
 
       {/* Scrollable preview area */}
-      <div className="flex-1 overflow-auto flex justify-center p-4">
+      <div className="flex-1 overflow-auto flex justify-center p-4" dir="ltr">
         {/* Scale container — uses the zoom trick with padding-bottom to handle height correctly */}
         <div
           style={{
@@ -262,7 +262,7 @@ export function StorePreview() {
             style={{
               width: '1200px',
               transform: `scale(${scale})`,
-              transformOrigin: 'top left',
+              transformOrigin: 'top center',
             }}
           >
             <div

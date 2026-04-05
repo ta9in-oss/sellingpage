@@ -115,11 +115,11 @@ export function StoreSettingsModal({
       dir={dir}
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
     >
-      <div className="bg-white border-2 border-black shadow-[6px_6px_0px_0px_#000] w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+      <div className="bg-card border border-border rounded-2xl shadow-lg w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b-2 border-black">
           <div>
-            <h2 className="text-lg font-black">{t(T.deploySettings)}</h2>
+            <h2 className="text-lg font-semibold">{t(T.deploySettings)}</h2>
             <p className="text-xs text-zinc-500 mt-0.5">{storeName}</p>
           </div>
           <button
@@ -136,11 +136,11 @@ export function StoreSettingsModal({
           <section>
             <div className="flex items-center gap-2 mb-4">
               <div className="w-6 h-6 bg-[#F6821F] flex items-center justify-center shrink-0">
-                <span className="text-white text-xs font-black">CF</span>
+                <span className="text-orange-600 text-xs font-semibold">CF</span>
               </div>
-              <h3 className="font-black text-sm">{t(T.cfSettings)}</h3>
+              <h3 className="font-semibold text-sm">{t(T.cfSettings)}</h3>
             </div>
-            <div className="border-2 border-black p-4 space-y-3 bg-zinc-50">
+            <div className="bg-muted/40 rounded-xl p-4 space-y-3">
               <div className="space-y-1">
                 <Label className="text-xs font-bold">Account ID</Label>
                 <Input
@@ -188,11 +188,11 @@ export function StoreSettingsModal({
           <section>
             <div className="flex items-center gap-2 mb-4">
               <div className="w-6 h-6 bg-black flex items-center justify-center shrink-0">
-                <span className="text-yellow-400 text-xs font-black">DB</span>
+                <span className="text-violet-600 text-xs font-semibold">DB</span>
               </div>
-              <h3 className="font-black text-sm">{t(T.instantSettings)}</h3>
+              <h3 className="font-semibold text-sm">{t(T.instantSettings)}</h3>
             </div>
-            <div className="border-2 border-black p-4 space-y-3 bg-zinc-50">
+            <div className="bg-muted/40 rounded-xl p-4 space-y-3">
               <div className="space-y-1">
                 <Label className="text-xs font-bold">App ID</Label>
                 <Input
@@ -235,20 +235,20 @@ export function StoreSettingsModal({
           </section>
 
           {error && (
-            <div className="border-2 border-red-400 bg-red-50 p-3 text-sm text-red-700">{error}</div>
+            <div className="border border-destructive/40 bg-destructive/10 rounded-lg p-3 text-sm text-destructive">{error}</div>
           )}
 
           {/* Danger zone */}
-          <section className="border-2 border-red-300 p-4 space-y-3 bg-red-50">
-            <h3 className="font-black text-sm text-red-700">{t(T.dangerZone)}</h3>
+          <section className="border border-destructive/30 bg-destructive/5 rounded-xl p-4 space-y-3">
+            <h3 className="font-semibold text-sm text-destructive">{t(T.dangerZone)}</h3>
             {showDeleteConfirm ? (
               <div className="space-y-3">
-                <p className="text-sm text-red-700">{t(T.deleteConfirm)}</p>
+                <p className="text-sm text-destructive/80">{t(T.deleteConfirm)}</p>
                 <div className="flex gap-2">
                   <button
                     onClick={handleDelete}
                     disabled={deleting}
-                    className="flex-1 flex items-center justify-center gap-2 py-2 border-2 border-red-600 bg-red-600 text-white text-sm font-black hover:bg-red-700 disabled:opacity-60 transition-colors"
+                    className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border border-destructive bg-destructive text-destructive-foreground text-sm font-medium hover:bg-destructive/90 disabled:opacity-60 transition-colors"
                   >
                     {deleting ? <><Loader2 size={14} className="animate-spin" />{t(T.deleting)}</> : t(T.confirmDelete)}
                   </button>
@@ -278,7 +278,7 @@ export function StoreSettingsModal({
             onClick={handleSave}
             disabled={saving}
             className={cn(
-              'flex items-center gap-2 px-5 py-2.5 border-2 border-black text-sm font-black transition-all',
+              'flex items-center gap-2 px-5 py-2.5 rounded-lg border border-border text-sm font-medium transition-all',
               saved
                 ? 'bg-green-400 text-black'
                 : 'bg-yellow-400 text-black shadow-[3px_3px_0px_0px_#000] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px]',
