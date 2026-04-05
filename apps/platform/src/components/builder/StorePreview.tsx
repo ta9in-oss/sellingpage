@@ -202,12 +202,19 @@ function SectionRenderer({ section, config }: { section: Section; config: StoreC
 export function StorePreview() {
   const { config, selectedSectionId, selectSection } = useBuilderStore()
   const [zoom, setZoom] = useState<Zoom>(55)
-  const scrollRef = useRef<HTMLDivElement>(null)
-  // Use refs for pan state so mouse event handlers always read latest value (no stale closure)
+
+  // Canvas height measured via ResizeObserver
+  const [canvasNaturalHeight, setCanvasNaturalHeight] = useState(0)
+  const canvasRef = useRef<HTMLDivElement>(null)
+
+  // Pan state — refs for synchronous reads in event handlers
   const spaceHeldRef = useRef(false)
   const isPanningRef = useRef(false)
-  const panStart = useRef({ x: 0, y: 0, scrollLeft: 0, scrollTop: 0 })
-  // State only for cursor/UI re-render
+  const panStart = useRef({ x: 0, y: 0, panX: 0, panY: 0 })
+  const panOffsetRef = useRef({ x: 0, y: 0 })
+  // Ref to the sizing wrapper so we can translate it without React re-renders
+  const panWrapperRef = useRef<HTMLDivElement>(null)
+  // State for cursor class only
   const [spaceHeld, setSpaceHeld] = useState(false)
   const [isPanning, setIsPanning] = useState(false)
 
@@ -219,7 +226,25 @@ export function StorePreview() {
     }
   }, [config.theme.typography.fontFamily, config.theme.typography.headingFont])
 
-  // Spacebar + global mouse pan tool
+  // ResizeObserver: track canvas natural height for sizing wrapper
+  useEffect(() => {
+    if (!canvasRef.current) return
+    const ro = new ResizeObserver(([entry]) => {
+      setCanvasNaturalHeight(entry.contentRect.height)
+    })
+    ro.observe(canvasRef.current)
+    return () => ro.disconnect()
+  }, [])
+
+  // Reset pan when zoom changes
+  useEffect(() => {
+    panOffsetRef.current = { x: 0, y: 0 }
+    if (panWrapperRef.current) {
+      panWrapperRef.current.style.transform = 'none'
+    }
+  }, [zoom])
+
+  // Global key handlers for spacebar
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (
@@ -249,14 +274,16 @@ export function StorePreview() {
     }
   }, [])
 
-  // Global mouse move/up during pan — attached to window so fast moves outside div still work
+  // Global mouse move/up: translate the sizing wrapper directly (no re-render, works in both axes)
   useEffect(() => {
     const onMove = (e: MouseEvent) => {
-      if (!isPanningRef.current || !scrollRef.current) return
+      if (!isPanningRef.current || !panWrapperRef.current) return
       const dx = e.clientX - panStart.current.x
       const dy = e.clientY - panStart.current.y
-      scrollRef.current.scrollLeft = panStart.current.scrollLeft - dx
-      scrollRef.current.scrollTop = panStart.current.scrollTop - dy
+      const newX = panStart.current.panX + dx
+      const newY = panStart.current.panY + dy
+      panOffsetRef.current = { x: newX, y: newY }
+      panWrapperRef.current.style.transform = `translate(${newX}px, ${newY}px)`
     }
     const onUp = () => {
       if (isPanningRef.current) {
@@ -273,15 +300,15 @@ export function StorePreview() {
   }, [])
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (!spaceHeldRef.current || !scrollRef.current) return
+    if (!spaceHeldRef.current) return
     e.preventDefault()
     isPanningRef.current = true
     setIsPanning(true)
     panStart.current = {
       x: e.clientX,
       y: e.clientY,
-      scrollLeft: scrollRef.current.scrollLeft,
-      scrollTop: scrollRef.current.scrollTop,
+      panX: panOffsetRef.current.x,
+      panY: panOffsetRef.current.y,
     }
   }
 
@@ -291,7 +318,7 @@ export function StorePreview() {
   const scale = zoom / 100
 
   return (
-    // dir="ltr" isolates this component from RTL context — preview is always centered
+    // dir="ltr" ensures LTR flex/block context so margin:auto always centers left-right
     <div className="flex flex-col h-full bg-zinc-100" dir="ltr">
       {/* Zoom toolbar */}
       <div className="flex items-center justify-center gap-2 py-1.5 bg-zinc-200 border-b border-zinc-300 shrink-0">
@@ -319,9 +346,8 @@ export function StorePreview() {
         )}
       </div>
 
-      {/* Scrollable preview area — block layout so margin:auto centering works regardless of dir */}
+      {/* Scrollable preview area */}
       <div
-        ref={scrollRef}
         className={cn(
           'flex-1 overflow-auto p-4',
           spaceHeld && !isPanning && 'cursor-grab',
@@ -329,19 +355,37 @@ export function StorePreview() {
         )}
         onMouseDown={handleMouseDown}
       >
-        {/* margin: 0 auto centers the canvas — immune to RTL direction */}
+        {/*
+          Sizing wrapper: exact VISUAL dimensions of the scaled canvas.
+          - margin: 0 auto  → horizontal centering (immune to RTL)
+          - position: relative → anchor for absolute canvas
+          - pan translate is applied via DOM ref (no re-render)
+        */}
         <div
+          ref={panWrapperRef}
           style={{
             width: `${1200 * scale}px`,
-            margin: '0 auto',
-            minHeight: '100%',
+            height: canvasNaturalHeight > 0 ? `${canvasNaturalHeight * scale}px` : 'auto',
+            marginLeft: 'auto',
+            marginRight: 'auto',
+            position: 'relative',
           }}
         >
+          {/*
+            Canvas: absolutely positioned so it NEVER contributes to parent's layout size.
+            Without this, the 1200px layout div would overflow the 660px sizing wrapper,
+            making the scroll container think content is 1200px wide → scrollLeft=0 means
+            left edge, not center → margin:auto on wrapper is defeated.
+          */}
           <div
+            ref={canvasRef}
             style={{
+              position: canvasNaturalHeight > 0 ? 'absolute' : 'relative',
+              top: 0,
+              left: 0,
               width: '1200px',
               transform: `scale(${scale})`,
-              transformOrigin: 'top center',
+              transformOrigin: 'top left',
             }}
           >
             <div
