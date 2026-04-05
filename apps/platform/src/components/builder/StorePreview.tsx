@@ -207,17 +207,6 @@ export function StorePreview() {
   const [canvasNaturalHeight, setCanvasNaturalHeight] = useState(0)
   const canvasRef = useRef<HTMLDivElement>(null)
 
-  // Pan state — refs for synchronous reads in event handlers
-  const spaceHeldRef = useRef(false)
-  const isPanningRef = useRef(false)
-  const panStart = useRef({ x: 0, y: 0, panX: 0, panY: 0 })
-  const panOffsetRef = useRef({ x: 0, y: 0 })
-  // Ref to the sizing wrapper so we can translate it without React re-renders
-  const panWrapperRef = useRef<HTMLDivElement>(null)
-  // State for cursor class only
-  const [spaceHeld, setSpaceHeld] = useState(false)
-  const [isPanning, setIsPanning] = useState(false)
-
   // Load theme fonts
   useEffect(() => {
     loadGoogleFont(config.theme.typography.fontFamily)
@@ -235,82 +224,6 @@ export function StorePreview() {
     ro.observe(canvasRef.current)
     return () => ro.disconnect()
   }, [])
-
-  // Reset pan when zoom changes
-  useEffect(() => {
-    panOffsetRef.current = { x: 0, y: 0 }
-    if (panWrapperRef.current) {
-      panWrapperRef.current.style.transform = 'none'
-    }
-  }, [zoom])
-
-  // Global key handlers for spacebar
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (
-        e.code === 'Space' &&
-        !e.repeat &&
-        !(e.target instanceof HTMLInputElement) &&
-        !(e.target instanceof HTMLTextAreaElement)
-      ) {
-        e.preventDefault()
-        spaceHeldRef.current = true
-        setSpaceHeld(true)
-      }
-    }
-    const onKeyUp = (e: KeyboardEvent) => {
-      if (e.code === 'Space') {
-        spaceHeldRef.current = false
-        isPanningRef.current = false
-        setSpaceHeld(false)
-        setIsPanning(false)
-      }
-    }
-    window.addEventListener('keydown', onKeyDown)
-    window.addEventListener('keyup', onKeyUp)
-    return () => {
-      window.removeEventListener('keydown', onKeyDown)
-      window.removeEventListener('keyup', onKeyUp)
-    }
-  }, [])
-
-  // Global mouse move/up: translate the sizing wrapper directly (no re-render, works in both axes)
-  useEffect(() => {
-    const onMove = (e: MouseEvent) => {
-      if (!isPanningRef.current || !panWrapperRef.current) return
-      const dx = e.clientX - panStart.current.x
-      const dy = e.clientY - panStart.current.y
-      const newX = panStart.current.panX + dx
-      const newY = panStart.current.panY + dy
-      panOffsetRef.current = { x: newX, y: newY }
-      panWrapperRef.current.style.transform = `translate(${newX}px, ${newY}px)`
-    }
-    const onUp = () => {
-      if (isPanningRef.current) {
-        isPanningRef.current = false
-        setIsPanning(false)
-      }
-    }
-    window.addEventListener('mousemove', onMove)
-    window.addEventListener('mouseup', onUp)
-    return () => {
-      window.removeEventListener('mousemove', onMove)
-      window.removeEventListener('mouseup', onUp)
-    }
-  }, [])
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (!spaceHeldRef.current) return
-    e.preventDefault()
-    isPanningRef.current = true
-    setIsPanning(true)
-    panStart.current = {
-      x: e.clientX,
-      y: e.clientY,
-      panX: panOffsetRef.current.x,
-      panY: panOffsetRef.current.y,
-    }
-  }
 
   const zoomIndex = ZOOM_STEPS.indexOf(zoom)
   const canZoomIn = zoomIndex < ZOOM_STEPS.length - 1
@@ -339,22 +252,10 @@ export function StorePreview() {
         >
           <ZoomIn size={14} />
         </button>
-        {spaceHeld && (
-          <span className="text-xs text-zinc-500 ms-2 font-mono">
-            {isPanning ? '✋ panning' : '🤚 pan mode'}
-          </span>
-        )}
       </div>
 
       {/* Scrollable preview area */}
-      <div
-        className={cn(
-          'flex-1 overflow-auto p-4',
-          spaceHeld && !isPanning && 'cursor-grab',
-          isPanning && 'cursor-grabbing select-none',
-        )}
-        onMouseDown={handleMouseDown}
-      >
+      <div className="flex-1 overflow-auto p-4">
         {/*
           Sizing wrapper: exact VISUAL dimensions of the scaled canvas.
           - margin: 0 auto  → horizontal centering (immune to RTL)
@@ -362,7 +263,6 @@ export function StorePreview() {
           - pan translate is applied via DOM ref (no re-render)
         */}
         <div
-          ref={panWrapperRef}
           style={{
             width: `${1200 * scale}px`,
             height: canvasNaturalHeight > 0 ? `${canvasNaturalHeight * scale}px` : 'auto',
@@ -404,13 +304,12 @@ export function StorePreview() {
                   config.sections.map((section) => (
                     <div
                       key={section.id}
-                      onClick={() => !spaceHeld && selectSection(section.id)}
+                      onClick={() => selectSection(section.id)}
                       className={cn(
-                        'relative transition-all',
-                        !spaceHeld && 'cursor-pointer',
+                        'relative transition-all cursor-pointer',
                         selectedSectionId === section.id
                           ? 'ring-4 ring-inset ring-yellow-400'
-                          : !spaceHeld && 'hover:ring-2 hover:ring-inset hover:ring-zinc-300'
+                          : 'hover:ring-2 hover:ring-inset hover:ring-zinc-300'
                       )}
                       title={section.type}
                     >
