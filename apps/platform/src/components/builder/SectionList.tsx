@@ -88,10 +88,14 @@ interface SortableSectionCardProps {
   isSelected: boolean
   onSelect: () => void
   onRemove: () => void
+  onAddAbove: () => void
+  onAddBelow: () => void
   isDragOverlay?: boolean
   sectionLabels: Record<SectionType, string>
   dragLabel: string
   deleteLabel: string
+  addAboveLabel: string
+  addBelowLabel: string
 }
 
 function SortableSectionCard({
@@ -99,10 +103,14 @@ function SortableSectionCard({
   isSelected,
   onSelect,
   onRemove,
+  onAddAbove,
+  onAddBelow,
   isDragOverlay = false,
   sectionLabels,
   dragLabel,
   deleteLabel,
+  addAboveLabel,
+  addBelowLabel,
 }: SortableSectionCardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: section.id,
@@ -117,59 +125,84 @@ function SortableSectionCard({
   const Icon = SECTION_ICONS[section.type] ?? LayoutGrid
 
   return (
-    <Card
-      ref={isDragOverlay ? undefined : setNodeRef}
-      style={style}
-      onClick={isDragOverlay ? undefined : onSelect}
-      className={cn(
-        'flex items-center gap-2 px-2 py-2 cursor-pointer transition-all mb-1 shadow-none select-none',
-        'hover:bg-zinc-50 border',
-        isSelected && !isDragOverlay && 'border-s-2 border-s-zinc-900 bg-zinc-50',
-        isDragOverlay && 'shadow-xl border-2 border-black bg-yellow-50 rotate-1 scale-105 cursor-grabbing'
-      )}
-    >
-      <button
-        {...(isDragOverlay ? {} : { ...attributes, ...listeners })}
-        onClick={(e) => e.stopPropagation()}
-        className={cn(
-          'text-zinc-300 hover:text-zinc-600 shrink-0 cursor-grab active:cursor-grabbing',
-          isDragOverlay && 'cursor-grabbing text-zinc-600'
-        )}
-        aria-label={dragLabel}
-      >
-        <GripVertical size={14} />
-      </button>
-
-      <Icon size={14} className="text-zinc-500 shrink-0" />
-      <span className="flex-1 text-sm font-medium truncate">{sectionLabels[section.type]}</span>
-
-      <Badge variant="outline" className="text-[10px] px-1 py-0 h-4 shrink-0">
-        {section.type}
-      </Badge>
-
+    <div className="relative group/card">
+      {/* Add above button — appears on hover between cards */}
       {!isDragOverlay && (
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-6 w-6 shrink-0 text-zinc-300 hover:text-red-500 hover:bg-transparent"
-          onClick={(e) => {
-            e.stopPropagation()
-            onRemove()
-          }}
-          aria-label={deleteLabel}
+        <button
+          onClick={(e) => { e.stopPropagation(); onAddAbove() }}
+          className="absolute -top-2.5 left-1/2 -translate-x-1/2 z-10 h-5 w-5 rounded-full bg-zinc-900 text-white flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-opacity shadow-md"
+          aria-label={addAboveLabel}
         >
-          <Trash2 size={13} />
-        </Button>
+          <Plus size={10} />
+        </button>
       )}
-    </Card>
+
+      <Card
+        ref={isDragOverlay ? undefined : setNodeRef}
+        style={style}
+        onClick={isDragOverlay ? undefined : onSelect}
+        className={cn(
+          'flex items-center gap-2 px-2 py-2 cursor-pointer transition-all mb-1 shadow-none select-none',
+          'hover:bg-zinc-50 border',
+          isSelected && !isDragOverlay && 'border-s-2 border-s-zinc-900 bg-zinc-50',
+          isDragOverlay && 'shadow-xl border-2 border-black bg-yellow-50 rotate-1 scale-105 cursor-grabbing'
+        )}
+      >
+        <button
+          {...(isDragOverlay ? {} : { ...attributes, ...listeners })}
+          onClick={(e) => e.stopPropagation()}
+          className={cn(
+            'text-zinc-300 hover:text-zinc-600 shrink-0 cursor-grab active:cursor-grabbing',
+            isDragOverlay && 'cursor-grabbing text-zinc-600'
+          )}
+          aria-label={dragLabel}
+        >
+          <GripVertical size={14} />
+        </button>
+
+        <Icon size={14} className="text-zinc-500 shrink-0" />
+        <span className="flex-1 text-sm font-medium truncate">{sectionLabels[section.type]}</span>
+
+        <Badge variant="outline" className="text-[10px] px-1 py-0 h-4 shrink-0">
+          {section.type}
+        </Badge>
+
+        {!isDragOverlay && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 shrink-0 text-zinc-300 hover:text-red-500 hover:bg-transparent opacity-0 group-hover/card:opacity-100 transition-opacity"
+            onClick={(e) => {
+              e.stopPropagation()
+              onRemove()
+            }}
+            aria-label={deleteLabel}
+          >
+            <Trash2 size={13} />
+          </Button>
+        )}
+      </Card>
+
+      {/* Add below button — appears on hover between cards */}
+      {!isDragOverlay && (
+        <button
+          onClick={(e) => { e.stopPropagation(); onAddBelow() }}
+          className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 z-10 h-5 w-5 rounded-full bg-zinc-900 text-white flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-opacity shadow-md"
+          aria-label={addBelowLabel}
+        >
+          <Plus size={10} />
+        </button>
+      )}
+    </div>
   )
 }
 
 export function SectionList() {
-  const { config, selectedSectionId, selectSection, removeSection, reorderSections, addSection } =
+  const { config, selectedSectionId, selectSection, removeSection, reorderSections, addSection, addSectionAt } =
     useBuilderStore()
   const { t } = useLang()
   const [showAddMenu, setShowAddMenu] = useState(false)
+  const [insertAfterId, setInsertAfterId] = useState<string | null | undefined>(undefined) // undefined = not showing; null = insert at top
   const [activeId, setActiveId] = useState<string | null>(null)
   const [isClient, setIsClient] = useState(false)
 
@@ -211,18 +244,52 @@ export function SectionList() {
 
   const activeSection = activeId ? config.sections.find((s) => s.id === activeId) : null
 
-  const sectionCards = config.sections.map((section) => (
+  const handleAddAt = (afterId: string | null) => {
+    setInsertAfterId(afterId)
+    setShowAddMenu(false)
+  }
+
+  const sectionCards = config.sections.map((section, index) => (
     <SortableSectionCard
       key={section.id}
       section={section}
       isSelected={selectedSectionId === section.id}
       onSelect={() => selectSection(section.id)}
       onRemove={() => removeSection(section.id)}
+      onAddAbove={() => handleAddAt(index === 0 ? null : config.sections[index - 1].id)}
+      onAddBelow={() => handleAddAt(section.id)}
       sectionLabels={SECTION_LABELS}
       dragLabel={t(T.drag)}
       deleteLabel={t(T.deleteSection)}
+      addAboveLabel={t({ ar: 'إضافة فوق', fr: 'Ajouter au-dessus', en: 'Add above' })}
+      addBelowLabel={t({ ar: 'إضافة تحت', fr: 'Ajouter en-dessous', en: 'Add below' })}
     />
   ))
+
+  // Section type picker popup (used for both bottom Add button and inline +)
+  const renderSectionPicker = (afterId: string | null | undefined, onClose: () => void) => {
+    if (afterId === undefined) return null
+    return (
+      <Card className="absolute bottom-full left-2 right-2 mb-1 z-10 overflow-hidden shadow-lg p-1 max-h-72 overflow-y-auto">
+        {ADDABLE_TYPES.map((type) => {
+          const Icon = SECTION_ICONS[type]
+          return (
+            <button
+              key={type}
+              onClick={() => {
+                addSectionAt(type, afterId)
+                onClose()
+              }}
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded hover:bg-zinc-50 transition-colors"
+            >
+              <Icon size={14} className="text-zinc-500" />
+              {SECTION_LABELS[type]}
+            </button>
+          )
+        })}
+      </Card>
+    )
+  }
 
   return (
     <div className="flex flex-col h-full">
@@ -230,7 +297,7 @@ export function SectionList() {
         <span className="text-xs font-bold text-zinc-500 uppercase tracking-wide">{t(T.sections)}</span>
       </div>
 
-      <ScrollArea className="flex-1 p-2">
+      <ScrollArea className="flex-1 p-2 pt-4">
         {config.sections.length === 0 && (
           <p className="text-xs text-zinc-400 text-center py-4">{t(T.noSections)}</p>
         )}
@@ -256,10 +323,14 @@ export function SectionList() {
                     isSelected={false}
                     onSelect={() => {}}
                     onRemove={() => {}}
+                    onAddAbove={() => {}}
+                    onAddBelow={() => {}}
                     isDragOverlay
                     sectionLabels={SECTION_LABELS}
                     dragLabel={t(T.drag)}
                     deleteLabel={t(T.deleteSection)}
+                    addAboveLabel=""
+                    addBelowLabel=""
                   />
                 )}
               </DragOverlay>,
@@ -273,7 +344,7 @@ export function SectionList() {
 
       <div className="p-2 border-t border-zinc-200 relative">
         <Button
-          onClick={() => setShowAddMenu((v) => !v)}
+          onClick={() => { setShowAddMenu((v) => !v); setInsertAfterId(undefined) }}
           className="w-full gap-2"
           size="sm"
         >
@@ -281,25 +352,14 @@ export function SectionList() {
           {t(T.addSection)}
         </Button>
 
-        {showAddMenu && (
-          <Card className="absolute bottom-full left-2 right-2 mb-1 z-10 overflow-hidden shadow-lg p-1">
-            {ADDABLE_TYPES.map((type) => {
-              const Icon = SECTION_ICONS[type]
-              return (
-                <button
-                  key={type}
-                  onClick={() => {
-                    addSection(type)
-                    setShowAddMenu(false)
-                  }}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded hover:bg-zinc-50 transition-colors"
-                >
-                  <Icon size={14} className="text-zinc-500" />
-                  {SECTION_LABELS[type]}
-                </button>
-              )
-            })}
-          </Card>
+        {showAddMenu && renderSectionPicker(
+          config.sections.length > 0 ? config.sections[config.sections.length - 1].id : null,
+          () => setShowAddMenu(false)
+        )}
+
+        {insertAfterId !== undefined && !showAddMenu && renderSectionPicker(
+          insertAfterId,
+          () => setInsertAfterId(undefined)
         )}
       </div>
     </div>

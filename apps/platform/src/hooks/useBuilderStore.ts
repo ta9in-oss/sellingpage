@@ -14,6 +14,7 @@ interface BuilderActions {
   selectSection: (id: string | null) => void
   updateSection: (id: string, patch: Record<string, unknown>) => void
   addSection: (type: Section['type']) => void
+  addSectionAt: (type: Section['type'], afterId: string | null) => void
   removeSection: (id: string) => void
   reorderSections: (activeId: string, overId: string) => void
   updateTheme: (theme: Theme) => void
@@ -209,6 +210,20 @@ export const useBuilderStore = create<BuilderState & BuilderActions>((set, get) 
     set((state) => ({
       config: { ...state.config, sections: [...state.config.sections, newSection] },
     }))
+  },
+
+  addSectionAt: (type, afterId) => {
+    const newSection = createDefaultSection(type)
+    set((state) => {
+      const sections = [...state.config.sections]
+      if (afterId === null) {
+        sections.unshift(newSection)
+      } else {
+        const idx = sections.findIndex((s) => s.id === afterId)
+        sections.splice(idx === -1 ? sections.length : idx + 1, 0, newSection)
+      }
+      return { config: { ...state.config, sections } }
+    })
   },
 
   removeSection: (id) =>

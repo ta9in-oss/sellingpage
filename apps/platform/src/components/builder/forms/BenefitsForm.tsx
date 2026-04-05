@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 
 const T = {
   benefits: { ar: 'فوائد المنتج', fr: 'Avantages du produit', en: 'Product Benefits' },
+  sectionTitle: { ar: 'عنوان القسم', fr: 'Titre de la section', en: 'Section title' },
   benefit: { ar: 'فائدة', fr: 'Avantage', en: 'Benefit' },
   icon: { ar: 'الأيقونة (رمز)', fr: 'Icône (emoji)', en: 'Icon (emoji)' },
   title: { ar: 'العنوان', fr: 'Titre', en: 'Title' },
@@ -23,12 +24,22 @@ export function BenefitsForm() {
   if (!section || section.type !== 'benefits') return null
 
   const storeDir = config.meta.rtl ? 'rtl' : 'ltr'
-  const items: { icon: string; title: string; description: string }[] = (section as any).items ?? []
+  const items: { icon: string; title: string; description: string }[] = section.items ?? []
   const update = (newItems: typeof items) => updateSection(section.id, { items: newItems })
 
   return (
     <div className="space-y-4 p-4" dir={dir}>
       <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t(T.benefits)}</p>
+
+      <div className="space-y-1.5">
+        <Label className="text-xs">{t(T.sectionTitle)}</Label>
+        <Input
+          value={section.title ?? ''}
+          onChange={(e) => updateSection(section.id, { title: e.target.value })}
+          dir={storeDir}
+          placeholder={t({ ar: 'فوائد المنتج', fr: 'Avantages du produit', en: 'Product Benefits' })}
+        />
+      </div>
 
       {items.map((item, index) => (
         <div key={index} className="border border-border rounded p-3 space-y-2">

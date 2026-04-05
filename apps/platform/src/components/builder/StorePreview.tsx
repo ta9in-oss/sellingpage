@@ -52,7 +52,7 @@ function SectionRenderer({ section, config }: { section: Section; config: StoreC
           amount: config.product.price > 0 ? String(config.product.price) : '2500',
           currency: config.product.currency || 'دج',
         },
-        freeDelivery: true,
+        freeDelivery: section.freeDelivery ?? true,
       }
       return <HeroSection content={content} />
     }
@@ -70,7 +70,7 @@ function SectionRenderer({ section, config }: { section: Section; config: StoreC
             { image: '/bagpack_003.png', title: 'ميزة ثانية', description: 'اكتب وصف هذه الميزة هنا', bgColor: 'bg-white text-black' },
             { image: '/bagpack_004.png', title: 'ميزة ثالثة', description: 'اكتب وصف هذه الميزة هنا', bgColor: 'bg-black text-white' },
           ]
-      return <FeatureGrid title={(section as any).title || 'المميزات'} features={features} />
+      return <FeatureGrid title={section.title || 'المميزات'} features={features} />
     }
 
     case 'testimonials': {
@@ -80,12 +80,13 @@ function SectionRenderer({ section, config }: { section: Section; config: StoreC
             name: item.name,
             rating: item.rating,
             comment: item.text,
+            location: item.location,
           }))
         : [
             { id: 1, name: 'أحمد بن علي', location: 'الجزائر', comment: 'منتج رائع! جودة ممتازة وتوصيل سريع', rating: 5 },
             { id: 2, name: 'فاطمة الزهراء', location: 'وهران', comment: 'راضية بزاف على الشراء، ننصح بيه', rating: 5 },
           ]
-      return <TestimonialSection testimonials={testimonials} />
+      return <TestimonialSection testimonials={testimonials} title={section.title} />
     }
 
     case 'faq': {
@@ -95,7 +96,7 @@ function SectionRenderer({ section, config }: { section: Section; config: StoreC
             { id: 1, question: 'كيفاش نطلب؟', answer: 'اكتب معلوماتك في الاستمارة.' },
             { id: 2, question: 'واش التوصيل مجاني؟', answer: 'إيه! لكامل الوطن.' },
           ]
-      return <FAQSection faqs={faqs} />
+      return <FAQSection faqs={faqs} title={section.title} />
     }
 
     case 'guarantee': {
@@ -106,7 +107,7 @@ function SectionRenderer({ section, config }: { section: Section; config: StoreC
             { icon: 'refresh', title: 'إرجاع مجاني', description: 'خلال 7 أيام' },
             { icon: 'shield', title: 'ضمان الجودة', description: 'استرداد الأموال' },
           ]
-      return <GuaranteeSection guarantees={guarantees} />
+      return <GuaranteeSection guarantees={guarantees} title={section.title} />
     }
 
     case 'order-form': {
@@ -129,18 +130,16 @@ function SectionRenderer({ section, config }: { section: Section; config: StoreC
     }
 
     case 'social-proof': {
-      const s = section as any
-      return <SocialProofBar reviewCount={s.reviewCount ?? 300} rating={s.rating ?? 4.9} />
+      return <SocialProofBar reviewCount={section.reviewCount ?? 300} rating={section.rating ?? 4.9} />
     }
 
     case 'cta': {
-      const s = section as any
       return (
         <CTASection
           cta={{
-            title: s.headline || 'اطلب الآن وادفع عند الاستلام',
-            subtitle: s.subheadline || 'توصيل مجاني لجميع الولايات',
-            buttonText: s.cta || 'اطلب الآن',
+            title: section.headline || 'اطلب الآن وادفع عند الاستلام',
+            subtitle: section.subheadline || 'توصيل مجاني لجميع الولايات',
+            buttonText: section.cta || 'اطلب الآن',
             urgent: true,
           }}
         />
@@ -148,24 +147,22 @@ function SectionRenderer({ section, config }: { section: Section; config: StoreC
     }
 
     case 'benefits': {
-      const s = section as any
-      const benefits = (s.items ?? []).length > 0
-        ? s.items
+      const benefits = (section.items ?? []).length > 0
+        ? section.items
         : [
             { icon: '🚀', title: 'توصيل سريع', description: 'خلال 48-72 ساعة' },
             { icon: '💯', title: 'ضمان الجودة', description: '7 أيام استرداد' },
             { icon: '🔒', title: 'أمان الدفع', description: 'دفع عند الاستلام' },
           ]
-      return <BenefitsSection benefits={benefits} />
+      return <BenefitsSection benefits={benefits} title={section.title} />
     }
 
     case 'value-stack': {
-      const s = section as any
       return (
         <ValueStackSection
           price={config.product.price ?? 2990}
-          items={s.items}
-          ctaText={s.ctaText}
+          items={section.items}
+          ctaText={section.ctaText}
         />
       )
     }
@@ -183,16 +180,15 @@ function SectionRenderer({ section, config }: { section: Section; config: StoreC
     }
 
     case 'footer': {
-      const s = section as any
       return (
         <FooterSection
           content={{
-            storeName: s.storeName ?? config.meta.siteTitle ?? 'متجري',
-            tagline: s.tagline,
-            phone: s.phone,
-            email: s.email,
-            whatsapp: s.whatsapp,
-            copyright: s.copyright,
+            storeName: section.storeName ?? config.meta.siteTitle ?? 'متجري',
+            tagline: section.tagline,
+            phone: section.phone,
+            email: section.email,
+            whatsapp: section.whatsapp,
+            copyright: section.copyright,
           }}
         />
       )

@@ -45,15 +45,15 @@ export interface StoreConfig {
 }
 
 export type Section =
-  | { id: string; type: 'hero'; headline: string; subheadline: string; cta: string; image?: string }
+  | { id: string; type: 'hero'; headline: string; subheadline: string; cta: string; image?: string; freeDelivery?: boolean }
   | { id: string; type: 'features'; title?: string; items: { icon: string; title: string; body: string }[] }
-  | { id: string; type: 'testimonials'; items: { name: string; text: string; rating: number }[] }
-  | { id: string; type: 'faq'; items: { q: string; a: string }[] }
-  | { id: string; type: 'guarantee'; items: { title: string; description: string; icon: string }[] }
+  | { id: string; type: 'testimonials'; title?: string; items: { name: string; text: string; rating: number; location?: string }[] }
+  | { id: string; type: 'faq'; title?: string; items: { q: string; a: string }[] }
+  | { id: string; type: 'guarantee'; title?: string; items: { title: string; description: string; icon: string }[] }
   | { id: string; type: 'order-form'; submitLabel: string; fields: FormField[] }
   | { id: string; type: 'social-proof'; rating?: number; reviewCount?: number }
   | { id: string; type: 'cta'; headline: string; subheadline: string; cta: string }
-  | { id: string; type: 'benefits'; items: { icon: string; title: string; description: string }[] }
+  | { id: string; type: 'benefits'; title?: string; items: { icon: string; title: string; description: string }[] }
   | { id: string; type: 'value-stack'; ctaText: string; items: { icon: string; title: string; description: string; value: string; isFree: boolean }[] }
   | { id: string; type: 'product-carousel'; title?: string }
   | { id: string; type: 'footer'; storeName: string; tagline?: string; phone?: string; email?: string; whatsapp?: string; copyright?: string }

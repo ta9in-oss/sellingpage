@@ -18,6 +18,7 @@ const ICON_OPTIONS = [
 
 const T = {
   guarantees: { ar: 'الضمانات', fr: 'Garanties', en: 'Guarantees' },
+  sectionTitle: { ar: 'عنوان القسم', fr: 'Titre de la section', en: 'Section title' },
   guarantee: { ar: 'ضمان', fr: 'Garantie', en: 'Guarantee' },
   titleLabel: { ar: 'العنوان', fr: 'Titre', en: 'Title' },
   descriptionLabel: { ar: 'الوصف', fr: 'Description', en: 'Description' },
@@ -47,6 +48,16 @@ export function GuaranteeForm() {
           className="gap-1">
           <Plus size={12} /> {t(T.add)}
         </Button>
+      </div>
+
+      <div className="space-y-1.5">
+        <Label className="text-xs">{t(T.sectionTitle)}</Label>
+        <Input
+          value={section.title ?? ''}
+          onChange={(e) => updateSection(section.id, { title: e.target.value })}
+          dir={storeDir}
+          placeholder={t({ ar: 'الضمانات ديالنا', fr: 'Nos garanties', en: 'Our guarantees' })}
+        />
       </div>
 
       {items.map((item, i) => (

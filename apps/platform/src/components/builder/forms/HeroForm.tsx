@@ -3,6 +3,7 @@ import { useLang } from '@/hooks/useLang'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
 import { ImageUpload } from '../ImageUpload'
 
 const T = {
@@ -11,6 +12,7 @@ const T = {
   subheadline: { ar: 'العنوان الفرعي', fr: 'Sous-titre', en: 'Subheadline' },
   ctaButton: { ar: 'نص الزر', fr: 'Texte du bouton', en: 'Button text' },
   heroImage: { ar: 'صورة المنتج', fr: 'Image du produit', en: 'Product image' },
+  freeDelivery: { ar: 'توصيل مجاني', fr: 'Livraison gratuite', en: 'Free delivery' },
 }
 
 export function HeroForm() {
@@ -53,6 +55,15 @@ export function HeroForm() {
           value={section.cta}
           onChange={(e) => update({ cta: e.target.value })}
           dir={storeDir}
+        />
+      </div>
+
+      <div className="flex items-center justify-between py-1">
+        <Label htmlFor="free-delivery-toggle">{t(T.freeDelivery)}</Label>
+        <Switch
+          id="free-delivery-toggle"
+          checked={section.freeDelivery ?? true}
+          onCheckedChange={(checked) => update({ freeDelivery: checked })}
         />
       </div>
 
