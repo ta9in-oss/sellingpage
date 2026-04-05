@@ -50,7 +50,7 @@ export type Section =
   | { id: string; type: 'testimonials'; title?: string; items: { name: string; text: string; rating: number; location?: string }[] }
   | { id: string; type: 'faq'; title?: string; items: { q: string; a: string }[] }
   | { id: string; type: 'guarantee'; title?: string; items: { title: string; description: string; icon: string }[] }
-  | { id: string; type: 'order-form'; submitLabel: string; fields: FormField[] }
+  | { id: string; type: 'order-form'; title?: string; submitLabel: string; fields: FormField[] }
   | { id: string; type: 'social-proof'; rating?: number; reviewCount?: number }
   | { id: string; type: 'cta'; headline: string; subheadline: string; cta: string }
   | { id: string; type: 'benefits'; title?: string; items: { icon: string; title: string; description: string }[] }

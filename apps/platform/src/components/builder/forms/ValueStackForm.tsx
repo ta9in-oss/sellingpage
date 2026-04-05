@@ -55,8 +55,8 @@ export function ValueStackForm({ sectionId }: ValueStackFormProps) {
   }
 
   return (
-    <div className="space-y-4" dir={dir}>
-      <h3 className="font-semibold text-sm">{t(T.title)}</h3>
+    <div className="space-y-4 p-4" dir={dir}>
+      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t(T.title)}</p>
 
       <div className="space-y-1">
         <Label className="text-xs">{t(T.ctaText)}</Label>
@@ -73,15 +73,15 @@ export function ValueStackForm({ sectionId }: ValueStackFormProps) {
         {items.map((item: any, index: number) => (
           <div
             key={index}
-            className="border rounded-md p-3 space-y-2 bg-gray-50 dark:bg-gray-900"
+            className="border border-border rounded-md p-3 space-y-2 bg-muted/50"
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs text-gray-500">#{index + 1}</span>
+              <span className="text-xs text-muted-foreground">#{index + 1}</span>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => removeItem(index)}
-                className="h-6 w-6 p-0 text-red-500 hover:text-red-600"
+                className="h-6 w-6 p-0 text-destructive"
               >
                 <Trash2 size={12} />
               </Button>

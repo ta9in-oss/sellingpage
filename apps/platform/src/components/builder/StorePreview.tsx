@@ -124,7 +124,7 @@ function SectionRenderer({ section, config }: { section: Section; config: StoreC
           totalStock={10}
           productImages={productImages}
           onSubmit={async () => {}}
-          title={section.submitLabel || 'اطلب الآن'}
+          title={section.title || section.submitLabel || 'اطلب الآن'}
         />
       )
     }

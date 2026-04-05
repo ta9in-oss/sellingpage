@@ -1,39 +1,28 @@
-import { useBuilderStore } from '@/hooks/useBuilderStore'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { useLang } from '@/hooks/useLang'
+import { Package } from 'lucide-react'
 
 const T = {
   title: { ar: 'صور المنتج', fr: 'Carrousel produit', en: 'Product Carousel' },
-  carouselTitle: { ar: 'عنوان القسم', fr: 'Titre de la section', en: 'Section title' },
-  note: { ar: 'يعرض هذا القسم صور المنتج المضافة في لوحة المنتج', fr: 'Cette section affiche les images du produit ajoutées dans le panneau produit', en: 'This section displays product images added in the product panel' },
+  note: { ar: 'يعرض هذا القسم صور المنتج التي تضيفها من لوحة "المنتج" في الشريط العلوي. أضف صور المنتج من هناك.', fr: 'Cette section affiche les images du produit ajoutées via l\'onglet "Produit". Ajoutez les images depuis là.', en: 'This section displays product images added via the "Product" tab. Add images from there.' },
+  goToProduct: { ar: 'لوحة المنتج ← في الشريط الجانبي', fr: 'Panneau Produit ← dans la barre latérale', en: 'Product Panel ← in the right sidebar' },
 }
 
 interface ProductCarouselFormProps {
   sectionId: string
 }
 
-export function ProductCarouselForm({ sectionId }: ProductCarouselFormProps) {
-  const { config, updateSection } = useBuilderStore()
+export function ProductCarouselForm({ sectionId: _ }: ProductCarouselFormProps) {
   const { t, dir } = useLang()
-  const storeDir = config.meta.rtl ? 'rtl' : 'ltr'
-
-  const section = config.sections.find((s) => s.id === sectionId) as any
-  if (!section) return null
 
   return (
-    <div className="space-y-4" dir={dir}>
-      <h3 className="font-semibold text-sm">{t(T.title)}</h3>
-      <p className="text-xs text-gray-500">{t(T.note)}</p>
-
-      <div className="space-y-1">
-        <Label className="text-xs">{t(T.carouselTitle)}</Label>
-        <Input
-          dir={storeDir}
-          value={section.title ?? ''}
-          onChange={(e) => updateSection(sectionId, { title: e.target.value })}
-          className="text-sm"
-        />
+    <div className="space-y-4 p-4" dir={dir}>
+      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t(T.title)}</p>
+      <div className="flex gap-3 p-3 rounded-md bg-muted border border-border">
+        <Package size={16} className="text-muted-foreground shrink-0 mt-0.5" />
+        <div className="space-y-1">
+          <p className="text-xs text-foreground">{t(T.note)}</p>
+          <p className="text-xs font-mono text-muted-foreground">{t(T.goToProduct)}</p>
+        </div>
       </div>
     </div>
   )
