@@ -252,7 +252,7 @@ export function BuilderLayout({ storeId }: BuilderLayoutProps) {
   ]
 
   return (
-    <div className="min-h-screen flex flex-col bg-white" dir={dir}>
+    <div className="h-screen flex flex-col bg-white overflow-hidden" dir={dir}>
       {/* Top bar */}
       <header className="h-14 border-b border-border flex items-center px-4 gap-2 shrink-0 bg-background">
         {/* Back to dashboard */}

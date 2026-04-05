@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useBuilderStore } from '@/hooks/useBuilderStore'
 import { loadGoogleFont } from '@/lib/googleFonts'
 import {
@@ -202,6 +202,10 @@ function SectionRenderer({ section, config }: { section: Section; config: StoreC
 export function StorePreview() {
   const { config, selectedSectionId, selectSection } = useBuilderStore()
   const [zoom, setZoom] = useState<Zoom>(55)
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const [spaceHeld, setSpaceHeld] = useState(false)
+  const [isPanning, setIsPanning] = useState(false)
+  const panStart = useRef({ x: 0, y: 0, scrollLeft: 0, scrollTop: 0 })
 
   // Load theme fonts
   useEffect(() => {
@@ -211,18 +215,58 @@ export function StorePreview() {
     }
   }, [config.theme.typography.fontFamily, config.theme.typography.headingFont])
 
+  // Spacebar pan tool
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'Space' && !e.repeat && !(e.target instanceof HTMLInputElement) && !(e.target instanceof HTMLTextAreaElement)) {
+        e.preventDefault()
+        setSpaceHeld(true)
+      }
+    }
+    const onKeyUp = (e: KeyboardEvent) => {
+      if (e.code === 'Space') {
+        setSpaceHeld(false)
+        setIsPanning(false)
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    window.addEventListener('keyup', onKeyUp)
+    return () => {
+      window.removeEventListener('keydown', onKeyDown)
+      window.removeEventListener('keyup', onKeyUp)
+    }
+  }, [])
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!spaceHeld || !scrollRef.current) return
+    e.preventDefault()
+    setIsPanning(true)
+    panStart.current = {
+      x: e.clientX,
+      y: e.clientY,
+      scrollLeft: scrollRef.current.scrollLeft,
+      scrollTop: scrollRef.current.scrollTop,
+    }
+  }
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isPanning || !scrollRef.current) return
+    const dx = e.clientX - panStart.current.x
+    const dy = e.clientY - panStart.current.y
+    scrollRef.current.scrollLeft = panStart.current.scrollLeft - dx
+    scrollRef.current.scrollTop = panStart.current.scrollTop - dy
+  }
+
+  const handleMouseUp = () => setIsPanning(false)
+
   const zoomIndex = ZOOM_STEPS.indexOf(zoom)
   const canZoomIn = zoomIndex < ZOOM_STEPS.length - 1
   const canZoomOut = zoomIndex > 0
-
-  // Calculate the height compensation for transform scale
-  // When scaled down, the element's layout height is unchanged but visually smaller
-  // We compensate by setting a negative margin-bottom = naturalHeight * (1 - scale)
-  // Since we use overflow-auto, we just let the scaled content define scroll height via a wrapper trick
   const scale = zoom / 100
 
   return (
-    <div className="flex flex-col h-full bg-zinc-100">
+    // dir="ltr" isolates this component from RTL context — preview is always centered
+    <div className="flex flex-col h-full bg-zinc-100" dir="ltr">
       {/* Zoom toolbar */}
       <div className="flex items-center justify-center gap-2 py-1.5 bg-zinc-200 border-b border-zinc-300 shrink-0">
         <button
@@ -242,11 +286,27 @@ export function StorePreview() {
         >
           <ZoomIn size={14} />
         </button>
+        {spaceHeld && (
+          <span className="text-xs text-zinc-500 ms-2 font-mono">
+            {isPanning ? '✋ panning' : '🤚 pan mode'}
+          </span>
+        )}
       </div>
 
       {/* Scrollable preview area */}
-      <div className="flex-1 overflow-auto flex justify-center p-4" dir="ltr">
-        {/* Scale container — uses the zoom trick with padding-bottom to handle height correctly */}
+      <div
+        ref={scrollRef}
+        className={cn(
+          'flex-1 overflow-auto flex justify-center p-4',
+          spaceHeld && !isPanning && 'cursor-grab',
+          isPanning && 'cursor-grabbing select-none',
+        )}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+      >
+        {/* Outer wrapper sizes to scaled width so the scroll container knows the content width */}
         <div
           style={{
             width: `${1200 * scale}px`,
@@ -277,17 +337,17 @@ export function StorePreview() {
                   config.sections.map((section) => (
                     <div
                       key={section.id}
-                      onClick={() => selectSection(section.id)}
+                      onClick={() => !spaceHeld && selectSection(section.id)}
                       className={cn(
-                        'relative cursor-pointer transition-all',
+                        'relative transition-all',
+                        !spaceHeld && 'cursor-pointer',
                         selectedSectionId === section.id
                           ? 'ring-4 ring-inset ring-yellow-400'
-                          : 'hover:ring-2 hover:ring-inset hover:ring-zinc-300'
+                          : !spaceHeld && 'hover:ring-2 hover:ring-inset hover:ring-zinc-300'
                       )}
                       title={section.type}
                     >
                       <SectionRenderer section={section} config={config} />
-                      {/* Section type label on hover/select */}
                       {selectedSectionId === section.id && (
                         <div className="absolute top-0 start-0 bg-yellow-400 text-black text-xs font-bold px-2 py-0.5 z-10">
                           {section.type}
