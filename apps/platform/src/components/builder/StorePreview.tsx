@@ -203,9 +203,13 @@ export function StorePreview() {
   const { config, selectedSectionId, selectSection } = useBuilderStore()
   const [zoom, setZoom] = useState<Zoom>(55)
   const scrollRef = useRef<HTMLDivElement>(null)
+  // Use refs for pan state so mouse event handlers always read latest value (no stale closure)
+  const spaceHeldRef = useRef(false)
+  const isPanningRef = useRef(false)
+  const panStart = useRef({ x: 0, y: 0, scrollLeft: 0, scrollTop: 0 })
+  // State only for cursor/UI re-render
   const [spaceHeld, setSpaceHeld] = useState(false)
   const [isPanning, setIsPanning] = useState(false)
-  const panStart = useRef({ x: 0, y: 0, scrollLeft: 0, scrollTop: 0 })
 
   // Load theme fonts
   useEffect(() => {
@@ -215,16 +219,24 @@ export function StorePreview() {
     }
   }, [config.theme.typography.fontFamily, config.theme.typography.headingFont])
 
-  // Spacebar pan tool
+  // Spacebar + global mouse pan tool
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.code === 'Space' && !e.repeat && !(e.target instanceof HTMLInputElement) && !(e.target instanceof HTMLTextAreaElement)) {
+      if (
+        e.code === 'Space' &&
+        !e.repeat &&
+        !(e.target instanceof HTMLInputElement) &&
+        !(e.target instanceof HTMLTextAreaElement)
+      ) {
         e.preventDefault()
+        spaceHeldRef.current = true
         setSpaceHeld(true)
       }
     }
     const onKeyUp = (e: KeyboardEvent) => {
       if (e.code === 'Space') {
+        spaceHeldRef.current = false
+        isPanningRef.current = false
         setSpaceHeld(false)
         setIsPanning(false)
       }
@@ -237,9 +249,33 @@ export function StorePreview() {
     }
   }, [])
 
+  // Global mouse move/up during pan — attached to window so fast moves outside div still work
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      if (!isPanningRef.current || !scrollRef.current) return
+      const dx = e.clientX - panStart.current.x
+      const dy = e.clientY - panStart.current.y
+      scrollRef.current.scrollLeft = panStart.current.scrollLeft - dx
+      scrollRef.current.scrollTop = panStart.current.scrollTop - dy
+    }
+    const onUp = () => {
+      if (isPanningRef.current) {
+        isPanningRef.current = false
+        setIsPanning(false)
+      }
+    }
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('mouseup', onUp)
+    return () => {
+      window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('mouseup', onUp)
+    }
+  }, [])
+
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (!spaceHeld || !scrollRef.current) return
+    if (!spaceHeldRef.current || !scrollRef.current) return
     e.preventDefault()
+    isPanningRef.current = true
     setIsPanning(true)
     panStart.current = {
       x: e.clientX,
@@ -248,16 +284,6 @@ export function StorePreview() {
       scrollTop: scrollRef.current.scrollTop,
     }
   }
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isPanning || !scrollRef.current) return
-    const dx = e.clientX - panStart.current.x
-    const dy = e.clientY - panStart.current.y
-    scrollRef.current.scrollLeft = panStart.current.scrollLeft - dx
-    scrollRef.current.scrollTop = panStart.current.scrollTop - dy
-  }
-
-  const handleMouseUp = () => setIsPanning(false)
 
   const zoomIndex = ZOOM_STEPS.indexOf(zoom)
   const canZoomIn = zoomIndex < ZOOM_STEPS.length - 1
@@ -293,25 +319,22 @@ export function StorePreview() {
         )}
       </div>
 
-      {/* Scrollable preview area */}
+      {/* Scrollable preview area — block layout so margin:auto centering works regardless of dir */}
       <div
         ref={scrollRef}
         className={cn(
-          'flex-1 overflow-auto flex justify-center p-4',
+          'flex-1 overflow-auto p-4',
           spaceHeld && !isPanning && 'cursor-grab',
           isPanning && 'cursor-grabbing select-none',
         )}
         onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
       >
-        {/* Outer wrapper sizes to scaled width so the scroll container knows the content width */}
+        {/* margin: 0 auto centers the canvas — immune to RTL direction */}
         <div
           style={{
             width: `${1200 * scale}px`,
+            margin: '0 auto',
             minHeight: '100%',
-            flexShrink: 0,
           }}
         >
           <div

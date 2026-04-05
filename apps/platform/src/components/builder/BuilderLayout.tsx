@@ -302,7 +302,7 @@ export function BuilderLayout({ storeId }: BuilderLayoutProps) {
         </aside>
 
         {/* Center: preview */}
-        <main className="flex-1 overflow-hidden bg-muted/40">
+        <main className="flex-1 overflow-hidden bg-muted/40" dir="ltr">
           <StorePreview />
         </main>
 
