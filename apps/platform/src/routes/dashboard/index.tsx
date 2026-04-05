@@ -14,6 +14,12 @@ import { cn } from '@/lib/utils'
 import { useLang } from '@/hooks/useLang'
 import { AuthModal } from '@/components/auth/AuthModal'
 import { StoreSettingsModal } from '@/components/dashboard/StoreSettingsModal'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { createSubscriptionCheckout } from '@/server/createSubscriptionCheckout'
 import { verifySubscriptionPayment } from '@/server/verifySubscriptionPayment'
 import { getDownloadUrl } from '@/server/getDownloadUrl'
@@ -723,7 +729,7 @@ function EmptyStores({ onNew }: { onNew: () => void }) {
 // ─── Header ────────────────────────────────────────────────────────────────────
 
 function DashboardHeader({ email, tier }: { email: string; tier?: string }) {
-  const { t, toggle, lang } = useLang()
+  const { t, setLang, lang } = useLang()
   const navigate = useNavigate()
   const tierLabels: Record<string, { ar: string; fr: string; en: string }> = {
     starter: { ar: 'مبتدئ', fr: 'Starter', en: 'Starter' },
@@ -753,13 +759,20 @@ function DashboardHeader({ email, tier }: { email: string; tier?: string }) {
         >
           <Settings className="h-4 w-4" />
         </button>
-        <button
-          onClick={() => toggle()}
-          className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors text-xs font-semibold min-w-[28px]"
-          title="Switch language"
-        >
-          {lang === 'ar' ? 'AR' : lang === 'fr' ? 'FR' : 'EN'}
-        </button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="flex items-center gap-1 p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors text-xs font-semibold">
+              <Globe className="h-4 w-4" />
+              {lang.toUpperCase()}
+              <ChevronDown className="h-3 w-3" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => setLang('ar')} className={lang === 'ar' ? 'font-semibold' : ''}>العربية</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setLang('fr')} className={lang === 'fr' ? 'font-semibold' : ''}>Français</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setLang('en')} className={lang === 'en' ? 'font-semibold' : ''}>English</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <button
           onClick={() => db.auth.signOut()}
           className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"

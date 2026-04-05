@@ -2,7 +2,7 @@
 
 > **For AI agents:** Read this file at the start of every session. Update it when you make structural changes, add/remove dependencies, or change conventions. Keep entries concise — one line where possible. Do NOT add prose or explanations that already exist in code. Update the `Last updated` field on every write.
 
-**Last updated:** 2026-04-01 (one-click service linking)  
+**Last updated:** 2026-04-05 (lang dropdown, shadcn-first rules)  
 **Project:** حبة ستور (7aba.store) — Algerian e-commerce platform (store builder + selling page)  
 **Repo:** https://github.com/Ta9in/sellingpage  
 **Monorepo:** pnpm workspaces + Turborepo — `apps/store`, `apps/platform`, `packages/store-ui`
@@ -291,6 +291,8 @@ npx tsx seed-orders.ts          # Seed test orders (from apps/store/)
 - Path alias: `@/*` → `./src/*` in each app; `@7aba/store-ui` → `packages/store-ui/src/index.ts`
 - `packages/store-ui` uses TypeScript source directly (no build step) — `"main": "./src/index.ts"`
 - Styling: Tailwind utility classes; `cn()` from each workspace's `src/lib/utils.ts`
+- **ALL UI must use shadcn/ui components and its ecosystem** — never roll custom buttons, dropdowns, modals, alerts, badges, or form controls from scratch when a shadcn component exists
+- **Never use a plain cycling button for multi-option switches** — always use `DropdownMenu` (or `Select`) from shadcn; applies to language switchers, theme pickers, status selectors, etc.
 - DB reads: `db.useQuery({...})` reactive hook (InstantDB)
 - DB writes: `db.transact(tx.entity.id().update({...}))` pattern
 - RTL: Arabic-first UI; Google Font "Almarai"
