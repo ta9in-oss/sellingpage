@@ -38,9 +38,12 @@ import {
 } from 'lucide-react'
 import type { Section } from '@7aba/store-ui'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Card } from '@/components/ui/card'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { createPortal } from 'react-dom'
 import { useLang } from '@/hooks/useLang'
 
@@ -61,41 +64,69 @@ const SECTION_ICONS: Record<SectionType, React.ComponentType<{ size?: number; cl
   footer: Baseline,
 }
 
-const ADDABLE_TYPES: SectionType[] = ['hero', 'features', 'testimonials', 'faq', 'guarantee', 'order-form', 'social-proof', 'cta', 'benefits', 'value-stack', 'product-carousel', 'footer']
+const ADDABLE_TYPES: SectionType[] = [
+  'hero', 'features', 'testimonials', 'faq', 'guarantee',
+  'order-form', 'social-proof', 'cta', 'benefits',
+  'value-stack', 'product-carousel', 'footer',
+]
 
 const T = {
   sections: { ar: 'الأقسام', fr: 'Sections', en: 'Sections' },
-  noSections: { ar: 'لا توجد أقسام. أضف قسمًا.', fr: 'Aucune section. Ajoutez-en une.', en: 'No sections. Add one.' },
-  drag: { ar: 'سحب', fr: 'Glisser', en: 'Drag' },
-  deleteSection: { ar: 'حذف القسم', fr: 'Supprimer la section', en: 'Delete section' },
+  noSections: { ar: 'لا توجد أقسام', fr: 'Aucune section', en: 'No sections' },
   addSection: { ar: 'إضافة قسم', fr: 'Ajouter une section', en: 'Add section' },
-  sectionHero: { ar: 'قسم البطل', fr: 'Section héros', en: 'Hero section' },
+  addAbove: { ar: 'إضافة فوق', fr: 'Ajouter au-dessus', en: 'Add above' },
+  addBelow: { ar: 'إضافة تحت', fr: 'Ajouter en-dessous', en: 'Add below' },
+  deleteSection: { ar: 'حذف', fr: 'Supprimer', en: 'Delete' },
+  sectionHero: { ar: 'قسم البطل', fr: 'Section héros', en: 'Hero' },
   sectionFeatures: { ar: 'المميزات', fr: 'Fonctionnalités', en: 'Features' },
   sectionTestimonials: { ar: 'آراء العملاء', fr: 'Avis clients', en: 'Testimonials' },
-  sectionFaq: { ar: 'الأسئلة الشائعة', fr: 'FAQ', en: 'FAQ' },
+  sectionFaq: { ar: 'أسئلة شائعة', fr: 'FAQ', en: 'FAQ' },
   sectionGuarantee: { ar: 'الضمان', fr: 'Garantie', en: 'Guarantee' },
-  sectionOrderForm: { ar: 'نموذج الطلب', fr: 'Formulaire de commande', en: 'Order form' },
+  sectionOrderForm: { ar: 'نموذج الطلب', fr: 'Formulaire', en: 'Order form' },
   sectionSocialProof: { ar: 'إثبات اجتماعي', fr: 'Preuve sociale', en: 'Social proof' },
-  sectionCta: { ar: 'دعوة للعمل', fr: 'Appel à l\'action', en: 'Call to action' },
+  sectionCta: { ar: 'دعوة للعمل', fr: 'CTA', en: 'CTA' },
   sectionBenefits: { ar: 'المزايا', fr: 'Avantages', en: 'Benefits' },
   sectionValueStack: { ar: 'قيمة المنتج', fr: 'Valeur produit', en: 'Value stack' },
-  sectionProductCarousel: { ar: 'صور المنتج', fr: 'Carrousel produit', en: 'Product carousel' },
+  sectionProductCarousel: { ar: 'صور المنتج', fr: 'Carrousel', en: 'Carousel' },
   sectionFooter: { ar: 'الذيل', fr: 'Pied de page', en: 'Footer' },
 }
 
-interface SortableSectionCardProps {
+// Section type picker rendered inside a DropdownMenuContent
+function SectionPickerItems({
+  onPick,
+  sectionLabels,
+}: {
+  onPick: (type: SectionType) => void
+  sectionLabels: Record<SectionType, string>
+}) {
+  return (
+    <>
+      {ADDABLE_TYPES.map((type) => {
+        const Icon = SECTION_ICONS[type]
+        return (
+          <DropdownMenuItem
+            key={type}
+            onClick={() => onPick(type)}
+            className="flex items-center gap-2 cursor-pointer"
+          >
+            <Icon size={14} className="text-muted-foreground shrink-0" />
+            <span>{sectionLabels[type]}</span>
+          </DropdownMenuItem>
+        )
+      })}
+    </>
+  )
+}
+
+interface CardProps {
   section: Section
   isSelected: boolean
   onSelect: () => void
   onRemove: () => void
-  onAddAbove: () => void
-  onAddBelow: () => void
+  onAddAbove: (type: SectionType) => void
+  onAddBelow: (type: SectionType) => void
   isDragOverlay?: boolean
   sectionLabels: Record<SectionType, string>
-  dragLabel: string
-  deleteLabel: string
-  addAboveLabel: string
-  addBelowLabel: string
 }
 
 function SortableSectionCard({
@@ -107,14 +138,9 @@ function SortableSectionCard({
   onAddBelow,
   isDragOverlay = false,
   sectionLabels,
-  dragLabel,
-  deleteLabel,
-  addAboveLabel,
-  addBelowLabel,
-}: SortableSectionCardProps) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: section.id,
-  })
+}: CardProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: section.id })
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -125,84 +151,104 @@ function SortableSectionCard({
   const Icon = SECTION_ICONS[section.type] ?? LayoutGrid
 
   return (
-    <div className="relative group/card">
-      {/* Add above button — appears on hover between cards */}
+    <div
+      ref={isDragOverlay ? undefined : setNodeRef}
+      style={style}
+      className="group/card relative"
+    >
+      {/* Add-above button — centered above card, shown on hover */}
       {!isDragOverlay && (
-        <button
-          onClick={(e) => { e.stopPropagation(); onAddAbove() }}
-          className="absolute -top-2.5 left-1/2 -translate-x-1/2 z-10 h-5 w-5 rounded-full bg-zinc-900 text-white flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-opacity shadow-md"
-          aria-label={addAboveLabel}
-        >
-          <Plus size={10} />
-        </button>
+        <div className="absolute -top-3 inset-x-0 flex justify-center z-20 opacity-0 group-hover/card:opacity-100 transition-opacity">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                className="h-5 w-5 rounded-full bg-foreground text-background flex items-center justify-center shadow-sm hover:scale-110 transition-transform"
+              >
+                <Plus size={10} />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent side="right" align="start" className="w-48">
+              <SectionPickerItems onPick={onAddAbove} sectionLabels={sectionLabels} />
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       )}
 
-      <Card
-        ref={isDragOverlay ? undefined : setNodeRef}
-        style={style}
+      {/* Main card row */}
+      <div
         onClick={isDragOverlay ? undefined : onSelect}
         className={cn(
-          'flex items-center gap-2 px-2 py-2 cursor-pointer transition-all mb-1 shadow-none select-none',
-          'hover:bg-zinc-50 border',
-          isSelected && !isDragOverlay && 'border-s-2 border-s-zinc-900 bg-zinc-50',
-          isDragOverlay && 'shadow-xl border-2 border-black bg-yellow-50 rotate-1 scale-105 cursor-grabbing'
+          'flex items-center gap-1.5 px-2 py-2 rounded-md border border-transparent transition-colors cursor-pointer',
+          'hover:bg-accent',
+          isSelected && !isDragOverlay && 'bg-accent border-border',
+          isDragOverlay && 'bg-accent border-border shadow-lg scale-105 rotate-1 cursor-grabbing',
         )}
       >
+        {/* Grip handle */}
         <button
           {...(isDragOverlay ? {} : { ...attributes, ...listeners })}
-          onClick={(e) => e.stopPropagation()}
+          onPointerDown={(e) => e.stopPropagation()}
           className={cn(
-            'text-zinc-300 hover:text-zinc-600 shrink-0 cursor-grab active:cursor-grabbing',
-            isDragOverlay && 'cursor-grabbing text-zinc-600'
+            'text-muted-foreground/40 hover:text-muted-foreground shrink-0 cursor-grab active:cursor-grabbing touch-none',
+            isDragOverlay && 'cursor-grabbing',
           )}
-          aria-label={dragLabel}
+          tabIndex={-1}
+          aria-hidden
         >
           <GripVertical size={14} />
         </button>
 
-        <Icon size={14} className="text-zinc-500 shrink-0" />
-        <span className="flex-1 text-sm font-medium truncate">{sectionLabels[section.type]}</span>
+        <Icon size={13} className="text-muted-foreground shrink-0" />
 
-        <Badge variant="outline" className="text-[10px] px-1 py-0 h-4 shrink-0">
-          {section.type}
-        </Badge>
+        <span className="flex-1 text-xs font-medium truncate">
+          {sectionLabels[section.type]}
+        </span>
 
+        {/* Delete — hover-only */}
         {!isDragOverlay && (
           <Button
             variant="ghost"
             size="icon"
-            className="h-6 w-6 shrink-0 text-zinc-300 hover:text-red-500 hover:bg-transparent opacity-0 group-hover/card:opacity-100 transition-opacity"
+            className="h-6 w-6 shrink-0 text-muted-foreground/0 group-hover/card:text-muted-foreground hover:text-destructive! hover:bg-transparent transition-colors"
+            onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => {
               e.stopPropagation()
               onRemove()
             }}
-            aria-label={deleteLabel}
+            tabIndex={-1}
           >
-            <Trash2 size={13} />
+            <Trash2 size={12} />
           </Button>
         )}
-      </Card>
+      </div>
 
-      {/* Add below button — appears on hover between cards */}
+      {/* Add-below button — centered below card, shown on hover */}
       {!isDragOverlay && (
-        <button
-          onClick={(e) => { e.stopPropagation(); onAddBelow() }}
-          className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 z-10 h-5 w-5 rounded-full bg-zinc-900 text-white flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-opacity shadow-md"
-          aria-label={addBelowLabel}
-        >
-          <Plus size={10} />
-        </button>
+        <div className="absolute -bottom-3 inset-x-0 flex justify-center z-20 opacity-0 group-hover/card:opacity-100 transition-opacity">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                className="h-5 w-5 rounded-full bg-foreground text-background flex items-center justify-center shadow-sm hover:scale-110 transition-transform"
+              >
+                <Plus size={10} />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent side="right" align="start" className="w-48">
+              <SectionPickerItems onPick={onAddBelow} sectionLabels={sectionLabels} />
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       )}
     </div>
   )
 }
 
 export function SectionList() {
-  const { config, selectedSectionId, selectSection, removeSection, reorderSections, addSection, addSectionAt } =
+  const { config, selectedSectionId, selectSection, removeSection, reorderSections, addSectionAt } =
     useBuilderStore()
-  const { t } = useLang()
-  const [showAddMenu, setShowAddMenu] = useState(false)
-  const [insertAfterId, setInsertAfterId] = useState<string | null | undefined>(undefined) // undefined = not showing; null = insert at top
+  const { t, dir } = useLang()
   const [activeId, setActiveId] = useState<string | null>(null)
   const [isClient, setIsClient] = useState(false)
 
@@ -221,86 +267,50 @@ export function SectionList() {
     footer: t(T.sectionFooter),
   }
 
-  useEffect(() => {
-    setIsClient(true)
-  }, [])
+  useEffect(() => setIsClient(true), [])
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   )
 
-  const handleDragStart = (event: DragStartEvent) => {
-    setActiveId(String(event.active.id))
-  }
-
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragStart = (e: DragStartEvent) => setActiveId(String(e.active.id))
+  const handleDragEnd = (e: DragEndEvent) => {
     setActiveId(null)
-    const { active, over } = event
-    if (over && active.id !== over.id) {
-      reorderSections(String(active.id), String(over.id))
-    }
+    const { active, over } = e
+    if (over && active.id !== over.id) reorderSections(String(active.id), String(over.id))
   }
 
   const activeSection = activeId ? config.sections.find((s) => s.id === activeId) : null
 
-  const handleAddAt = (afterId: string | null) => {
-    setInsertAfterId(afterId)
-    setShowAddMenu(false)
-  }
-
-  const sectionCards = config.sections.map((section, index) => (
+  const cards = config.sections.map((section, index) => (
     <SortableSectionCard
       key={section.id}
       section={section}
       isSelected={selectedSectionId === section.id}
       onSelect={() => selectSection(section.id)}
       onRemove={() => removeSection(section.id)}
-      onAddAbove={() => handleAddAt(index === 0 ? null : config.sections[index - 1].id)}
-      onAddBelow={() => handleAddAt(section.id)}
+      onAddAbove={(type) => addSectionAt(type, index === 0 ? null : config.sections[index - 1].id)}
+      onAddBelow={(type) => addSectionAt(type, section.id)}
       sectionLabels={SECTION_LABELS}
-      dragLabel={t(T.drag)}
-      deleteLabel={t(T.deleteSection)}
-      addAboveLabel={t({ ar: 'إضافة فوق', fr: 'Ajouter au-dessus', en: 'Add above' })}
-      addBelowLabel={t({ ar: 'إضافة تحت', fr: 'Ajouter en-dessous', en: 'Add below' })}
     />
   ))
 
-  // Section type picker popup (used for both bottom Add button and inline +)
-  const renderSectionPicker = (afterId: string | null | undefined, onClose: () => void) => {
-    if (afterId === undefined) return null
-    return (
-      <Card className="absolute bottom-full left-2 right-2 mb-1 z-10 overflow-hidden shadow-lg p-1 max-h-72 overflow-y-auto">
-        {ADDABLE_TYPES.map((type) => {
-          const Icon = SECTION_ICONS[type]
-          return (
-            <button
-              key={type}
-              onClick={() => {
-                addSectionAt(type, afterId)
-                onClose()
-              }}
-              className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded hover:bg-zinc-50 transition-colors"
-            >
-              <Icon size={14} className="text-zinc-500" />
-              {SECTION_LABELS[type]}
-            </button>
-          )
-        })}
-      </Card>
-    )
-  }
-
   return (
-    <div className="flex flex-col h-full">
-      <div className="px-3 py-3 border-b border-zinc-200">
-        <span className="text-xs font-bold text-zinc-500 uppercase tracking-wide">{t(T.sections)}</span>
+    <div className="flex flex-col h-full" dir={dir}>
+      {/* Header */}
+      <div className="px-3 py-2.5 border-b border-border shrink-0">
+        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
+          {t(T.sections)}
+        </span>
       </div>
 
-      <ScrollArea className="flex-1 p-2 pt-4">
+      {/* Scrollable section list */}
+      <div className="flex-1 min-h-0 overflow-y-auto px-2 py-3 space-y-3">
         {config.sections.length === 0 && (
-          <p className="text-xs text-zinc-400 text-center py-4">{t(T.noSections)}</p>
+          <p className="text-xs text-muted-foreground text-center py-6">{t(T.noSections)}</p>
         )}
+
         {isClient ? (
           <DndContext
             sensors={sensors}
@@ -308,11 +318,8 @@ export function SectionList() {
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
           >
-            <SortableContext
-              items={config.sections.map((s) => s.id)}
-              strategy={verticalListSortingStrategy}
-            >
-              {sectionCards}
+            <SortableContext items={config.sections.map((s) => s.id)} strategy={verticalListSortingStrategy}>
+              {cards}
             </SortableContext>
 
             {createPortal(
@@ -327,10 +334,6 @@ export function SectionList() {
                     onAddBelow={() => {}}
                     isDragOverlay
                     sectionLabels={SECTION_LABELS}
-                    dragLabel={t(T.drag)}
-                    deleteLabel={t(T.deleteSection)}
-                    addAboveLabel=""
-                    addBelowLabel=""
                   />
                 )}
               </DragOverlay>,
@@ -338,29 +341,33 @@ export function SectionList() {
             )}
           </DndContext>
         ) : (
-          sectionCards
+          cards
         )}
-      </ScrollArea>
+      </div>
 
-      <div className="p-2 border-t border-zinc-200 relative">
-        <Button
-          onClick={() => { setShowAddMenu((v) => !v); setInsertAfterId(undefined) }}
-          className="w-full gap-2"
-          size="sm"
-        >
-          <Plus size={14} />
-          {t(T.addSection)}
-        </Button>
-
-        {showAddMenu && renderSectionPicker(
-          config.sections.length > 0 ? config.sections[config.sections.length - 1].id : null,
-          () => setShowAddMenu(false)
-        )}
-
-        {insertAfterId !== undefined && !showAddMenu && renderSectionPicker(
-          insertAfterId,
-          () => setInsertAfterId(undefined)
-        )}
+      {/* Sticky footer: Add section */}
+      <div className="p-2 border-t border-border shrink-0">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm" className="w-full gap-2">
+              <Plus size={14} />
+              {t(T.addSection)}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent side="top" align="center" className="w-52">
+            <SectionPickerItems
+              onPick={(type) =>
+                addSectionAt(
+                  type,
+                  config.sections.length > 0
+                    ? config.sections[config.sections.length - 1].id
+                    : null
+                )
+              }
+              sectionLabels={SECTION_LABELS}
+            />
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   )

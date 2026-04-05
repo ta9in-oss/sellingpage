@@ -22,7 +22,7 @@ import { ProductCarouselForm } from './forms/ProductCarouselForm'
 import { FooterForm } from './forms/FooterForm'
 import { useNavigate } from '@tanstack/react-router'
 import type { StoreConfig, Section } from '@7aba/store-ui'
-import { Loader2, Check, Rocket, Palette, Package, Bell, Globe, CreditCard } from 'lucide-react'
+import { Loader2, Check, Rocket, Palette, Package, Bell, Globe, CreditCard, ArrowLeft, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -254,7 +254,18 @@ export function BuilderLayout({ storeId }: BuilderLayoutProps) {
   return (
     <div className="min-h-screen flex flex-col bg-white" dir={dir}>
       {/* Top bar */}
-      <header className="h-14 border-b border-border flex items-center px-4 gap-3 shrink-0 bg-background">
+      <header className="h-14 border-b border-border flex items-center px-4 gap-2 shrink-0 bg-background">
+        {/* Back to dashboard */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 shrink-0"
+          onClick={() => navigate({ to: '/dashboard' })}
+          title={dir === 'rtl' ? 'العودة للوحة التحكم' : 'Back to dashboard'}
+        >
+          {dir === 'rtl' ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
+        </Button>
+
         <Input
           type="text"
           value={config.meta.name}
@@ -286,7 +297,7 @@ export function BuilderLayout({ storeId }: BuilderLayoutProps) {
       {/* Desktop: three-column layout — direction-aware */}
       <div className="flex-1 hidden lg:flex overflow-hidden">
         {/* Sections panel — start side (left in LTR, right in RTL) */}
-        <aside className="w-60 border-e border-border shrink-0 overflow-y-auto flex flex-col bg-background">
+        <aside className="w-60 border-e border-border shrink-0 overflow-hidden flex flex-col bg-background">
           <SectionList />
         </aside>
 
@@ -305,7 +316,7 @@ export function BuilderLayout({ storeId }: BuilderLayoutProps) {
       <div className="flex-1 flex flex-col lg:hidden overflow-hidden">
         <div className="flex-1 overflow-hidden">
           {mobileTab === 'sections' && (
-            <div className="h-full overflow-y-auto"><SectionList /></div>
+            <div className="h-full overflow-hidden"><SectionList /></div>
           )}
           {mobileTab === 'preview' && (
             <div className="h-full overflow-hidden"><StorePreview /></div>
