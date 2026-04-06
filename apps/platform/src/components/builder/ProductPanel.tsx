@@ -1,8 +1,11 @@
+import { useState } from 'react'
 import { useBuilderStore } from '@/hooks/useBuilderStore'
 import { cn } from '@/lib/utils'
-import { Plus, Package } from 'lucide-react'
+import { Plus, Package, X, ChevronUp, ChevronDown, ImageIcon } from 'lucide-react'
 import { useLang } from '@/hooks/useLang'
 import { ImageUpload } from './ImageUpload'
+
+const MAX_IMAGES = 6
 
 const T = {
   product: { ar: 'المنتج', fr: 'Produit', en: 'Product' },
@@ -11,7 +14,11 @@ const T = {
   price: { ar: 'السعر', fr: 'Prix', en: 'Price' },
   productImages: { ar: 'صور المنتج', fr: 'Images du produit', en: 'Product images' },
   addImage: { ar: 'إضافة صورة', fr: 'Ajouter une image', en: 'Add image' },
+  editImage: { ar: 'تعديل الصورة', fr: 'Modifier l\'image', en: 'Edit image' },
   imageN: { ar: 'صورة', fr: 'Image', en: 'Image' },
+  maxReached: { ar: `الحد الأقصى ${MAX_IMAGES} صور`, fr: `Maximum ${MAX_IMAGES} images`, en: `Max ${MAX_IMAGES} images` },
+  noImages: { ar: 'لا توجد صور بعد — أضف صوراً لتظهر في الأقسام', fr: 'Aucune image — ajoutez-en pour les sections', en: 'No images yet — add some to use in sections' },
+  usedIn: { ar: 'تُستخدم في: البطل، العرض، استمارة الطلب', fr: 'Utilisé dans : Héros, Carrousel, Commande', en: 'Used in: Hero, Carousel, Order form' },
 }
 
 export function ProductPanel() {
@@ -19,15 +26,33 @@ export function ProductPanel() {
   const { t, dir } = useLang()
   const { name, price, currency, images } = config.product
   const storeDir = config.meta.rtl ? 'rtl' : 'ltr'
+  const [editingIndex, setEditingIndex] = useState<number | null>(null)
+
+  const addImage = () => {
+    if (images.length >= MAX_IMAGES) return
+    updateProduct({ images: [...images, ''] })
+    setEditingIndex(images.length)
+  }
 
   const updateImage = (i: number, val: string) => {
     const next = images.map((img, idx) => (idx === i ? val : img))
     updateProduct({ images: next })
+    if (val) setEditingIndex(null)
   }
 
   const removeImage = (i: number) => {
     updateProduct({ images: images.filter((_, idx) => idx !== i) })
+    setEditingIndex(null)
   }
+
+  const moveImage = (i: number, dir: 'up' | 'down') => {
+    const next = [...images]
+    const swap = dir === 'up' ? i - 1 : i + 1
+    ;[next[i], next[swap]] = [next[swap], next[i]]
+    updateProduct({ images: next })
+  }
+
+  const filledImages = images.filter(Boolean)
 
   return (
     <div className="space-y-5 p-4" dir={dir}>
@@ -78,40 +103,128 @@ export function ProductPanel() {
         </div>
       </div>
 
-      {/* Product Images — up to 3, each with upload widget */}
+      {/* Product Images */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <label className="block text-sm font-medium">{t(T.productImages)}</label>
-          {images.length < 3 && (
+          <div>
+            <label className="block text-sm font-medium">{t(T.productImages)}</label>
+            <p className="text-[10px] text-zinc-400 mt-0.5">{t(T.usedIn)}</p>
+          </div>
+          {filledImages.length < MAX_IMAGES && (
             <button
-              onClick={() => updateProduct({ images: [...images, ''] })}
-              className="flex items-center gap-1 text-xs px-2 py-1 border border-zinc-200 rounded hover:border-zinc-900 transition-colors"
+              onClick={addImage}
+              className="flex items-center gap-1 text-xs px-2 py-1 border border-zinc-200 rounded hover:border-zinc-900 transition-colors shrink-0"
             >
               <Plus size={12} /> {t(T.addImage)}
             </button>
           )}
+          {filledImages.length >= MAX_IMAGES && (
+            <span className="text-[10px] text-zinc-400">{t(T.maxReached)}</span>
+          )}
         </div>
 
-        {images.map((img, i) => (
-          <div key={i} className="border border-zinc-200 rounded p-3">
+        {/* Thumbnail grid */}
+        {filledImages.length > 0 && (
+          <div className="grid grid-cols-3 gap-2">
+            {images.map((img, i) => {
+              if (!img) return null
+              const isEditing = editingIndex === i
+              return (
+                <div key={i} className="group relative">
+                  <button
+                    onClick={() => setEditingIndex(isEditing ? null : i)}
+                    className={cn(
+                      'w-full aspect-square rounded overflow-hidden border-2 transition-all',
+                      isEditing ? 'border-zinc-900' : 'border-zinc-200 hover:border-zinc-400'
+                    )}
+                  >
+                    <img src={img} alt="" className="w-full h-full object-cover" />
+                  </button>
+                  {/* Overlay controls: reorder + delete */}
+                  <div className="absolute top-0.5 end-0.5 flex flex-col gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={() => removeImage(i)}
+                      className="bg-red-500 text-white rounded p-0.5"
+                      title="Remove"
+                    ><X size={10} /></button>
+                  </div>
+                  <div className="absolute bottom-0.5 end-0.5 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {i > 0 && (
+                      <button
+                        onClick={() => moveImage(i, 'up')}
+                        className="bg-black/60 text-white rounded p-0.5"
+                        title="Move left"
+                      ><ChevronUp size={10} /></button>
+                    )}
+                    {i < images.filter(Boolean).length - 1 && (
+                      <button
+                        onClick={() => moveImage(i, 'down')}
+                        className="bg-black/60 text-white rounded p-0.5"
+                        title="Move right"
+                      ><ChevronDown size={10} /></button>
+                    )}
+                  </div>
+                  {/* Edit overlay */}
+                  {isEditing && (
+                    <div className="col-span-3 mt-1 border border-zinc-200 rounded p-2 bg-white absolute inset-x-0 top-full z-10 shadow-lg">
+                      <ImageUpload
+                        value={img}
+                        onChange={(url) => {
+                          if (!url) removeImage(i)
+                          else updateImage(i, url)
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        )}
+
+        {/* Edit panel for selected image */}
+        {editingIndex !== null && images[editingIndex] && (
+          <div className="border border-zinc-200 rounded p-3 bg-zinc-50">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs font-medium">{t(T.editImage)} {editingIndex + 1}</p>
+              <button onClick={() => setEditingIndex(null)} className="text-zinc-400 hover:text-zinc-700">
+                <X size={12} />
+              </button>
+            </div>
             <ImageUpload
-              label={`${t(T.imageN)} ${i + 1}`}
-              value={img}
+              value={images[editingIndex]}
               onChange={(url) => {
-                if (!url) removeImage(i)
-                else updateImage(i, url)
+                if (!url) removeImage(editingIndex)
+                else updateImage(editingIndex, url)
               }}
             />
           </div>
-        ))}
+        )}
 
-        {images.length === 0 && (
-          <button
-            onClick={() => updateProduct({ images: [''] })}
-            className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-zinc-200 rounded text-sm text-zinc-400 hover:border-zinc-400 hover:text-zinc-600 transition-colors"
-          >
-            <Plus size={14} /> {t(T.addImage)}
-          </button>
+        {/* Empty state + upload first */}
+        {filledImages.length === 0 && (
+          <div className="space-y-2">
+            <p className="text-xs text-zinc-400 text-center py-2">{t(T.noImages)}</p>
+            <ImageUpload
+              value=""
+              onChange={(url) => {
+                if (url) updateProduct({ images: [url] })
+              }}
+            />
+          </div>
+        )}
+
+        {/* Add new slot shown as upload widget when editingIndex points to empty slot */}
+        {editingIndex !== null && !images[editingIndex] && (
+          <div className="border border-zinc-200 rounded p-3 bg-zinc-50">
+            <ImageUpload
+              label={`${t(T.addImage)}`}
+              value=""
+              onChange={(url) => {
+                if (url) updateImage(editingIndex, url)
+              }}
+            />
+          </div>
         )}
       </div>
     </div>

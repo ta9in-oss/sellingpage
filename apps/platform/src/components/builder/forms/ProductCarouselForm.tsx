@@ -1,29 +1,49 @@
+import { useBuilderStore } from '@/hooks/useBuilderStore'
 import { useLang } from '@/hooks/useLang'
-import { Package } from 'lucide-react'
+import { ImagePicker } from '../ImagePicker'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 const T = {
   title: { ar: 'صور المنتج', fr: 'Carrousel produit', en: 'Product Carousel' },
-  note: { ar: 'يعرض هذا القسم صور المنتج التي تضيفها من لوحة "المنتج" في الشريط العلوي. أضف صور المنتج من هناك.', fr: 'Cette section affiche les images du produit ajoutées via l\'onglet "Produit". Ajoutez les images depuis là.', en: 'This section displays product images added via the "Product" tab. Add images from there.' },
-  goToProduct: { ar: 'لوحة المنتج ← في الشريط الجانبي', fr: 'Panneau Produit ← dans la barre latérale', en: 'Product Panel ← in the right sidebar' },
+  sectionTitle: { ar: 'عنوان القسم (اختياري)', fr: 'Titre de section (optionnel)', en: 'Section title (optional)' },
+  selectImages: { ar: 'اختر الصور التي ستظهر (اتركها فارغة لعرض الكل)', fr: 'Choisissez les images à afficher (vide = toutes)', en: 'Select images to show (empty = show all)' },
 }
 
 interface ProductCarouselFormProps {
   sectionId: string
 }
 
-export function ProductCarouselForm({ sectionId: _ }: ProductCarouselFormProps) {
+export function ProductCarouselForm({ sectionId }: ProductCarouselFormProps) {
+  const { config, updateSection } = useBuilderStore()
   const { t, dir } = useLang()
+  const section = config.sections.find((s) => s.id === sectionId)
+
+  if (!section || section.type !== 'product-carousel') return null
+
+  const storeDir = config.meta.rtl ? 'rtl' : 'ltr'
+  const selectedImages: string[] = section.images ?? []
 
   return (
     <div className="space-y-4 p-4" dir={dir}>
       <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t(T.title)}</p>
-      <div className="flex gap-3 p-3 rounded-md bg-muted border border-border">
-        <Package size={16} className="text-muted-foreground shrink-0 mt-0.5" />
-        <div className="space-y-1">
-          <p className="text-xs text-foreground">{t(T.note)}</p>
-          <p className="text-xs font-mono text-muted-foreground">{t(T.goToProduct)}</p>
-        </div>
+
+      <div className="space-y-1.5">
+        <Label>{t(T.sectionTitle)}</Label>
+        <Input
+          value={section.title ?? ''}
+          onChange={(e) => updateSection(sectionId, { title: e.target.value || undefined })}
+          dir={storeDir}
+          placeholder="—"
+        />
       </div>
+
+      <ImagePicker
+        mode="multi"
+        label={t(T.selectImages)}
+        value={selectedImages}
+        onChange={(urls) => updateSection(sectionId, { images: urls.length > 0 ? urls : undefined })}
+      />
     </div>
   )
 }

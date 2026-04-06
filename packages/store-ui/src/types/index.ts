@@ -55,7 +55,7 @@ export type Section =
   | { id: string; type: 'cta'; headline: string; subheadline: string; cta: string }
   | { id: string; type: 'benefits'; title?: string; items: { icon: string; title: string; description: string }[] }
   | { id: string; type: 'value-stack'; ctaText: string; items: { icon: string; title: string; description: string; value: string; isFree: boolean }[] }
-  | { id: string; type: 'product-carousel'; title?: string }
+  | { id: string; type: 'product-carousel'; title?: string; images?: string[] }
   | { id: string; type: 'footer'; storeName: string; tagline?: string; phone?: string; email?: string; whatsapp?: string; copyright?: string }
 
 export interface FormField {

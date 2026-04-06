@@ -168,12 +168,17 @@ function SectionRenderer({ section, config }: { section: Section; config: StoreC
     }
 
     case 'product-carousel': {
-      const images: ProductImage[] = (config.product.images ?? []).length > 0
-        ? config.product.images.map((img: any, i: number) => ({
+      // section.images = user-selected subset; fall back to all config.product.images
+      const sourceImages =
+        section.images && section.images.length > 0
+          ? section.images
+          : config.product.images ?? []
+      const images: ProductImage[] = sourceImages.length > 0
+        ? sourceImages.map((img: string, i: number) => ({
             id: i + 1,
-            image: img.src ?? img,
-            title: img.alt ?? config.product.name ?? 'صورة المنتج',
-            bgColor: img.bgColor ?? 'bg-gray-100',
+            image: img,
+            title: config.product.name || 'صورة المنتج',
+            bgColor: 'bg-gray-100',
           }))
         : PLACEHOLDER_IMAGES
       return <ProductCarousel products={images} />

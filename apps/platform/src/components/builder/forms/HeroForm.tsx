@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
-import { ImageUpload } from '../ImageUpload'
+import { ImagePicker } from '../ImagePicker'
 
 const T = {
   heroSection: { ar: 'قسم البطل', fr: 'Section héros', en: 'Hero Section' },
@@ -67,10 +67,12 @@ export function HeroForm() {
         />
       </div>
 
-      <ImageUpload
+      {/* Image picker: select from product images or custom URL */}
+      <ImagePicker
         label={t(T.heroImage)}
         value={section.image ?? ''}
         onChange={(url) => update({ image: url })}
+        allowCustom
       />
     </div>
   )
