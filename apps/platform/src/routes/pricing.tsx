@@ -13,7 +13,7 @@ const tiers = [
   {
     id: 'starter',
     name: { ar: 'مبتدئ', fr: 'Starter', en: 'Starter' },
-    price: { ar: '3,900 دج', fr: '3 900 DZD', en: '3,900 DZD' },
+    price: { ar: '3,500 دج', fr: '3 500 DZD', en: '3,500 DZD' },
     badge: null,
     accent: false,
     features: {
@@ -52,7 +52,7 @@ const tiers = [
   {
     id: 'pro',
     name: { ar: 'احترافي', fr: 'Pro', en: 'Pro' },
-    price: { ar: '14,900 دج', fr: '14 900 DZD', en: '14,900 DZD' },
+    price: { ar: '20,000 دج', fr: '20 000 DZD', en: '20,000 DZD' },
     badge: { ar: 'الأكثر شيوعاً', fr: 'Le plus populaire', en: 'Most popular' },
     accent: true,
     features: {
@@ -79,7 +79,7 @@ const tiers = [
   {
     id: 'agency',
     name: { ar: 'وكالة', fr: 'Agence', en: 'Agency' },
-    price: { ar: '49,000 دج', fr: '49 000 DZD', en: '49,000 DZD' },
+    price: { ar: '100,000 دج', fr: '100 000 DZD', en: '100,000 DZD' },
     badge: null,
     accent: false,
     features: {

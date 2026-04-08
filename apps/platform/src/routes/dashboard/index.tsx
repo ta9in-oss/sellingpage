@@ -331,7 +331,7 @@ const TIERS: {
   {
     id: 'starter',
     name: { ar: 'مبتدئ', fr: 'Starter', en: 'Starter' },
-    price: '3,900 دج',
+    price: '3,500 دج',
     accent: false,
     features: {
       ar: ['إنشاء ونشر المتاجر', 'نطاق مخصص (Cloudflare)', 'لوحة إدارة الطلبات', 'دفع نقدي + Chargily', 'Google Analytics'],
@@ -342,7 +342,7 @@ const TIERS: {
   {
     id: 'pro',
     name: { ar: 'احترافي', fr: 'Pro', en: 'Pro' },
-    price: '14,900 دج',
+    price: '20,000 دج',
     accent: true,
     features: {
       ar: ['كل ما في مبتدئ', 'تحميل كود المتجر', 'تحميل كود التطبيق', 'دعم ذو أولوية'],
@@ -353,7 +353,7 @@ const TIERS: {
   {
     id: 'agency',
     name: { ar: 'وكالة', fr: 'Agence', en: 'Agency' },
-    price: '49,000 دج',
+    price: '100,000 دج',
     accent: false,
     features: {
       ar: ['كل ما في احترافي', 'كود المنصة كاملاً', 'متاجر غير محدودة', 'دعم مباشر'],

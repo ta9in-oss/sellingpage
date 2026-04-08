@@ -146,7 +146,7 @@ export const comparisonTable = {
     },
     {
       label:   { ar: 'السعر',                        fr: 'Prix',                            en: 'Price' },
-      haba:    { text: { ar: '3,900 DZD مرة واحدة', fr: '3 900 DZD une fois',              en: '3,900 DZD one-time' },      good: true, highlight: true },
+      haba:    { text: { ar: '3,500 DZD مرة واحدة', fr: '3 500 DZD une fois',              en: '3,500 DZD one-time' },      good: true, highlight: true },
       ayor:    { text: { ar: '3,900+ DZD/شهر',       fr: '3 900+ DZD/mois',                en: '3,900+ DZD/mo' },           good: false },
       shopify: { text: { ar: '$29+/شهر',              fr: '$29+/mois',                      en: '$29+/mo' },                  good: false },
     },
@@ -217,10 +217,10 @@ export const pricingPreview = {
   cta:  { ar: 'اختر هذه الباقة',       fr: 'Choisir ce forfait',  en: 'Choose this plan' },
   once: { ar: 'دفع مرة واحدة',         fr: 'Paiement unique',     en: 'One-time payment' },
   tiers: [
-    { id: 'simple', name: { ar: 'بسيط',     fr: 'Simple',     en: 'Simple'   }, dzd: '3,900',  usd: '$29',   badge: { ar: 'الأكثر شيوعاً', fr: 'Le plus populaire', en: 'Most popular' }, accent: true },
-    { id: 'pro',    name: { ar: 'احترافي',  fr: 'Pro',        en: 'Pro'      }, dzd: '14,900', usd: '$99',   badge: null, accent: false },
-    { id: 'studio', name: { ar: 'ستوديو',   fr: 'Studio',     en: 'Studio'   }, dzd: '49,000', usd: '$299',  badge: null, accent: false },
-    { id: 'partner',name: { ar: 'راعي',     fr: 'Partenaire', en: 'Partner'  }, dzd: '99,000+',usd: '$500+', badge: null, accent: false },
+    { id: 'simple', name: { ar: 'بسيط',     fr: 'Simple',     en: 'Simple'   }, dzd: '3,500',   usd: '$25',   badge: { ar: 'الأكثر شيوعاً', fr: 'Le plus populaire', en: 'Most popular' }, accent: true },
+    { id: 'pro',    name: { ar: 'احترافي',  fr: 'Pro',        en: 'Pro'      }, dzd: '20,000',  usd: '$125',  badge: null, accent: false },
+    { id: 'studio', name: { ar: 'ستوديو',   fr: 'Studio',     en: 'Studio'   }, dzd: '100,000', usd: '$650',  badge: null, accent: false },
+    { id: 'partner',name: { ar: 'راعي',     fr: 'Partenaire', en: 'Partner'  }, dzd: '99,000+', usd: '$500+', badge: null, accent: false },
   ],
 }
 

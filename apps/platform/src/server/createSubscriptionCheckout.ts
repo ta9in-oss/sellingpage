@@ -12,9 +12,9 @@ interface SubscriptionCheckoutInput {
 }
 
 const TIER_PRICES: Record<string, number> = {
-  starter: 3900,
-  pro: 14900,
-  agency: 49000,
+  starter: 3500,
+  pro: 20000,
+  agency: 100000,
 }
 
 const TIER_NAMES: Record<string, string> = {

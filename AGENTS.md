@@ -133,9 +133,9 @@ sellingpage/                  ← monorepo root
 
 | Tier | Price | Features |
 |------|-------|---------|
-| `starter` | 3,900 DZD | Create stores, builder access |
-| `pro` | 14,900 DZD | + Download store source code + store app APK |
-| `agency` | 49,000 DZD | + Download platform codebase |
+| `starter` | 3,500 DZD | Create stores, builder access |
+| `pro` | 20,000 DZD | + Download store source code + store app APK |
+| `agency` | 100,000 DZD | + Download platform codebase |
 
 **Paywall flow:** Un-subscribed user → dashboard → pricing inline → Chargily Pay → redirect back → verify → unlock tier
 
