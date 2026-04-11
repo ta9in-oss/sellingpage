@@ -1,18 +1,17 @@
 import type { Theme } from './theme.types';
 
-// Dark, high-converting sales page theme inspired by acquisition.com
-// Orange accent, dark background, clean professional look
-export const acquisitionTheme: Theme = {
-    name: 'acquisition',
-    mode: 'dark',
+// Clean / Minimal — Shopify-style modern e-commerce theme
+export const cleanTheme: Theme = {
+    name: 'clean',
+    mode: 'light',
     colors: {
-        primary: '#F97316',    // orange-500 — brand / CTA color
-        secondary: '#FFFFFF',  // white text
-        accent: '#F97316',     // orange — highlights, stars, buttons
-        background: '#0A0A0A', // near black page background
-        foreground: '#FFFFFF', // primary text
-        border: '#262626',     // subtle dark borders
-        muted: '#161616',      // card / section backgrounds
+        primary: '#0EA5E9',  // sky-500
+        secondary: '#FFFFFF',
+        accent: '#0EA5E9',
+        background: '#F8FAFC',  // slate-50
+        foreground: '#0F172A',  // slate-900
+        border: '#E2E8F0',      // slate-200
+        muted: '#F1F5F9',       // slate-100
         error: '#EF4444',
         success: '#22C55E',
     },
@@ -39,14 +38,14 @@ export const acquisitionTheme: Theme = {
     spacing: {
         containerMaxWidth: '80rem',
         sectionPadding: '5rem 1.5rem',
-        cardPadding: '2rem',
-        buttonPadding: '1rem 2rem',
+        cardPadding: '1.5rem',
+        buttonPadding: '0.75rem 2rem',
     },
     effects: {
-        borderRadius: '8px',
+        borderRadius: '12px',
         borderWidth: '1px',
-        shadow: '0 4px 12px rgba(0,0,0,0.4)',
-        hoverShadow: '0 8px 24px rgba(249,115,22,0.2)',
+        shadow: '0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px -1px rgba(0,0,0,0.1)',
+        hoverShadow: '0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1)',
         transition: 'all 200ms cubic-bezier(0.4, 0, 0.2, 1)',
     },
     direction: 'rtl',

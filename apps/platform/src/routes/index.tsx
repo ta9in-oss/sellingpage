@@ -1,14 +1,19 @@
 import { createFileRoute } from '@tanstack/react-router'
+import {
+  ThemeProvider,
+  HeroSection,
+  SocialProofBar,
+  FeatureGrid,
+  BenefitsSection,
+  TestimonialSection,
+  CTASection,
+  GuaranteeSection,
+  FAQSection,
+  FooterSection,
+  brutalistTheme,
+  ComparisonSection,
+} from '@7aba/store-ui'
 import { Navbar } from '@/components/marketing/Navbar'
-import { HeroSection } from '@/components/marketing/HeroSection'
-import { ComparisonTable } from '@/components/marketing/ComparisonTable'
-import { HowItWorks } from '@/components/marketing/HowItWorks'
-import { NotificationShowcase } from '@/components/marketing/NotificationShowcase'
-import { FeatureGrid } from '@/components/marketing/FeatureGrid'
-import { SocialNumbers } from '@/components/marketing/SocialNumbers'
-import { PricingPreview } from '@/components/marketing/PricingPreview'
-import { Footer } from '@/components/marketing/Footer'
-import { ThemesShowcase } from '@/components/marketing/ThemesShowcase'
 import { useLang } from '@/hooks/useLang'
 
 const SITE_URL = 'https://7aba.store'
@@ -218,18 +223,118 @@ export const Route = createFileRoute('/')({
 
 function LandingPage() {
   const { dir } = useLang()
+
   return (
-    <div className="min-h-screen" dir={dir}>
+    <div dir={dir}>
       <Navbar />
-      <HeroSection />
-      <ComparisonTable />
-      <HowItWorks />
-      <NotificationShowcase />
-      <FeatureGrid />
-      <ThemesShowcase />
-      <SocialNumbers />
-      <PricingPreview />
-      <Footer />
+      <ThemeProvider value={brutalistTheme}>
+        {/* Hero */}
+        <HeroSection
+          content={{
+            title: ['ابني متجرك', 'في دقيقتين'],
+            description: 'منصة جزائرية لإنشاء المتاجر الإلكترونية. صمّم، خصّص، وانشر على Cloudflare بدفعة واحدة — بدون اشتراك شهري.',
+            ctaText: 'ابدأ الآن',
+            ctaLink: '/dashboard',
+            image: '/demo-store-preview.png',
+            priceTag: { amount: 'من 3,500', currency: 'دج' },
+            freeDelivery: false,
+          }}
+          onCtaClick={() => { window.location.href = '/dashboard' }}
+        />
+
+        {/* Social proof */}
+        <SocialProofBar reviewCount={500} rating={4.9} />
+
+        {/* Features */}
+        <FeatureGrid
+          title="لماذا 7aba.store؟"
+          subtitle="كل ما يحتاجه تاجر جزائري في مكان واحد"
+          features={[
+            { image: '', title: 'نشر تلقائي', description: 'انشر متجرك على Cloudflare Workers في ثوانٍ — أسرع CDN في العالم بدون سيرفر خاص', bgColor: 'bg-yellow-50' },
+            { image: '', title: 'Chargily Pay مدمج', description: 'استقبل الدفع الإلكتروني بالدينار الجزائري مباشرة — بدون إعداد معقد', bgColor: 'bg-white' },
+            { image: '', title: '3 قوالب احترافية', description: 'اختر من بين قوالب مُصممة لرفع معدل التحويل: Brutalist، Clean، وDark Pro', bgColor: 'bg-gray-50' },
+            { image: '', title: 'إشعارات FOMO', description: 'أشعل الرغبة عند زوار متجرك بإشعارات الطلبات الفورية — تزيد المبيعات بنسبة 30٪', bgColor: 'bg-yellow-50' },
+            { image: '', title: 'لوحة إدارة متكاملة', description: 'تابع طلباتك، حالة التوصيل، والإيرادات من لوحة تحكم عربية سهلة الاستخدام', bgColor: 'bg-white' },
+            { image: '', title: '58 ولاية جزائرية', description: 'قاعدة بيانات كاملة لكل ولايات الجزائر ومدنها — لتوصيل لا أخطاء فيه', bgColor: 'bg-gray-50' },
+          ]}
+        />
+
+        {/* Benefits */}
+        <BenefitsSection
+          title="ما يميّزنا عن البقية"
+          subtitle="بنيناها بأيدينا للسوق الجزائري"
+          benefits={[
+            { icon: '🚀', title: 'بدون خبرة تقنية', description: 'من الصفر إلى متجر حيّ في أقل من دقيقتين. لا تحتاج لمبرمج.' },
+            { icon: '💳', title: 'دفعة واحدة للأبد', description: 'لا اشتراك شهري، لا مفاجآت. ادفع مرة وامتلك متجرك إلى الأبد.' },
+            { icon: '⚡', title: 'سرعة Edge Computing', description: 'متجرك يُخدَّم من Cloudflare — أسرع تحميل = أقل ارتداد = أكثر مبيعات.' },
+            { icon: '🇩🇿', title: 'صُنع في الجزائر', description: 'منصة فهمت السوق المحلي: الدينار، COD، شاريلي، ولايات الجزائر الـ58.' },
+            { icon: '📦', title: 'كود المصدر لك', description: 'في الباقات المتقدمة تحصل على كود المتجر والمنصة كاملاً — ملكيتك 100٪.' },
+            { icon: '🛠️', title: 'دعم وتطوير مستمر', description: 'تحديثات منتظمة وميزات جديدة باستمرار. مجتمع تجار جزائريين نشط.' },
+          ]}
+        />
+
+        {/* Testimonials */}
+        <TestimonialSection
+          title="ماذا قال التجار؟"
+          testimonials={[
+            { id: 1, name: 'محمد من الجزائر العاصمة', location: 'تاجر إلكترونيات', rating: 5, comment: 'فتحت متجري في أقل من دقيقتين. شاريلي يعمل من الأول، الطلبات تجي وأنا نايم.' },
+            { id: 2, name: 'ريم من وهران', location: 'متجر عطور', rating: 5, comment: 'كنت خايفة من الجانب التقني. لقيت 7aba.store وكل شي بسيط جداً. الآن عندي متجر احترافي.' },
+            { id: 3, name: 'خالد من قسنطينة', location: 'أكسسوارات هاتف', rating: 5, comment: 'دفعت مرة واحدة وخلصت. لا اشتراك شهري يوجعني. أفضل استثمار في مسيرتي التجارية.' },
+          ]}
+        />
+
+        {/* Comparison */}
+        <ComparisonSection title="كيف نقارن بالآخرين؟" />
+
+        {/* CTA */}
+        <CTASection
+          cta={{
+            title: 'متجرك على بُعد نقرة',
+            subtitle: 'ابدأ اليوم — الأسعار ترتفع قريباً',
+            description: 'انضم لمئات التجار الجزائريين الذين يبيعون عبر 7aba.store.',
+            buttonText: 'أنشئ متجرك الآن',
+            urgencyText: 'عرض محدود — أسعار التأسيس لن تدوم',
+            features: ['دفعة واحدة للأبد', 'نشر في دقيقتين', 'دعم مستمر'],
+          }}
+        />
+
+        {/* Guarantees */}
+        <GuaranteeSection
+          title="ضماناتنا لك"
+          guarantees={[
+            { icon: '🛡️', title: 'ضمان الاسترداد', description: 'إذا لم تتمكن من نشر متجرك في 24 ساعة بسبب مشكلة منا — نستردّ لك المبلغ كاملاً.' },
+            { icon: '🔒', title: 'بياناتك آمنة', description: 'بيانات متجرك ومستخدميك مشفرة ومحمية. لا نشارك أي معلومات مع أطراف ثالثة.' },
+            { icon: '♾️', title: 'مدى الحياة', description: 'لا تنتهي صلاحيتك أبداً. المنصة ملكك بعد أول دفعة — للأبد.' },
+          ]}
+        />
+
+        {/* FAQ */}
+        <FAQSection
+          title="أسئلة شائعة"
+          faqs={[
+            { id: 1, question: 'هل أحتاج خبرة تقنية؟', answer: 'لا على الإطلاق. المنصة مصممة لأي شخص — اتبع الخطوات وستنشر متجرك في أقل من دقيقتين.' },
+            { id: 2, question: 'كيف يعمل الدفع الإلكتروني؟', answer: 'نستخدم Chargily Pay — بوابة الدفع الجزائرية. ستحتاج لحساب Chargily مجاني وربطه بمتجرك من لوحة التحكم.' },
+            { id: 3, question: 'هل يمكنني تغيير تصميم المتجر؟', answer: 'نعم. لديك builder بصري كامل لتغيير الألوان، الخطوط، الصور، والمحتوى. الأقسام قابلة للنقل والتخصيص.' },
+            { id: 4, question: 'ماذا يحدث بعد الدفع؟', answer: 'تُفتح لك لوحة التحكم فوراً. أنشئ متجرك، صممه، وانشره على Cloudflare بنقرة واحدة.' },
+            { id: 5, question: 'هل يمكنني استخدام نطاق خاص؟', answer: 'نعم. بعد النشر يمكنك ربط أي نطاق تملكه بمتجرك من إعدادات Cloudflare.' },
+            { id: 6, question: 'ما الفرق بين الباقات؟', answer: 'Starter: إنشاء المتاجر والنشر. Pro: + تحميل كود المتجر والتطبيق. Agency: + كود المنصة الكاملة.' },
+          ]}
+        />
+
+        {/* Footer */}
+        <FooterSection
+          content={{
+            storeName: '7aba.store',
+            tagline: 'منصة المتاجر الإلكترونية للتجار الجزائريين',
+            links: [
+              { label: 'الأسعار', href: '/pricing' },
+              { label: 'المتجر التجريبي', href: '/demo' },
+              { label: 'لوحة التحكم', href: '/dashboard' },
+            ],
+            copyright: `© ${new Date().getFullYear()} 7aba.store — جميع الحقوق محفوظة`,
+          }}
+        />
+      </ThemeProvider>
     </div>
   )
 }

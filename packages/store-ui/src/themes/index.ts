@@ -1,11 +1,11 @@
 export * from './theme.types'
 export * from './brutalist'
-export * from './acquisition'
-export * from './warm'
+export * from './clean'
+export * from './dark'
 
 import { brutalistTheme } from './brutalist'
-import { acquisitionTheme } from './acquisition'
-import { warmTheme } from './warm'
+import { cleanTheme } from './clean'
+import { darkTheme } from './dark'
 import type { Theme } from './theme.types'
 
-export const presets: Theme[] = [brutalistTheme, acquisitionTheme, warmTheme]
+export const presets: Theme[] = [brutalistTheme, cleanTheme, darkTheme]

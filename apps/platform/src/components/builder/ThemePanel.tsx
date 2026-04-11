@@ -25,9 +25,9 @@ const T = {
   colorBackground: { ar: 'الخلفية', fr: 'Arrière-plan', en: 'Background' },
   colorForeground: { ar: 'النص', fr: 'Texte', en: 'Foreground' },
   colorBorder: { ar: 'الحدود', fr: 'Bordure', en: 'Border' },
-  presetSimple: { ar: 'بسيط', fr: 'Simple', en: 'Simple' },
-  presetBold: { ar: 'جريء', fr: 'Audacieux', en: 'Bold' },
-  presetWarm: { ar: 'دافئ', fr: 'Chaleureux', en: 'Warm' },
+  presetBrutalist: { ar: 'خام', fr: 'Brutalist', en: 'Brutalist' },
+  presetClean: { ar: 'نظيف', fr: 'Propre', en: 'Clean' },
+  presetDark: { ar: 'داكن', fr: 'Sombre', en: 'Dark Pro' },
 }
 
 const RADIUS_OPTIONS = ['0px', '4px', '8px', '12px', '9999px']
@@ -38,9 +38,9 @@ export function ThemePanel() {
   const { t } = useLang()
 
   const PRESET_LABELS: Record<string, string> = {
-    brutalist: t(T.presetSimple),
-    acquisition: t(T.presetBold),
-    warm: t(T.presetWarm),
+    brutalist: t(T.presetBrutalist),
+    clean: t(T.presetClean),
+    dark: t(T.presetDark),
   }
 
   const COLOR_LABELS: Array<{ key: keyof Theme['colors']; label: string }> = [

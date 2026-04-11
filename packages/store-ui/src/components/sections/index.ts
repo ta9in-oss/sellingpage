@@ -1,4 +1,5 @@
 export * from './BenefitsSection'
+export * from './ComparisonSection'
 export * from './CTASection'
 export * from './FAQSection'
 export * from './FeatureGrid'

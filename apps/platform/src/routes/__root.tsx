@@ -2,6 +2,7 @@ import * as React from 'react'
 import { Outlet, createRootRoute, HeadContent, Scripts } from '@tanstack/react-router'
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import { LangProvider } from '@/context/LangContext'
+import { PlatformNotifications } from '@/components/PlatformNotifications'
 import appCss from '@/styles/app.css?url'
 
 const SITE_URL = 'https://7aba.store'
@@ -53,6 +54,7 @@ function RootComponent() {
         <LangProvider>
           <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID ?? ''}>
             <Outlet />
+            <PlatformNotifications />
           </GoogleOAuthProvider>
         </LangProvider>
         <Scripts />
