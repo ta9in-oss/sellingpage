@@ -98,7 +98,7 @@ sellingpage/                  ← monorepo root
     └── store-ui/             ← @7aba/store-ui — shared React component library
         └── src/
             ├── index.ts      ← main re-export (themes, types, ThemeProvider, useTheme, sections)
-            ├── themes/       ← brutalist.ts, acquisition.ts, warm.ts + theme.types.ts + index.ts
+            ├── themes/       ← brutalist.ts, clean.ts, dark.ts + theme.types.ts + index.ts
             ├── types/        ← StoreConfig, Section, FormField, content.types.ts
             ├── context/      ← ThemeContext.tsx (ThemeProvider + useTheme)
             ├── components/sections/ ← 12 section components (all use useTheme)
@@ -146,7 +146,8 @@ sellingpage/                  ← monorepo root
 - **Interface:** `Theme` in `theme.types.ts` — includes `mode: 'light' | 'dark'`
 - **Switch theme (store):** edit `siteConfig.theme` in `apps/store/src/config/site.config.ts` (compile-time)
 - **Switch theme (platform builder):** `useBuilderStore().config.theme` — runtime via Zustand
-- **Available themes:** `brutalistTheme` (light), `acquisitionTheme` (dark, #0A0A0A bg, #F97316 orange), `warmTheme` (light, amber/brown)
+- **Available themes:** `brutalistTheme` (light), `cleanTheme` (sky-blue, rounded, soft shadows), `darkTheme` (dark, green accent)
+- **Theme names for configGenerator:** `brutalist` | `clean` | `dark`
 - **Component pattern:** `const theme = useTheme(); const isDark = theme.mode === 'dark'` — conditional JSX per mode
 - `useTheme()` from `packages/store-ui/src/context/ThemeContext.tsx` — used by ALL store-ui components
 - `getTheme()` still in `apps/store/src/lib/theme.ts` — only for non-section files in store app
@@ -219,13 +220,13 @@ Page order in `apps/store/src/routes/index.tsx`: Hero → SocialProofBar → Fea
 ## Key Config
 
 ### apps/store — `src/config/site.config.ts`
-- Active theme: `brutalistTheme` — swap to `acquisitionTheme` at build time
+- Active theme: `brutalistTheme` — swap to `cleanTheme` or `darkTheme` at build time
 - `payment.activeMethod`: `'cod'` (default) — change to `'chargily'` or `'both'`
 - Feature flags: `notifications: true`, others `false` by default
 
 ### apps/platform — `src/lib/configGenerator.ts`
 - `generateSiteConfig()` builds store's `site.config.ts` + `content.json` + `wrangler.toml` from `StoreConfig`
-- Theme name must match filename: `brutalist` | `acquisition` | `warm`
+- Theme name must match filename: `brutalist` | `clean` | `dark`
 - `payment.activeMethod` is written to `site.config.ts` by this generator
 
 ---
