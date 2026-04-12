@@ -4,6 +4,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google'
 import { LangProvider } from '@/context/LangContext'
 import { PlatformNotifications } from '@/components/PlatformNotifications'
 import appCss from '@/styles/app.css?url'
+import analytics from '@/utils/analytics'
 
 const SITE_URL = 'https://7aba.store'
 const DEFAULT_OG = `${SITE_URL}/og-image.webp`
@@ -40,6 +41,7 @@ export const Route = createRootRoute({
       { rel: 'icon', type: 'image/png', sizes: '96x96', href: '/favicon-96x96.png' },
       { rel: 'manifest', href: '/site.webmanifest' },
     ],
+    scripts: import.meta.env.SSR ? [...analytics()] : [],
   }),
   component: RootComponent,
 })
