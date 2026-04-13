@@ -34,7 +34,7 @@ export function ProductCarouselForm({ sectionId }: ProductCarouselFormProps) {
           value={section.title ?? ''}
           onChange={(e) => updateSection(sectionId, { title: e.target.value || undefined })}
           dir={storeDir}
-          placeholder="—"
+          placeholder="-"
         />
       </div>
 

@@ -25,7 +25,7 @@ export function HeroSection({ content, onCtaClick }: HeroSectionProps) {
                                 style={{ backgroundColor: `${theme.colors.accent}20`, color: theme.colors.accent, border: `1px solid ${theme.colors.accent}40` }}
                             >
                                 <span>🔥</span>
-                                <span>العرض محدود — اطلب اليوم</span>
+                                <span>العرض محدود. اطلب اليوم</span>
                             </div>
 
                             <h1 className="text-4xl lg:text-5xl font-black leading-tight text-right" style={{ color: theme.colors.foreground }}>
@@ -65,7 +65,7 @@ export function HeroSection({ content, onCtaClick }: HeroSectionProps) {
                                     onClick={onCtaClick}
                                 >
                                     <ShoppingBag className="ml-2" size={20} />
-                                    {content.ctaText} — {content.priceTag.amount} {content.priceTag.currency}
+                                    {content.ctaText} {content.priceTag.amount} {content.priceTag.currency}
                                 </Button>
                                 {content.freeDelivery && (
                                     <span className="text-sm font-semibold pt-3" style={{ color: theme.colors.success }}>✓ التوصيل مجاني</span>

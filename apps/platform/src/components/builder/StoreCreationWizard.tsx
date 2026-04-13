@@ -57,7 +57,7 @@ const T = {
   currency: { ar: 'العملة', fr: 'Devise', en: 'Currency' },
   productImages: { ar: 'صور المنتج', fr: 'Images du produit', en: 'Product images' },
   addImage: { ar: 'إضافة صورة', fr: 'Ajouter une image', en: 'Add image' },
-  imageHint: { ar: 'أضف حتى 5 صور للمنتج — تظهر في الكاروسيل', fr: "Ajoutez jusqu'à 5 images — affichées dans le carrousel", en: 'Add up to 5 product images — shown in carousel' },
+  imageHint: { ar: 'أضف حتى 5 صور للمنتج، تظهر في الكاروسيل', fr: "Ajoutez jusqu'à 5 images, affichées dans le carrousel", en: 'Add up to 5 product images, shown in carousel' },
   removeImage: { ar: 'حذف', fr: 'Supprimer', en: 'Remove' },
   // Validation
   nameRequired: { ar: 'اسم المتجر مطلوب', fr: 'Le nom est requis', en: 'Store name is required' },

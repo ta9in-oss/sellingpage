@@ -17,7 +17,7 @@ const T = {
   editImage: { ar: 'تعديل الصورة', fr: 'Modifier l\'image', en: 'Edit image' },
   imageN: { ar: 'صورة', fr: 'Image', en: 'Image' },
   maxReached: { ar: `الحد الأقصى ${MAX_IMAGES} صور`, fr: `Maximum ${MAX_IMAGES} images`, en: `Max ${MAX_IMAGES} images` },
-  noImages: { ar: 'لا توجد صور بعد — أضف صوراً لتظهر في الأقسام', fr: 'Aucune image — ajoutez-en pour les sections', en: 'No images yet — add some to use in sections' },
+  noImages: { ar: 'لا توجد صور بعد. أضف صوراً لتظهر في الأقسام', fr: 'Aucune image. Ajoutez-en pour les sections', en: 'No images yet. Add some to use in sections' },
   usedIn: { ar: 'تُستخدم في: البطل، العرض، استمارة الطلب', fr: 'Utilisé dans : Héros, Carrousel, Commande', en: 'Used in: Hero, Carousel, Order form' },
 }
 

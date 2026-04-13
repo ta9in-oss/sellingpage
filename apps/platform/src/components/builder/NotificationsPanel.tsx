@@ -13,7 +13,7 @@ const T = {
   notificationPlaceholder: { ar: 'شخص طلب للتو! 🔔', fr: 'Quelqu\'un vient de commander ! 🔔', en: 'Someone just ordered! 🔔' },
   notificationDefaultMsg: { ar: 'شخص طلب للتو!', fr: 'Quelqu\'un vient de commander !', en: 'Someone just ordered!' },
   notificationHint: { ar: 'يمكنك إضافة اسم المنتج أو رمز تعبيري', fr: 'Vous pouvez ajouter le nom du produit ou un emoji', en: 'You can add the product name or an emoji' },
-  disabledHint: { ar: 'الإشعارات معطّلة — فعّلها لزيادة ثقة الزوار وتحسين معدل التحويل', fr: 'Notifications désactivées — activez-les pour renforcer la confiance et améliorer la conversion', en: 'Notifications disabled — enable them to boost visitor trust and conversion rate' },
+  disabledHint: { ar: 'الإشعارات معطّلة. فعّلها لزيادة ثقة الزوار وتحسين معدل التحويل', fr: 'Notifications désactivées. Activez-les pour renforcer la confiance et améliorer la conversion', en: 'Notifications disabled. Enable them to boost visitor trust and conversion rate' },
 }
 
 export function NotificationsPanel() {

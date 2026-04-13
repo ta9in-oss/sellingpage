@@ -72,7 +72,7 @@ export function ReviewStep({ storeId, onContinue }: Props) {
       <div>
         <p className="text-sm font-medium text-muted-foreground mb-1">{t(T.storeName)}</p>
         <div className="px-3 py-2.5 bg-muted rounded-lg text-sm font-medium">
-          {config.meta.name || '—'}
+          {config.meta.name || '-'}
         </div>
       </div>
 

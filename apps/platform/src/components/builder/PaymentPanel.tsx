@@ -7,7 +7,7 @@ import { useLang } from '@/hooks/useLang'
 
 const T = {
   paymentMethod: { ar: 'طريقة الدفع', fr: 'Méthode de paiement', en: 'Payment method' },
-  paymentHint: { ar: 'اختر طريقة الدفع المفعّلة في متجرك. لن يرى المشتري هذا الخيار — يُطبَّق تلقائيًا عند الطلب.', fr: "Choisissez la méthode de paiement activée dans votre boutique. L'acheteur ne verra pas ce choix — il s'applique automatiquement à la commande.", en: 'Choose the active payment method for your store. The buyer will not see this option — it is applied automatically at checkout.' },
+  paymentHint: { ar: 'اختر طريقة الدفع المفعّلة في متجرك. لن يرى المشتري هذا الخيار، يُطبَّق تلقائيًا عند الطلب.', fr: "Choisissez la méthode de paiement activée dans votre boutique. L'acheteur ne verra pas ce choix, il s'applique automatiquement à la commande.", en: 'Choose the active payment method for your store. The buyer will not see this option, it is applied automatically at checkout.' },
   cod: { ar: 'الدفع عند الاستلام', fr: 'Paiement à la livraison', en: 'Cash on delivery' },
   online: { ar: 'دفع إلكتروني', fr: 'Paiement en ligne', en: 'Online payment' },
   both: { ar: 'كلاهما', fr: 'Les deux', en: 'Both' },

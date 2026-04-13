@@ -88,8 +88,8 @@ export function DeployingStep({ storeId, onComplete, onError }: Props) {
       const cfApiToken = store?.cfApiToken ?? ''
       const instantAppId = store?.instantAppId ?? ''
       const instantAdminToken = store?.instantAdminToken ?? ''
-      if (!cfAccountId || !cfApiToken) throw new Error('بيانات Cloudflare مطلوبة — يرجى ربط الحساب أولاً')
-      if (!instantAppId || !instantAdminToken) throw new Error('بيانات InstantDB مطلوبة — يرجى ربط الحساب أولاً')
+      if (!cfAccountId || !cfApiToken) throw new Error('بيانات Cloudflare مطلوبة. يرجى ربط الحساب أولاً')
+      if (!instantAppId || !instantAdminToken) throw new Error('بيانات InstantDB مطلوبة. يرجى ربط الحساب أولاً')
       addLog(`✓ Slug: ${config.meta.slug}`)
       addLog(`✓ CF Account: ${cfAccountId.slice(0, 8)}...`)
       addLog(`✓ InstantDB App: ${instantAppId}`)
@@ -155,7 +155,7 @@ export function DeployingStep({ storeId, onComplete, onError }: Props) {
           addLog('  أضفه يدوياً من InstantDB Explorer → جدول users')
         }
       } else {
-        addLog('⚠ لا يوجد بريد مدير — أضفه لاحقاً من الإعدادات')
+        addLog('⚠ لا يوجد بريد مدير. أضفه لاحقاً من الإعدادات')
       }
       setStepStatus(5, 'done')
 

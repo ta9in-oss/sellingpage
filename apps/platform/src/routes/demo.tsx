@@ -18,7 +18,7 @@ import {
 } from '@7aba/store-ui'
 
 const SITE_URL = 'https://7aba.store'
-const TITLE = 'متجر تجريبي — شوف كيف يبدو متجرك مع 7aba.store'
+const TITLE = 'متجر تجريبي | شوف كيف يبدو متجرك مع 7aba.store'
 const DESC =
   'جرّب متجراً جزائرياً حقيقياً مبنياً بـ 7aba.store. شاهد كيف يبدو المتجر، اختبر نموذج الطلب، وتعرف على تجربة المشتري قبل أن تنشئ متجرك الخاص.'
 
@@ -42,7 +42,7 @@ const demoJsonLd = {
     },
     {
       '@type': 'ItemPage',
-      name: 'متجر تجريبي — حقيبة ظهر احترافية',
+      name: 'متجر تجريبي - حقيبة ظهر احترافية',
       description: 'مثال حي لمتجر إلكتروني جزائري مبني بمنصة 7aba.store',
       image: `${SITE_URL}/demo-store-preview.png`,
     },
@@ -80,7 +80,7 @@ const HERO = {
 }
 
 const FEATURES = [
-  { image: 'bagpack_005.png', title: 'السعة', description: 'هي جاية كي شغل F1 فيها جيب واحد كبير تحط فيه كلش. يرفد الله يبارك — كراس، حاسوب، ملابس، كل شي.', bgColor: 'bg-yellow-400 text-black' },
+  { image: 'bagpack_005.png', title: 'السعة', description: 'هي جاية كي شغل F1 فيها جيب واحد كبير تحط فيه كلش. يرفد الله يبارك، كراس، حاسوب، ملابس، كل شي.', bgColor: 'bg-yellow-400 text-black' },
   { image: 'bagpack_003.png', title: 'مريح للظهر', description: 'التصميم مدروس باش يكون مريح للظهر ولكتف. ما تحسش بالثقل حتى لو رفدتها طول النهار.', bgColor: 'bg-black text-white' },
   { image: 'bagpack_004.png', title: 'متين وعصري', description: 'مصنوع من مواد متينة تتحمل الاستخدام اليومي. تصميم عصري يناسب كل المناسبات.', bgColor: 'bg-white text-black' },
 ]
@@ -133,7 +133,7 @@ const ORDER_LAYOUT = {
 function DemoBanner() {
   return (
     <div className="bg-yellow-400 border-b-4 border-black py-2 px-4 text-center font-black text-sm text-black">
-      🎯 هذا متجر تجريبي — هذا هو شكل متجرك مع حبة ستور |{' '}
+      🎯 هذا متجر تجريبي. هذا هو شكل متجرك مع حبة ستور |{' '}
       <a href="/pricing" className="underline hover:no-underline">
         ابدأ الآن
       </a>
@@ -191,12 +191,12 @@ function DemoStorePage() {
         <FAQSection faqs={FAQS} />
         <div className="bg-black text-white py-12 px-6 text-center border-t-4 border-yellow-400">
           <h2 className="text-2xl font-black mb-4">أعجبك الشكل؟ اصنع متجرك الآن 🚀</h2>
-          <p className="text-gray-400 mb-6">متجرك جاهز في 5 دقايق — بدون كود، بدون تقنية</p>
+          <p className="text-gray-400 mb-6">متجرك جاهز في 5 دقايق. بدون كود، بدون تقنية</p>
           <a
             href="/pricing"
             className="inline-block bg-yellow-400 text-black px-8 py-4 border-4 border-yellow-400 font-black text-lg hover:bg-yellow-300 transition-colors"
           >
-            ابدأ الآن — 3,500 دج دفعة واحدة
+            ابدأ الآن: 3,500 دج دفعة واحدة
           </a>
         </div>
       </div>

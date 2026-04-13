@@ -16,7 +16,7 @@ const T = {
   sourceCodeDesc: { ar: 'احصل على كود متجرك ومنصتك', fr: 'Obtenez le code de votre boutique et de votre plateforme', en: 'Get the code for your store and platform' },
   downloadFailed: { ar: 'تعذّر التحميل. أعد المحاولة.', fr: 'Échec du téléchargement. Réessayez.', en: 'Download failed. Please try again.' },
   storeSourceLabel: { ar: 'كود المتجر (React)', fr: 'Code de la boutique (React)', en: 'Store code (React)' },
-  storeSourceDesc: { ar: 'كود مصدر متجرك بالكامل — TanStack Start + React 19', fr: 'Code source complet de votre boutique — TanStack Start + React 19', en: 'Full store source code — TanStack Start + React 19' },
+  storeSourceDesc: { ar: 'كود مصدر متجرك بالكامل. TanStack Start + React 19', fr: 'Code source complet de votre boutique. TanStack Start + React 19', en: 'Full store source code. TanStack Start + React 19' },
   storeAppLabel: { ar: 'كود تطبيق المتجر', fr: 'Code de l\'application mobile', en: 'Store app code' },
   storeAppDesc: { ar: 'كود مصدر تطبيق الجوال للمتجر', fr: 'Code source de l\'application mobile de la boutique', en: 'Store mobile app source code' },
   platformSourceLabel: { ar: 'كود المنصة الكاملة', fr: 'Code complet de la plateforme', en: 'Full platform code' },

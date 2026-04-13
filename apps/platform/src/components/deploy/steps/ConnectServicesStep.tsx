@@ -14,9 +14,9 @@ interface Props {
 const T = {
   connectServices: { ar: 'ربط الخدمات', fr: 'Connecter les services', en: 'Connect Services' },
   connectServicesDesc: {
-    ar: 'اربط حساب Cloudflare لنشر متجرك — قاعدة البيانات تُدار تلقائياً من طرفنا',
-    fr: 'Connectez Cloudflare pour déployer — la base de données est gérée automatiquement',
-    en: 'Connect Cloudflare to deploy — the database is managed automatically by us',
+    ar: 'اربط حساب Cloudflare لنشر متجرك. قاعدة البيانات تُدار تلقائياً من طرفنا',
+    fr: 'Connectez Cloudflare pour déployer. La base de données est gérée automatiquement',
+    en: 'Connect Cloudflare to deploy. The database is managed automatically by us',
   },
   cfTitle: { ar: 'Cloudflare', fr: 'Cloudflare', en: 'Cloudflare' },
   cfDescription: {
@@ -29,14 +29,14 @@ const T = {
   cfAccountIdLabel: { ar: 'Account ID', fr: 'Account ID', en: 'Account ID' },
   cfApiTokenLabel: { ar: 'API Token', fr: 'API Token', en: 'API Token' },
   cfTokenHint: {
-    ar: 'من My Profile → API Tokens — صلاحية: Edit Workers & Pages + Zone Read + DNS Edit',
-    fr: 'Dans My Profile → API Tokens — permission : Edit Workers & Pages + Zone Read + DNS Edit',
-    en: 'From My Profile → API Tokens — permission: Edit Workers & Pages + Zone Read + DNS Edit',
+    ar: 'من My Profile → API Tokens. صلاحية: Edit Workers & Pages + Zone Read + DNS Edit',
+    fr: 'Dans My Profile → API Tokens. Permission : Edit Workers & Pages + Zone Read + DNS Edit',
+    en: 'From My Profile → API Tokens. Permission: Edit Workers & Pages + Zone Read + DNS Edit',
   },
   cfOAuthNotConfigured: {
-    ar: 'ربط OAuth غير مهيأ — استخدم الإدخال اليدوي',
-    fr: 'OAuth non configuré — utilisez la saisie manuelle',
-    en: 'OAuth not configured — use manual entry',
+    ar: 'ربط OAuth غير مهيأ. استخدم الإدخال اليدوي',
+    fr: 'OAuth non configuré. Utilisez la saisie manuelle',
+    en: 'OAuth not configured. Use manual entry',
   },
   fromAccountCreds: {
     ar: 'من إعدادات الحساب',
@@ -50,9 +50,9 @@ const T = {
   },
   instantTitle: { ar: 'قاعدة البيانات (InstantDB)', fr: 'Base de données (InstantDB)', en: 'Database (InstantDB)' },
   instantAutoDesc: {
-    ar: 'سيتم إنشاء قاعدة البيانات تلقائياً عند النشر — لا تحتاج لإجراء أي شيء',
+    ar: 'سيتم إنشاء قاعدة البيانات تلقائياً عند النشر. لا تحتاج لإجراء أي شيء',
     fr: 'La base de données sera créée automatiquement lors du déploiement',
-    en: 'The database will be created automatically at deployment — no action needed',
+    en: 'The database will be created automatically at deployment. No action needed',
   },
   instantAutoManaged: { ar: 'مُدارة تلقائياً بواسطة 7aba', fr: 'Gérée automatiquement par 7aba', en: 'Auto-managed by 7aba' },
   instantAdvanced: {

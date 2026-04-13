@@ -43,17 +43,17 @@ export const featureGrid = {
     {
       icon: 'Zap',
       label: { ar: 'نشر في دقيقتين',         fr: 'Déployé en 2 min',                en: 'Deploy in 2 minutes' },
-      desc:  { ar: 'Cloudflare Workers — أسرع CDN في العالم', fr: 'Cloudflare Workers — CDN le plus rapide', en: 'Cloudflare Workers — fastest CDN worldwide' },
+      desc:  { ar: 'Cloudflare Workers. أسرع CDN في العالم', fr: 'Cloudflare Workers. CDN le plus rapide', en: 'Cloudflare Workers. Fastest CDN worldwide' },
     },
     {
       icon: 'Shield',
       label: { ar: 'ملكية كاملة',             fr: 'Propriété totale',                en: 'Full ownership' },
-      desc:  { ar: 'الكود والبيانات ملكك، لا أحد يستطيع إغلاق متجرك', fr: 'Code et données vous appartiennent', en: 'Code and data are yours — nobody can shut your store down' },
+      desc:  { ar: 'الكود والبيانات ملكك، لا أحد يستطيع إغلاق متجرك', fr: 'Code et données vous appartiennent', en: 'Code and data are yours. Nobody can shut your store down' },
     },
     {
       icon: 'Palette',
       label: { ar: '3 قوالب احترافية',        fr: '3 thèmes pro',                    en: '3 pro themes' },
-      desc:  { ar: 'بسيط، جريء، دافئ — كل واحد محسّن للبيع', fr: 'Simple, audacieux, chaleureux — optimisés pour vendre', en: 'Simple, bold, warm — each optimised to sell' },
+      desc:  { ar: 'بسيط، جريء، دافئ. كل واحد محسّن للبيع', fr: 'Simple, audacieux, chaleureux. Optimisés pour vendre', en: 'Simple, bold, warm. Each optimised to sell' },
     },
     {
       icon: 'Languages',
@@ -95,15 +95,15 @@ export const howItWorks = {
     {
       icon: 'SlidersHorizontal',
       label: { ar: 'خصص محتواك',               fr: 'Personnalisez le contenu',        en: 'Customize your content' },
-      desc:  { ar: 'صور، نصوص، أسعار — كل شيء بصري', fr: 'Images, textes, prix — tout visuel', en: 'Images, text, prices — all visual' },
+      desc:  { ar: 'صور، نصوص، أسعار. كل شيء بصري', fr: 'Images, textes, prix. Tout visuel', en: 'Images, text, prices. All visual' },
     },
     {
       icon: 'Bell',
-      label: { ar: 'FOMO للزبائن — تلقائي',    fr: 'FOMO automatique pour vos clients', en: 'FOMO for customers — automatic' },
+      label: { ar: 'FOMO للزبائن تلقائي',    fr: 'FOMO automatique pour vos clients', en: 'FOMO for customers. Automatic' },
       desc:  {
-        ar: 'زوار متجرك يشوفوا: "شخص من وهران طلب للتو" — يخلق إلحاح ويرفع المبيعات',
-        fr: "Les visiteurs voient : \"Quelqu'un d'Oran vient de commander\" — urgence automatique",
-        en: 'Visitors see: "Someone from Oran just ordered" — creates urgency, boosts sales',
+        ar: 'زوار متجرك يشوفوا: "شخص من وهران طلب للتو". يخلق إلحاح ويرفع المبيعات',
+        fr: "Les visiteurs voient : \"Quelqu'un d'Oran vient de commander\". Urgence automatique",
+        en: 'Visitors see: "Someone from Oran just ordered". Creates urgency, boosts sales',
       },
     },
     {
@@ -156,25 +156,25 @@ export const comparisonTable = {
 // ── Notification Showcase ─────────────────────────────────────────────────────
 export const notificationShowcase = {
   badge:   {
-    ar: '🔥 ميزة حصرية — لا أحد في الجزائر يملكها',
-    fr: "🔥 Exclusif — personne en Algérie ne l'a",
-    en: '🔥 Exclusive — nobody in Algeria has it',
+    ar: '🔥 ميزة حصرية. لا أحد في الجزائر يملكها',
+    fr: "🔥 Exclusif. Personne en Algérie ne l'a",
+    en: '🔥 Exclusive. Nobody in Algeria has it',
   },
   headline: {
-    ar: 'زبائنك يشوفوا من اشترى قبلهم — تلقائياً',
-    fr: 'Vos clients voient qui a acheté avant eux — automatiquement',
-    en: 'Your customers see who bought before them — automatically',
+    ar: 'زبائنك يشوفوا من اشترى قبلهم، تلقائياً',
+    fr: 'Vos clients voient qui a acheté avant eux, automatiquement',
+    en: 'Your customers see who bought before them, automatically',
   },
   sub: {
-    ar: 'كل مرة يزور حد متجرك، يشوف إشعارات صغيرة في الزاوية: "شخص من وهران طلب للتو" أو "5 أشخاص من ولايتك طلبوا هذا الأسبوع". هذا يخلق إلحاح حقيقي ويرفع معدل التحويل — مثل WiserNotify، لكن مدمج في متجرك مباشرة.',
-    fr: "À chaque visite, vos clients voient des notifications discrètes : \"Quelqu'un d'Oran vient de commander\" ou \"5 personnes de votre wilaya ont commandé cette semaine\". Crée une vraie urgence — comme WiserNotify, mais intégré gratuitement.",
-    en: 'Every visit, customers see small corner notifications: "Someone from Oran just ordered" or "5 people from your wilaya ordered this week". Creates real urgency — like WiserNotify, but built right into your store.',
+    ar: 'كل مرة يزور حد متجرك، يشوف إشعارات صغيرة في الزاوية: "شخص من وهران طلب للتو" أو "5 أشخاص من ولايتك طلبوا هذا الأسبوع". هذا يخلق إلحاح حقيقي ويرفع معدل التحويل. مثل WiserNotify، لكن مدمج في متجرك مباشرة.',
+    fr: "À chaque visite, vos clients voient des notifications discrètes : \"Quelqu'un d'Oran vient de commander\" ou \"5 personnes de votre wilaya ont commandé cette semaine\". Crée une vraie urgence. Comme WiserNotify, mais intégré gratuitement.",
+    en: 'Every visit, customers see small corner notifications: "Someone from Oran just ordered" or "5 people from your wilaya ordered this week". Creates real urgency. Like WiserNotify, but built right into your store.',
   },
   features: [
     { ar: 'إشعار "شخص من ولايتك طلب للتو"',    fr: '"Quelqu\'un de ta wilaya vient de commander"', en: '"Someone from your wilaya just ordered"' },
     { ar: 'يتكيف مع مدينة الزائر',               fr: "S'adapte à la ville du visiteur",             en: "Adapts to the visitor's city" },
     { ar: 'يرفع معدل التحويل بشكل ملحوظ',        fr: 'Booste le taux de conversion significativement', en: 'Significantly boosts conversion rate' },
-    { ar: 'مدمج 100% — لا تطبيق خارجي',         fr: "100% intégré — aucune app externe",           en: '100% built-in — no external app' },
+    { ar: 'مدمج 100%. لا تطبيق خارجي',         fr: "100% intégré. Aucune app externe",           en: '100% built-in. No external app' },
   ],
   visitorSees: {
     ar: 'ما يراه الزائر في متجرك ↓',

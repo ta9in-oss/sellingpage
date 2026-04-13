@@ -83,7 +83,7 @@ export function FooterSection({ content, className }: FooterSectionProps) {
 
         {/* Copyright */}
         <p className="text-center text-xs opacity-40">
-          {content.copyright || `© ${new Date().getFullYear()} ${content.storeName || 'متجرك'} — جميع الحقوق محفوظة`}
+          {content.copyright || `© ${new Date().getFullYear()} ${content.storeName || 'متجرك'}. جميع الحقوق محفوظة`}
         </p>
       </div>
     </footer>

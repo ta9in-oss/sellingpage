@@ -302,8 +302,8 @@ export function StorePreview() {
                 {config.sections.length === 0 ? (
                   <div className="flex items-center justify-center h-64 text-zinc-400 text-lg">
                     {config.meta.rtl
-                      ? 'لا توجد أقسام — أضف قسمًا من القائمة'
-                      : 'No sections — add one from the sidebar'}
+                      ? 'لا توجد أقسام. أضف قسمًا من القائمة'
+                      : 'No sections. Add one from the sidebar'}
                   </div>
                 ) : (
                   config.sections.map((section) => (
