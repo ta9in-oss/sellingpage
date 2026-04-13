@@ -209,7 +209,7 @@ Page order in `apps/store/src/routes/index.tsx`: Hero → SocialProofBar → Fea
 |---|---|---|
 | `/` | `index.tsx` | Marketing landing page (JSON-LD schemas) |
 | `/pricing` | `pricing.tsx` | Pricing + comparison + FAQ |
-| `/demo` | `demo.tsx` | Demo store using `@7aba/store-ui` |
+| `/demo` | `demo.tsx` | Demo store — also served at `demo.7aba.store` via `7aba-demo-redirect` Worker (proxied, not redirected) |
 | `/dashboard` | `dashboard/index.tsx` | Auth gate → subscription gate → merchant dashboard |
 | `/dashboard/builder` | `dashboard/builder.tsx` | Store builder (`?storeId=`) |
 | `/dashboard/deploy` | `dashboard/deploy.tsx` | Deploy wizard (`?tier=free|pro`) |
@@ -323,7 +323,7 @@ npx tsx seed-orders.ts          # Seed test orders (from apps/store/)
 - **TanStack Start v1.131.31 has NO `createAPIFileRoute`** — API/webhook endpoints must be Cloudflare Workers or `createServerFn`
 - CF Worker `7aba-webhook` at `https://7aba-webhook.mohessaid.workers.dev` — handles Chargily webhooks; all env vars are **encrypted secrets** (`secret_text` bindings)
 - CF Worker `7aba-proxy` — reverse-proxies `7aba.store/*` → `7aba-platform.pages.dev`; injects `Cross-Origin-Opener-Policy: unsafe-none` on all responses (required for Google OAuth popup)
-- CF Worker `7aba-demo-redirect` — `demo.7aba.store/*` → 301 to `7aba.store/demo`
+- CF Worker `7aba-demo-redirect` — `demo.7aba.store/*` → **proxy** to `7aba-platform.pages.dev/demo` (NOT a redirect; root `/` maps to `/demo`)
 - Worker route priority: `7aba.store/api/webhook/chargily` (specific) > `7aba.store/*` (proxy) — webhook still hits `7aba-webhook` directly
 - **`handleNewStore`** in `dashboard/index.tsx` must pass `useBuilderStore.getState().config` (full StoreConfig) when creating a store — never a partial/manual config. Wrong section shapes crash `SortableSectionCard`.
 - **Chargily API v2 does NOT accept inline `customer` objects** in `createCheckout` — always call `createCustomer()` first, then pass `customer_id` to `createCheckout()`
