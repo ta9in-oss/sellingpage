@@ -16,7 +16,7 @@ import {
 import { Navbar } from '@/components/marketing/Navbar'
 import { useLang } from '@/hooks/useLang'
 
-const SITE_URL = 'https://7aba.store'
+const SITE_URL = 'https://7aba.app'
 
 const TITLE = '7aba.store | أطلق متجرك الإلكتروني في الجزائر | دفعة واحدة'
 const DESC =

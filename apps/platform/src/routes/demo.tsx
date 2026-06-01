@@ -17,7 +17,7 @@ import {
   type OrderData,
 } from '@7aba/store-ui'
 
-const SITE_URL = 'https://7aba.store'
+const SITE_URL = 'https://7aba.app'
 const TITLE = 'متجر تجريبي | شوف كيف يبدو متجرك مع 7aba.store'
 const DESC =
   'جرّب متجراً جزائرياً حقيقياً مبنياً بـ 7aba.store. شاهد كيف يبدو المتجر، اختبر نموذج الطلب، وتعرف على تجربة المشتري قبل أن تنشئ متجرك الخاص.'

@@ -6,7 +6,7 @@ import { PlatformNotifications } from '@/components/PlatformNotifications'
 import appCss from '@/styles/app.css?url'
 import analytics from '@/utils/analytics'
 
-const SITE_URL = 'https://7aba.store'
+const SITE_URL = 'https://7aba.app'
 const DEFAULT_OG = `${SITE_URL}/og-image.webp`
 const FONT_URL = 'https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&display=swap'
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined

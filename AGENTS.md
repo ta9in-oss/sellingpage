@@ -28,7 +28,7 @@
 ### Cloudflare MCP
 - Use `cloudflare-mcp-execute` to deploy Workers/Pages, set env vars, manage DNS
 - **Account ID:** check via `cloudflare-mcp-execute` — do not hardcode
-- **Platform Pages project:** `7aba-platform` → served at `7aba.store` via `7aba-proxy` Worker route
+- **Platform Pages project:** `7aba-platform` → served at `7aba.app` via `7aba-proxy` Worker route
 - **CF token:** set by user as environment variable — never hardcode in files
 
 ### InstantDB MCP
@@ -82,7 +82,7 @@ sellingpage/                  ← monorepo root
 │   │       ├── server/       ← createChargilyCheckout.ts, verifyChargilyPayment.ts
 │   │       ├── types/, utils/, styles/
 │   │       └── instant.schema.ts, instant.perms.ts
-│   └── platform/             ← main deployed app at 7aba.store (port 3001)
+│   └── platform/             ← main deployed app at 7aba.app (port 3001)
 │       └── src/
 │           ├── routes/       ← __root, index, pricing, demo, dashboard/(index, builder, deploy)
 │           ├── components/
@@ -209,7 +209,7 @@ Page order in `apps/store/src/routes/index.tsx`: Hero → SocialProofBar → Fea
 |---|---|---|
 | `/` | `index.tsx` | Marketing landing page (JSON-LD schemas) |
 | `/pricing` | `pricing.tsx` | Pricing + comparison + FAQ |
-| `/demo` | `demo.tsx` | Demo store — also served at `demo.7aba.store` via `7aba-demo-redirect` Worker (proxied, not redirected) |
+| `/demo` | `demo.tsx` | Demo store — also served at `demo.7aba.app` via `7aba-demo-redirect` Worker (proxied, not redirected) |
 | `/dashboard` | `dashboard/index.tsx` | Auth gate → subscription gate → merchant dashboard |
 | `/dashboard/builder` | `dashboard/builder.tsx` | Store builder (`?storeId=`) |
 | `/dashboard/deploy` | `dashboard/deploy.tsx` | Deploy wizard (`?tier=free|pro`) |
@@ -252,7 +252,7 @@ Page order in `apps/store/src/routes/index.tsx`: Hero → SocialProofBar → Fea
 | `INSTANTDB_PLATFORM_PERSONAL_TOKEN` | Personal token — auto-provisions store databases | ✅ set |
 | `VITE_GOOGLE_CLIENT_ID` | Google OAuth for platform login | ✅ set |
 | `CHARGILY_PLATFORM_SECRET_KEY` | Chargily secret for subscriptions | ✅ set (test) |
-| `VITE_APP_URL` | App base URL (production: https://7aba.store) | ✅ set |
+| `VITE_APP_URL` | App base URL (production: https://7aba.app) | ✅ set |
 | `VITE_CF_OAUTH_CLIENT_ID` | CF OAuth client ID (one-click CF linking) | ❌ register at dash.cloudflare.com/profile/developer-applications |
 | `CF_OAUTH_CLIENT_SECRET` | CF OAuth client secret (server-only) | ❌ register at dash.cloudflare.com/profile/developer-applications |
 | `DOWNLOAD_URL_STORE_SOURCE` | Pro tier store source download | ❌ optional (defaults to GitHub archive) |
@@ -282,7 +282,7 @@ npx tsx seed-orders.ts          # Seed test orders (from apps/store/)
 
 - **GitHub Actions:** `.github/workflows/deploy.yml` — triggers on push to `main`
 - **Builds:** `apps/platform` only (store is a template, not deployed separately)
-- **Deploys to:** Cloudflare Pages project `7aba-platform` → `7aba.store`
+- **Deploys to:** Cloudflare Pages project `7aba-platform` → `7aba.app`
 - **CF token in CI:** `CLOUDFLARE_API_TOKEN` secret in GitHub repo settings
 
 ---
@@ -322,9 +322,9 @@ npx tsx seed-orders.ts          # Seed test orders (from apps/store/)
 - `apps/store/app/` — **DELETED** (was a legacy duplicate of `apps/store/src/`)
 - **TanStack Start v1.131.31 has NO `createAPIFileRoute`** — API/webhook endpoints must be Cloudflare Workers or `createServerFn`
 - CF Worker `7aba-webhook` at `https://7aba-webhook.mohessaid.workers.dev` — handles Chargily webhooks; all env vars are **encrypted secrets** (`secret_text` bindings)
-- CF Worker `7aba-proxy` — reverse-proxies `7aba.store/*` → `7aba-platform.pages.dev`; injects `Cross-Origin-Opener-Policy: unsafe-none` on all responses (required for Google OAuth popup)
-- CF Worker `7aba-demo-redirect` — `demo.7aba.store/*` → **proxy** to `7aba-platform.pages.dev/demo` (NOT a redirect; root `/` maps to `/demo`)
-- Worker route priority: `7aba.store/api/webhook/chargily` (specific) > `7aba.store/*` (proxy) — webhook still hits `7aba-webhook` directly
+- CF Worker `7aba-proxy` — reverse-proxies `7aba.app/*` → `7aba-platform.pages.dev`; injects `Cross-Origin-Opener-Policy: unsafe-none` on all responses (required for Google OAuth popup)
+- CF Worker `7aba-demo-redirect` — `demo.7aba.app/*` → **proxy** to `7aba-platform.pages.dev/demo` (NOT a redirect; root `/` maps to `/demo`)
+- Worker route priority: `7aba.app/api/webhook/chargily` (specific) > `7aba.app/*` (proxy) — webhook still hits `7aba-webhook` directly
 - **`handleNewStore`** in `dashboard/index.tsx` must pass `useBuilderStore.getState().config` (full StoreConfig) when creating a store — never a partial/manual config. Wrong section shapes crash `SortableSectionCard`.
 - **Chargily API v2 does NOT accept inline `customer` objects** in `createCheckout` — always call `createCustomer()` first, then pass `customer_id` to `createCheckout()`
 - **Google OAuth**: `clientName: 'google-web'` must be registered in InstantDB dash API — cannot use `instant-cli` for this; use `POST /dash/apps/{id}/oauth_service_providers` then `POST /dash/apps/{id}/oauth_clients`
