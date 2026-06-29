@@ -168,7 +168,7 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
   const openCFOAuth = () => {
     if (!cfClientId) return
     const redirectUri = `${window.location.origin}/auth/cloudflare`
-    const scopes = 'account:read user:read workers:write workers_kv:write workers_routes:write zone:read dns:write'
+    const scopes = 'account:read user:read workers:write workers_routes:write zone:read dns:write'
     const url = `https://dash.cloudflare.com/oauth2/auth?response_type=code&client_id=${encodeURIComponent(cfClientId)}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scopes)}`
     popupRef.current = window.open(url, 'cf-oauth', 'width=640,height=720,noopener')
   }
