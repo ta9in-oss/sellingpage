@@ -62,6 +62,12 @@ const T = {
   },
   instantAppIdLabel: { ar: 'App ID', fr: 'App ID', en: 'App ID' },
   instantAdminTokenLabel: { ar: 'Admin Token', fr: 'Admin Token', en: 'Admin Token' },
+  connectInstant: { ar: 'ربط InstantDB', fr: 'Connecter InstantDB', en: 'Connect InstantDB' },
+  instantOwnAccount: {
+    ar: 'سيتم إنشاء قاعدة البيانات في حسابك على InstantDB',
+    fr: 'La base de données sera créée dans votre compte InstantDB',
+    en: 'The database will be created in your own InstantDB account',
+  },
   connected: { ar: 'متصل ✓', fr: 'Connecté ✓', en: 'Connected ✓' },
   notConnected: { ar: 'غير متصل', fr: 'Non connecté', en: 'Not connected' },
   saving: { ar: 'جارٍ الحفظ...', fr: 'Enregistrement...', en: 'Saving...' },
@@ -85,15 +91,23 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
   const [instantAppId, setInstantAppId] = useState('')
   const [instantAdminToken, setInstantAdminToken] = useState('')
   const [instantProvisionError, setInstantProvisionError] = useState('')
+  const [instantOAuthToken, setInstantOAuthToken] = useState('')
+  const [instantConnected, setInstantConnected] = useState(false)
 
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState('')
   const popupRef = useRef<Window | null>(null)
+  const instantPopupRef = useRef<Window | null>(null)
 
   const cfClientId = typeof window !== 'undefined'
     ? (import.meta.env.VITE_CF_OAUTH_CLIENT_ID as string | undefined)
     : undefined
   const cfOAuthAvailable = Boolean(cfClientId)
+
+  const instantClientId = typeof window !== 'undefined'
+    ? ((import.meta as any).env?.VITE_INSTANTDB_OAUTH_CLIENT_ID as string | undefined)
+    : undefined
+  const instantOAuthAvailable = Boolean(instantClientId)
 
   const { data: storeData } = db.useQuery({
     stores: { $: { where: { id: storeId } } },
@@ -140,6 +154,12 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
         setUsingAccountCreds(false)
         popupRef.current?.close()
       }
+      if (e.data?.type === 'instantdb_connected') {
+        const { token } = e.data as { token: string; refreshToken?: string }
+        setInstantOAuthToken(token)
+        setInstantConnected(true)
+        instantPopupRef.current?.close()
+      }
     }
     window.addEventListener('message', handler)
     return () => window.removeEventListener('message', handler)
@@ -151,6 +171,14 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
     const scopes = 'account:read user:read workers:write workers_kv:write workers_routes:write zone:read dns:write'
     const url = `https://dash.cloudflare.com/oauth2/auth?response_type=code&client_id=${encodeURIComponent(cfClientId)}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scopes)}`
     popupRef.current = window.open(url, 'cf-oauth', 'width=640,height=720,noopener')
+  }
+
+  const openInstantOAuth = () => {
+    if (!instantClientId) return
+    const redirectUri = `${window.location.origin}/auth/instantdb`
+    const scopes = 'apps-read apps-write'
+    const url = `https://api.instantdb.com/platform/oauth/start?response_type=code&client_id=${encodeURIComponent(instantClientId)}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scopes)}`
+    instantPopupRef.current = window.open(url, 'instant-oauth', 'width=640,height=720,noopener')
   }
 
   const canContinue = cfConnected || (cfAccountId.trim() !== '' && cfApiToken.trim() !== '')
@@ -167,7 +195,7 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
       if (!useOwnInstant && !alreadyProvisioned) {
         const store = storeData?.stores?.[0]
         const slug = (store?.slug as string) ?? storeId
-        const provisioned = await autoProvisionInstantDB({ data: { storeSlug: slug } })
+        const provisioned = await autoProvisionInstantDB({ data: { storeSlug: slug, merchantToken: instantOAuthToken || undefined } })
         appId = provisioned.appId
         adminToken = provisioned.adminToken
       }
@@ -227,6 +255,18 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
             {t(T.instantAutoManaged)}
           </span>
         </div>
+
+        {instantOAuthAvailable && (
+          <div className="space-y-1.5">
+            <Button variant="default" size="sm" onClick={openInstantOAuth} className="w-full gap-2" disabled={instantConnected}>
+              <InstantIcon size={14} />
+              {instantConnected ? t(T.connected) : t(T.connectInstant)}
+            </Button>
+            {instantConnected && (
+              <p className="text-xs text-green-600">{t(T.instantOwnAccount)}</p>
+            )}
+          </div>
+        )}
 
         <button
           onClick={() => setUseOwnInstant(!useOwnInstant)}
@@ -365,7 +405,10 @@ function CFIcon({ size }: { size?: number }) {
   return <div className="w-9 h-9 bg-orange-500 rounded-lg flex items-center justify-center shrink-0 text-white text-xs font-bold">CF</div>
 }
 
-function InstantIcon() {
+function InstantIcon({ size }: { size?: number } = {}) {
+  if (size) {
+    return <Sparkles size={size} className="text-purple-600" />
+  }
   return (
     <div className="w-9 h-9 bg-purple-600 rounded-lg flex items-center justify-center shrink-0">
       <Sparkles size={16} className="text-white" />
