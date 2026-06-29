@@ -17,6 +17,7 @@ import { Route as DashboardSettingsRouteImport } from './routes/dashboard/settin
 import { Route as DashboardNewStoreRouteImport } from './routes/dashboard/new-store'
 import { Route as DashboardDeployRouteImport } from './routes/dashboard/deploy'
 import { Route as DashboardBuilderRouteImport } from './routes/dashboard/builder'
+import { Route as AuthInstantdbRouteImport } from './routes/auth/instantdb'
 import { Route as AuthCloudflareRouteImport } from './routes/auth/cloudflare'
 
 const PricingRoute = PricingRouteImport.update({
@@ -59,6 +60,11 @@ const DashboardBuilderRoute = DashboardBuilderRouteImport.update({
   path: '/dashboard/builder',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthInstantdbRoute = AuthInstantdbRouteImport.update({
+  id: '/auth/instantdb',
+  path: '/auth/instantdb',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthCloudflareRoute = AuthCloudflareRouteImport.update({
   id: '/auth/cloudflare',
   path: '/auth/cloudflare',
@@ -70,6 +76,7 @@ export interface FileRoutesByFullPath {
   '/demo': typeof DemoRoute
   '/pricing': typeof PricingRoute
   '/auth/cloudflare': typeof AuthCloudflareRoute
+  '/auth/instantdb': typeof AuthInstantdbRoute
   '/dashboard/builder': typeof DashboardBuilderRoute
   '/dashboard/deploy': typeof DashboardDeployRoute
   '/dashboard/new-store': typeof DashboardNewStoreRoute
@@ -81,6 +88,7 @@ export interface FileRoutesByTo {
   '/demo': typeof DemoRoute
   '/pricing': typeof PricingRoute
   '/auth/cloudflare': typeof AuthCloudflareRoute
+  '/auth/instantdb': typeof AuthInstantdbRoute
   '/dashboard/builder': typeof DashboardBuilderRoute
   '/dashboard/deploy': typeof DashboardDeployRoute
   '/dashboard/new-store': typeof DashboardNewStoreRoute
@@ -93,6 +101,7 @@ export interface FileRoutesById {
   '/demo': typeof DemoRoute
   '/pricing': typeof PricingRoute
   '/auth/cloudflare': typeof AuthCloudflareRoute
+  '/auth/instantdb': typeof AuthInstantdbRoute
   '/dashboard/builder': typeof DashboardBuilderRoute
   '/dashboard/deploy': typeof DashboardDeployRoute
   '/dashboard/new-store': typeof DashboardNewStoreRoute
@@ -106,6 +115,7 @@ export interface FileRouteTypes {
     | '/demo'
     | '/pricing'
     | '/auth/cloudflare'
+    | '/auth/instantdb'
     | '/dashboard/builder'
     | '/dashboard/deploy'
     | '/dashboard/new-store'
@@ -117,6 +127,7 @@ export interface FileRouteTypes {
     | '/demo'
     | '/pricing'
     | '/auth/cloudflare'
+    | '/auth/instantdb'
     | '/dashboard/builder'
     | '/dashboard/deploy'
     | '/dashboard/new-store'
@@ -128,6 +139,7 @@ export interface FileRouteTypes {
     | '/demo'
     | '/pricing'
     | '/auth/cloudflare'
+    | '/auth/instantdb'
     | '/dashboard/builder'
     | '/dashboard/deploy'
     | '/dashboard/new-store'
@@ -140,6 +152,7 @@ export interface RootRouteChildren {
   DemoRoute: typeof DemoRoute
   PricingRoute: typeof PricingRoute
   AuthCloudflareRoute: typeof AuthCloudflareRoute
+  AuthInstantdbRoute: typeof AuthInstantdbRoute
   DashboardBuilderRoute: typeof DashboardBuilderRoute
   DashboardDeployRoute: typeof DashboardDeployRoute
   DashboardNewStoreRoute: typeof DashboardNewStoreRoute
@@ -205,6 +218,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardBuilderRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/instantdb': {
+      id: '/auth/instantdb'
+      path: '/auth/instantdb'
+      fullPath: '/auth/instantdb'
+      preLoaderRoute: typeof AuthInstantdbRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth/cloudflare': {
       id: '/auth/cloudflare'
       path: '/auth/cloudflare'
@@ -220,6 +240,7 @@ const rootRouteChildren: RootRouteChildren = {
   DemoRoute: DemoRoute,
   PricingRoute: PricingRoute,
   AuthCloudflareRoute: AuthCloudflareRoute,
+  AuthInstantdbRoute: AuthInstantdbRoute,
   DashboardBuilderRoute: DashboardBuilderRoute,
   DashboardDeployRoute: DashboardDeployRoute,
   DashboardNewStoreRoute: DashboardNewStoreRoute,
