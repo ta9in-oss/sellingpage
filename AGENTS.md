@@ -2,7 +2,7 @@
 
 > **For AI agents:** Read this file at the start of every session. Update it when you make structural changes, add/remove dependencies, or change conventions. Keep entries concise — one line where possible. Do NOT add prose or explanations that already exist in code. Update the `Last updated` field on every write.
 
-**Last updated:** 2026-04-05 (lang dropdown, shadcn-first rules)  
+**Last updated:** 2026-06-29 (neo-brutalist landing redesign, CF + InstantDB OAuth, pricing)  
 **Project:** حبة ستور (7aba.store) — Algerian e-commerce platform (store builder + selling page)  
 **Repo:** https://github.com/Ta9in/sellingpage  
 **Monorepo:** pnpm workspaces + Turborepo — `apps/store`, `apps/platform`, `packages/store-ui`
@@ -54,7 +54,7 @@
 | State | Zustand (platform builder) + InstantDB reactive queries |
 | DnD | @dnd-kit/core + @dnd-kit/sortable (builder SectionList) |
 | Icons | Lucide React |
-| Auth | Google OAuth (`@react-oauth/google`) + InstantDB magic-code |
+| Auth | Google OAuth (`@react-oauth/google`) + InstantDB magic-code; merchant-link OAuth for Cloudflare + InstantDB (deploy wizard) |
 | Payments | Chargily Pay (DZD, Algerian e-payments) |
 | Analytics | Google Analytics, Meta Pixel, Microsoft Clarity, PostHog |
 
@@ -131,11 +131,13 @@ sellingpage/                  ← monorepo root
 
 ## Subscription Tiers
 
-| Tier | Price | Features |
-|------|-------|---------|
-| `starter` | 3,500 DZD | Create stores, builder access |
-| `pro` | 20,000 DZD | + Download store source code + store app APK |
-| `agency` | 100,000 DZD | + Download platform codebase |
+> Display names changed (Starter / Freelancer / Run One); **internal enum keys unchanged** (`starter`|`pro`|`agency`) — no data migration. `search={{ plan: tier.id }}` still uses these ids.
+
+| Tier (id) | Display name | Price | Features |
+|------|------|-------|---------|
+| `starter` | Starter / المبتدئ | 3,000 DZD | Create stores, builder access |
+| `pro` | Freelancer / المستقل | 20,000 DZD | + Download store source code + priority support |
+| `agency` | Run One / الوكالة | 500,000 DZD | + Full platform setup, updates-first, unlimited client stores |
 
 **Paywall flow:** Un-subscribed user → dashboard → pricing inline → Chargily Pay → redirect back → verify → unlock tier
 
@@ -214,6 +216,7 @@ Page order in `apps/store/src/routes/index.tsx`: Hero → SocialProofBar → Fea
 | `/dashboard/builder` | `dashboard/builder.tsx` | Store builder (`?storeId=`) |
 | `/dashboard/deploy` | `dashboard/deploy.tsx` | Deploy wizard (`?tier=free|pro`) |
 | `/auth/cloudflare` | `auth/cloudflare.tsx` | CF OAuth popup callback — exchanges code, postMessages creds to opener |
+| `/auth/instantdb` | `auth/instantdb.tsx` | InstantDB Platform OAuth popup callback — exchanges code, postMessages `instantdb_connected` `{token,refreshToken}` to opener |
 
 ---
 
@@ -255,6 +258,8 @@ Page order in `apps/store/src/routes/index.tsx`: Hero → SocialProofBar → Fea
 | `VITE_APP_URL` | App base URL (production: https://7aba.app) | ✅ set |
 | `VITE_CF_OAUTH_CLIENT_ID` | CF OAuth client ID (one-click CF linking) | ❌ register at dash.cloudflare.com/profile/developer-applications |
 | `CF_OAUTH_CLIENT_SECRET` | CF OAuth client secret (server-only) | ❌ register at dash.cloudflare.com/profile/developer-applications |
+| `VITE_INSTANTDB_OAUTH_CLIENT_ID` | InstantDB Platform OAuth client ID (merchant connects own DB) | ❌ register in InstantDB dashboard; app is test-mode until approved |
+| `INSTANTDB_OAUTH_CLIENT_SECRET` | InstantDB OAuth client secret (server-only) | ❌ register in InstantDB dashboard |
 | `DOWNLOAD_URL_STORE_SOURCE` | Pro tier store source download | ❌ optional (defaults to GitHub archive) |
 | `DOWNLOAD_URL_STORE_APP` | Pro tier app APK download | ❌ optional (defaults to GitHub archive) |
 | `DOWNLOAD_URL_PLATFORM_SOURCE` | Agency tier platform download | ❌ optional (defaults to GitHub archive) |
@@ -331,7 +336,10 @@ npx tsx seed-orders.ts          # Seed test orders (from apps/store/)
 - **InstantDB personal token** for dash API calls: `REDACTED` (at `~/.config/instantdb-prod-nodejs/a`)
 - **InstantDB app creation API**: `POST https://api.instantdb.com/dash/apps` — must supply `id` (UUID), `title`, `admin_token` (UUID) in body + `Authorization: Bearer {personal_token}`. Response: `{"app": {..., "admin-token": "...", "id": "..."}}` (note hyphen in `admin-token`)
 - **CF OAuth**: `ConnectServicesStep` shows OAuth button when `VITE_CF_OAUTH_CLIENT_ID` is set; falls back to manual entry. Callback route at `/auth/cloudflare`. Requires registering app at dash.cloudflare.com/profile/developer-applications — scopes: `account:read workers:write workers_kv:write workers_routes:write zone:read dns:write`
-- **InstantDB auto-provision**: `autoProvisionInstantDB` server fn uses `INSTANTDB_PLATFORM_PERSONAL_TOKEN` to create store apps automatically — merchants never need an InstantDB account
+- **InstantDB auto-provision**: `autoProvisionInstantDB` server fn uses `INSTANTDB_PLATFORM_PERSONAL_TOKEN` to create store apps automatically (`/dash/apps`) — merchants never need an InstantDB account. If a merchant OAuth-connects their own InstantDB (deploy wizard), `autoProvisionInstantDB({storeSlug, merchantToken})` provisions under THEIR account via `/superadmin/apps` instead.
+- **Landing page** (`apps/platform/src/routes/index.tsx`): neo-brutalist redesign, SEPARATE from `@7aba/store-ui`. All markup under `<div className="landing-root">`; styles in `src/styles/landing.css` are **scoped under `.landing-root`** (do not unscope — it would leak resets into the Tailwind/shadcn dashboard). Sections in `components/marketing/landing/*`, copy in `locales/index.ts` `landing*` exports (ar/en; fr falls back to en until translated), shared helpers in `landing/primitives.tsx` (inline SVG icons, `Reveal`, `SplitTitle`, `Kicker`, `Brand`). Old store-ui landing sections removed from `/` but still used by `/demo` + builder preview.
+- **InstantDB OAuth (Platform)**: verify endpoints against live docs before going live — `https://api.instantdb.com/platform/oauth/{start,token}` + `/superadmin/apps`. OAuth apps start in **test mode** (members only) until InstantDB approves. Both `/auth/cloudflare` and `/auth/instantdb` callbacks currently omit the OAuth `state`/CSRF param (future hardening).
+- `apps/platform/src/public/landing/store.png` + `dashboard.png` are the landing screenshots; `dashboard.png` is currently an interim copy of `demo-hero-screenshot.png` — swap the real design dashboard asset when available.
 
 ---
 
