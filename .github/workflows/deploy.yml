@@ -35,6 +35,11 @@ jobs:
           VITE_APP_URL: https://7aba.store
           VITE_GOOGLE_CLIENT_ID: 16915599620-b4cv7djgvok8agu1lpb2cbcdfjifbu93.apps.googleusercontent.com
           VITE_CHARGILY_PUBLIC_KEY: test_pk_9MgGDzJQ03LZzxaGGEiShDsRz1BL4tCRBJFHJcEb
+          # Public OAuth client ids (not secrets) — inlined by Vite to render the
+          # "connect" buttons. The matching *_CLIENT_SECRET values are runtime-only
+          # and set as encrypted Pages secrets, never here.
+          VITE_CF_OAUTH_CLIENT_ID: 8e55e2088cfacd60b74c2199b30a3a8d
+          VITE_INSTANTDB_OAUTH_CLIENT_ID: be194d93-775f-4b2f-b312-04996c0f5acf
         run: pnpm build
 
       - name: Deploy platform to Cloudflare Pages
