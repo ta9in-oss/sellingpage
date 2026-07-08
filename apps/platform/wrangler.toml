@@ -2,3 +2,12 @@ name = "7aba-platform"
 compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
 pages_build_output_dir = "dist"
+
+# Public (non-secret) runtime env vars. Safe to commit — these are OAuth *client ids*,
+# not secrets. The matching *_CLIENT_SECRET values are set as encrypted secrets via the
+# dashboard or `wrangler pages secret put`, never here.
+# Note: the VITE_* client ids are NOT set here — Vite inlines those at build time, so they
+# must be present in the environment that runs `pnpm build`.
+[vars]
+CF_OAUTH_CLIENT_ID = "8e55e2088cfacd60b74c2199b30a3a8d"
+INSTANTDB_OAUTH_CLIENT_ID = "be194d93-775f-4b2f-b312-04996c0f5acf"

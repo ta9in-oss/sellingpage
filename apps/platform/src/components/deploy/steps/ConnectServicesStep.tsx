@@ -100,7 +100,7 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
   const instantPopupRef = useRef<Window | null>(null)
 
   const cfClientId = typeof window !== 'undefined'
-    ? (import.meta.env.VITE_CF_OAUTH_CLIENT_ID as string | undefined)
+    ? ((import.meta as any).env?.VITE_CF_OAUTH_CLIENT_ID as string | undefined)
     : undefined
   const cfOAuthAvailable = Boolean(cfClientId)
 
