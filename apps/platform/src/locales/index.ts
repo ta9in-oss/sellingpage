@@ -241,6 +241,8 @@ export const footer = {
   pricing:   { ar: 'الأسعار',              fr: 'Tarifs',            en: 'Pricing' },
   howItWorks:{ ar: 'كيف يعمل؟',           fr: 'Comment ça marche?',en: 'How it works' },
   demo:      { ar: 'عرض تجريبي',           fr: 'Démo',              en: 'Demo' },
+  terms:     { ar: 'شروط الاستخدام',       fr: "Conditions d'utilisation", en: 'Terms of Service' },
+  privacy:   { ar: 'سياسة الخصوصية',       fr: 'Politique de confidentialité', en: 'Privacy Policy' },
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
