@@ -9,17 +9,11 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TestComponentsRouteImport } from './routes/test-components'
 import { Route as SuccessRouteImport } from './routes/success'
 import { Route as SetupRouteImport } from './routes/setup'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 
-const TestComponentsRoute = TestComponentsRouteImport.update({
-  id: '/test-components',
-  path: '/test-components',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const SuccessRoute = SuccessRouteImport.update({
   id: '/success',
   path: '/success',
@@ -46,14 +40,12 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/setup': typeof SetupRoute
   '/success': typeof SuccessRoute
-  '/test-components': typeof TestComponentsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/setup': typeof SetupRoute
   '/success': typeof SuccessRoute
-  '/test-components': typeof TestComponentsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -61,20 +53,13 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/setup': typeof SetupRoute
   '/success': typeof SuccessRoute
-  '/test-components': typeof TestComponentsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/setup' | '/success' | '/test-components'
+  fullPaths: '/' | '/dashboard' | '/setup' | '/success'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/setup' | '/success' | '/test-components'
-  id:
-    | '__root__'
-    | '/'
-    | '/dashboard'
-    | '/setup'
-    | '/success'
-    | '/test-components'
+  to: '/' | '/dashboard' | '/setup' | '/success'
+  id: '__root__' | '/' | '/dashboard' | '/setup' | '/success'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -82,18 +67,10 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   SetupRoute: typeof SetupRoute
   SuccessRoute: typeof SuccessRoute
-  TestComponentsRoute: typeof TestComponentsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/test-components': {
-      id: '/test-components'
-      path: '/test-components'
-      fullPath: '/test-components'
-      preLoaderRoute: typeof TestComponentsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/success': {
       id: '/success'
       path: '/success'
@@ -130,7 +107,6 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   SetupRoute: SetupRoute,
   SuccessRoute: SuccessRoute,
-  TestComponentsRoute: TestComponentsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

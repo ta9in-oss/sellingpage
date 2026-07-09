@@ -1,11 +1,11 @@
 import { useLang } from '@/hooks/useLang'
-import type { Lang } from '@/hooks/useLang'
 import { Link } from '@tanstack/react-router'
 import { Brand } from '@/components/marketing/landing/primitives'
+import { LanguageSelect } from '@/components/marketing/LanguageSelect'
 import { landingNav } from '@/locales'
 
 export function Nav() {
-  const { lang, setLang, t } = useLang()
+  const { t } = useLang()
 
   return (
     <header className="nav" id="top">
@@ -18,16 +18,7 @@ export function Nav() {
           <a href="#roadmap">{t(landingNav.roadmap)}</a>
         </nav>
         <div className="nav__right">
-          <select
-            className="langbtn"
-            value={lang}
-            onChange={(e) => setLang(e.target.value as Lang)}
-            aria-label="switch language"
-          >
-            <option value="ar">عربي</option>
-            <option value="fr">Français</option>
-            <option value="en">English</option>
-          </select>
+          <LanguageSelect />
           <Link to="/dashboard" search={{}} className="btn btn--accent">
             {t(landingNav.cta)}
           </Link>

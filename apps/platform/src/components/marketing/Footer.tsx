@@ -30,9 +30,9 @@ export function Footer() {
             <a href="#how" className="text-zinc-400 hover:text-yellow-400 font-bold transition-colors">
               {t(T.howItWorks)}
             </a>
-            <Link to="/pricing" className="text-zinc-400 hover:text-yellow-400 font-bold transition-colors">
+            <a href="/#pricing" className="text-zinc-400 hover:text-yellow-400 font-bold transition-colors">
               {t(T.pricing)}
-            </Link>
+            </a>
             <Link to="/demo" className="text-zinc-400 hover:text-yellow-400 font-bold transition-colors">
               {t(T.demo)}
             </Link>
