@@ -12,12 +12,11 @@ export function Footer() {
           {/* Brand */}
           <div className="flex flex-col items-center md:items-start gap-3">
             <img
-              src="/assets/logo/7aba_store_logo_i1.svg"
-              alt="7aba.store"
-              className="h-10 w-auto brightness-0 invert"
+              src="/assets/logo/7aba_logo_dark.svg"
+              alt="7aba"
+              className="h-12 w-auto"
               onError={(e) => {
-                ;(e.currentTarget as HTMLImageElement).src = '/assets/logo/7aba_store_logo_i1.png'
-                ;(e.currentTarget as HTMLImageElement).classList.add('brightness-0', 'invert')
+                ;(e.currentTarget as HTMLImageElement).src = '/assets/logo/7aba_logo_dark.png'
               }}
             />
             <span className="text-sm text-zinc-400">{t(T.tagline)}</span>
@@ -36,6 +35,12 @@ export function Footer() {
             </Link>
             <Link to="/demo" className="text-zinc-400 hover:text-yellow-400 font-bold transition-colors">
               {t(T.demo)}
+            </Link>
+            <Link to="/terms" className="text-zinc-400 hover:text-yellow-400 font-bold transition-colors">
+              {t(T.terms)}
+            </Link>
+            <Link to="/privacy" className="text-zinc-400 hover:text-yellow-400 font-bold transition-colors">
+              {t(T.privacy)}
             </Link>
             <a
               href="https://wa.me/213XXXXXXXXX"

@@ -27,4 +27,4 @@ User-agent: Googlebot
 Allow: /
 Disallow: /dashboard
 
-Sitemap: https://7aba.store/sitemap.xml
+Sitemap: https://7aba.app/sitemap.xml

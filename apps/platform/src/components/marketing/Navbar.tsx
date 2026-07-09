@@ -13,13 +13,14 @@ export function Navbar() {
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 shrink-0">
           <img
-            src="/assets/logo/7aba_store_logo_i1.svg"
-            alt="7aba.store"
+            src="/assets/logo/7aba_logo_light.svg"
+            alt="7aba"
             className="h-8 w-auto"
             onError={(e) => {
-              ;(e.currentTarget as HTMLImageElement).src = '/assets/logo/7aba_store_logo_i1.png'
+              ;(e.currentTarget as HTMLImageElement).src = '/assets/logo/7aba_logo_light.png'
             }}
           />
+          <span className="text-xl font-black tracking-tight">7aba</span>
         </Link>
 
         {/* Nav links */}

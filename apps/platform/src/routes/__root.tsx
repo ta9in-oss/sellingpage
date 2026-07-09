@@ -3,6 +3,7 @@ import { Outlet, createRootRoute, HeadContent, Scripts } from '@tanstack/react-r
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import { LangProvider } from '@/context/LangContext'
 import { PlatformNotifications } from '@/components/PlatformNotifications'
+import { CookieNotice } from '@/components/marketing/CookieNotice'
 import appCss from '@/styles/app.css?url'
 import analytics from '@/utils/analytics'
 
@@ -57,6 +58,7 @@ function RootComponent() {
           <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID ?? ''}>
             <Outlet />
             <PlatformNotifications />
+            <CookieNotice />
           </GoogleOAuthProvider>
         </LangProvider>
         <Scripts />
