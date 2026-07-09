@@ -310,25 +310,24 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
           </div>
         </div>
 
-        {cfOAuthAvailable ? (
+        {cfOAuthAvailable && (
           <Button variant="default" size="sm" onClick={openCFOAuth} className="w-full gap-2" disabled={cfConnected}>
             <CFIcon size={14} />
             {cfConnected ? t(T.connected) : t(T.cfOAuth)}
           </Button>
-        ) : (
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" disabled className="gap-1.5 opacity-60">{t(T.cfOAuth)}</Button>
-            <p className="text-xs text-muted-foreground">{t(T.cfOAuthNotConfigured)}</p>
-          </div>
         )}
 
-        <button
-          onClick={() => setShowManualCF(!showManualCF)}
-          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
-        >
-          {showManualCF ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-          {t(T.cfManual)}
-        </button>
+        {/* When OAuth is unavailable (CF client not yet public), the manual fields
+            below render by default — no toggle needed. */}
+        {cfOAuthAvailable && (
+          <button
+            onClick={() => setShowManualCF(!showManualCF)}
+            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            {showManualCF ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+            {t(T.cfManual)}
+          </button>
+        )}
 
         {(showManualCF || !cfOAuthAvailable) && (
           <div className="space-y-3">
