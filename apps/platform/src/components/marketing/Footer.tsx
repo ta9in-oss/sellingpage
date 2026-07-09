@@ -43,7 +43,7 @@ export function Footer() {
               {t(T.privacy)}
             </Link>
             <a
-              href="https://wa.me/213XXXXXXXXX"
+              href="https://wa.me/213553816920"
               target="_blank"
               rel="noopener noreferrer"
               className="text-zinc-400 hover:text-yellow-400 font-bold transition-colors flex items-center gap-1.5"

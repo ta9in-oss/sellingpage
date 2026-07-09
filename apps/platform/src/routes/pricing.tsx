@@ -2,125 +2,36 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useLang } from '@/hooks/useLang'
 import { Navbar } from '@/components/marketing/Navbar'
 import { Footer } from '@/components/marketing/Footer'
+import { FirstBatchCountdown } from '@/components/marketing/FirstBatchCountdown'
 import { Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { TIERS, ONCE_LABEL, contactWhatsappUrl, CONTACT_EMAIL } from '@/config/pricing'
 
 export const Route = createFileRoute('/pricing')({
   component: PricingPage,
 })
 
-const tiers = [
-  {
-    id: 'starter',
-    name: { ar: 'المبتدئ', fr: 'Starter', en: 'Starter' },
-    price: { ar: '3,000 دج', fr: '3 000 DZD', en: '3,000 DZD' },
-    badge: null,
-    accent: false,
-    features: {
-      ar: [
-        'إنشاء ونشر عدد غير محدود من المتاجر',
-        'محرر بصري كامل (12 نوع قسم)',
-        '3 ثيمات احترافية + تخصيص كامل',
-        'دفع عند الاستلام (COD). مجاني دائماً',
-        'دفع إلكتروني Chargily Pay (CIB، Dahabia)',
-        'نطاق مخصص عبر Cloudflare',
-        'لوحة إدارة الطلبات',
-        'Google Analytics + Meta Pixel',
-      ],
-      fr: [
-        'Créer et publier des boutiques illimitées',
-        'Éditeur visuel complet (12 types de sections)',
-        '3 thèmes professionnels + personnalisation',
-        'Paiement à la livraison (COD). toujours gratuit',
-        'Paiement en ligne Chargily Pay (CIB, Dahabia)',
-        'Domaine personnalisé via Cloudflare',
-        'Tableau de bord commandes',
-        'Google Analytics + Meta Pixel',
-      ],
-      en: [
-        'Create and publish unlimited stores',
-        'Full visual builder (12 section types)',
-        '3 professional themes + full customisation',
-        'Cash on Delivery (COD). always free',
-        'Online payment via Chargily Pay (CIB, Dahabia)',
-        'Custom domain via Cloudflare',
-        'Orders management dashboard',
-        'Google Analytics + Meta Pixel',
-      ],
-    },
-  },
-  {
-    id: 'pro',
-    name: { ar: 'المستقل', fr: 'Freelance', en: 'Freelancer' },
-    price: { ar: '20,000 دج', fr: '20 000 DZD', en: '20,000 DZD' },
-    badge: { ar: 'الأكثر اختياراً', fr: 'Le plus choisi', en: 'Most chosen' },
-    accent: true,
-    features: {
-      ar: [
-        'كل ما في باقة المبتدئ',
-        'تحميل كود مصدر المتجر فوراً',
-        'دعم ذو أولوية',
-      ],
-      fr: [
-        'Tout ce qui est dans Starter',
-        'Télécharger le code source de la boutique',
-        'Support prioritaire',
-      ],
-      en: [
-        'Everything in Starter',
-        'Download store source code instantly',
-        'Priority support',
-      ],
-    },
-  },
-  {
-    id: 'agency',
-    name: { ar: 'الوكالة', fr: 'Run One', en: 'Run One' },
-    price: { ar: '500,000 دج', fr: '500 000 DZD', en: '500,000 DZD' },
-    badge: null,
-    accent: false,
-    features: {
-      ar: [
-        'كل ما في باقة المستقل',
-        'نُجهّز لك منصة كاملة مثل حبة',
-        'تصلك التحديثات عند صدورها أولاً بأول',
-        'متاجر غير محدودة + دعم مباشر',
-      ],
-      fr: [
-        'Tout ce qui est dans Freelance',
-        'Nous configurons une plateforme complète comme 7aba',
-        'Vous recevez les mises à jour en premier',
-        'Boutiques illimitées + support direct',
-      ],
-      en: [
-        'Everything in Freelancer',
-        'We set up a full platform like 7aba for you',
-        'You get updates first, as we ship them',
-        'Unlimited client stores + direct support',
-      ],
-    },
-  },
-]
+const RUN_ONE_MSG = {
+  ar: 'مرحباً، أنا مهتم بباقة Run One على 7aba.',
+  fr: 'Bonjour, je suis intéressé par le forfait Run One sur 7aba.',
+  en: 'Hi, I am interested in the Run One plan on 7aba.',
+}
 
 const faqs = [
   {
     q: { ar: 'هل الدفع مرة واحدة فعلاً؟', fr: 'Le paiement est-il vraiment unique?', en: 'Is it really a one-time payment?' },
-    a: { ar: 'نعم. تدفع مرة واحدة وتحصل على الوصول كاملاً بدون اشتراك شهري أو سنوي.', fr: "Oui. Vous payez une seule fois et obtenez un accès complet sans abonnement mensuel ou annuel.", en: 'Yes. You pay once and get full access with no monthly or annual subscription.' },
+    a: { ar: 'نعم. تدفع مرة واحدة وتحصل على الوصول كاملاً بدون اشتراك شهري أو سنوي. لكن أسعار الدفعة الأولى تنتهي في 31 جويلية 2026.', fr: "Oui. Vous payez une seule fois, sans abonnement. Mais les tarifs 1re vague se terminent le 31 juillet 2026.", en: 'Yes. You pay once, no monthly or annual subscription. But first-batch prices end on 31 July 2026.' },
   },
   {
-    q: { ar: 'ما طرق الدفع المتاحة في متاجري؟', fr: 'Quels modes de paiement sont disponibles dans mes boutiques?', en: 'What payment methods are available in my stores?' },
-    a: {
-      ar: 'متجرك يدعم طريقتين: الدفع عند الاستلام (COD) مجاناً دائماً، ودفع إلكتروني عبر Chargily Pay (بطاقة CIB، Dahabia). تختار الطريقة أو تفعّل الاثنتين معاً من المحرر.',
-      fr: "Votre boutique supporte deux méthodes : Paiement à la livraison (COD) toujours gratuit, et paiement en ligne via Chargily Pay (CIB, Dahabia). Activez l'une ou les deux depuis l'éditeur.",
-      en: 'Your store supports two methods: Cash on Delivery (COD) always free, and online payment via Chargily Pay (CIB, Dahabia). Choose one or enable both from the builder.',
-    },
+    q: { ar: 'ماذا يحدث بعد 31 جويلية 2026؟', fr: 'Que se passe-t-il après le 31 juillet 2026?', en: 'What happens after 31 July 2026?' },
+    a: { ar: 'ترتفع الأسعار: المبتدئ يصبح محدوداً بـ10 متاجر ثم 3,000 دج لكل متجر إضافي، المستقل يصبح 100,000 دج، وRun One يتضاعف. من يشترِ الآن يثبّت السعر والمزايا للأبد.', fr: "Les tarifs augmentent : Starter passe à 10 boutiques puis 3 000 DZD/boutique, Freelancer à 100 000 DZD, et Run One double. Achetez maintenant pour verrouiller le prix à vie.", en: 'Prices rise: Starter becomes capped at 10 stores then 3,000 DZD each, Freelancer becomes 100,000 DZD, and Run One doubles. Buy now to lock the price and perks forever.' },
   },
   {
-    q: { ar: 'هل يمكنني تخصيص ثيم المتجر؟', fr: 'Puis-je personnaliser le thème de ma boutique?', en: 'Can I customise my store theme?' },
+    q: { ar: 'ما طرق الدفع المتاحة في متاجري؟', fr: 'Quels modes de paiement dans mes boutiques?', en: 'What payment methods are available in my stores?' },
     a: {
-      ar: 'نعم، جميع الباقات بما فيها المبتدئة تتيح تخصيص الثيم كاملاً من المحرر البصري. 3 ثيمات جاهزة: جريء، داكن، دافئ.',
-      fr: "Oui, tous les abonnements y compris Starter permettent la personnalisation complète du thème depuis l'éditeur visuel. 3 thèmes prêts : Audacieux, Sombre, Chaleureux.",
-      en: 'Yes, all plans including Starter allow full theme customisation from the visual builder. 3 ready themes: Brutalist, Dark, Warm.',
+      ar: 'متجرك يدعم طريقتين: الدفع عند الاستلام (COD) مجاناً دائماً، ودفع إلكتروني عبر Chargily Pay (بطاقة CIB، Dahabia).',
+      fr: "Votre boutique supporte deux méthodes : Paiement à la livraison (COD) toujours gratuit, et paiement en ligne via Chargily Pay (CIB, Dahabia).",
+      en: 'Your store supports two methods: Cash on Delivery (COD) always free, and online payment via Chargily Pay (CIB, Dahabia).',
     },
   },
   {
@@ -141,19 +52,25 @@ function PricingPage() {
       <Navbar />
 
       {/* Hero */}
-      <section className="py-24 px-4 bg-black text-white text-center border-b-4 border-yellow-400">
+      <section className="py-20 px-4 bg-black text-white text-center border-b-4 border-yellow-400">
+        <span className="inline-block bg-yellow-400 text-black text-sm font-black px-4 py-1.5 mb-5 border-2 border-yellow-400">
+          {t(ONCE_LABEL)} · {t({ ar: 'لا اشتراكات', fr: 'Pas d\'abonnement', en: 'No subscriptions' })}
+        </span>
         <h1 className="text-4xl md:text-5xl font-black mb-4">
           {t({ ar: 'الأسعار', fr: 'Tarifs', en: 'Pricing' })}
         </h1>
-        <p className="text-white/60 text-lg max-w-lg mx-auto">
-          {t({ ar: 'دفع مرة واحدة. لا اشتراكات. لا مفاجآت.', fr: "Payez une fois. Pas d'abonnements. Pas de surprises.", en: 'Pay once. No subscriptions. No surprises.' })}
+        <p className="text-white/60 text-lg max-w-lg mx-auto mb-8">
+          {t({ ar: 'ادفع مرة واحدة. امتلك للأبد. الأسعار ترتفع بعد الدفعة الأولى.', fr: "Payez une fois. Possédez à vie. Les tarifs montent après la 1re vague.", en: 'Pay once. Own it forever. Prices rise after the first batch.' })}
         </p>
+        <div className="flex justify-center">
+          <FirstBatchCountdown variant="dark" />
+        </div>
       </section>
 
       {/* Tiers */}
       <section className="py-20 px-4 bg-white">
         <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
-          {tiers.map((tier) => (
+          {TIERS.map((tier) => (
             <div
               key={tier.id}
               className={cn(
@@ -168,8 +85,11 @@ function PricingPage() {
               )}
               <div>
                 <p className="font-black text-xl text-black">{t(tier.name)}</p>
-                <p className="text-3xl font-black text-black mt-1">{t(tier.price)}</p>
-                <p className="text-xs text-black/50 mt-0.5">{t({ ar: 'دفع مرة واحدة', fr: 'Paiement unique', en: 'One-time payment' })}</p>
+                <p className="text-3xl font-black text-black mt-1">{t(tier.priceLabel)}</p>
+                <p className="text-xs font-bold text-black/50 mt-0.5">{t(ONCE_LABEL)}</p>
+                <p className="text-xs text-red-600 font-bold mt-2 line-through decoration-2">
+                  {t(tier.afterLabel)}
+                </p>
               </div>
               <ul className="space-y-2 flex-1">
                 {tier.features[lang].map((f, i) => (
@@ -179,21 +99,37 @@ function PricingPage() {
                   </li>
                 ))}
               </ul>
-              <Link
-                to="/dashboard"
-                search={{ plan: tier.id }}
-                className={cn(
-                  'block text-center font-black py-2.5 border-2 border-black transition-all text-sm',
-                  tier.accent
-                    ? 'bg-black text-white hover:bg-zinc-800'
-                    : 'bg-white text-black hover:bg-yellow-400',
-                )}
-              >
-                {t({ ar: 'اشترك الآن', fr: 'S\'abonner', en: 'Subscribe now' })}
-              </Link>
+              {tier.checkout === 'contact' ? (
+                <a
+                  href={contactWhatsappUrl(t(RUN_ONE_MSG))}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cn(
+                    'block text-center font-black py-2.5 border-2 border-black transition-all text-sm',
+                    'bg-white text-black hover:bg-yellow-400',
+                  )}
+                >
+                  {t({ ar: 'تواصل معنا', fr: 'Contactez-nous', en: 'Contact us' })}
+                </a>
+              ) : (
+                <Link
+                  to="/dashboard"
+                  search={{ plan: tier.id }}
+                  className={cn(
+                    'block text-center font-black py-2.5 border-2 border-black transition-all text-sm',
+                    tier.accent ? 'bg-black text-white hover:bg-zinc-800' : 'bg-white text-black hover:bg-yellow-400',
+                  )}
+                >
+                  {t({ ar: 'اشترك الآن', fr: 'S\'abonner', en: 'Subscribe now' })}
+                </Link>
+              )}
             </div>
           ))}
         </div>
+        <p className="text-center text-xs text-black/50 mt-6">
+          {t({ ar: 'باقة Run One عبر تواصل مباشر:', fr: 'Run One par contact direct :', en: 'Run One via direct contact:' })}{' '}
+          <a href={`mailto:${CONTACT_EMAIL}`} className="underline font-bold">{CONTACT_EMAIL}</a>
+        </p>
       </section>
 
       {/* FAQs */}

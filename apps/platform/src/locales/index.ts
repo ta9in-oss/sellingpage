@@ -146,7 +146,7 @@ export const comparisonTable = {
     },
     {
       label:   { ar: 'السعر',                        fr: 'Prix',                            en: 'Price' },
-      haba:    { text: { ar: '3,500 DZD مرة واحدة', fr: '3 500 DZD une fois',              en: '3,500 DZD one-time' },      good: true, highlight: true },
+      haba:    { text: { ar: '10,000 DZD مرة واحدة', fr: '10 000 DZD une fois',            en: '10,000 DZD one-time' },     good: true, highlight: true },
       ayor:    { text: { ar: '3,900+ DZD/شهر',       fr: '3 900+ DZD/mois',                en: '3,900+ DZD/mo' },           good: false },
       shopify: { text: { ar: '$29+/شهر',              fr: '$29+/mois',                      en: '$29+/mo' },                  good: false },
     },
@@ -359,14 +359,17 @@ export const landingPricing = {
   sub:      { ar: 'كل باقة تفتح طبقة أعمق من الملكية.',  en: 'Each tier unlocks a deeper layer of ownership.' },
   currency: { ar: 'دج',   en: 'DA' },
   once:     { ar: 'دفعة واحدة',  en: 'one-time' },
+  // NOTE: prices/after-labels here must match src/config/pricing.ts (the canonical
+  // source of truth). Landing copy is ar+en; the config carries the fr variant.
   tiers: [
     {
       name:      { ar: 'المبتدئ',   en: 'Starter' },
       who:       { ar: 'البائع: تبيع بنفسك',  en: 'The seller: sell for yourself' },
-      price:     '3,000',
+      price:     '10,000',
+      after:     { ar: 'بعد 31 جويلية: 10 متاجر ثم 3,000 دج/متجر', en: 'After Jul 31: 10 stores, then 3,000 DZD/store' },
       highlight: false,
       features: [
-        { ar: 'متاجر غير محدودة',                                                     en: 'Unlimited stores' },
+        { ar: 'متاجر غير محدودة — للأبد (عرض الدفعة الأولى)',                        en: 'Unlimited stores — forever (first-batch offer)' },
         { ar: 'محرر بصري كامل (12 نوع قسم)',                                          en: 'Full visual editor (12 section types)' },
         { ar: '3 ثيمات + تخصيص كامل',                                                 en: '3 themes + full customization' },
         { ar: 'دفع عند الاستلام، مجاني دائماً',                                       en: 'Cash on delivery, free forever' },
@@ -380,7 +383,8 @@ export const landingPricing = {
     {
       name:      { ar: 'المستقل',   en: 'Freelancer' },
       who:       { ar: 'المستقل: تبني لعملائك',  en: 'The freelancer: build for clients' },
-      price:     '20,000',
+      price:     '70,000',
+      after:     { ar: 'بعد 31 جويلية: 100,000 دج', en: 'After Jul 31: 100,000 DZD' },
       badge:     { ar: 'الأكثر اختياراً',  en: 'Most chosen' },
       highlight: true,
       features: [
@@ -393,7 +397,9 @@ export const landingPricing = {
     {
       name:      { ar: 'الوكالة',   en: 'Run One' },
       who:       { ar: 'الوكالة: تملك منصة مثل هذه',  en: 'The agency: own a platform like this' },
-      price:     '500,000',
+      price:     '1,000,000',
+      after:     { ar: 'بعد 31 جويلية: 2,000,000 دج', en: 'After Jul 31: 2,000,000 DZD' },
+      contact:   true,
       highlight: false,
       features: [
         { ar: 'كل ما في المستقل',                            en: 'Everything in Freelancer' },
@@ -401,7 +407,7 @@ export const landingPricing = {
         { ar: 'تصلك التحديثات عند صدورها أولاً بأول',       en: 'You get updates first, as we ship them' },
         { ar: 'متاجر غير محدودة + دعم مباشر',               en: 'Unlimited client stores + direct support' },
       ],
-      cta: { ar: 'امتلك المنصة',   en: 'Own the platform' },
+      cta: { ar: 'تواصل معنا',   en: 'Contact us' },
     },
   ],
   ownTitle: { ar: 'تريد امتلاك المشروع بالكامل؟',                        en: 'Want to own the whole project?' },

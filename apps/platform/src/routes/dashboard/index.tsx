@@ -22,6 +22,8 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { createSubscriptionCheckout } from '@/server/createSubscriptionCheckout'
 import { verifySubscriptionPayment } from '@/server/verifySubscriptionPayment'
+import { TIERS as PRICING_TIERS, ONCE_LABEL, contactWhatsappUrl } from '@/config/pricing'
+import { FirstBatchCountdown } from '@/components/marketing/FirstBatchCountdown'
 import { getDownloadUrl } from '@/server/getDownloadUrl'
 import type { DownloadType } from '@/server/getDownloadUrl'
 import {
@@ -321,47 +323,9 @@ function OnboardingWelcome({
 
 // ─── Subscription gate ─────────────────────────────────────────────────────────
 
-const TIERS: {
-  id: 'starter' | 'pro' | 'agency'
-  name: { ar: string; fr: string; en: string }
-  price: string
-  accent: boolean
-  features: { ar: string[]; fr: string[]; en: string[] }
-}[] = [
-  {
-    id: 'starter',
-    name: { ar: 'مبتدئ', fr: 'Starter', en: 'Starter' },
-    price: '3,500 دج',
-    accent: false,
-    features: {
-      ar: ['إنشاء ونشر المتاجر', 'نطاق مخصص (Cloudflare)', 'لوحة إدارة الطلبات', 'دفع نقدي + Chargily', 'Google Analytics'],
-      fr: ['Créer et publier des boutiques', 'Domaine personnalisé (Cloudflare)', 'Tableau de bord commandes', 'Paiement cash + Chargily', 'Google Analytics'],
-      en: ['Create and publish stores', 'Custom domain (Cloudflare)', 'Orders dashboard', 'Cash + Chargily payment', 'Google Analytics'],
-    },
-  },
-  {
-    id: 'pro',
-    name: { ar: 'احترافي', fr: 'Pro', en: 'Pro' },
-    price: '20,000 دج',
-    accent: true,
-    features: {
-      ar: ['كل ما في مبتدئ', 'تحميل كود المتجر', 'تحميل كود التطبيق', 'دعم ذو أولوية'],
-      fr: ['Tout Starter', 'Télécharger code boutique', 'Télécharger code app', 'Support prioritaire'],
-      en: ['Everything in Starter', 'Download store code', 'Download app code', 'Priority support'],
-    },
-  },
-  {
-    id: 'agency',
-    name: { ar: 'وكالة', fr: 'Agence', en: 'Agency' },
-    price: '100,000 دج',
-    accent: false,
-    features: {
-      ar: ['كل ما في احترافي', 'كود المنصة كاملاً', 'متاجر غير محدودة', 'دعم مباشر'],
-      fr: ['Tout Pro', 'Code plateforme complet', 'Boutiques illimitées', 'Support direct'],
-      en: ['Everything in Pro', 'Full platform source code', 'Unlimited stores', 'Direct support'],
-    },
-  },
-]
+// Tiers come from the canonical config (src/config/pricing.ts) so this gate can
+// never drift from the marketing pages or the Chargily charge amounts.
+const RUN_ONE_MSG_AR = 'مرحباً، أنا مهتم بباقة Run One على 7aba.'
 
 function SubscriptionGate({ email, autoPlan }: { email: string; autoPlan?: string }) {
   const [loading, setLoading] = useState<string | null>(null)
@@ -383,8 +347,10 @@ function SubscriptionGate({ email, autoPlan }: { email: string; autoPlan?: strin
   }
 
   useEffect(() => {
-    const validPlans = ['starter', 'pro', 'agency'] as const
-    if (autoPlan && (validPlans as readonly string[]).includes(autoPlan)) {
+    // Only auto-start checkout for instant (chargily) tiers. Contact tiers (Run One)
+    // must never auto-hit checkout — they route to WhatsApp instead.
+    const buyable = PRICING_TIERS.filter((x) => x.checkout === 'chargily').map((x) => x.id)
+    if (autoPlan && (buyable as string[]).includes(autoPlan)) {
       handleBuy(autoPlan as 'starter' | 'pro' | 'agency')
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -394,13 +360,16 @@ function SubscriptionGate({ email, autoPlan }: { email: string; autoPlan?: strin
     <div className="min-h-screen bg-background p-6" dir={dir}>
       <DashboardHeader email={email} />
       <div className="max-w-5xl mx-auto mt-10 space-y-6">
-        <div className="text-center space-y-2">
+        <div className="text-center space-y-4">
           <h2 className="text-2xl font-bold">{t(DT.choosePlan)}</h2>
-          <p className="text-muted-foreground">اشترك الآن للبدء في بناء متجرك الإلكتروني</p>
+          <p className="text-muted-foreground">{t(ONCE_LABEL)} — {t({ ar: 'الأسعار ترتفع بعد الدفعة الأولى', fr: 'les tarifs montent après la 1re vague', en: 'prices rise after the first batch' })}</p>
+          <div className="flex justify-center">
+            <FirstBatchCountdown variant="light" />
+          </div>
         </div>
         {error && <p className="text-destructive text-center text-sm">{error}</p>}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {TIERS.map((tier) => (
+          {PRICING_TIERS.map((tier) => (
             <div
               key={tier.id}
               className={cn(
@@ -410,34 +379,46 @@ function SubscriptionGate({ email, autoPlan }: { email: string; autoPlan?: strin
             >
               <div>
                 <p className="font-bold text-lg">{t(tier.name)}</p>
-                <p className="text-2xl font-black mt-1">{tier.price}</p>
-                <p className="text-xs text-muted-foreground">دفعة واحدة</p>
+                <p className="text-2xl font-black mt-1">{t(tier.priceLabel)}</p>
+                <p className="text-xs text-muted-foreground">{t(ONCE_LABEL)}</p>
+                <p className="text-xs text-red-600 font-bold mt-1.5 line-through">{t(tier.afterLabel)}</p>
               </div>
               <ul className="space-y-2 flex-1">
-                {(lang === 'ar' ? tier.features.ar : lang === 'fr' ? tier.features.fr : tier.features.en).map((f) => (
+                {tier.features[lang].map((f) => (
                   <li key={f} className="flex items-center gap-2 text-sm">
                     <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
                     {f}
                   </li>
                 ))}
               </ul>
-              <button
-                onClick={() => handleBuy(tier.id)}
-                disabled={!!loading}
-                className={cn(
-                  'w-full py-3 rounded-xl font-semibold transition-colors',
-                  tier.accent
-                    ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-                    : 'border border-border hover:bg-muted',
-                  loading === tier.id && 'opacity-60 cursor-not-allowed',
-                )}
-              >
-                {loading === tier.id ? (
-                  <Loader2 className="h-4 w-4 animate-spin mx-auto" />
-                ) : (
-                  t(DT.subscribeNow)
-                )}
-              </button>
+              {tier.checkout === 'contact' ? (
+                <a
+                  href={contactWhatsappUrl(RUN_ONE_MSG_AR)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-3 rounded-xl font-semibold transition-colors border border-border hover:bg-muted text-center"
+                >
+                  {t({ ar: 'تواصل معنا', fr: 'Contactez-nous', en: 'Contact us' })}
+                </a>
+              ) : (
+                <button
+                  onClick={() => handleBuy(tier.id)}
+                  disabled={!!loading}
+                  className={cn(
+                    'w-full py-3 rounded-xl font-semibold transition-colors',
+                    tier.accent
+                      ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                      : 'border border-border hover:bg-muted',
+                    loading === tier.id && 'opacity-60 cursor-not-allowed',
+                  )}
+                >
+                  {loading === tier.id ? (
+                    <Loader2 className="h-4 w-4 animate-spin mx-auto" />
+                  ) : (
+                    t(DT.subscribeNow)
+                  )}
+                </button>
+              )}
             </div>
           ))}
         </div>

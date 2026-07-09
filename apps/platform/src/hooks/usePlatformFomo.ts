@@ -10,15 +10,15 @@ interface FomoEvent {
 
 const FOMO_EVENTS: FomoEvent[] = [
     { name: 'محمد', city: 'وهران', plan: 'Starter', planAr: 'المبتدئ', timeAgo: 'منذ 3 دقائق' },
-    { name: 'أحمد', city: 'الجزائر العاصمة', plan: 'Pro', planAr: 'الاحترافي', timeAgo: 'منذ 7 دقائق' },
+    { name: 'أحمد', city: 'الجزائر العاصمة', plan: 'Freelancer', planAr: 'المستقل', timeAgo: 'منذ 7 دقائق' },
     { name: 'يوسف', city: 'قسنطينة', plan: 'Starter', planAr: 'المبتدئ', timeAgo: 'منذ 12 دقيقة' },
-    { name: 'خالد', city: 'عنابة', plan: 'Pro', planAr: 'الاحترافي', timeAgo: 'منذ 18 دقيقة' },
+    { name: 'خالد', city: 'عنابة', plan: 'Freelancer', planAr: 'المستقل', timeAgo: 'منذ 18 دقيقة' },
     { name: 'ريم', city: 'سطيف', plan: 'Starter', planAr: 'المبتدئ', timeAgo: 'منذ 25 دقيقة' },
-    { name: 'سلمى', city: 'تلمسان', plan: 'Agency', planAr: 'الوكالة', timeAgo: 'منذ دقيقة' },
-    { name: 'عمر', city: 'بجاية', plan: 'Pro', planAr: 'الاحترافي', timeAgo: 'منذ 4 دقائق' },
+    { name: 'سلمى', city: 'تلمسان', plan: 'Run One', planAr: 'الوكالة', timeAgo: 'منذ دقيقة' },
+    { name: 'عمر', city: 'بجاية', plan: 'Freelancer', planAr: 'المستقل', timeAgo: 'منذ 4 دقائق' },
     { name: 'أمين', city: 'باتنة', plan: 'Starter', planAr: 'المبتدئ', timeAgo: 'منذ 9 دقائق' },
-    { name: 'سارة', city: 'الشلف', plan: 'Pro', planAr: 'الاحترافي', timeAgo: 'منذ 15 دقيقة' },
-    { name: 'عبد الرحمن', city: 'تيزي وزو', plan: 'Agency', planAr: 'الوكالة', timeAgo: 'منذ 22 دقيقة' },
+    { name: 'سارة', city: 'الشلف', plan: 'Freelancer', planAr: 'المستقل', timeAgo: 'منذ 15 دقيقة' },
+    { name: 'عبد الرحمن', city: 'تيزي وزو', plan: 'Run One', planAr: 'الوكالة', timeAgo: 'منذ 22 دقيقة' },
 ]
 
 export function usePlatformFomo() {
