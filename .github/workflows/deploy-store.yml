@@ -1,0 +1,64 @@
+name: Deploy Merchant Store
+
+on:
+  repository_dispatch:
+    types: [deploy-store]
+
+concurrency:
+  group: deploy-store-${{ github.event.client_payload.storeId }}
+  cancel-in-progress: true
+
+jobs:
+  deploy-store:
+    runs-on: ubuntu-latest
+    env:
+      VITE_INSTANT_APP_ID: b9227417-33f4-4c3d-9c88-612e094aff89
+      INSTANTDB_PLATFORM_ADMIN_TOKEN: ${{ secrets.INSTANTDB_PLATFORM_ADMIN_TOKEN }}
+      STORE_ID: ${{ github.event.client_payload.storeId }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Mark building
+        run: node scripts/set-store-status.mjs --store-id="$STORE_ID" --status=building
+
+      - name: Generate store config from InstantDB
+        id: gen
+        run: pnpm exec tsx scripts/generate-store-config.mjs --store-id="$STORE_ID"
+
+      - name: Build store
+        env:
+          CF_PAGES: '1' # selects the cloudflare-pages preset → output in apps/store/dist
+          VITE_INSTANT_APP_ID: ${{ steps.gen.outputs.instant_app_id }}
+          VITE_APP_URL: https://7aba-${{ steps.gen.outputs.slug }}.pages.dev
+          VITE_GOOGLE_CLIENT_ID: 1031735082979-bjhvq3ulo8gsmebkeihkalh3gohoropm.apps.googleusercontent.com
+        run: pnpm --filter store build
+
+      - name: Deploy to merchant's Cloudflare Pages
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ steps.gen.outputs.cf_api_token }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ steps.gen.outputs.cf_account_id }}
+        run: |
+          npx wrangler pages deploy apps/store/dist \
+            --project-name="7aba-${{ steps.gen.outputs.slug }}" \
+            --branch=main \
+            --commit-dirty=true
+
+      - name: Mark live
+        if: success()
+        run: |
+          node scripts/set-store-status.mjs \
+            --store-id="$STORE_ID" \
+            --status=live \
+            --url="https://7aba-${{ steps.gen.outputs.slug }}.pages.dev"
+
+      - name: Mark failed
+        if: failure()
+        run: node scripts/set-store-status.mjs --store-id="$STORE_ID" --status=failed
