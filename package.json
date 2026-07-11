@@ -10,7 +10,9 @@
   "devDependencies": {
     "@instantdb/admin": "^1.0.49",
     "tsx": "^4.21.0",
-    "turbo": "latest"
+    "turbo": "latest",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^4.1.10"
   },
   "pnpm": {
     "overrides": {
