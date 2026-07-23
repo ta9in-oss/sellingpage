@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       VITE_INSTANT_APP_ID: b9227417-33f4-4c3d-9c88-612e094aff89
-      INSTANTDB_PLATFORM_ADMIN_TOKEN: ${{ secrets.INSTANTDB_PLATFORM_ADMIN_TOKEN }}
+      PLATFORM_INSTANTDB_ADMIN_TOKEN: ${{ secrets.PLATFORM_INSTANTDB_ADMIN_TOKEN }}
       STORE_ID: ${{ github.event.client_payload.storeId }}
     steps:
       - uses: actions/checkout@v4

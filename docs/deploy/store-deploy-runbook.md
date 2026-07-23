@@ -10,7 +10,7 @@ The `stores` entity gained a `deployStatus` field. Push it to the platform Insta
 
 ### 2. GitHub Actions secret
 Repo `Ta9in/sellingpage` → Settings → Secrets and variables → Actions → New repository secret:
-- `INSTANTDB_PLATFORM_ADMIN_TOKEN` — platform InstantDB admin token (InstantDB dashboard →
+- `PLATFORM_INSTANTDB_ADMIN_TOKEN` — platform InstantDB admin token (InstantDB dashboard →
   platform app `b9227417-…aff89` → Admin → Admin token). The workflow uses it to read the
   store row (incl. the merchant's CF token) and write deploy status back.
 

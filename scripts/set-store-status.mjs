@@ -11,7 +11,7 @@ async function main() {
 
   const db = init({
     appId: process.env.VITE_INSTANT_APP_ID,
-    adminToken: process.env.INSTANTDB_PLATFORM_ADMIN_TOKEN,
+    adminToken: process.env.PLATFORM_INSTANTDB_ADMIN_TOKEN,
   })
 
   const patch = { deployStatus: status, lastDeployAt: Date.now() }

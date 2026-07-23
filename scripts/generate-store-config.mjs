@@ -34,8 +34,8 @@ async function main() {
   if (!storeId) throw new Error('Usage: node scripts/generate-store-config.mjs --store-id=<id>')
 
   const appId = process.env.VITE_INSTANT_APP_ID
-  const adminToken = process.env.INSTANTDB_PLATFORM_ADMIN_TOKEN
-  if (!appId || !adminToken) throw new Error('VITE_INSTANT_APP_ID and INSTANTDB_PLATFORM_ADMIN_TOKEN are required')
+  const adminToken = process.env.PLATFORM_INSTANTDB_ADMIN_TOKEN
+  if (!appId || !adminToken) throw new Error('VITE_INSTANT_APP_ID and PLATFORM_INSTANTDB_ADMIN_TOKEN are required')
 
   const store = await fetchStore(appId, adminToken, storeId)
 
