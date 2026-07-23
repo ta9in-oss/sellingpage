@@ -14,7 +14,8 @@
   },
   "scripts": {
     "dev": "vite dev",
-    "build": "vite build"
+    "build": "vite build",
+    "test:e2e": "playwright test"
   },
   "type": "module",
   "homepage": "https://github.com/Ta9in/sellingpage#readme",
@@ -44,6 +45,7 @@
   },
   "devDependencies": {
     "@instantdb/admin": "^0.22.112",
+    "@playwright/test": "^1.61.1",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^4.7.0",

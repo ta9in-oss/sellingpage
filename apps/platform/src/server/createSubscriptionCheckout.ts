@@ -4,23 +4,12 @@ import {
   createChargilyCustomer,
   createChargilyCheckout,
 } from './chargilyApi'
+import { TIER_CHARGE_DZD, tierById } from '@/config/pricing'
 
 interface SubscriptionCheckoutInput {
   tier: 'starter' | 'pro' | 'agency'
   userId: string
   userEmail: string
-}
-
-const TIER_PRICES: Record<string, number> = {
-  starter: 3500,
-  pro: 20000,
-  agency: 100000,
-}
-
-const TIER_NAMES: Record<string, string> = {
-  starter: 'مبتدئ',
-  pro: 'احترافي',
-  agency: 'وكالة',
 }
 
 export const createSubscriptionCheckout = createServerFn({ method: 'POST' })
@@ -30,8 +19,11 @@ export const createSubscriptionCheckout = createServerFn({ method: 'POST' })
     if (!secretKey) throw new Error('CHARGILY_PLATFORM_SECRET_KEY not configured')
 
     const baseUrl = process.env.VITE_APP_URL || 'http://localhost:3001'
-    const amount = TIER_PRICES[data.tier]
-    if (!amount) throw new Error(`Unknown tier: ${data.tier}`)
+    // Contact-sales tiers (e.g. Run One) are absent from the charge map on purpose —
+    // they must never hit Chargily. Only chargily tiers have an amount here.
+    const amount = TIER_CHARGE_DZD[data.tier]
+    if (!amount) throw new Error(`Tier not purchasable via checkout: ${data.tier}`)
+    const tierNameAr = tierById(data.tier)?.name.ar ?? data.tier
 
     // Create customer (identity shown in Chargily dashboard)
     const customer = await createChargilyCustomer(secretKey, data.userEmail, data.userEmail)
@@ -42,7 +34,7 @@ export const createSubscriptionCheckout = createServerFn({ method: 'POST' })
       currency: 'dzd',
       success_url: `${baseUrl}/dashboard?payment=success&tier=${data.tier}`,
       failure_url: `${baseUrl}/dashboard?payment=failed`,
-      description: `اشتراك باقة ${TIER_NAMES[data.tier]} - 7aba.store`,
+      description: `اشتراك باقة ${tierNameAr} - 7aba`,
       locale: 'ar',
       customer_id: customer.id,
       metadata: {

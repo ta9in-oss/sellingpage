@@ -10,3 +10,8 @@ apps/platform/.env
 apps/*/node_modules/
 packages/*/node_modules/
 .turbo/
+
+# Playwright
+test-results/
+playwright-report/
+apps/store/src/config/*.e2e-bak

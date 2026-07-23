@@ -1,10 +1,23 @@
 import { Link } from '@tanstack/react-router'
 import { useLang } from '@/hooks/useLang'
 import { Reveal, Kicker, SplitTitle, Icon } from '@/components/marketing/landing/primitives'
+import { FirstBatchCountdown } from '@/components/marketing/FirstBatchCountdown'
+import { contactWhatsappUrl } from '@/config/pricing'
 import { landingPricing } from '@/locales'
 
 /* ---- types ---- */
-type Tier = (typeof landingPricing.tiers)[number]
+// The tiers array is a heterogeneous union; intersecting with the optional extras
+// makes badge/after/contact safely accessible on every card.
+type Tier = (typeof landingPricing.tiers)[number] & {
+  badge?: { ar: string; en: string }
+  after?: { ar: string; en: string }
+  contact?: boolean
+}
+
+const RUN_ONE_MSG = {
+  ar: 'مرحباً، أنا مهتم بباقة Run One على 7aba.',
+  en: 'Hi, I am interested in the Run One plan on 7aba.',
+}
 
 interface TierCardProps {
   tier: Tier
@@ -23,6 +36,14 @@ function TierCard({ tier }: TierCardProps) {
         <span className="tier__cur">{t(landingPricing.currency)}</span>
       </div>
       <div className="tier__once">{t(landingPricing.once)}</div>
+      {tier.after && (
+        <div
+          className="tier__after"
+          style={{ color: '#dc2626', fontSize: '0.72rem', fontWeight: 800, textDecoration: 'line-through', marginTop: '0.35rem' }}
+        >
+          {t(tier.after)}
+        </div>
+      )}
       <ul className="tier__feats">
         {tier.features.map((ft, i) => (
           <li key={i}>
@@ -31,13 +52,24 @@ function TierCard({ tier }: TierCardProps) {
           </li>
         ))}
       </ul>
-      <Link
-        to="/dashboard"
-        search={{}}
-        className={'btn ' + (tier.highlight ? 'btn--accent' : 'btn--ink')}
-      >
-        {t(tier.cta)}
-      </Link>
+      {tier.contact ? (
+        <a
+          href={contactWhatsappUrl(t(RUN_ONE_MSG))}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={'btn ' + (tier.highlight ? 'btn--accent' : 'btn--ink')}
+        >
+          {t(tier.cta)}
+        </a>
+      ) : (
+        <Link
+          to="/dashboard"
+          search={{}}
+          className={'btn ' + (tier.highlight ? 'btn--accent' : 'btn--ink')}
+        >
+          {t(tier.cta)}
+        </Link>
+      )}
     </div>
   )
 }
@@ -53,11 +85,14 @@ export function Pricing() {
           <Kicker>{t(landingPricing.kicker)}</Kicker>
           <SplitTitle lines={[t(landingPricing.title.l1), t(landingPricing.title.l2)]} />
           <p>{t(landingPricing.sub)}</p>
+          <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'center' }}>
+            <FirstBatchCountdown variant="light" />
+          </div>
         </Reveal>
 
         <Reveal delay={60}>
           <div className="tiers">
-            {landingPricing.tiers.map((tier, i) => (
+            {(landingPricing.tiers as Tier[]).map((tier, i) => (
               <TierCard key={i} tier={tier} />
             ))}
           </div>

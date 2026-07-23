@@ -42,6 +42,7 @@ const _schema = i.schema({
       createdAt: i.date().optional(),
       deployedUrl: i.string().optional(),
       deployLog: i.string().optional(),
+      deployStatus: i.string().optional(),
       instantAdminToken: i.string().optional(),
       instantAppId: i.string().optional(),
       lastDeployAt: i.date().optional(),

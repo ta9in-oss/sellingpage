@@ -1,11 +1,11 @@
 import { useLang } from '@/hooks/useLang'
-import type { Lang } from '@/hooks/useLang'
 import { Link } from '@tanstack/react-router'
 import { cn } from '@/lib/utils'
 import { navbar as T } from '@/locales'
+import { LanguageSelect } from '@/components/marketing/LanguageSelect'
 
 export function Navbar() {
-  const { lang, setLang, t } = useLang()
+  const { t } = useLang()
 
   return (
     <header className="fixed top-0 inset-x-0 z-50 bg-white border-b-2 border-black">
@@ -13,13 +13,14 @@ export function Navbar() {
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 shrink-0">
           <img
-            src="/assets/logo/7aba_store_logo_i1.svg"
-            alt="7aba.store"
+            src="/assets/logo/7aba_logo_light.svg"
+            alt="7aba"
             className="h-8 w-auto"
             onError={(e) => {
-              ;(e.currentTarget as HTMLImageElement).src = '/assets/logo/7aba_store_logo_i1.png'
+              ;(e.currentTarget as HTMLImageElement).src = '/assets/logo/7aba_logo_light.png'
             }}
           />
+          <span className="text-xl font-black tracking-tight">7aba</span>
         </Link>
 
         {/* Nav links */}
@@ -27,9 +28,9 @@ export function Navbar() {
           <a href="#how" className="text-sm font-bold text-black hover:underline transition-colors">
             {t(T.howItWorks)}
           </a>
-          <Link to="/pricing" className="text-sm font-bold text-black hover:underline transition-colors">
+          <a href="/#pricing" className="text-sm font-bold text-black hover:underline transition-colors">
             {t(T.pricing)}
-          </Link>
+          </a>
           <Link to="/demo" className="text-sm font-bold text-black hover:underline transition-colors">
             {t(T.demo)}
           </Link>
@@ -37,17 +38,7 @@ export function Navbar() {
 
         {/* Right actions */}
         <div className="flex items-center gap-3">
-          {/* Language dropdown — shows all 3 options at once */}
-          <select
-            value={lang}
-            onChange={(e) => setLang(e.target.value as Lang)}
-            aria-label={t(T.langLabel)}
-            className="text-xs font-bold px-2.5 py-1.5 border-2 border-black bg-white hover:bg-yellow-400 transition-colors cursor-pointer"
-          >
-            <option value="ar">عربي</option>
-            <option value="fr">Français</option>
-            <option value="en">English</option>
-          </select>
+          <LanguageSelect />
           <Link
             to="/dashboard" search={{}}
             className={cn(

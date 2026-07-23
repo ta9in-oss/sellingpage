@@ -9,7 +9,8 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as TermsRouteImport } from './routes/terms'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as DemoRouteImport } from './routes/demo'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
@@ -20,9 +21,14 @@ import { Route as DashboardBuilderRouteImport } from './routes/dashboard/builder
 import { Route as AuthInstantdbRouteImport } from './routes/auth/instantdb'
 import { Route as AuthCloudflareRouteImport } from './routes/auth/cloudflare'
 
-const PricingRoute = PricingRouteImport.update({
-  id: '/pricing',
-  path: '/pricing',
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DemoRoute = DemoRouteImport.update({
@@ -74,7 +80,8 @@ const AuthCloudflareRoute = AuthCloudflareRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/demo': typeof DemoRoute
-  '/pricing': typeof PricingRoute
+  '/privacy': typeof PrivacyRoute
+  '/terms': typeof TermsRoute
   '/auth/cloudflare': typeof AuthCloudflareRoute
   '/auth/instantdb': typeof AuthInstantdbRoute
   '/dashboard/builder': typeof DashboardBuilderRoute
@@ -86,7 +93,8 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/demo': typeof DemoRoute
-  '/pricing': typeof PricingRoute
+  '/privacy': typeof PrivacyRoute
+  '/terms': typeof TermsRoute
   '/auth/cloudflare': typeof AuthCloudflareRoute
   '/auth/instantdb': typeof AuthInstantdbRoute
   '/dashboard/builder': typeof DashboardBuilderRoute
@@ -99,7 +107,8 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/demo': typeof DemoRoute
-  '/pricing': typeof PricingRoute
+  '/privacy': typeof PrivacyRoute
+  '/terms': typeof TermsRoute
   '/auth/cloudflare': typeof AuthCloudflareRoute
   '/auth/instantdb': typeof AuthInstantdbRoute
   '/dashboard/builder': typeof DashboardBuilderRoute
@@ -113,7 +122,8 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/demo'
-    | '/pricing'
+    | '/privacy'
+    | '/terms'
     | '/auth/cloudflare'
     | '/auth/instantdb'
     | '/dashboard/builder'
@@ -125,7 +135,8 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/demo'
-    | '/pricing'
+    | '/privacy'
+    | '/terms'
     | '/auth/cloudflare'
     | '/auth/instantdb'
     | '/dashboard/builder'
@@ -137,7 +148,8 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/demo'
-    | '/pricing'
+    | '/privacy'
+    | '/terms'
     | '/auth/cloudflare'
     | '/auth/instantdb'
     | '/dashboard/builder'
@@ -150,7 +162,8 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DemoRoute: typeof DemoRoute
-  PricingRoute: typeof PricingRoute
+  PrivacyRoute: typeof PrivacyRoute
+  TermsRoute: typeof TermsRoute
   AuthCloudflareRoute: typeof AuthCloudflareRoute
   AuthInstantdbRoute: typeof AuthInstantdbRoute
   DashboardBuilderRoute: typeof DashboardBuilderRoute
@@ -162,11 +175,18 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/pricing': {
-      id: '/pricing'
-      path: '/pricing'
-      fullPath: '/pricing'
-      preLoaderRoute: typeof PricingRouteImport
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/demo': {
@@ -238,7 +258,8 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DemoRoute: DemoRoute,
-  PricingRoute: PricingRoute,
+  PrivacyRoute: PrivacyRoute,
+  TermsRoute: TermsRoute,
   AuthCloudflareRoute: AuthCloudflareRoute,
   AuthInstantdbRoute: AuthInstantdbRoute,
   DashboardBuilderRoute: DashboardBuilderRoute,

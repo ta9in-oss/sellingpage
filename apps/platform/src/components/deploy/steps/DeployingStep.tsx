@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useBuilderStore } from '@/hooks/useBuilderStore'
 import { db } from '@/lib/instantdb'
-import { generateSiteConfig, generateContentJson } from '@/lib/configGenerator'
 import { cn } from '@/lib/utils'
 import type { StoreConfig } from '@7aba/store-ui'
 import { useLang } from '@/hooks/useLang'
@@ -64,6 +63,8 @@ export function DeployingStep({ storeId, onComplete, onError }: Props) {
   })
   const store = storeData?.stores?.[0]
   const config = (store?.config as StoreConfig | undefined) ?? builderConfig
+  const deployStatus = store?.deployStatus as 'queued' | 'building' | 'live' | 'failed' | undefined
+  const doneRef = useRef(false)
 
   const addLog = useCallback((msg: string) => {
     setLogs((prev) => [...prev, msg])
@@ -74,6 +75,7 @@ export function DeployingStep({ storeId, onComplete, onError }: Props) {
   }, [])
 
   const runDeploy = useCallback(async () => {
+    doneRef.current = false
     setHasError(false)
     setLogs(['> بدء عملية النشر...'])
     setSteps(initialSteps())
@@ -95,55 +97,21 @@ export function DeployingStep({ storeId, onComplete, onError }: Props) {
       addLog(`✓ InstantDB App: ${instantAppId}`)
       setStepStatus(0, 'done')
 
-      // Step 1: Generate config files (logged for reference)
+      // Step 1: Prepare hand-off to CI
       setStepStatus(1, 'running')
-      addLog('> توليد ملفات الإعداد...')
-      await delay(400)
-      const siteConfigContent = generateSiteConfig(config)
-      const contentJsonContent = generateContentJson(config)
-      addLog(`✓ site.config.ts: ${siteConfigContent.length} بايت`)
-      addLog(`✓ content.json: ${contentJsonContent.length} بايت`)
+      addLog('> تجهيز عملية النشر على الخادم...')
+      await delay(300)
       setStepStatus(1, 'done')
 
-      // Step 2: Connect to Cloudflare (API call via deployStore)
+      // Step 2: Trigger the deploy workflow (build + upload happen in CI)
       setStepStatus(2, 'running')
-      addLog('> الاتصال بـ Cloudflare API...')
+      addLog('> إرسال طلب النشر...')
+      const { triggerStoreDeploy } = await import('@/server/triggerStoreDeploy')
+      await triggerStoreDeploy({ data: { storeId } })
+      addLog('✓ تم إرسال الطلب. جاري بناء المتجر ونشره على Cloudflare...')
+      // Steps 3–6 (build, deploy, verify, save) are driven by the deployStatus poll below.
 
-      const { deployStore } = await import('@/server/deployStore')
-      const deployResult = await deployStore({
-        data: {
-          storeId,
-          slug: config.meta.slug,
-          cfAccountId,
-          cfApiToken,
-          instantAppId,
-          instantAdminToken,
-          chargilyApiKey: store?.chargilyApiKey ?? undefined,
-        },
-      })
-
-      addLog(`✓ تم التحقق من بيانات Cloudflare`)
-      setStepStatus(2, 'done')
-
-      // Step 3: Create/update CF Pages project
-      setStepStatus(3, 'running')
-      addLog(`> مشروع Pages: ${deployResult.projectName}`)
-      addLog(`✓ ${deployResult.message}`)
-      addLog(`> رابط المتجر: ${deployResult.deployedUrl}`)
-      addLog('> ملاحظة: يحتاج Cloudflare Pages بضع دقائق للبناء الأول من GitHub')
-      setStepStatus(3, 'done')
-
-      // Step 4: Verify (basic URL check)
-      setStepStatus(4, 'running')
-      addLog('> التحقق من الموقع...')
-      await delay(600)
-      addLog(`✓ المشروع جاهز: ${deployResult.deployedUrl}`)
-      setStepStatus(4, 'done')
-
-      // Step 5: Add store admin user
-      setStepStatus(5, 'running')
-      addLog('> إضافة مدير المتجر...')
-      await delay(400)
+      // Best-effort: add the store admin to the merchant's InstantDB now.
       const adminEmail = store?.adminEmail
       if (adminEmail && instantAdminToken && instantAppId) {
         try {
@@ -154,28 +122,7 @@ export function DeployingStep({ storeId, onComplete, onError }: Props) {
           addLog(`⚠ تعذّر إضافة المدير تلقائياً: ${(adminErr as Error).message}`)
           addLog('  أضفه يدوياً من InstantDB Explorer → جدول users')
         }
-      } else {
-        addLog('⚠ لا يوجد بريد مدير. أضفه لاحقاً من الإعدادات')
       }
-      setStepStatus(5, 'done')
-
-      // Step 6: Save data to platform DB
-      setStepStatus(6, 'running')
-      addLog('> حفظ البيانات...')
-      await db.transact(
-        db.tx.stores[storeId].update({
-          status: 'published',
-          deployedUrl: deployResult.deployedUrl,
-          lastDeployAt: Date.now(),
-          deployLog: logs.join('\n'),
-        })
-      )
-      addLog('✓ تم حفظ البيانات')
-      setStepStatus(6, 'done')
-
-      addLog('> 🎉 اكتملت عملية النشر بنجاح!')
-      await delay(600)
-      onComplete()
     } catch (e) {
       const errMsg = e instanceof Error ? e.message : 'حدث خطأ غير متوقع'
       addLog(`✗ خطأ: ${errMsg}`)
@@ -193,6 +140,29 @@ export function DeployingStep({ storeId, onComplete, onError }: Props) {
   useEffect(() => {
     runDeploy()
   }, [runDeploy])
+
+  // Drive steps 3–6 + completion from the CI-reported deployStatus.
+  useEffect(() => {
+    if (doneRef.current) return
+    if (deployStatus === 'building') {
+      setStepStatus(2, 'done')
+      setStepStatus(3, 'running')
+    }
+    if (deployStatus === 'live') {
+      doneRef.current = true
+      ;[2, 3, 4, 5, 6].forEach((i) => setStepStatus(i, 'done'))
+      addLog(`> 🎉 المتجر أصبح مباشراً: ${store?.deployedUrl ?? ''}`)
+      onComplete()
+    }
+    if (deployStatus === 'failed') {
+      doneRef.current = true
+      setSteps((prev) => prev.map((s) => (s.status === 'running' ? { ...s, status: 'error' } : s)))
+      setHasError(true)
+      addLog('✗ فشل البناء على الخادم. راجع الإعدادات وحاول مجدداً.')
+      onError()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deployStatus, store?.deployedUrl])
 
   useEffect(() => {
     logsEndRef.current?.scrollIntoView({ behavior: 'smooth' })

@@ -134,7 +134,7 @@ function DemoBanner() {
   return (
     <div className="bg-yellow-400 border-b-4 border-black py-2 px-4 text-center font-black text-sm text-black">
       🎯 هذا متجر تجريبي. هذا هو شكل متجرك مع حبة ستور |{' '}
-      <a href="/pricing" className="underline hover:no-underline">
+      <a href="/#pricing" className="underline hover:no-underline">
         ابدأ الآن
       </a>
     </div>
@@ -193,10 +193,10 @@ function DemoStorePage() {
           <h2 className="text-2xl font-black mb-4">أعجبك الشكل؟ اصنع متجرك الآن 🚀</h2>
           <p className="text-gray-400 mb-6">متجرك جاهز في 5 دقايق. بدون كود، بدون تقنية</p>
           <a
-            href="/pricing"
+            href="/#pricing"
             className="inline-block bg-yellow-400 text-black px-8 py-4 border-4 border-yellow-400 font-black text-lg hover:bg-yellow-300 transition-colors"
           >
-            ابدأ الآن: 3,500 دج دفعة واحدة
+            ابدأ الآن: 10,000 دج دفعة واحدة
           </a>
         </div>
       </div>

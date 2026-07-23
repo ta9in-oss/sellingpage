@@ -146,90 +146,10 @@ export const comparisonTable = {
     },
     {
       label:   { ar: 'السعر',                        fr: 'Prix',                            en: 'Price' },
-      haba:    { text: { ar: '3,500 DZD مرة واحدة', fr: '3 500 DZD une fois',              en: '3,500 DZD one-time' },      good: true, highlight: true },
+      haba:    { text: { ar: '10,000 DZD مرة واحدة', fr: '10 000 DZD une fois',            en: '10,000 DZD one-time' },     good: true, highlight: true },
       ayor:    { text: { ar: '3,900+ DZD/شهر',       fr: '3 900+ DZD/mois',                en: '3,900+ DZD/mo' },           good: false },
       shopify: { text: { ar: '$29+/شهر',              fr: '$29+/mois',                      en: '$29+/mo' },                  good: false },
     },
-  ],
-}
-
-// ── Notification Showcase ─────────────────────────────────────────────────────
-export const notificationShowcase = {
-  badge:   {
-    ar: '🔥 ميزة حصرية. لا أحد في الجزائر يملكها',
-    fr: "🔥 Exclusif. Personne en Algérie ne l'a",
-    en: '🔥 Exclusive. Nobody in Algeria has it',
-  },
-  headline: {
-    ar: 'زبائنك يشوفوا من اشترى قبلهم، تلقائياً',
-    fr: 'Vos clients voient qui a acheté avant eux, automatiquement',
-    en: 'Your customers see who bought before them, automatically',
-  },
-  sub: {
-    ar: 'كل مرة يزور حد متجرك، يشوف إشعارات صغيرة في الزاوية: "شخص من وهران طلب للتو" أو "5 أشخاص من ولايتك طلبوا هذا الأسبوع". هذا يخلق إلحاح حقيقي ويرفع معدل التحويل. مثل WiserNotify، لكن مدمج في متجرك مباشرة.',
-    fr: "À chaque visite, vos clients voient des notifications discrètes : \"Quelqu'un d'Oran vient de commander\" ou \"5 personnes de votre wilaya ont commandé cette semaine\". Crée une vraie urgence. Comme WiserNotify, mais intégré gratuitement.",
-    en: 'Every visit, customers see small corner notifications: "Someone from Oran just ordered" or "5 people from your wilaya ordered this week". Creates real urgency. Like WiserNotify, but built right into your store.',
-  },
-  features: [
-    { ar: 'إشعار "شخص من ولايتك طلب للتو"',    fr: '"Quelqu\'un de ta wilaya vient de commander"', en: '"Someone from your wilaya just ordered"' },
-    { ar: 'يتكيف مع مدينة الزائر',               fr: "S'adapte à la ville du visiteur",             en: "Adapts to the visitor's city" },
-    { ar: 'يرفع معدل التحويل بشكل ملحوظ',        fr: 'Booste le taux de conversion significativement', en: 'Significantly boosts conversion rate' },
-    { ar: 'مدمج 100%. لا تطبيق خارجي',         fr: "100% intégré. Aucune app externe",           en: '100% built-in. No external app' },
-  ],
-  visitorSees: {
-    ar: 'ما يراه الزائر في متجرك ↓',
-    fr: 'Ce que voit le visiteur dans votre boutique ↓',
-    en: 'What the visitor sees in your store ↓',
-  },
-  mockNotifications: [
-    {
-      type: 'live' as const,
-      text: { ar: 'طلب جديد!',     fr: 'Nouvelle commande!', en: 'New order!' },
-      desc: { ar: 'أحد سكان وهران قام بطلب 1 × صاكادو', fr: "Quelqu'un d'Oran vient de commander 1 × Sac", en: 'Someone from Oran just ordered 1 × Bag' },
-      sub:  { ar: 'منذ لحظات',     fr: 'il y a quelques instants', en: 'moments ago' },
-      bg: 'bg-green-500',
-    },
-    {
-      type: 'wilaya' as const,
-      text: { ar: 'طلب من ولايتك!', fr: 'Commande de ta wilaya!', en: 'Order from your wilaya!' },
-      desc: { ar: 'أحد سكان ولايتك قام بطلب 2 × صاكادو', fr: "Quelqu'un de ta wilaya a commandé 2 × Sac", en: 'Someone from your wilaya ordered 2 × Bag' },
-      sub:  { ar: 'أهل ولايتك يثقون بالمنتج! 💫', fr: 'Ta wilaya fait confiance au produit ! 💫', en: 'Your wilaya trusts this product! 💫' },
-      bg: 'bg-cyan-500',
-    },
-    {
-      type: 'recent' as const,
-      text: { ar: 'طلب حديث!',     fr: 'Commande récente!', en: 'Recent order!' },
-      desc: { ar: 'أحد سكان قسنطينة قام بطلب 1 × صاكادو', fr: "Quelqu'un de Constantine a commandé 1 × Sac", en: 'Someone from Constantine ordered 1 × Bag' },
-      sub:  { ar: 'منذ 5 دقائق',   fr: 'il y a 5 minutes', en: '5 minutes ago' },
-      bg: 'bg-blue-500',
-    },
-  ],
-}
-
-// ── Pricing Preview (homepage teaser) ─────────────────────────────────────────
-export const pricingPreview = {
-  title: { ar: 'الأسعار',              fr: 'Tarifs',      en: 'Pricing' },
-  sub: {
-    ar: 'دفع مرة واحدة. لا اشتراكات. لا مفاجآت.',
-    fr: "Payez une fois. Pas d'abonnements. Pas de surprises.",
-    en: 'Pay once. No subscriptions. No surprises.',
-  },
-  cta:  { ar: 'اختر هذه الباقة',       fr: 'Choisir ce forfait',  en: 'Choose this plan' },
-  once: { ar: 'دفع مرة واحدة',         fr: 'Paiement unique',     en: 'One-time payment' },
-  tiers: [
-    { id: 'simple', name: { ar: 'بسيط',     fr: 'Simple',     en: 'Simple'   }, dzd: '3,500',   usd: '$25',   badge: { ar: 'الأكثر شيوعاً', fr: 'Le plus populaire', en: 'Most popular' }, accent: true },
-    { id: 'pro',    name: { ar: 'احترافي',  fr: 'Pro',        en: 'Pro'      }, dzd: '20,000',  usd: '$125',  badge: null, accent: false },
-    { id: 'studio', name: { ar: 'ستوديو',   fr: 'Studio',     en: 'Studio'   }, dzd: '100,000', usd: '$650',  badge: null, accent: false },
-    { id: 'partner',name: { ar: 'راعي',     fr: 'Partenaire', en: 'Partner'  }, dzd: '99,000+', usd: '$500+', badge: null, accent: false },
-  ],
-}
-
-// ── Social Numbers ────────────────────────────────────────────────────────────
-export const socialNumbers = {
-  stats: [
-    { value: 500, suffix: '+',  label: { ar: 'متجر منشور',         fr: 'Boutiques lancées',      en: '500+ stores launched' } },
-    { value: 99,  suffix: '%',  label: { ar: 'رضا العملاء',         fr: 'Satisfaction client',    en: '99% satisfaction' } },
-    { value: 2,   suffix: 'د',  label: { ar: 'متوسط وقت النشر',    fr: 'Temps de déploiement',   en: 'avg deploy time' } },
   ],
 }
 
@@ -241,6 +161,8 @@ export const footer = {
   pricing:   { ar: 'الأسعار',              fr: 'Tarifs',            en: 'Pricing' },
   howItWorks:{ ar: 'كيف يعمل؟',           fr: 'Comment ça marche?',en: 'How it works' },
   demo:      { ar: 'عرض تجريبي',           fr: 'Démo',              en: 'Demo' },
+  terms:     { ar: 'شروط الاستخدام',       fr: "Conditions d'utilisation", en: 'Terms of Service' },
+  privacy:   { ar: 'سياسة الخصوصية',       fr: 'Politique de confidentialité', en: 'Privacy Policy' },
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -357,14 +279,17 @@ export const landingPricing = {
   sub:      { ar: 'كل باقة تفتح طبقة أعمق من الملكية.',  en: 'Each tier unlocks a deeper layer of ownership.' },
   currency: { ar: 'دج',   en: 'DA' },
   once:     { ar: 'دفعة واحدة',  en: 'one-time' },
+  // NOTE: prices/after-labels here must match src/config/pricing.ts (the canonical
+  // source of truth). Landing copy is ar+en; the config carries the fr variant.
   tiers: [
     {
       name:      { ar: 'المبتدئ',   en: 'Starter' },
       who:       { ar: 'البائع: تبيع بنفسك',  en: 'The seller: sell for yourself' },
-      price:     '3,000',
+      price:     '10,000',
+      after:     { ar: 'بعد 31 جويلية: 10 متاجر ثم 3,000 دج/متجر', en: 'After Jul 31: 10 stores, then 3,000 DZD/store' },
       highlight: false,
       features: [
-        { ar: 'متاجر غير محدودة',                                                     en: 'Unlimited stores' },
+        { ar: 'متاجر غير محدودة — للأبد (عرض الدفعة الأولى)',                        en: 'Unlimited stores — forever (first-batch offer)' },
         { ar: 'محرر بصري كامل (12 نوع قسم)',                                          en: 'Full visual editor (12 section types)' },
         { ar: '3 ثيمات + تخصيص كامل',                                                 en: '3 themes + full customization' },
         { ar: 'دفع عند الاستلام، مجاني دائماً',                                       en: 'Cash on delivery, free forever' },
@@ -378,7 +303,8 @@ export const landingPricing = {
     {
       name:      { ar: 'المستقل',   en: 'Freelancer' },
       who:       { ar: 'المستقل: تبني لعملائك',  en: 'The freelancer: build for clients' },
-      price:     '20,000',
+      price:     '70,000',
+      after:     { ar: 'بعد 31 جويلية: 100,000 دج', en: 'After Jul 31: 100,000 DZD' },
       badge:     { ar: 'الأكثر اختياراً',  en: 'Most chosen' },
       highlight: true,
       features: [
@@ -391,7 +317,9 @@ export const landingPricing = {
     {
       name:      { ar: 'الوكالة',   en: 'Run One' },
       who:       { ar: 'الوكالة: تملك منصة مثل هذه',  en: 'The agency: own a platform like this' },
-      price:     '500,000',
+      price:     '1,000,000',
+      after:     { ar: 'بعد 31 جويلية: 2,000,000 دج', en: 'After Jul 31: 2,000,000 DZD' },
+      contact:   true,
       highlight: false,
       features: [
         { ar: 'كل ما في المستقل',                            en: 'Everything in Freelancer' },
@@ -399,7 +327,7 @@ export const landingPricing = {
         { ar: 'تصلك التحديثات عند صدورها أولاً بأول',       en: 'You get updates first, as we ship them' },
         { ar: 'متاجر غير محدودة + دعم مباشر',               en: 'Unlimited client stores + direct support' },
       ],
-      cta: { ar: 'امتلك المنصة',   en: 'Own the platform' },
+      cta: { ar: 'تواصل معنا',   en: 'Contact us' },
     },
   ],
   ownTitle: { ar: 'تريد امتلاك المشروع بالكامل؟',                        en: 'Want to own the whole project?' },

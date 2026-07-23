@@ -21,8 +21,8 @@ type WizardStep = 'review' | 'connect' | 'admin-setup' | 'deploying' | 'live'
 const T = {
   deployStore: { ar: 'نشر المتجر', fr: 'Déployer la boutique', en: 'Deploy Store' },
   tierStarter: { ar: 'خطة المبتدئ', fr: 'Formule Débutant', en: 'Starter plan' },
-  tierPro: { ar: 'خطة الاحترافي', fr: 'Formule Pro', en: 'Pro plan' },
-  tierAgency: { ar: 'خطة الوكالة', fr: 'Formule Agence', en: 'Agency plan' },
+  tierPro: { ar: 'خطة المستقل', fr: 'Formule Freelancer', en: 'Freelancer plan' },
+  tierAgency: { ar: 'خطة الوكالة', fr: 'Formule Run One', en: 'Run One plan' },
   stepReview: { ar: 'المراجعة', fr: 'Révision', en: 'Review' },
   stepConnect: { ar: 'الخدمات', fr: 'Services', en: 'Services' },
   stepAdmin: { ar: 'المدير', fr: 'Admin', en: 'Admin' },

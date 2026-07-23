@@ -32,9 +32,19 @@ jobs:
         env:
           CF_PAGES: '1'
           VITE_INSTANT_APP_ID: b9227417-33f4-4c3d-9c88-612e094aff89
-          VITE_APP_URL: https://7aba.store
-          VITE_GOOGLE_CLIENT_ID: 16915599620-b4cv7djgvok8agu1lpb2cbcdfjifbu93.apps.googleusercontent.com
+          VITE_APP_URL: https://7aba.app
+          VITE_GOOGLE_CLIENT_ID: 1031735082979-bjhvq3ulo8gsmebkeihkalh3gohoropm.apps.googleusercontent.com
           VITE_CHARGILY_PUBLIC_KEY: test_pk_9MgGDzJQ03LZzxaGGEiShDsRz1BL4tCRBJFHJcEb
+          # Public OAuth client ids (not secrets) — inlined by Vite to render the
+          # "connect" buttons. The matching *_CLIENT_SECRET values are runtime-only
+          # and set as encrypted Pages secrets, never here.
+          #
+          # VITE_CF_OAUTH_CLIENT_ID is intentionally NOT set: the Cloudflare
+          # self-managed OAuth client is still private/pending approval, so its
+          # "Connect Cloudflare" button cannot authorize arbitrary merchants yet.
+          # With it absent, cfOAuthAvailable is false and merchants use manual
+          # API-token entry instead. Re-add this line once the CF client is public.
+          VITE_INSTANTDB_OAUTH_CLIENT_ID: be194d93-775f-4b2f-b312-04996c0f5acf
         run: pnpm build
 
       - name: Deploy platform to Cloudflare Pages
