@@ -10,6 +10,7 @@ import { X, Eye, EyeOff, Save, Loader2, Trash2 } from 'lucide-react'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { useLang } from '@/hooks/useLang'
+import { saveMerchantSecrets } from '@/server/saveMerchantSecrets'
 
 interface StoreSettingsModalProps {
   storeId: string
@@ -36,6 +37,11 @@ const T = {
   instantAppIdHint: { ar: 'من', fr: 'Depuis', en: 'From' },
   instantAppIdHint2: { ar: '← اختر تطبيقك ← App Settings', fr: '← Choisissez votre application ← App Settings', en: '← Choose your app ← App Settings' },
   instantAdminTokenHint: { ar: 'Admin token للوصول الخلفي إلى بيانات متجرك.', fr: 'Admin token pour l\'accès backend aux données de votre boutique.', en: 'Admin token for backend access to your store data.' },
+  secretOnFile: {
+    ar: '•••••••• محفوظ ومشفّر — اتركه فارغاً للإبقاء عليه',
+    fr: '•••••••• enregistré et chiffré — laissez vide pour le conserver',
+    en: '•••••••• saved and encrypted — leave blank to keep it',
+  },
   cancel: { ar: 'إلغاء', fr: 'Annuler', en: 'Cancel' },
   savingSettings: { ar: 'جارٍ الحفظ...', fr: 'Enregistrement...', en: 'Saving...' },
   savedSettings: { ar: '✓ تم الحفظ', fr: '✓ Enregistré', en: '✓ Saved' },
@@ -57,9 +63,14 @@ export function StoreSettingsModal({
 }: StoreSettingsModalProps) {
   const { t, dir } = useLang()
   const [cfAccountId, setCfAccountId] = useState(initialValues.cfAccountId ?? '')
-  const [cfApiToken, setCfApiToken] = useState(initialValues.cfApiToken ?? '')
+  // Secrets are encrypted at rest and never sent back to the browser, so these
+  // start empty; the *OnFile flags drive the "already saved" hint, and an empty
+  // field on save means "leave the stored value alone".
+  const [cfApiToken, setCfApiToken] = useState('')
+  const cfTokenOnFile = Boolean(initialValues.cfApiToken)
   const [instantAppId, setInstantAppId] = useState(initialValues.instantAppId ?? '')
-  const [instantAdminToken, setInstantAdminToken] = useState(initialValues.instantAdminToken ?? '')
+  const [instantAdminToken, setInstantAdminToken] = useState('')
+  const instantTokenOnFile = Boolean(initialValues.instantAdminToken)
   const [showCfToken, setShowCfToken] = useState(false)
   const [showInstantToken, setShowInstantToken] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -80,14 +91,15 @@ export function StoreSettingsModal({
     setError(null)
     setSaved(false)
     try {
-      await db.transact(
-        db.tx.stores[storeId].update({
+      await saveMerchantSecrets({
+        data: {
+          storeId,
           cfAccountId: cfAccountId.trim(),
-          cfApiToken: cfApiToken.trim(),
+          cfApiToken: cfApiToken.trim() || undefined,
           instantAppId: instantAppId.trim(),
-          instantAdminToken: instantAdminToken.trim(),
-        })
-      )
+          instantAdminToken: instantAdminToken.trim() || undefined,
+        },
+      })
       setSaved(true)
       setTimeout(() => setSaved(false), 2500)
     } catch (e: unknown) {
@@ -165,7 +177,7 @@ export function StoreSettingsModal({
                     type={showCfToken ? 'text' : 'password'}
                     value={cfApiToken}
                     onChange={(e) => setCfApiToken(e.target.value)}
-                    placeholder="abcdef123456..."
+                    placeholder={cfTokenOnFile ? t(T.secretOnFile) : 'abcdef123456...'}
                     dir="ltr"
                     className="text-sm font-mono pe-10"
                   />
@@ -217,7 +229,7 @@ export function StoreSettingsModal({
                     type={showInstantToken ? 'text' : 'password'}
                     value={instantAdminToken}
                     onChange={(e) => setInstantAdminToken(e.target.value)}
-                    placeholder="your-admin-token..."
+                    placeholder={instantTokenOnFile ? t(T.secretOnFile) : 'your-admin-token...'}
                     dir="ltr"
                     className="text-sm font-mono pe-10"
                   />

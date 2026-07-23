@@ -25,6 +25,7 @@ import { verifySubscriptionPayment } from '@/server/verifySubscriptionPayment'
 import { TIERS as PRICING_TIERS, ONCE_LABEL, contactWhatsappUrl } from '@/config/pricing'
 import { FirstBatchCountdown } from '@/components/marketing/FirstBatchCountdown'
 import { getDownloadUrl } from '@/server/getDownloadUrl'
+import { saveMerchantSecrets } from '@/server/saveMerchantSecrets'
 import type { DownloadType } from '@/server/getDownloadUrl'
 import {
   Plus, Settings, ExternalLink, LogOut, Store, Rocket,
@@ -206,14 +207,15 @@ function OnboardingWelcome({
     if (!platformUserId || !fields.cfAccountId || !fields.cfApiToken) return
     setSaving(true)
     try {
-      await db.transact(
-        (db.tx.platformUsers as any)[platformUserId].update({
+      await saveMerchantSecrets({
+        data: {
+          platformUserId,
           cfAccountId: fields.cfAccountId.trim(),
           cfApiToken: fields.cfApiToken.trim(),
-          instantAppId: fields.instantAppId.trim() || null,
-          instantAdminToken: fields.instantAdminToken.trim() || null,
-        })
-      )
+          instantAppId: fields.instantAppId.trim() || undefined,
+          instantAdminToken: fields.instantAdminToken.trim() || undefined,
+        },
+      })
       onDone()
       navigate({ to: '/dashboard' })
     } finally {

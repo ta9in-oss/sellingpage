@@ -14,6 +14,9 @@ jobs:
     env:
       VITE_INSTANT_APP_ID: ${{ secrets.PLATFORM_VITE_INSTANT_APP_ID }}
       PLATFORM_INSTANTDB_ADMIN_TOKEN: ${{ secrets.PLATFORM_INSTANTDB_ADMIN_TOKEN }}
+      # Opens the merchant secrets sealed by the platform. Must be byte-identical
+      # to the STORE_SECRET_KEY Pages secret on 7aba-platform.
+      STORE_SECRET_KEY: ${{ secrets.STORE_SECRET_KEY }}
       STORE_ID: ${{ github.event.client_payload.storeId }}
     steps:
       - uses: actions/checkout@v4

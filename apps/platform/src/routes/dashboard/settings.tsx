@@ -5,6 +5,7 @@ import { db } from '@/lib/instantdb'
 import { Loader2, ArrowLeft, ArrowRight, Save, Key, ExternalLink, Globe, AlertCircle } from 'lucide-react'
 import { useLang } from '@/hooks/useLang'
 import { cn } from '@/lib/utils'
+import { saveMerchantSecrets } from '@/server/saveMerchantSecrets'
 
 export const Route = createFileRoute('/dashboard/settings')({
   validateSearch: (search) => ({
@@ -63,11 +64,13 @@ function SettingsPage() {
 
   useEffect(() => {
     if (platformUser) {
+      // Token fields stay blank: they are encrypted at rest and the plaintext
+      // never leaves the server. Blank on save means "keep what's stored".
       setFields({
         cfAccountId: platformUser.cfAccountId ?? '',
-        cfApiToken: platformUser.cfApiToken ?? '',
+        cfApiToken: '',
         instantAppId: platformUser.instantAppId ?? '',
-        instantAdminToken: platformUser.instantAdminToken ?? '',
+        instantAdminToken: '',
       })
     }
   }, [platformUser?.id])
@@ -76,14 +79,15 @@ function SettingsPage() {
     if (!platformUser?.id) return
     setSaving(true)
     try {
-      await db.transact(
-        (db.tx.platformUsers as any)[platformUser.id].update({
-          cfAccountId: fields.cfAccountId.trim() || null,
-          cfApiToken: fields.cfApiToken.trim() || null,
-          instantAppId: fields.instantAppId.trim() || null,
-          instantAdminToken: fields.instantAdminToken.trim() || null,
-        })
-      )
+      await saveMerchantSecrets({
+        data: {
+          platformUserId: platformUser.id,
+          cfAccountId: fields.cfAccountId.trim(),
+          cfApiToken: fields.cfApiToken.trim() || undefined,
+          instantAppId: fields.instantAppId.trim(),
+          instantAdminToken: fields.instantAdminToken.trim() || undefined,
+        },
+      })
       setSaveStatus('saved')
       setTimeout(() => {
         setSaveStatus('idle')

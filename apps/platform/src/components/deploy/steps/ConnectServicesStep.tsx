@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils'
 import { ExternalLink, ChevronDown, ChevronUp, Check, Sparkles, Globe } from 'lucide-react'
 import { useLang } from '@/hooks/useLang'
 import { autoProvisionInstantDB } from '@/server/autoProvisionInstantDB'
+import { saveMerchantSecrets } from '@/server/saveMerchantSecrets'
 import { Button } from '@/components/ui/button'
 
 interface Props {
@@ -73,6 +74,12 @@ const T = {
   saving: { ar: 'جارٍ الحفظ...', fr: 'Enregistrement...', en: 'Saving...' },
   continue: { ar: 'تابع →', fr: 'Continuer →', en: 'Continue →' },
   whereToFind: { ar: 'كيفية الحصول عليها', fr: 'Comment obtenir', en: 'How to get it' },
+  tokenOnFile: { ar: 'محفوظ', fr: 'enregistré', en: 'saved' },
+  tokenOnFileHint: {
+    ar: 'المفتاح محفوظ ومشفّر. اتركه فارغاً للإبقاء عليه، أو أدخل مفتاحاً جديداً لاستبداله',
+    fr: 'Le jeton est enregistré et chiffré. Laissez vide pour le conserver, ou saisissez-en un nouveau pour le remplacer',
+    en: 'Your token is saved and encrypted. Leave blank to keep it, or enter a new one to replace it',
+  },
   error: { ar: 'خطأ', fr: 'Erreur', en: 'Error' },
 }
 
@@ -82,6 +89,10 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
 
   const [cfAccountId, setCfAccountId] = useState('')
   const [cfApiToken, setCfApiToken] = useState('')
+  // The stored token is encrypted and never comes back to the browser, so the
+  // input stays empty on revisit; this flag is what tells the merchant one is
+  // already on file. Typing a new value replaces it.
+  const [cfTokenOnFile, setCfTokenOnFile] = useState(false)
   const [cfConnected, setCfConnected] = useState(false)
   const [showManualCF, setShowManualCF] = useState(false)
   const [usingAccountCreds, setUsingAccountCreds] = useState(false)
@@ -126,12 +137,12 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
 
     if (store?.cfAccountId) {
       setCfAccountId(store.cfAccountId as string)
-      setCfApiToken((store.cfApiToken as string) ?? '')
+      setCfTokenOnFile(Boolean(store.cfApiToken))
       setCfConnected(true)
       setUsingAccountCreds(false)
     } else if (platformUser?.cfAccountId) {
       setCfAccountId(platformUser.cfAccountId as string)
-      setCfApiToken((platformUser.cfApiToken as string) ?? '')
+      setCfTokenOnFile(Boolean(platformUser.cfApiToken))
       setCfConnected(true)
       setUsingAccountCreds(true)
       setShowManualCF(true)
@@ -139,7 +150,6 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
 
     if (store?.instantAppId) {
       setInstantAppId(store.instantAppId as string)
-      setInstantAdminToken((store.instantAdminToken as string) ?? '')
     }
   }, [storeData, userData])
 
@@ -150,6 +160,7 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
         const { accountId, apiToken } = e.data as { accountId: string; apiToken: string }
         setCfAccountId(accountId)
         setCfApiToken(apiToken)
+        setCfTokenOnFile(false)
         setCfConnected(true)
         setUsingAccountCreds(false)
         popupRef.current?.close()
@@ -181,7 +192,8 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
     instantPopupRef.current = window.open(url, 'instant-oauth', 'width=640,height=720,noopener')
   }
 
-  const canContinue = cfConnected || (cfAccountId.trim() !== '' && cfApiToken.trim() !== '')
+  const canContinue =
+    cfConnected || (cfAccountId.trim() !== '' && (cfApiToken.trim() !== '' || cfTokenOnFile))
 
   const handleContinue = async () => {
     setSaving(true)
@@ -200,25 +212,19 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
         adminToken = provisioned.adminToken
       }
 
-      await db.transact(
-        db.tx.stores[storeId].update({
-          cfAccountId: cfAccountId.trim(),
-          cfApiToken: cfApiToken.trim(),
-          instantAppId: appId.trim(),
-          instantAdminToken: adminToken.trim(),
-        })
-      )
-
-      // Optionally persist to account-level platformUsers
+      // Secrets are written server-side so they land encrypted; an empty token
+      // here means "keep the one already on file" rather than "clear it".
       const platformUser = (userData as any)?.platformUsers?.[0]
-      if (saveToAccount && user?.email && platformUser?.id) {
-        await db.transact(
-          (db.tx.platformUsers as any)[platformUser.id].update({
-            cfAccountId: cfAccountId.trim(),
-            cfApiToken: cfApiToken.trim(),
-          })
-        )
-      }
+      await saveMerchantSecrets({
+        data: {
+          storeId,
+          platformUserId: saveToAccount && user?.email ? platformUser?.id : undefined,
+          cfAccountId: cfAccountId.trim(),
+          cfApiToken: cfApiToken.trim() || undefined,
+          instantAppId: appId.trim(),
+          instantAdminToken: adminToken.trim() || undefined,
+        },
+      })
 
       onContinue()
     } catch (err) {
@@ -335,17 +341,19 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
               label={t(T.cfAccountIdLabel)}
               value={cfAccountId}
               placeholder="abc123..."
-              onChange={(v) => { setCfAccountId(v); setUsingAccountCreds(false); setCfConnected(v.trim() !== '' && cfApiToken.trim() !== '') }}
+              onChange={(v) => { setCfAccountId(v); setUsingAccountCreds(false); setCfConnected(v.trim() !== '' && (cfApiToken.trim() !== '' || cfTokenOnFile)) }}
             />
             <div>
               <ManualField
                 label={t(T.cfApiTokenLabel)}
                 value={cfApiToken}
-                placeholder="••••••••••••••••••••"
-                onChange={(v) => { setCfApiToken(v); setUsingAccountCreds(false); setCfConnected(cfAccountId.trim() !== '' && v.trim() !== '') }}
+                placeholder={cfTokenOnFile ? '••••••••  ' + t(T.tokenOnFile) : '••••••••••••••••••••'}
+                onChange={(v) => { setCfApiToken(v); setUsingAccountCreds(false); setCfConnected(cfAccountId.trim() !== '' && (v.trim() !== '' || cfTokenOnFile)) }}
                 isSecret
               />
-              <p className="text-xs text-muted-foreground mt-1">{t(T.cfTokenHint)}</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {cfTokenOnFile ? t(T.tokenOnFileHint) : t(T.cfTokenHint)}
+              </p>
             </div>
             <a href="https://dash.cloudflare.com/profile/api-tokens" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
               <ExternalLink size={11} />
