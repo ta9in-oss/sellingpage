@@ -12,7 +12,7 @@ jobs:
   deploy-store:
     runs-on: ubuntu-latest
     env:
-      VITE_INSTANT_APP_ID: b9227417-33f4-4c3d-9c88-612e094aff89
+      VITE_INSTANT_APP_ID: ${{ secrets.PLATFORM_VITE_INSTANT_APP_ID }}
       PLATFORM_INSTANTDB_ADMIN_TOKEN: ${{ secrets.PLATFORM_INSTANTDB_ADMIN_TOKEN }}
       STORE_ID: ${{ github.event.client_payload.storeId }}
     steps:
@@ -46,6 +46,10 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ steps.gen.outputs.cf_api_token }}
           CLOUDFLARE_ACCOUNT_ID: ${{ steps.gen.outputs.cf_account_id }}
         run: |
+          # `pages deploy` prompts to create a missing project, which hangs in CI.
+          # Creating it up front is idempotent enough: a second create just errors.
+          npx wrangler pages project create "7aba-${{ steps.gen.outputs.slug }}" \
+            --production-branch=main || echo "project already exists, continuing"
           npx wrangler pages deploy apps/store/dist \
             --project-name="7aba-${{ steps.gen.outputs.slug }}" \
             --branch=main \
