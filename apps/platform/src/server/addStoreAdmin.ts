@@ -1,9 +1,10 @@
 import { createServerFn } from '@tanstack/react-start'
 import { init } from '@instantdb/admin'
+import { decryptSecret } from '../lib/secretBox'
 
 interface Params {
-  instantAppId: string
-  instantAdminToken: string
+  /** The store whose merchant InstantDB credentials to use. */
+  storeId: string
   adminEmail: string
 }
 
@@ -14,14 +15,34 @@ interface Params {
  * The merchant provides their InstantDB App ID and Admin Token in ConnectServicesStep,
  * and the admin email in SetupAdminStep. This server function adds that email to
  * the store's `users` table with role: 'admin'.
+ *
+ * The merchant's admin token is encrypted at rest and the browser cannot read it,
+ * so this takes a storeId and resolves the credentials here instead of accepting
+ * them from the client.
  */
 export const addStoreAdmin = createServerFn({ method: 'POST' })
   .validator((data: unknown) => data as Params)
   .handler(async ({ data }) => {
-    const { instantAppId, instantAdminToken, adminEmail } = data
+    const { storeId, adminEmail } = data
 
-    if (!instantAppId || !instantAdminToken || !adminEmail) {
+    if (!storeId || !adminEmail) {
       throw new Error('المعطيات ناقصة')
+    }
+
+    const platformDb = init({
+      appId: process.env.VITE_INSTANT_APP_ID!,
+      adminToken: process.env.INSTANTDB_ADMIN_TOKEN!,
+    })
+    const storeRes = await platformDb.query({ stores: { $: { where: { id: storeId } } } })
+    const store = storeRes.stores?.[0] as { instantAppId?: string; instantAdminToken?: string } | undefined
+
+    const instantAppId = store?.instantAppId ?? ''
+    const instantAdminToken = store?.instantAdminToken
+      ? await decryptSecret(store.instantAdminToken, process.env.STORE_SECRET_KEY ?? '')
+      : ''
+
+    if (!instantAppId || !instantAdminToken) {
+      throw new Error('بيانات InstantDB للمتجر غير متوفرة')
     }
 
     // Initialize admin SDK with the MERCHANT's InstantDB app credentials

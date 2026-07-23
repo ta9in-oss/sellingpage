@@ -4,13 +4,21 @@ on:
   repository_dispatch:
     types: [deploy-store]
 
+# Serialise per store rather than cancelling. Cancelling raced badly: the
+# cancelled run's status write could land after the replacement run had already
+# reported `building`, leaving a live deploy looking failed. Queueing is also
+# what a merchant means by clicking Publish twice — they want the latest state
+# deployed, not the first attempt killed.
 concurrency:
   group: deploy-store-${{ github.event.client_payload.storeId }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   deploy-store:
     runs-on: ubuntu-latest
+    # A hung job must not hold the per-store concurrency slot for GitHub's
+    # 6-hour default; the merchant is watching a spinner the whole time.
+    timeout-minutes: 20
     env:
       VITE_INSTANT_APP_ID: ${{ secrets.PLATFORM_VITE_INSTANT_APP_ID }}
       PLATFORM_INSTANTDB_ADMIN_TOKEN: ${{ secrets.PLATFORM_INSTANTDB_ADMIN_TOKEN }}
@@ -66,6 +74,8 @@ jobs:
             --status=live \
             --url="https://7aba-${{ steps.gen.outputs.slug }}.pages.dev"
 
+      # `failure()` alone misses cancellation and timeout, which would strand the
+      # store at `building` with nothing left to move it.
       - name: Mark failed
-        if: failure()
+        if: failure() || cancelled()
         run: node scripts/set-store-status.mjs --store-id="$STORE_ID" --status=failed

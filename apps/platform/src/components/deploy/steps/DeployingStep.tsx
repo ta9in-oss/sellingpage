@@ -31,6 +31,10 @@ const T = {
   retry: { ar: 'حاول مجدداً', fr: 'Réessayer', en: 'Try again' },
 }
 
+// Generous vs. the CI job's own 20-minute cap plus queue wait: this only fires
+// when CI never reported at all, so it must not undercut a slow-but-fine build.
+const DEPLOY_TIMEOUT_MS = 25 * 60 * 1000
+
 function delay(ms: number) {
   return new Promise<void>((resolve) => setTimeout(resolve, ms))
 }
@@ -65,6 +69,9 @@ export function DeployingStep({ storeId, onComplete, onError }: Props) {
   const config = (store?.config as StoreConfig | undefined) ?? builderConfig
   const deployStatus = store?.deployStatus as 'queued' | 'building' | 'live' | 'failed' | undefined
   const doneRef = useRef(false)
+  // Guards against reacting to the previous deploy's status; see runDeploy.
+  const dispatchedRef = useRef(false)
+  const [watchdogStartedAt, setWatchdogStartedAt] = useState<number | null>(null)
 
   const addLog = useCallback((msg: string) => {
     setLogs((prev) => [...prev, msg])
@@ -76,6 +83,8 @@ export function DeployingStep({ storeId, onComplete, onError }: Props) {
 
   const runDeploy = useCallback(async () => {
     doneRef.current = false
+    dispatchedRef.current = false
+    setWatchdogStartedAt(null)
     setHasError(false)
     setLogs(['> بدء عملية النشر...'])
     setSteps(initialSteps())
@@ -108,15 +117,20 @@ export function DeployingStep({ storeId, onComplete, onError }: Props) {
       addLog('> إرسال طلب النشر...')
       const { triggerStoreDeploy } = await import('@/server/triggerStoreDeploy')
       await triggerStoreDeploy({ data: { storeId } })
+      // Only now may the status effect act: before the dispatch, deployStatus
+      // still holds the PREVIOUS deploy's value, and acting on a stale `live`
+      // would report success for a build that has not begun.
+      dispatchedRef.current = true
+      setWatchdogStartedAt(Date.now())
       addLog('✓ تم إرسال الطلب. جاري بناء المتجر ونشره على Cloudflare...')
-      // Steps 3–6 (build, deploy, verify, save) are driven by the deployStatus poll below.
+      // Steps 3–6 (build, deploy, verify, save) are driven by deployStatus below.
 
       // Best-effort: add the store admin to the merchant's InstantDB now.
       const adminEmail = store?.adminEmail
       if (adminEmail && instantAdminToken && instantAppId) {
         try {
           const { addStoreAdmin } = await import('@/server/addStoreAdmin')
-          await addStoreAdmin({ data: { instantAppId, instantAdminToken, adminEmail } })
+          await addStoreAdmin({ data: { storeId, adminEmail } })
           addLog(`✓ تم إضافة المدير: ${adminEmail}`)
         } catch (adminErr) {
           addLog(`⚠ تعذّر إضافة المدير تلقائياً: ${(adminErr as Error).message}`)
@@ -142,8 +156,13 @@ export function DeployingStep({ storeId, onComplete, onError }: Props) {
   }, [runDeploy])
 
   // Drive steps 3–6 + completion from the CI-reported deployStatus.
+  //
+  // This is a live InstantDB subscription, not a poll: CI writes the row and the
+  // update arrives over the open socket, so the wizard cannot show a stale step.
+  // The one thing a subscription cannot tell us is that CI never reported at all
+  // (queue backlog, runner outage) — that is the watchdog below.
   useEffect(() => {
-    if (doneRef.current) return
+    if (doneRef.current || !dispatchedRef.current) return
     if (deployStatus === 'building') {
       setStepStatus(2, 'done')
       setStepStatus(3, 'running')
@@ -163,6 +182,22 @@ export function DeployingStep({ storeId, onComplete, onError }: Props) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deployStatus, store?.deployedUrl])
+
+  // Watchdog: if CI never reports a terminal status, fail the wizard instead of
+  // spinning forever. A merchant who sees an honest error retries; one watching
+  // an endless spinner assumes the product is broken and leaves.
+  useEffect(() => {
+    if (watchdogStartedAt === null) return
+    const timer = setTimeout(() => {
+      if (doneRef.current) return
+      doneRef.current = true
+      setSteps((prev) => prev.map((s) => (s.status === 'running' ? { ...s, status: 'error' } : s)))
+      setHasError(true)
+      addLog('✗ انتهت المهلة دون رد من الخادم. المتجر قد يكون قيد البناء — أعد المحاولة بعد قليل.')
+      onError()
+    }, DEPLOY_TIMEOUT_MS)
+    return () => clearTimeout(timer)
+  }, [watchdogStartedAt, addLog, onError])
 
   useEffect(() => {
     logsEndRef.current?.scrollIntoView({ behavior: 'smooth' })
