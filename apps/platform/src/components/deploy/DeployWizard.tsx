@@ -1,11 +1,13 @@
 import { useState } from 'react'
+import { useNavigate } from '@tanstack/react-router'
+import { Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ReviewStep } from './steps/ReviewStep'
-import { ConnectServicesStep } from './steps/ConnectServicesStep'
 import { SetupAdminStep } from './steps/SetupAdminStep'
 import { DeployingStep } from './steps/DeployingStep'
 import { LiveStep } from './steps/LiveStep'
 import { ProDeliveryStep } from './steps/ProDeliveryStep'
+import { prepareStoreForDeploy } from '@/server/prepareStoreForDeploy'
 import { useLang } from '@/hooks/useLang'
 
 interface Props {
@@ -14,9 +16,11 @@ interface Props {
   userEmail: string
 }
 
-// All tiers: review → connect → admin-setup → deploying → live
-// Pro/Agency additionally get source code delivery on the live step
-type WizardStep = 'review' | 'connect' | 'admin-setup' | 'deploying' | 'live'
+// All tiers: review → admin-setup → deploying → live.
+// Cloudflare/InstantDB are connected once at the account level (Settings);
+// on review-continue we silently apply them to the store — no per-store connect
+// step. Pro/Agency additionally get source code delivery on the live step.
+type WizardStep = 'review' | 'admin-setup' | 'deploying' | 'live'
 
 const T = {
   deployStore: { ar: 'نشر المتجر', fr: 'Déployer la boutique', en: 'Deploy Store' },
@@ -24,27 +28,50 @@ const T = {
   tierPro: { ar: 'خطة المستقل', fr: 'Formule Freelancer', en: 'Freelancer plan' },
   tierAgency: { ar: 'خطة الوكالة', fr: 'Formule Run One', en: 'Run One plan' },
   stepReview: { ar: 'المراجعة', fr: 'Révision', en: 'Review' },
-  stepConnect: { ar: 'الخدمات', fr: 'Services', en: 'Services' },
   stepAdmin: { ar: 'المدير', fr: 'Admin', en: 'Admin' },
   stepDeploy: { ar: 'النشر', fr: 'Déploiement', en: 'Deploy' },
   stepLive: { ar: 'مكتمل', fr: 'Terminé', en: 'Done' },
+  preparing: { ar: 'جارٍ تجهيز الخدمات…', fr: 'Préparation des services…', en: 'Preparing services…' },
+  prepFailed: { ar: 'تعذّر تجهيز الخدمات', fr: 'Échec de préparation', en: 'Could not prepare services' },
 }
 
 export function DeployWizard({ storeId, tier, userEmail }: Props) {
   const { t } = useLang()
+  const navigate = useNavigate()
   const isProOrAgency = tier === 'pro' || tier === 'agency'
   const [currentStep, setCurrentStep] = useState(0)
   const [showProDelivery, setShowProDelivery] = useState(false)
+  const [preparing, setPreparing] = useState(false)
+  const [prepError, setPrepError] = useState<string | null>(null)
 
   const STEPS: { key: WizardStep; label: string }[] = [
     { key: 'review', label: t(T.stepReview) },
-    { key: 'connect', label: t(T.stepConnect) },
     { key: 'admin-setup', label: t(T.stepAdmin) },
     { key: 'deploying', label: t(T.stepDeploy) },
     { key: 'live', label: t(T.stepLive) },
   ]
 
   const advance = () => setCurrentStep((s) => Math.min(s + 1, STEPS.length - 1))
+
+  // Applies the account's Cloudflare/InstantDB credentials to this store, then
+  // advances. If Cloudflare isn't connected at all, send the merchant to Settings.
+  const handleReviewContinue = async () => {
+    setPreparing(true)
+    setPrepError(null)
+    try {
+      await prepareStoreForDeploy({ data: { storeId, userEmail } })
+      advance()
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e)
+      if (msg.includes('CLOUDFLARE_NOT_CONFIGURED') || msg.includes('INSTANTDB_NOT_CONFIGURED')) {
+        navigate({ to: '/dashboard/settings', search: { from: 'deploy' } as any })
+      } else {
+        setPrepError(t(T.prepFailed))
+      }
+    } finally {
+      setPreparing(false)
+    }
+  }
 
   const currentKey = STEPS[currentStep].key
 
@@ -53,10 +80,20 @@ export function DeployWizard({ storeId, tier, userEmail }: Props) {
 
   const renderStep = () => {
     if (currentKey === 'review') {
-      return <ReviewStep storeId={storeId} onContinue={advance} />
-    }
-    if (currentKey === 'connect') {
-      return <ConnectServicesStep storeId={storeId} onContinue={advance} />
+      if (preparing) {
+        return (
+          <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            <p className="text-sm text-muted-foreground">{t(T.preparing)}</p>
+          </div>
+        )
+      }
+      return (
+        <div className="space-y-3">
+          <ReviewStep storeId={storeId} onContinue={handleReviewContinue} />
+          {prepError && <p className="text-sm text-destructive text-center">{prepError}</p>}
+        </div>
+      )
     }
     if (currentKey === 'admin-setup') {
       return <SetupAdminStep storeId={storeId} onContinue={advance} />

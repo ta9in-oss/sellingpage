@@ -27,7 +27,7 @@ export function Hero() {
               <Link to="/dashboard" search={{}} className="btn btn--accent btn--lg">
                 {t(landingHero.ctaPrimary)}<span className="btn__arrow">→</span>
               </Link>
-              <a className="btn btn--lg" href="#proof">{t(landingHero.ctaSecondary)}</a>
+              <a className="btn btn--lg" href="https://demo.7aba.app" target="_blank" rel="noopener noreferrer">{t(landingHero.ctaSecondary)}</a>
             </div>
           </Reveal>
         </div>

@@ -23,6 +23,8 @@ export interface StoreConfig {
     rtl: boolean
     siteTitle?: string
     siteDescription?: string
+    /** Store logo — a media-library URL shown in the header/footer. */
+    logo?: string
   }
   theme: Theme
   sections: Section[]

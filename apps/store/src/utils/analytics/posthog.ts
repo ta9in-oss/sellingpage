@@ -1,8 +1,8 @@
 export default () => {
-  const isProd = (process.env.NODE_ENV || import.meta.env.MODE) === 'production'
+  const isProd = import.meta.env.MODE === 'production'
 
-  const postHogKey = process.env.PUBLIC_POSTHOG_KEY || import.meta.env.VITE_PUBLIC_POSTHOG_KEY;
-  const postHogHost = process.env.PUBLIC_POSTHOG_HOST || import.meta.env.VITE_PUBLIC_POSTHOG_HOST;
+  const postHogKey = import.meta.env.VITE_PUBLIC_POSTHOG_KEY;
+  const postHogHost = import.meta.env.VITE_PUBLIC_POSTHOG_HOST;
 
   if (!isProd || !postHogKey || !postHogHost) return [];
 

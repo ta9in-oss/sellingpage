@@ -1,0 +1,8 @@
+# Caddy config for the deploy daemon. Terminates TLS (auto Let's Encrypt) on the
+# subdomain and proxies to the localhost-only daemon. Requires:
+#   - an A record: deploy.7aba.app -> <build-server-ip>
+#   - ports 80 and 443 open on the box
+deploy.7aba.app {
+	reverse_proxy 127.0.0.1:8787
+	encode gzip
+}

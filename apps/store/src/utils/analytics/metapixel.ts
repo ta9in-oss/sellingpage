@@ -1,9 +1,7 @@
 export default () => {
-  const isProd =
-    (process.env.NODE_ENV || import.meta.env.MODE) === "production";
+  const isProd = import.meta.env.MODE === "production";
 
-  const metaPixelId =
-    process.env.META_PIXEL_ID || import.meta.env.VITE_META_PIXEL_ID;
+  const metaPixelId = import.meta.env.VITE_META_PIXEL_ID;
 
   if (!isProd || !metaPixelId) return [];
 

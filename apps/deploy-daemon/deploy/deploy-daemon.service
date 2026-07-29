@@ -1,0 +1,22 @@
+[Unit]
+Description=7aba store deploy daemon
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=bubblewardevops
+WorkingDirectory=/home/bubblewardevops/sellingpage
+EnvironmentFile=/home/bubblewardevops/sellingpage/apps/deploy-daemon/.env
+# corepack provides pnpm; tsx runs the .mjs entry that imports the platform's .ts
+ExecStart=/usr/bin/env pnpm --filter @7aba/deploy-daemon start
+Restart=on-failure
+RestartSec=3
+# A hung build must not wedge a slot forever; the client-side watchdog fails the
+# wizard at ~25min, so give the process room but not infinite.
+TimeoutStopSec=30
+StandardOutput=append:/home/bubblewardevops/deploy-daemon.log
+StandardError=append:/home/bubblewardevops/deploy-daemon.log
+
+[Install]
+WantedBy=multi-user.target

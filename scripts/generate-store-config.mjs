@@ -30,21 +30,24 @@ function ghOutput(name, value) {
   if (process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, `${name}=${value}\n`)
 }
 
-async function main() {
-  const storeId = process.argv.find((a) => a.startsWith('--store-id='))?.split('=')[1]
-  if (!storeId) throw new Error('Usage: node scripts/generate-store-config.mjs --store-id=<id>')
-
-  const appId = process.env.VITE_INSTANT_APP_ID
-  const adminToken = process.env.PLATFORM_INSTANTDB_ADMIN_TOKEN
-  if (!appId || !adminToken) throw new Error('VITE_INSTANT_APP_ID and PLATFORM_INSTANTDB_ADMIN_TOKEN are required')
+/**
+ * Fetches a store, decrypts its sealed merchant secrets, writes the store's
+ * config files, and RETURNS the resolved values. No stdout side effects — the
+ * caller decides what to do with the secrets (GitHub masking, or the deploy
+ * daemon feeding them to wrangler). Shared by the CLI below and
+ * apps/deploy-daemon so both build stores identically.
+ *
+ * @param {{storeId: string, appId: string, adminToken: string, encKey?: string}} p
+ */
+export async function generateStoreConfig({ storeId, appId, adminToken, encKey = '' }) {
+  if (!storeId) throw new Error('storeId is required')
+  if (!appId || !adminToken) throw new Error('appId and adminToken are required')
 
   const store = await fetchStore(appId, adminToken, storeId)
 
   // Merchant secrets are sealed at rest (see apps/platform/src/lib/secretBox.ts).
-  // Open them here — this runner is the only other place besides the platform
-  // worker that holds STORE_SECRET_KEY. Values written before encryption was
-  // introduced are plaintext and pass through untouched.
-  const encKey = process.env.STORE_SECRET_KEY ?? ''
+  // Open them here — a runner that holds STORE_SECRET_KEY. Values written before
+  // encryption was introduced are plaintext and pass through untouched.
   const sealed = [store.cfApiToken, store.instantAdminToken, store.chargilyApiKey].filter(isEncrypted)
   if (sealed.length > 0 && !encKey) {
     throw new Error('This store has encrypted secrets but STORE_SECRET_KEY is not set on the runner')
@@ -53,25 +56,59 @@ async function main() {
   const instantAdminToken = store.instantAdminToken ? await decryptSecret(store.instantAdminToken, encKey) : ''
   const chargilyApiKey = store.chargilyApiKey ? await decryptSecret(store.chargilyApiKey, encKey) : ''
 
-  // Mask every secret before emitting any other output. Mask both forms: the
-  // plaintext is what leaks if a later step echoes it, and the ciphertext is
-  // what a query dump would show.
-  for (const s of [cfApiToken, instantAdminToken, chargilyApiKey, store.cfApiToken, store.instantAdminToken, store.chargilyApiKey]) {
-    if (s) console.log(`::add-mask::${s}`)
-  }
-
   const { siteConfigTs, contentJson } = buildStoreArtifacts(store)
   writeFileSync(resolve(STORE_CONFIG_DIR, 'site.config.ts'), siteConfigTs)
   writeFileSync(resolve(STORE_CONFIG_DIR, 'content.json'), contentJson)
 
-  ghOutput('slug', store.slug)
-  ghOutput('cf_account_id', store.cfAccountId ?? '')
-  ghOutput('cf_api_token', cfApiToken)
-  ghOutput('instant_app_id', store.instantAppId ?? '')
-  ghOutput('instant_admin_token', instantAdminToken)
-  ghOutput('chargily_api_key', chargilyApiKey)
+  return {
+    slug: store.slug,
+    cfAccountId: store.cfAccountId ?? '',
+    cfApiToken,
+    instantAppId: store.instantAppId ?? '',
+    instantAdminToken,
+    chargilyApiKey,
+    // Raw sealed forms so a caller (e.g. GitHub Actions) can mask both.
+    sealed: {
+      cfApiToken: store.cfApiToken ?? '',
+      instantAdminToken: store.instantAdminToken ?? '',
+      chargilyApiKey: store.chargilyApiKey ?? '',
+    },
+  }
+}
 
-  console.log(`✓ Generated config for "${store.slug}" (${storeId})`)
+async function main() {
+  const storeId = process.argv.find((a) => a.startsWith('--store-id='))?.split('=')[1]
+  if (!storeId) throw new Error('Usage: node scripts/generate-store-config.mjs --store-id=<id>')
+
+  const appId = process.env.VITE_INSTANT_APP_ID
+  const adminToken = process.env.PLATFORM_INSTANTDB_ADMIN_TOKEN
+  if (!appId || !adminToken) throw new Error('VITE_INSTANT_APP_ID and PLATFORM_INSTANTDB_ADMIN_TOKEN are required')
+
+  const cfg = await generateStoreConfig({
+    storeId,
+    appId,
+    adminToken,
+    encKey: process.env.STORE_SECRET_KEY ?? '',
+  })
+
+  // Mask every secret before emitting any other output. Mask both forms: the
+  // plaintext is what leaks if a later step echoes it, and the ciphertext is
+  // what a query dump would show.
+  for (const s of [
+    cfg.cfApiToken, cfg.instantAdminToken, cfg.chargilyApiKey,
+    cfg.sealed.cfApiToken, cfg.sealed.instantAdminToken, cfg.sealed.chargilyApiKey,
+  ]) {
+    if (s) console.log(`::add-mask::${s}`)
+  }
+
+  ghOutput('slug', cfg.slug)
+  ghOutput('cf_account_id', cfg.cfAccountId)
+  ghOutput('cf_api_token', cfg.cfApiToken)
+  ghOutput('instant_app_id', cfg.instantAppId)
+  ghOutput('instant_admin_token', cfg.instantAdminToken)
+  ghOutput('chargily_api_key', cfg.chargilyApiKey)
+
+  console.log(`✓ Generated config for "${cfg.slug}" (${storeId})`)
 }
 
 // Only run main when invoked directly, not when imported by tests.

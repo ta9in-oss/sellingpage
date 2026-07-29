@@ -21,6 +21,7 @@ function CloudflareCallbackPage() {
     const params = new URLSearchParams(window.location.search)
     const code = params.get('code')
     const errorParam = params.get('error')
+    const state = params.get('state')
 
     if (errorParam) {
       setStatus('error')
@@ -34,12 +35,21 @@ function CloudflareCallbackPage() {
       return
     }
 
+    // CSRF: if we can see the state we issued (sessionStorage is copied into the popup),
+    // reject a mismatch before exchanging the code. The opener re-checks the echoed state.
+    const expectedState = sessionStorage.getItem('cf_oauth_state')
+    if (expectedState && state !== expectedState) {
+      setStatus('error')
+      setError('عدم تطابق رمز الحالة (state)')
+      return
+    }
+
     const redirectUri = `${window.location.origin}/auth/cloudflare`
     exchangeCloudflareOAuth({ data: { code, redirectUri } })
       .then(({ accessToken, accountId }) => {
         if (window.opener) {
           window.opener.postMessage(
-            { type: 'cloudflare_connected', accountId, apiToken: accessToken },
+            { type: 'cloudflare_connected', accountId, apiToken: accessToken, state },
             window.location.origin
           )
         }

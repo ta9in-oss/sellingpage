@@ -8,6 +8,6 @@ export default defineConfig({
   plugins: [tsConfigPaths()],
   test: {
     environment: 'node',
-    include: ['scripts/**/*.test.mjs'],
+    include: ['scripts/**/*.test.mjs', 'apps/deploy-daemon/src/**/*.test.mjs'],
   },
 })

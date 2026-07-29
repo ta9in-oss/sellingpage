@@ -1,7 +1,7 @@
 export default () => {
-    const isProd = (process.env.NODE_ENV || import.meta.env.MODE) === 'production'
+    const isProd = import.meta.env.MODE === 'production'
 
-    const googleAnalytics = process.env.GOOGLE_ANALYTICS || import.meta.env.VITE_GOOGLE_ANALYTICS;
+    const googleAnalytics = import.meta.env.VITE_GOOGLE_ANALYTICS;
 
     if (!isProd || !googleAnalytics) return [];
 

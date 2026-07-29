@@ -1,7 +1,7 @@
 export default () => {
-    const isProd = (process.env.NODE_ENV || import.meta.env.MODE) === 'production'
+    const isProd = import.meta.env.MODE === 'production'
 
-    const clarityID = process.env.MICROSOFT_CLARITY_ID || import.meta.env.VITE_MICROSOFT_CLARITY_ID;
+    const clarityID = import.meta.env.VITE_MICROSOFT_CLARITY_ID;
 
     if (!isProd || !clarityID) return [];
 

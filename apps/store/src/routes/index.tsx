@@ -102,8 +102,10 @@ function Home() {
     <Layout showNavigation={true}>
       <HeroSection content={content.hero} onCtaClick={() => scrollToSection("buy")} />
 
-      {/* Acquisition-only sections */}
-      {isDark && <SocialProofBar reviewCount={300} rating={4.9} />}
+      {/* Sections below are shown when the merchant adds them in the builder */}
+      {features.socialProof && content.socialProof && (
+        <SocialProofBar reviewCount={content.socialProof.reviewCount} rating={content.socialProof.rating} />
+      )}
 
       {!isDark && <div className="w-full h-0.5 bg-black" />}
 
@@ -111,11 +113,18 @@ function Home() {
 
       {features.benefits && <BenefitsSection benefits={content.benefits} />}
 
-      {isDark && <ValueStackSection price={price} onCtaClick={() => scrollToSection("buy")} />}
+      {features.valueStack && (
+        <ValueStackSection
+          price={price}
+          ctaText={content.valueStack?.ctaText}
+          items={content.valueStack?.items}
+          onCtaClick={() => scrollToSection("buy")}
+        />
+      )}
 
       {features.testimonials && <TestimonialSection testimonials={content.testimonials} />}
 
-      {isDark && <CTASection cta={content.cta} />}
+      {features.cta && content.cta && <CTASection cta={content.cta} />}
 
       {features.guarantees && <GuaranteeSection guarantees={content.guarantees} />}
 

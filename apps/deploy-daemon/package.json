@@ -1,0 +1,18 @@
+{
+  "name": "@7aba/deploy-daemon",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Self-hosted build+deploy daemon for merchant stores. Replaces the GitHub Actions deploy-store workflow: receives a signed webhook from the platform, generates the store config from InstantDB, builds the store, and deploys it to the merchant's Cloudflare Pages.",
+  "scripts": {
+    "start": "tsx src/server.mjs",
+    "test": "vitest run src"
+  },
+  "dependencies": {
+    "@instantdb/admin": "^0.22.169"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "vitest": "^2.1.8"
+  }
+}

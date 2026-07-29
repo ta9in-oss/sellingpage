@@ -109,6 +109,9 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
   const [saveError, setSaveError] = useState('')
   const popupRef = useRef<Window | null>(null)
   const instantPopupRef = useRef<Window | null>(null)
+  // CSRF state for the Cloudflare OAuth popup. Generated on open, echoed back by the
+  // callback, verified in the message handler below.
+  const cfStateRef = useRef<string>('')
 
   const cfClientId = typeof window !== 'undefined'
     ? ((import.meta as any).env?.VITE_CF_OAUTH_CLIENT_ID as string | undefined)
@@ -157,7 +160,9 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
     const handler = (e: MessageEvent) => {
       if (e.origin !== window.location.origin) return
       if (e.data?.type === 'cloudflare_connected') {
-        const { accountId, apiToken } = e.data as { accountId: string; apiToken: string }
+        const { accountId, apiToken, state } = e.data as { accountId: string; apiToken: string; state?: string }
+        // Reject a callback whose state doesn't match the one we issued (CSRF).
+        if (cfStateRef.current && state !== cfStateRef.current) return
         setCfAccountId(accountId)
         setCfApiToken(apiToken)
         setCfTokenOnFile(false)
@@ -179,9 +184,21 @@ export function ConnectServicesStep({ storeId, onContinue }: Props) {
   const openCFOAuth = () => {
     if (!cfClientId) return
     const redirectUri = `${window.location.origin}/auth/cloudflare`
-    const scopes = 'account:read user:read workers:write workers_routes:write zone:read dns:write'
-    const url = `https://dash.cloudflare.com/oauth2/auth?response_type=code&client_id=${encodeURIComponent(cfClientId)}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scopes)}`
-    popupRef.current = window.open(url, 'cf-oauth', 'width=640,height=720,noopener')
+    // Least-privilege set for `wrangler pages deploy` to *.pages.dev. Cloudflare OAuth
+    // scope ids are DOTTED, not colon-form: account-settings.read (list account id) +
+    // user-details.read + page.write (Pages deploy). No DNS/zone/workers — stores use the
+    // *.pages.dev subdomain, no custom domains. Colon-forms like `account:read` are not
+    // valid CF scopes and fail authorize with invalid_scope. These three are already
+    // granted on the 7aba OAuth client; keep code and client in sync.
+    const scopes = 'account-settings.read user-details.read page.write'
+    // Cloudflare requires a `state` of >=8 chars (CSRF). Persist it so the callback can
+    // echo it back for verification.
+    const state = crypto.randomUUID()
+    cfStateRef.current = state
+    sessionStorage.setItem('cf_oauth_state', state)
+    const url = `https://dash.cloudflare.com/oauth2/auth?response_type=code&client_id=${encodeURIComponent(cfClientId)}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scopes)}&state=${encodeURIComponent(state)}`
+    // No `noopener`: the callback needs `window.opener` to postMessage the token back.
+    popupRef.current = window.open(url, 'cf-oauth', 'width=640,height=720')
   }
 
   const openInstantOAuth = () => {

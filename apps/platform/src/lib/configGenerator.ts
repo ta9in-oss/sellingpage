@@ -21,6 +21,8 @@ export function generateContent(config: StoreConfig): SiteContent {
   const guarantee = find(config, 'guarantee')
   const benefits = find(config, 'benefits')
   const cta = find(config, 'cta')
+  const socialProof = find(config, 'social-proof')
+  const valueStack = find(config, 'value-stack')
   const carousel = find(config, 'product-carousel')
 
   const carouselImages = carousel?.images?.length ? carousel.images : config.product.images
@@ -76,6 +78,12 @@ export function generateContent(config: StoreConfig): SiteContent {
   if (cta) {
     content.cta = { title: cta.headline, subtitle: cta.subheadline, buttonText: cta.cta }
   }
+  if (socialProof) {
+    content.socialProof = { rating: socialProof.rating ?? 4.9, reviewCount: socialProof.reviewCount ?? 0 }
+  }
+  if (valueStack) {
+    content.valueStack = { ctaText: valueStack.ctaText, items: valueStack.items }
+  }
 
   return content
 }
@@ -99,7 +107,7 @@ export const siteConfig = {
     name: ${JSON.stringify(config.meta.name)},
     description: ${JSON.stringify(config.meta.siteDescription ?? '')},
     url: ${JSON.stringify(`https://${config.meta.slug}.pages.dev`)},
-    logo: '/assets/logo/7aba_store_logo_i1.svg',
+    logo: ${JSON.stringify(config.meta.logo || '/assets/logo/7aba_store_logo_i1.svg')},
   },
   features: {
     notifications: ${config.notifications.enabled},
@@ -107,6 +115,9 @@ export const siteConfig = {
     faqs: ${has('faq')},
     guarantees: ${has('guarantee')},
     benefits: ${has('benefits')},
+    socialProof: ${has('social-proof')},
+    valueStack: ${has('value-stack')},
+    cta: ${has('cta')},
     comparison: false,
     urgency: false,
     multiProduct: false,

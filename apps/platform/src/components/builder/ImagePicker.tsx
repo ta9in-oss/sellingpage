@@ -1,26 +1,32 @@
 /**
- * ImagePicker — pick from uploaded product images (config.product.images).
+ * ImagePicker — pick from the store's media library or upload a new image.
  *
- * Single-select mode (default): value is the selected URL, onChange returns one URL.
- * Multi-select mode: value is string[], onChange returns string[].
+ * The library is every image the merchant has uploaded (logo, product photos,
+ * section images), stored in InstantDB Storage under `stores/<storeId>/…` and
+ * surfaced by {@link useStoreMedia}. Anywhere an image is chosen the merchant can
+ * either select an existing upload or add a new one (drop / click / paste URL),
+ * and always sees the full list of what they have uploaded.
  *
- * If product images are empty, shows a hint pointing to the Product tab.
- * allowCustom (default true) adds a URL/file fallback below the grid.
+ * Single-select (default): value is the selected URL, onChange returns one URL.
+ * Multi-select: value is string[], onChange returns string[].
  */
+import { useRef, useState } from 'react'
 import { useBuilderStore } from '@/hooks/useBuilderStore'
+import { useStoreMedia } from '@/hooks/useStoreMedia'
 import { useLang } from '@/hooks/useLang'
 import { cn } from '@/lib/utils'
-import { Check, ImageIcon, Plus } from 'lucide-react'
-import { ImageUpload } from './ImageUpload'
+import { Check, ImageIcon, Loader2, Upload } from 'lucide-react'
 
 const T = {
-  selectImage: { ar: 'اختر صورة', fr: 'Sélectionner une image', en: 'Select image' },
-  noImages: { ar: 'لا توجد صور مضافة بعد', fr: 'Aucune image ajoutée', en: 'No product images yet' },
-  addInProductTab: { ar: 'أضف صوراً من تبويب «المنتج» في اليمين', fr: 'Ajoutez des images via l\'onglet Produit', en: 'Add images in the Product tab on the right' },
-  customImage: { ar: 'أو استخدم رابطاً مخصصاً', fr: 'Ou utiliser un lien personnalisé', en: 'Or use a custom URL / upload' },
+  library: { ar: 'مكتبة الصور', fr: 'Bibliothèque', en: 'Media library' },
+  noImages: { ar: 'لا توجد صور بعد — ارفع أول صورة', fr: 'Aucune image — téléversez la première', en: 'No images yet — upload your first' },
+  uploadNew: { ar: 'رفع صورة جديدة', fr: 'Téléverser', en: 'Upload new' },
+  dropHere: { ar: 'اسحب صورة أو انقر', fr: 'Glissez ou cliquez', en: 'Drop image or click' },
+  orPasteUrl: { ar: 'أو الصق رابط صورة', fr: 'Ou collez une URL', en: 'Or paste an image URL' },
+  uploading: { ar: 'جارٍ الرفع…', fr: 'Téléversement…', en: 'Uploading…' },
+  uploadFailed: { ar: 'فشل الرفع', fr: 'Échec du téléversement', en: 'Upload failed' },
 }
 
-/* ── Single-select ─────────────────────────────────────────────────── */
 interface SingleImagePickerProps {
   mode?: 'single'
   value: string
@@ -28,90 +34,76 @@ interface SingleImagePickerProps {
   label?: string
   allowCustom?: boolean
 }
-
-/* ── Multi-select ──────────────────────────────────────────────────── */
 interface MultiImagePickerProps {
   mode: 'multi'
   value: string[]
   onChange: (urls: string[]) => void
   label?: string
+  allowCustom?: boolean
 }
-
 type ImagePickerProps = SingleImagePickerProps | MultiImagePickerProps
 
 export function ImagePicker(props: ImagePickerProps) {
-  const { config } = useBuilderStore()
+  const { storeId } = useBuilderStore()
+  const { media, upload } = useStoreMedia(storeId)
   const { t, dir } = useLang()
-  const productImages = config.product.images.filter(Boolean)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [uploading, setUploading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [dragging, setDragging] = useState(false)
 
-  if (props.mode === 'multi') {
-    const { value, onChange, label } = props
-    const toggle = (img: string) => {
-      onChange(value.includes(img) ? value.filter((u) => u !== img) : [...value, img])
+  const multi = props.mode === 'multi'
+  const allowCustom = props.allowCustom ?? true
+  const isSelected = (url: string) =>
+    multi ? (props.value as string[]).includes(url) : props.value === url
+
+  const select = (url: string) => {
+    if (props.mode === 'multi') {
+      const v = props.value
+      props.onChange(v.includes(url) ? v.filter((u) => u !== url) : [...v, url])
+    } else {
+      props.onChange(props.value === url ? '' : url)
     }
-    return (
-      <div className="space-y-2" dir={dir}>
-        {label && <p className="text-sm font-medium">{label}</p>}
-        {productImages.length === 0 ? (
-          <EmptyHint />
-        ) : (
-          <div className="grid grid-cols-3 gap-2">
-            {productImages.map((img, i) => {
-              const selected = value.includes(img)
-              return (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => toggle(img)}
-                  className={cn(
-                    'relative aspect-square rounded overflow-hidden border-2 transition-all focus-visible:outline-none',
-                    selected
-                      ? 'border-zinc-900 ring-2 ring-zinc-900 ring-offset-1'
-                      : 'border-zinc-200 hover:border-zinc-400'
-                  )}
-                >
-                  <img src={img} alt="" className="w-full h-full object-cover" />
-                  {selected && (
-                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                      <Check size={16} className="text-white" />
-                    </div>
-                  )}
-                </button>
-              )
-            })}
-          </div>
-        )}
-      </div>
-    )
   }
 
-  /* single-select */
-  const { value, onChange, label, allowCustom = true } = props
-  const isProductImage = productImages.includes(value)
+  const doUpload = async (file: File) => {
+    setError(null)
+    setUploading(true)
+    try {
+      const url = await upload(file)
+      if (url) select(url)
+    } catch {
+      setError(t(T.uploadFailed))
+    } finally {
+      setUploading(false)
+    }
+  }
 
   return (
-    <div className="space-y-3" dir={dir}>
-      {label && <p className="text-sm font-medium">{label}</p>}
+    <div className="space-y-2" dir={dir}>
+      {props.label && <p className="text-sm font-medium">{props.label}</p>}
 
-      {productImages.length === 0 ? (
-        <EmptyHint />
+      {/* Library grid — the merchant's full upload history */}
+      {media.length === 0 ? (
+        <div className="flex flex-col items-center gap-1.5 py-3 border border-dashed border-zinc-200 rounded text-center">
+          <ImageIcon size={18} className="text-zinc-300" />
+          <p className="text-xs text-zinc-500">{t(T.noImages)}</p>
+        </div>
       ) : (
-        <div className="grid grid-cols-3 gap-2">
-          {productImages.map((img, i) => {
-            const selected = value === img
+        <div className="grid grid-cols-3 gap-2 max-h-52 overflow-y-auto p-0.5">
+          {media.map((m) => {
+            const selected = isSelected(m.url)
             return (
               <button
-                key={i}
+                key={m.id}
                 type="button"
-                onClick={() => onChange(selected ? '' : img)}
+                onClick={() => select(m.url)}
                 className={cn(
                   'relative aspect-square rounded overflow-hidden border-2 transition-all focus-visible:outline-none',
-                  selected
-                    ? 'border-zinc-900 ring-2 ring-zinc-900 ring-offset-1'
-                    : 'border-zinc-200 hover:border-zinc-400'
+                  selected ? 'border-zinc-900 ring-2 ring-zinc-900 ring-offset-1' : 'border-zinc-200 hover:border-zinc-400',
                 )}
               >
-                <img src={img} alt="" className="w-full h-full object-cover" />
+                <img src={m.url} alt="" className="w-full h-full object-cover" loading="lazy" />
                 {selected && (
                   <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
                     <Check size={16} className="text-white" />
@@ -123,32 +115,41 @@ export function ImagePicker(props: ImagePickerProps) {
         </div>
       )}
 
-      {/* Custom URL / upload fallback */}
-      {allowCustom && (
-        <details className="text-xs" open={!isProductImage && !!value}>
-          <summary className="cursor-pointer text-muted-foreground hover:text-foreground select-none">
-            <Plus size={10} className="inline me-1" />
-            {t(T.customImage)}
-          </summary>
-          <div className="mt-2">
-            <ImageUpload
-              value={isProductImage ? '' : value}
-              onChange={onChange}
-            />
-          </div>
-        </details>
-      )}
-    </div>
-  )
-}
+      {/* Upload dropzone */}
+      <div
+        onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={(e) => { e.preventDefault(); setDragging(false); const f = e.dataTransfer.files[0]; if (f) doUpload(f) }}
+        onClick={() => !uploading && inputRef.current?.click()}
+        className={cn(
+          'flex items-center justify-center gap-2 p-2.5 border-2 border-dashed rounded cursor-pointer transition-colors text-xs',
+          dragging ? 'border-zinc-900 bg-zinc-50' : 'border-zinc-200 hover:border-zinc-400',
+        )}
+      >
+        {uploading ? <Loader2 size={14} className="animate-spin text-zinc-500" /> : <Upload size={14} className="text-zinc-400" />}
+        <span className="text-zinc-500">{uploading ? t(T.uploading) : t(T.dropHere)}</span>
+      </div>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => { const f = e.target.files?.[0]; if (f) doUpload(f); e.target.value = '' }}
+      />
 
-function EmptyHint() {
-  const { t, dir } = useLang()
-  return (
-    <div className="flex flex-col items-center gap-1.5 py-4 border border-dashed border-zinc-200 rounded text-center" dir={dir}>
-      <ImageIcon size={18} className="text-zinc-300" />
-      <p className="text-xs text-zinc-500">{t(T.noImages)}</p>
-      <p className="text-[10px] text-zinc-400">{t(T.addInProductTab)}</p>
+      {/* URL paste fallback (single-select only) */}
+      {allowCustom && !multi && (
+        <input
+          type="url"
+          value={(props.value as string).startsWith('http') ? (props.value as string) : ''}
+          onChange={(e) => (props as SingleImagePickerProps).onChange(e.target.value)}
+          placeholder={t(T.orPasteUrl)}
+          className="w-full rounded border border-zinc-300 px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-zinc-900 font-mono"
+          dir="ltr"
+        />
+      )}
+
+      {error && <p className="text-xs text-red-500">{error}</p>}
     </div>
   )
 }

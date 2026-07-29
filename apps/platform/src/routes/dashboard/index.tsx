@@ -124,11 +124,6 @@ function AuthenticatedDashboard({
   const { data, isLoading } = db.useQuery({
     platformUsers: { $: { where: { email } } },
   })
-  const navigate = useNavigate()
-  const [onboardingSkipped, setOnboardingSkipped] = React.useState(
-    () => typeof window !== 'undefined' && localStorage.getItem('7aba:setup_dismissed') === '1'
-  )
-
   const platformUser = (data?.platformUsers ?? [])[0] as
     | { id: string; email: string; tier?: string; checkoutId?: string; cfAccountId?: string; cfApiToken?: string } | undefined
 
@@ -160,25 +155,9 @@ function AuthenticatedDashboard({
     return <SubscriptionGate email={email} autoPlan={autoPlan} />
   }
 
-  // Show onboarding welcome page to new users who haven't configured credentials
+  // New merchants land straight on their (empty) dashboard; the dashboard itself
+  // prompts them to connect Cloudflare/InstantDB, and publish enforces it.
   const hasCreds = !!(platformUser?.cfAccountId)
-
-  if (!hasCreds && !onboardingSkipped) {
-    return (
-      <OnboardingWelcome
-        email={email}
-        tier={tier}
-        platformUserId={platformUser?.id}
-        onDone={() => {
-          // creds saved → re-render will pick them up via db.useQuery
-        }}
-        onSkip={() => {
-          localStorage.setItem('7aba:setup_dismissed', '1')
-          setOnboardingSkipped(true)
-        }}
-      />
-    )
-  }
 
   return <StoresDashboard email={email} tier={tier} platformUserId={platformUser?.id} hasCreds={hasCreds} />
 }
@@ -465,6 +444,26 @@ function StoresDashboard({
       <DashboardHeader email={email} tier={tier} />
 
       <div className="max-w-6xl mx-auto mt-8 space-y-8">
+        {!hasCreds && (
+          <div className="rounded-2xl border border-primary/30 bg-primary/5 p-5 flex items-start gap-4">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+              <Key className="h-5 w-5 text-primary" />
+            </div>
+            <div className="flex-1 space-y-1">
+              <p className="font-bold text-sm">اربط Cloudflare و InstantDB</p>
+              <p className="text-xs text-muted-foreground">
+                تحتاجها مرة واحدة لنشر متاجرك. يمكنك بناء متجرك الآن وإضافتها قبل النشر.
+              </p>
+            </div>
+            <button
+              onClick={() => navigate({ to: '/dashboard/settings' })}
+              className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors shrink-0"
+            >
+              اربط الآن
+            </button>
+          </div>
+        )}
+
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold">{t(DT.myStores)}</h2>

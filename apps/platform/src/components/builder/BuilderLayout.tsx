@@ -8,6 +8,7 @@ import { ThemePanel } from './ThemePanel'
 import { ProductPanel } from './ProductPanel'
 import { NotificationsPanel } from './NotificationsPanel'
 import { PaymentPanel } from './PaymentPanel'
+import { ImagePicker } from './ImagePicker'
 import { HeroForm } from './forms/HeroForm'
 import { FeaturesForm } from './forms/FeaturesForm'
 import { TestimonialsForm } from './forms/TestimonialsForm'
@@ -37,6 +38,7 @@ type SettingsTab = 'theme' | 'product' | 'notifications' | 'site' | 'payment'
 
 const T = {
   siteDataSeo: { ar: 'بيانات الموقع والـ SEO', fr: 'Données du site & SEO', en: 'Site Data & SEO' },
+  logoLabel: { ar: 'شعار المتجر', fr: 'Logo de la boutique', en: 'Store logo' },
   tabTitle: { ar: 'عنوان التاب', fr: 'Titre de l\'onglet', en: 'Tab title' },
   tabTitlePlaceholder: { ar: 'مثال: حقيبة ظهر | متجرك', fr: 'Ex: Sac à dos | Boutique', en: 'Ex: Backpack | Your Store' },
   tabTitleHint: { ar: 'يظهر في تاب المتصفح ونتائج البحث', fr: 'Affiché dans l\'onglet et les résultats', en: 'Shown in browser tab and search results' },
@@ -88,6 +90,14 @@ function SitePanel() {
           ))}
         </div>
         <p className="text-[11px] text-zinc-400">{t(T.storeLocaleHint)}</p>
+      </div>
+
+      <div className="space-y-1">
+        <Label className="text-xs">{t(T.logoLabel)}</Label>
+        <ImagePicker
+          value={meta.logo ?? ''}
+          onChange={(url) => updateMeta({ logo: url })}
+        />
       </div>
 
       <div className="space-y-1">

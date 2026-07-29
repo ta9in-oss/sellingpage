@@ -137,7 +137,7 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
             width="1"
             style={{ display: "none" }}
             src={`https://www.facebook.com/tr?id=${
-              process.env.META_PIXEL_ID || import.meta.env.VITE_META_PIXEL_ID
+              import.meta.env.VITE_META_PIXEL_ID
             }&ev=PageView&noscript=1`}
           />
         </noscript>
