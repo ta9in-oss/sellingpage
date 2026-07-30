@@ -164,7 +164,7 @@ export const ONCE_LABEL: Tri = { ar: 'دفعة واحدة', fr: 'Paiement unique
 
 /** First-batch urgency label used near the countdown. */
 export const FIRST_BATCH_LABEL: Tri = {
-  ar: 'أسعار الدفعة الأولى — تنتهي 31 جويلية 2026',
-  fr: 'Tarifs 1re vague — fin le 31 juillet 2026',
-  en: 'First-batch pricing — ends 31 July 2026',
+  ar: 'أسعار الدفعة الأولى — حتى 15 أوت 2026',
+  fr: 'Tarifs 1re vague — jusqu\'au 15 août 2026',
+  en: 'First-batch pricing — until 15 August 2026',
 }

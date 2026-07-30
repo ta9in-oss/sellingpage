@@ -287,7 +287,7 @@ export const landingPricing = {
       name:      { ar: 'المبتدئ',   en: 'Starter' },
       who:       { ar: 'البائع: تبيع بنفسك',  en: 'The seller: sell for yourself' },
       price:     '10,000',
-      after:     { ar: 'بعد 31 جويلية: 10 متاجر ثم 3,000 دج/متجر', en: 'After Jul 31: 10 stores, then 3,000 DZD/store' },
+      after:     { ar: 'لأول 100 مشترك فقط — بعدها السعر العادي', en: 'First 100 subscribers only — then the normal price' },
       highlight: false,
       features: [
         { ar: 'متاجر غير محدودة — للأبد (عرض الدفعة الأولى)',                        en: 'Unlimited stores — forever (first-batch offer)' },
@@ -305,7 +305,7 @@ export const landingPricing = {
       name:      { ar: 'المستقل',   en: 'Freelancer' },
       who:       { ar: 'المستقل: تبني لعملائك',  en: 'The freelancer: build for clients' },
       price:     '70,000',
-      after:     { ar: 'بعد 31 جويلية: 100,000 دج', en: 'After Jul 31: 100,000 DZD' },
+      after:     { ar: 'لأول 10 مشتركين فقط — بعدها السعر العادي', en: 'First 10 subscribers only — then the normal price' },
       badge:     { ar: 'الأكثر اختياراً',  en: 'Most chosen' },
       highlight: true,
       features: [
@@ -319,7 +319,7 @@ export const landingPricing = {
       name:      { ar: 'الوكالة',   en: 'Run One' },
       who:       { ar: 'الوكالة: تملك منصة مثل هذه',  en: 'The agency: own a platform like this' },
       price:     '1,000,000',
-      after:     { ar: 'بعد 31 جويلية: 2,000,000 دج', en: 'After Jul 31: 2,000,000 DZD' },
+      after:     { ar: 'لأول 3 مشتركين فقط — بعدها السعر العادي', en: 'First 3 subscribers only — then the normal price' },
       contact:   true,
       highlight: false,
       features: [
