@@ -39,7 +39,7 @@ function TierCard({ tier }: TierCardProps) {
       {tier.after && (
         <div
           className="tier__after"
-          style={{ color: '#dc2626', fontSize: '0.72rem', fontWeight: 800, textDecoration: 'line-through', marginTop: '0.35rem' }}
+          style={{ color: '#dc2626', fontSize: '0.85rem', fontWeight: 800, marginTop: '0.1rem' }}
         >
           {t(tier.after)}
         </div>

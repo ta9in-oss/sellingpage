@@ -229,7 +229,7 @@ function SubscriptionGate({ email, autoPlan }: { email: string; autoPlan?: strin
                 <p className="font-bold text-lg">{t(tier.name)}</p>
                 <p className="text-2xl font-black mt-1">{t(tier.priceLabel)}</p>
                 <p className="text-xs text-muted-foreground">{t(ONCE_LABEL)}</p>
-                <p className="text-xs text-red-600 font-bold mt-1.5 line-through">{t(tier.afterLabel)}</p>
+                <p className="text-sm text-red-600 font-bold mt-0.5">{t(tier.afterLabel)}</p>
               </div>
               <ul className="space-y-2 flex-1">
                 {tier.features[lang].map((f) => (
