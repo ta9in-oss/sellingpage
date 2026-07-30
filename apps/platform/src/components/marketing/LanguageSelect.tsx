@@ -32,8 +32,8 @@ export function LanguageSelect({
 
   const trigger =
     variant === 'marketing'
-      ? 'w-9 h-9 border-2 border-black bg-white text-black hover:bg-yellow-400'
-      : 'w-9 h-9 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted'
+      ? 'text-black hover:text-black/60'
+      : 'text-muted-foreground hover:text-foreground'
 
   return (
     <DropdownMenu>
