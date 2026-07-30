@@ -109,6 +109,10 @@ export const siteConfig = {
     url: ${JSON.stringify(`https://${config.meta.slug}.pages.dev`)},
     logo: ${JSON.stringify(config.meta.logo || '/assets/logo/7aba_store_logo_i1.svg')},
   },
+  notifications: {
+    style: ${JSON.stringify(config.notifications.style ?? 'brutalist')},
+    message: ${JSON.stringify(config.notifications.message ?? '')},
+  },
   features: {
     notifications: ${config.notifications.enabled},
     testimonials: ${has('testimonials')},

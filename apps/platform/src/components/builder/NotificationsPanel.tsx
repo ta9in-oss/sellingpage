@@ -9,6 +9,7 @@ const T = {
   liveNotificationsHint: { ar: 'تظهر للزوار "شخص اشترى للتو..." لزيادة الثقة', fr: 'Affiche aux visiteurs "Quelqu\'un vient d\'acheter..." pour renforcer la confiance', en: 'Shows visitors "Someone just bought..." to boost trust' },
   toggleAriaLabel: { ar: 'تفعيل الإشعارات', fr: 'Activer les notifications', en: 'Toggle notifications' },
   previewHint: { ar: 'هذا مثال على ما يراه الزائر', fr: 'C\'est un exemple de ce que voit le visiteur', en: 'This is an example of what the visitor sees' },
+  designLabel: { ar: 'تصميم الإشعار', fr: 'Design de la notification', en: 'Notification design' },
   notificationText: { ar: 'نص الإشعار', fr: 'Texte de la notification', en: 'Notification text' },
   notificationPlaceholder: { ar: 'شخص طلب للتو! 🔔', fr: 'Quelqu\'un vient de commander ! 🔔', en: 'Someone just ordered! 🔔' },
   notificationDefaultMsg: { ar: 'شخص طلب للتو!', fr: 'Quelqu\'un vient de commander !', en: 'Someone just ordered!' },
@@ -16,10 +17,17 @@ const T = {
   disabledHint: { ar: 'الإشعارات معطّلة. فعّلها لزيادة ثقة الزوار وتحسين معدل التحويل', fr: 'Notifications désactivées. Activez-les pour renforcer la confiance et améliorer la conversion', en: 'Notifications disabled. Enable them to boost visitor trust and conversion rate' },
 }
 
+const STYLES: { key: 'brutalist' | 'soft' | 'minimal' | 'dark'; label: string; swatch: string }[] = [
+  { key: 'brutalist', label: 'Brutalist', swatch: 'bg-emerald-500 border-2 border-black rounded-none shadow-[2px_2px_0_#000]' },
+  { key: 'soft', label: 'Soft', swatch: 'bg-white border border-black/10 border-s-4 border-s-emerald-500 rounded-lg shadow' },
+  { key: 'minimal', label: 'Minimal', swatch: 'bg-white border border-zinc-200 border-s-4 border-s-emerald-500 rounded' },
+  { key: 'dark', label: 'Dark', swatch: 'bg-zinc-900 border border-white/10 border-s-4 border-s-emerald-500 rounded-lg' },
+]
+
 export function NotificationsPanel() {
   const { config, updateNotifications } = useBuilderStore()
   const { t } = useLang()
-  const { enabled, message } = config.notifications
+  const { enabled, message, style = 'brutalist' } = config.notifications
 
   return (
     <div className="space-y-5 p-4" dir="rtl">
@@ -50,6 +58,28 @@ export function NotificationsPanel() {
           />
         </button>
       </div>
+
+      {/* Design preset picker */}
+      {enabled && (
+        <div className="space-y-2">
+          <p className="text-sm font-medium">{t(T.designLabel)}</p>
+          <div className="grid grid-cols-4 gap-2">
+            {STYLES.map((s) => (
+              <button
+                key={s.key}
+                onClick={() => updateNotifications({ style: s.key })}
+                className={cn(
+                  'flex flex-col items-center gap-1.5 p-2 rounded-lg border transition-all',
+                  style === s.key ? 'border-zinc-900 ring-2 ring-zinc-900 ring-offset-1' : 'border-zinc-200 hover:border-zinc-400'
+                )}
+              >
+                <span className={cn('w-full h-6', s.swatch)} />
+                <span className="text-[10px] font-medium">{s.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Notification preview */}
       {enabled && (

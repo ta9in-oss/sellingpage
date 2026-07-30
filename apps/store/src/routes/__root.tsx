@@ -12,7 +12,7 @@ import appCss from "@/styles/app.css?url";
 import analytics from "@/utils/analytics";
 import { seo } from "@/utils/seo";
 import { siteConfig } from "@/config/site.config";
-import { ThemeProvider } from "@7aba/store-ui";
+import { ThemeProvider, themeToRootCss } from "@7aba/store-ui";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
 export const Route = createRootRoute({
@@ -123,6 +123,9 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
     <html className={isDark ? 'dark' : ''}>
       <head>
         <HeadContent />
+        {/* Merchant theme → shadcn CSS vars, so shadcn components AND sections
+            share one source of truth. SSR-rendered → no flash of default theme. */}
+        <style dangerouslySetInnerHTML={{ __html: themeToRootCss(siteConfig.theme) }} />
       </head>
       <body>
         <ThemeProvider value={siteConfig.theme}>

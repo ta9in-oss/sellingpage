@@ -37,6 +37,8 @@ export interface StoreConfig {
   notifications: {
     enabled: boolean
     message: string
+    /** FOMO popup visual preset. */
+    style?: 'brutalist' | 'soft' | 'minimal' | 'dark'
   }
   payment?: {
     /** Which payment method is active for this store. Configured by the merchant, not shown to buyers. */

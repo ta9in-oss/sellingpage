@@ -1,4 +1,5 @@
 export * from './theme.types'
+export * from './cssVars'
 export * from './brutalist'
 export * from './clean'
 export * from './dark'

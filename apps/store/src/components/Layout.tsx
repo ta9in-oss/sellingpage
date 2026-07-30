@@ -3,6 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getTheme } from "@/lib/theme";
+import { siteConfig } from "@/config/site.config";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -41,7 +42,7 @@ export function Layout({ children, showNavigation = true }: LayoutProps) {
         <header className="bg-white text-black py-3 px-6 border-1 border-black sticky top-0 z-50 flex-shrink-0">
           <div className="max-w-5xl mx-auto flex justify-between items-center">
             <button onClick={goHome} className="text-2xl font-black hover:text-yellow-500 transition-colors">
-              <img src="/assets/logo/7aba_store_logo_i1.svg" alt="Logo" className="h-16 w-auto" />
+              <img src={siteConfig.site.logo} alt="Logo" className="h-16 w-auto" />
             </button>
 
             {showNavigation && (
@@ -83,8 +84,8 @@ export function Layout({ children, showNavigation = true }: LayoutProps) {
 
         <footer className="bg-black text-white py-8 px-6 border-t-4 border-black flex-shrink-0 mt-auto">
           <div className="max-w-6xl mx-auto text-center">
-            <img src="/assets/logo/7aba_store_logo_i1.svg" alt="Logo" className="h-16 w-auto filter invert mx-auto" />
-            <p className="font-bold">جميع الحقوق محفوظة لـ <a href="/">حبة ستور</a> © {new Date().getFullYear()}</p>
+            <img src={siteConfig.site.logo} alt="Logo" className="h-16 w-auto filter invert mx-auto" />
+            <p className="font-bold">جميع الحقوق محفوظة لـ <a href="/">{siteConfig.site.name}</a> © {new Date().getFullYear()}</p>
           </div>
         </footer>
       </div>
@@ -104,7 +105,7 @@ export function Layout({ children, showNavigation = true }: LayoutProps) {
       >
         <div className="max-w-5xl mx-auto flex justify-between items-center">
           <button onClick={goHome} className="text-2xl font-black transition-colors">
-            <img src="/assets/logo/7aba_store_logo_i1.svg" alt="Logo" className="h-16 w-auto filter invert" />
+            <img src={siteConfig.site.logo} alt="Logo" className="h-16 w-auto filter invert" />
           </button>
 
           {showNavigation && (
@@ -151,8 +152,8 @@ export function Layout({ children, showNavigation = true }: LayoutProps) {
 
       <footer className="py-8 px-6 flex-shrink-0 mt-auto" style={{ backgroundColor: '#050505', borderTop: `1px solid ${theme.colors.border}` }}>
         <div className="max-w-6xl mx-auto text-center">
-          <img src="/assets/logo/7aba_store_logo_i1.svg" alt="Logo" className="h-16 w-auto filter invert mx-auto" />
-          <p className="font-bold" style={{ color: '#6b7280' }}>جميع الحقوق محفوظة لـ <a href="/" style={{ color: theme.colors.accent }}>حبة ستور</a> © {new Date().getFullYear()}</p>
+          <img src={siteConfig.site.logo} alt="Logo" className="h-16 w-auto filter invert mx-auto" />
+          <p className="font-bold" style={{ color: '#6b7280' }}>جميع الحقوق محفوظة لـ <a href="/" style={{ color: theme.colors.accent }}>{siteConfig.site.name}</a> © {new Date().getFullYear()}</p>
         </div>
       </footer>
     </div>

@@ -148,7 +148,13 @@ function Home() {
 
       {features.faqs && <FAQSection faqs={content.faqs} />}
 
-      <OrderNotifications userWilaya={selectedWilaya} userCommune={selectedCommune} />
+      {features.notifications && (
+        <OrderNotifications
+          userWilaya={selectedWilaya}
+          userCommune={selectedCommune}
+          variant={siteConfig.notifications?.style}
+        />
+      )}
 
       {showAuthModal && (
         <BuyerAuthModal

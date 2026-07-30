@@ -13,6 +13,12 @@ export const siteConfig = {
         logo: '/assets/logo/7aba_store_logo_i1.svg',
     },
 
+    // FOMO order notification
+    notifications: {
+        style: 'brutalist' as 'brutalist' | 'soft' | 'minimal' | 'dark',
+        message: '',
+    },
+
     // Feature flags
     features: {
         notifications: true,
