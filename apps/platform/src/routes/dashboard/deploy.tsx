@@ -25,10 +25,19 @@ function DeployPage() {
   const { isLoading: authLoading, user } = db.useAuth()
 
   const { data, isLoading: dataLoading } = db.useQuery(
-    user?.email ? { platformUsers: { $: { where: { email: user.email } } } } : null
+    user?.email
+      ? {
+          platformUsers: { $: { where: { email: user.email } } },
+          stores: { $: { where: { id: storeId } } },
+        }
+      : null
   )
   const platformUser = (data?.platformUsers ?? [])[0] as
     | { tier?: string; cfAccountId?: string } | undefined
+  const store = (data?.stores ?? [])[0] as
+    | { cfApiToken?: string; deployedUrl?: string } | undefined
+  // Configured + already deployed once → resume straight to the deploy step.
+  const resumeDeploy = !!(store?.deployedUrl && store?.cfApiToken)
 
   useEffect(() => {
     if (authLoading || (user && dataLoading)) return
@@ -61,7 +70,7 @@ function DeployPage() {
   }
   return (
     <div className="min-h-screen bg-background p-6">
-      <DeployWizard storeId={storeId} tier={tier} userEmail={user.email ?? ''} />
+      <DeployWizard storeId={storeId} tier={tier} userEmail={user.email ?? ''} resumeDeploy={resumeDeploy} />
     </div>
   )
 }

@@ -93,16 +93,16 @@ export function generateContentJson(config: StoreConfig): string {
 }
 
 export function generateSiteConfig(config: StoreConfig): string {
-  const themeName = config.theme.name
   const has = (type: Section['type']) => config.sections.some((s) => s.type === type)
   const paymentMethod = config.payment?.activeMethod === 'both' ? 'chargily' : config.payment?.activeMethod ?? 'cod'
 
+  // Emit the merchant's ACTUAL edited theme (colors/fonts/effects), not the
+  // preset by name — otherwise builder theme edits never reach the store.
   return `// AUTO-GENERATED — do not edit manually
-import { ${themeName}Theme } from './themes/${themeName}';
 import type { Theme } from './themes/theme.types';
 
 export const siteConfig = {
-  theme: ${themeName}Theme as Theme,
+  theme: ${JSON.stringify(config.theme, null, 2)} as Theme,
   site: {
     name: ${JSON.stringify(config.meta.name)},
     description: ${JSON.stringify(config.meta.siteDescription ?? '')},

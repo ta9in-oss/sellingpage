@@ -24,6 +24,7 @@ import { createSubscriptionCheckout } from '@/server/createSubscriptionCheckout'
 import { verifySubscriptionPayment } from '@/server/verifySubscriptionPayment'
 import { TIERS as PRICING_TIERS, ONCE_LABEL, contactWhatsappUrl } from '@/config/pricing'
 import { FirstBatchCountdown } from '@/components/marketing/FirstBatchCountdown'
+import { LanguageSelect } from '@/components/marketing/LanguageSelect'
 import { getDownloadUrl } from '@/server/getDownloadUrl'
 import { saveMerchantSecrets } from '@/server/saveMerchantSecrets'
 import type { DownloadType } from '@/server/getDownloadUrl'
@@ -163,150 +164,6 @@ function AuthenticatedDashboard({
 }
 
 // ─── Onboarding welcome ────────────────────────────────────────────────────────
-
-function OnboardingWelcome({
-  email,
-  tier,
-  platformUserId,
-  onDone,
-  onSkip,
-}: {
-  email: string
-  tier: string
-  platformUserId?: string
-  onDone: () => void
-  onSkip: () => void
-}) {
-  const navigate = useNavigate()
-  const { dir } = useLang()
-  const [saving, setSaving] = useState(false)
-  const [fields, setFields] = useState({ cfAccountId: '', cfApiToken: '', instantAppId: '', instantAdminToken: '' })
-
-  const handleSave = async () => {
-    if (!platformUserId || !fields.cfAccountId || !fields.cfApiToken) return
-    setSaving(true)
-    try {
-      await saveMerchantSecrets({
-        data: {
-          platformUserId,
-          cfAccountId: fields.cfAccountId.trim(),
-          cfApiToken: fields.cfApiToken.trim(),
-          instantAppId: fields.instantAppId.trim() || undefined,
-          instantAdminToken: fields.instantAdminToken.trim() || undefined,
-        },
-      })
-      onDone()
-      navigate({ to: '/dashboard' })
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4" dir={dir}>
-      <div className="w-full max-w-lg space-y-6">
-        <div className="text-center space-y-2">
-          <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto">
-            <span className="text-primary-foreground font-black text-2xl">7</span>
-          </div>
-          <h1 className="text-2xl font-bold">مرحباً بك في 7aba.store! 🎉</h1>
-          <p className="text-muted-foreground text-sm">
-            لنشر متاجرك، نحتاج بيانات Cloudflare الخاصة بك مرة واحدة فقط. يمكنك تخطي هذه الخطوة الآن وإضافتها لاحقاً من الإعدادات.
-          </p>
-        </div>
-
-        <div className="bg-card border border-border rounded-2xl p-6 space-y-4">
-          <h2 className="font-bold flex items-center gap-2">
-            <Key size={16} className="text-primary" />
-            بيانات Cloudflare
-          </h2>
-          <p className="text-xs text-muted-foreground">
-            احصل على البيانات من{" "}
-            <a href="https://dash.cloudflare.com/profile/api-tokens" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-              dash.cloudflare.com/profile/api-tokens
-            </a>
-          </p>
-          <div className="space-y-3">
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">Account ID <span className="text-destructive">*</span></label>
-              <input
-                type="text"
-                dir="ltr"
-                value={fields.cfAccountId}
-                onChange={(e) => setFields((f) => ({ ...f, cfAccountId: e.target.value }))}
-                placeholder="abc123..."
-                className="w-full border border-input bg-background rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">API Token <span className="text-destructive">*</span></label>
-              <input
-                type="password"
-                dir="ltr"
-                value={fields.cfApiToken}
-                onChange={(e) => setFields((f) => ({ ...f, cfApiToken: e.target.value }))}
-                placeholder="••••••••"
-                className="w-full border border-input bg-background rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring"
-              />
-            </div>
-          </div>
-
-          <h2 className="font-bold flex items-center gap-2 pt-2">
-            <Globe size={16} className="text-primary" />
-            بيانات InstantDB <span className="text-xs font-normal text-muted-foreground">(اختياري — يُنشأ تلقائياً)</span>
-          </h2>
-          <div className="space-y-3">
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">App ID</label>
-              <input
-                type="text"
-                dir="ltr"
-                value={fields.instantAppId}
-                onChange={(e) => setFields((f) => ({ ...f, instantAppId: e.target.value }))}
-                placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-                className="w-full border border-input bg-background rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">Admin Token</label>
-              <input
-                type="password"
-                dir="ltr"
-                value={fields.instantAdminToken}
-                onChange={(e) => setFields((f) => ({ ...f, instantAdminToken: e.target.value }))}
-                placeholder="••••••••"
-                className="w-full border border-input bg-background rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="flex gap-3">
-          <button
-            onClick={handleSave}
-            disabled={saving || !fields.cfAccountId || !fields.cfApiToken}
-            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-            حفظ والمتابعة
-          </button>
-          <button
-            onClick={onSkip}
-            className="px-4 py-3 rounded-xl border border-border text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-          >
-            تخطي الآن
-          </button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// ─── Subscription gate ─────────────────────────────────────────────────────────
-
-// Tiers come from the canonical config (src/config/pricing.ts) so this gate can
-// never drift from the marketing pages or the Chargily charge amounts.
-const RUN_ONE_MSG_AR = 'مرحباً، أنا مهتم بباقة Run One على 7aba.'
 
 function SubscriptionGate({ email, autoPlan }: { email: string; autoPlan?: string }) {
   const [loading, setLoading] = useState<string | null>(null)
@@ -741,20 +598,7 @@ function DashboardHeader({ email, tier }: { email: string; tier?: string }) {
         >
           <Settings className="h-4 w-4" />
         </button>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-1 p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors text-xs font-semibold">
-              <Globe className="h-4 w-4" />
-              {lang.toUpperCase()}
-              <ChevronDown className="h-3 w-3" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => setLang('ar')} className={lang === 'ar' ? 'font-semibold' : ''}>العربية</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setLang('fr')} className={lang === 'fr' ? 'font-semibold' : ''}>Français</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setLang('en')} className={lang === 'en' ? 'font-semibold' : ''}>English</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <LanguageSelect />
         <button
           onClick={() => db.auth.signOut()}
           className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"

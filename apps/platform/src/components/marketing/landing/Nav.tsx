@@ -18,7 +18,10 @@ export function Nav() {
           <a href="#roadmap">{t(landingNav.roadmap)}</a>
         </nav>
         <div className="nav__right">
-          <LanguageSelect />
+          <LanguageSelect variant="marketing" />
+          <Link to="/dashboard" search={{}} className="btn btn--ghost">
+            {t(landingNav.login)}
+          </Link>
           <Link to="/dashboard" search={{}} className="btn btn--accent">
             {t(landingNav.cta)}
           </Link>

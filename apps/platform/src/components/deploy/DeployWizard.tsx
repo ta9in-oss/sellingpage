@@ -14,6 +14,8 @@ interface Props {
   storeId: string
   tier: 'starter' | 'pro' | 'agency'
   userEmail: string
+  /** Store already configured + previously deployed → skip review/admin, go straight to deploy. */
+  resumeDeploy?: boolean
 }
 
 // All tiers: review → admin-setup → deploying → live.
@@ -35,11 +37,13 @@ const T = {
   prepFailed: { ar: 'تعذّر تجهيز الخدمات', fr: 'Échec de préparation', en: 'Could not prepare services' },
 }
 
-export function DeployWizard({ storeId, tier, userEmail }: Props) {
+export function DeployWizard({ storeId, tier, userEmail, resumeDeploy = false }: Props) {
   const { t } = useLang()
   const navigate = useNavigate()
   const isProOrAgency = tier === 'pro' || tier === 'agency'
-  const [currentStep, setCurrentStep] = useState(0)
+  // A re-deploy of a configured store skips review (index 0) + admin (1) and
+  // starts at the deploying step (index 2); the earlier steps render as done.
+  const [currentStep, setCurrentStep] = useState(resumeDeploy ? 2 : 0)
   const [showProDelivery, setShowProDelivery] = useState(false)
   const [preparing, setPreparing] = useState(false)
   const [prepError, setPrepError] = useState<string | null>(null)

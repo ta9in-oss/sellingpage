@@ -177,6 +177,7 @@ export const landingNav = {
   proof:   { ar: 'المتجر الحي',   en: 'Live store' },
   roadmap: { ar: 'خارطة الطريق',  en: 'Roadmap' },
   cta:     { ar: 'أنشئ حسابك',    en: 'Create account' },
+  login:   { ar: 'تسجيل الدخول',  en: 'Log in' },
 }
 
 // ── Landing: Hero ─────────────────────────────────────────────────────────────

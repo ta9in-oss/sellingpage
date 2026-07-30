@@ -38,7 +38,7 @@ export function Navbar() {
 
         {/* Right actions */}
         <div className="flex items-center gap-3">
-          <LanguageSelect />
+          <LanguageSelect variant="marketing" />
           <Link
             to="/dashboard" search={{}}
             className={cn(
