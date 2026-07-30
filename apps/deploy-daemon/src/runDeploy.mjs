@@ -4,9 +4,16 @@ import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'node:path'
 import { init } from '@instantdb/admin'
 import { initLogger, createRequestLogger } from 'evlog'
+import { createFsDrain } from 'evlog/fs'
 import { generateStoreConfig } from '../../../scripts/generate-store-config.mjs'
 
-initLogger({ env: { service: 'deploy-daemon', environment: process.env.NODE_ENV || 'production' } })
+// Daemon stdout is swallowed by the pnpm/systemd wrapper, so events would be
+// invisible. The fs drain persists every wide event as NDJSON under
+// apps/deploy-daemon/.evlog/logs/ — queryable with the analyze-logs skill.
+initLogger({
+  env: { service: 'deploy-daemon', environment: process.env.NODE_ENV || 'production' },
+  drain: createFsDrain({ dir: `${dirname(fileURLToPath(import.meta.url))}/../.evlog/logs` }),
+})
 
 const execFileP = promisify(execFile)
 // apps/deploy-daemon/src → repo root

@@ -93,7 +93,7 @@ export function OrderSection({
 
     const theme = useTheme();
     const isDark = theme.mode === 'dark';
-    const submitButtonText = activePaymentMethod === 'chargily' ? 'ادفع إلكترونياً →' : 'أكّد الطلب';
+    const submitButtonText = activePaymentMethod === 'chargily' ? 'ادفع إلكترونياً' : 'أكّد الطلب';
     const darkInput = isDark ? { backgroundColor: '#1a1a1a', border: `1px solid ${theme.colors.border}`, color: theme.colors.foreground, borderRadius: '6px' } : {};
     const darkPopoverBtn = isDark ? { backgroundColor: '#1a1a1a', border: `1px solid ${theme.colors.border}`, color: theme.colors.foreground, borderRadius: '6px' } : {};
     const darkPopoverContent = isDark ? { backgroundColor: '#161616', border: `1px solid ${theme.colors.border}` } : {};
@@ -128,27 +128,19 @@ export function OrderSection({
             return;
         }
 
-        if (!formData.name || !formData.phone || !selectedWilaya || !selectedDaira || !selectedCommune) {
+        // Online payment needs a real email for the Chargily receipt; COD does not.
+        const needsEmail = activePaymentMethod === 'chargily';
+        if (!formData.name || !formData.phone || !selectedWilaya || !selectedDaira || !selectedCommune || (needsEmail && !formData.email.trim())) {
             setValidationError(true);
             setTimeout(() => setValidationError(false), 5000);
             return;
         }
 
-        // Require authentication before Chargily e-payment
-        if (activePaymentMethod === 'chargily' && !buyerEmail) {
-            onAuthRequest?.();
-            return;
-        }
-
-        // Prefill buyer identity from auth when using Chargily
-        const resolvedEmail = activePaymentMethod === 'chargily' ? (buyerEmail ?? formData.email) : formData.email;
-        const resolvedName = activePaymentMethod === 'chargily' && buyerName ? buyerName : formData.name;
-
         try {
             await onSubmit({
                 ...formData,
-                name: resolvedName,
-                email: resolvedEmail,
+                name: formData.name,
+                email: formData.email,
                 wilaya: selectedWilaya,
                 daira: selectedDaira,
                 commune: selectedCommune,
@@ -214,7 +206,7 @@ export function OrderSection({
                 {/* Email */}
                 <div>
                     <Label htmlFor="email" className="block text-base font-bold mb-2 text-right">
-                        البريد الإلكتروني (ليس مهمًا)
+                        {activePaymentMethod === 'chargily' ? 'البريد الإلكتروني (مطلوب للدفع الإلكتروني)' : 'البريد الإلكتروني (اختياري)'}
                     </Label>
                     <Input
                         type="email"
