@@ -39,7 +39,7 @@ function TierCard({ tier }: TierCardProps) {
       {tier.after && (
         <div
           className="tier__after"
-          style={{ color: '#dc2626', fontSize: '0.85rem', fontWeight: 800, marginTop: '0.1rem' }}
+          style={{ color: '#dc2626', fontSize: '0.85rem', fontWeight: 800, marginTop: '-0.15rem' }}
         >
           {t(tier.after)}
         </div>
@@ -88,7 +88,7 @@ export function Pricing() {
         </Reveal>
 
         <Reveal delay={40}>
-          <div style={{ margin: '-0.75rem auto 0.5rem', display: 'flex', justifyContent: 'center', width: '100%' }}>
+          <div style={{ margin: '-0.75rem auto 2.75rem', display: 'flex', justifyContent: 'center', width: '100%' }}>
             <FirstBatchCountdown variant="light" />
           </div>
         </Reveal>
