@@ -85,7 +85,10 @@ export function Pricing() {
           <Kicker>{t(landingPricing.kicker)}</Kicker>
           <SplitTitle lines={[t(landingPricing.title.l1), t(landingPricing.title.l2)]} />
           <p>{t(landingPricing.sub)}</p>
-          <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'center' }}>
+        </Reveal>
+
+        <Reveal delay={40}>
+          <div style={{ margin: '1.5rem auto 0', display: 'flex', justifyContent: 'center', width: '100%' }}>
             <FirstBatchCountdown variant="light" />
           </div>
         </Reveal>

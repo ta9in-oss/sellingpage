@@ -71,7 +71,7 @@ export function FirstBatchCountdown({ variant = 'dark' }: { variant?: 'dark' | '
   return (
     <div dir={dir} className="flex flex-col items-center text-center gap-2 w-full">
       <span className={cn('text-sm sm:text-base font-bold', accent)}>{t(T.heading)}</span>
-      <div className="flex items-end justify-center gap-3 sm:gap-5" dir="ltr">
+      <div className="flex items-end justify-center gap-8 sm:gap-16" dir="ltr">
         {cells.map(([value, label], i) => (
           <div key={i} className="flex flex-col items-center leading-none">
             <span className={cn('text-4xl sm:text-6xl font-black tabular-nums', accent)}>{String(value).padStart(2, '0')}</span>
