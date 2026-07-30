@@ -201,7 +201,9 @@
 .landing-root .shot__label span{ color:var(--ink-soft); font-size:15px; }
 .landing-root .shot__frame{ border:var(--bw) solid var(--ink); border-radius:6px; overflow:hidden; box-shadow:var(--shadow); background:var(--card); height:420px; }
 .landing-root .shot__frame img{ width:100%; display:block; will-change:transform; }
-@media (max-width:640px){ .landing-root .shot__frame{ height:300px; } }
+/* Dashboard shot: container hugs its (shorter) image — no scroll, no empty space. */
+.landing-root .shot--b .shot__frame{ height:auto; }
+@media (max-width:640px){ .landing-root .shot__frame{ height:300px; } .landing-root .shot--b .shot__frame{ height:auto; } }
 .landing-root .shot--b{ margin-top:38px; }
 .landing-root .tape{ position:absolute; top:-14px; inset-inline-start:24px; background:var(--accent); border:2px solid var(--ink); font-family:var(--font-display); font-weight:700; font-size:12px; padding:5px 12px; transform:rotate(-3deg); z-index:2; box-shadow:var(--shadow-sm); }
 

@@ -88,7 +88,7 @@ export function Pricing() {
         </Reveal>
 
         <Reveal delay={40}>
-          <div style={{ margin: '1.5rem auto 0', display: 'flex', justifyContent: 'center', width: '100%' }}>
+          <div style={{ margin: '-0.75rem auto 0.5rem', display: 'flex', justifyContent: 'center', width: '100%' }}>
             <FirstBatchCountdown variant="light" />
           </div>
         </Reveal>
