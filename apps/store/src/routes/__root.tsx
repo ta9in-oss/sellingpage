@@ -26,9 +26,10 @@ export const Route = createRootRoute({
         content: "width=device-width, initial-scale=1",
       },
       ...seo({
-        title: "حبة ستور | كل مرة حبة جديدة ما صراتش!!!",
-        description:
-          "حبة ستور والكل يتسوق في راحتو. عس مليح ، واشري اللي تحتاج برك.",
+        title: siteConfig.site.description
+          ? `${siteConfig.site.name} | ${siteConfig.site.description}`
+          : siteConfig.site.name,
+        description: siteConfig.site.description || siteConfig.site.name,
         image: "https://7aba.store/og_image.webp",
       }),
     ],
