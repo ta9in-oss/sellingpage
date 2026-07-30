@@ -39,6 +39,7 @@ type SettingsTab = 'theme' | 'product' | 'notifications' | 'site' | 'payment'
 const T = {
   siteDataSeo: { ar: 'بيانات الموقع والـ SEO', fr: 'Données du site & SEO', en: 'Site Data & SEO' },
   logoLabel: { ar: 'شعار المتجر', fr: 'Logo de la boutique', en: 'Store logo' },
+  backToSettings: { ar: '→ رجوع إلى إعدادات المتجر', fr: '→ Retour aux réglages', en: '→ Back to store settings' },
   tabTitle: { ar: 'عنوان التاب', fr: 'Titre de l\'onglet', en: 'Tab title' },
   tabTitlePlaceholder: { ar: 'مثال: حقيبة ظهر | متجرك', fr: 'Ex: Sac à dos | Boutique', en: 'Ex: Backpack | Your Store' },
   tabTitleHint: { ar: 'يظهر في تاب المتصفح ونتائج البحث', fr: 'Affiché dans l\'onglet et les résultats', en: 'Shown in browser tab and search results' },
@@ -139,7 +140,7 @@ function SitePanel() {
 }
 
 function RightPanel() {
-  const { config, selectedSectionId } = useBuilderStore()
+  const { config, selectedSectionId, selectSection } = useBuilderStore()
   const { t, dir } = useLang()
   const [settingsTab, setSettingsTab] = useState<SettingsTab>('theme')
 
@@ -184,21 +185,37 @@ function RightPanel() {
   const section = config.sections.find((s) => s.id === selectedSectionId) as Section | undefined
   if (!section) return <ThemePanel />
 
-  switch (section.type) {
-    case 'hero': return <HeroForm />
-    case 'features': return <FeaturesForm />
-    case 'testimonials': return <TestimonialsForm />
-    case 'faq': return <FaqForm />
-    case 'guarantee': return <GuaranteeForm />
-    case 'order-form': return <OrderFormForm />
-    case 'social-proof': return <SocialProofForm />
-    case 'cta': return <CtaForm />
-    case 'benefits': return <BenefitsForm />
-    case 'value-stack': return <ValueStackForm sectionId={section.id} />
-    case 'product-carousel': return <ProductCarouselForm sectionId={section.id} />
-    case 'footer': return <FooterForm sectionId={section.id} />
-    default: return <ThemePanel />
-  }
+  const form = (() => {
+    switch (section.type) {
+      case 'hero': return <HeroForm />
+      case 'features': return <FeaturesForm />
+      case 'testimonials': return <TestimonialsForm />
+      case 'faq': return <FaqForm />
+      case 'guarantee': return <GuaranteeForm />
+      case 'order-form': return <OrderFormForm />
+      case 'social-proof': return <SocialProofForm />
+      case 'cta': return <CtaForm />
+      case 'benefits': return <BenefitsForm />
+      case 'value-stack': return <ValueStackForm sectionId={section.id} />
+      case 'product-carousel': return <ProductCarouselForm sectionId={section.id} />
+      case 'footer': return <FooterForm sectionId={section.id} />
+      default: return <ThemePanel />
+    }
+  })()
+
+  return (
+    <div className="flex flex-col h-full" dir={dir}>
+      {/* Deselect the section to get back to the store settings tabs. */}
+      <button
+        onClick={() => selectSection(null)}
+        className="flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold text-muted-foreground hover:text-foreground bg-muted/50 border-b border-border shrink-0"
+      >
+        <ArrowRight size={14} />
+        {t(T.backToSettings)}
+      </button>
+      <div className="flex-1 overflow-y-auto">{form}</div>
+    </div>
+  )
 }
 
 type MobileTab = 'sections' | 'preview' | 'settings'
