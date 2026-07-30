@@ -18,7 +18,7 @@ export type TierId = 'starter' | 'pro' | 'agency'
 export type CheckoutKind = 'chargily' | 'contact'
 
 /** First-batch offer deadline — Algiers time (UTC+1). After this, prices rise. */
-export const FIRST_BATCH_DEADLINE = new Date('2026-07-31T23:59:59+01:00')
+export const FIRST_BATCH_DEADLINE = new Date('2026-08-15T23:59:59+01:00')
 
 export function isFirstBatch(now: Date = new Date()): boolean {
   return now.getTime() < FIRST_BATCH_DEADLINE.getTime()
@@ -50,9 +50,9 @@ export const TIERS: Tier[] = [
     priceDzd: 10000,
     priceLabel: { ar: '10,000 دج', fr: '10 000 DZD', en: '10,000 DZD' },
     afterLabel: {
-      ar: 'بعد 31 جويلية: 10 متاجر فقط، ثم 3,000 دج لكل متجر إضافي',
-      fr: 'Après le 31 juillet : 10 boutiques, puis 3 000 DZD par boutique',
-      en: 'After Jul 31: 10 stores only, then 3,000 DZD per extra store',
+      ar: 'لأول 100 مشترك فقط بهذا السعر — بعدها السعر العادي',
+      fr: 'Pour les 100 premiers seulement — ensuite le prix normal',
+      en: 'First 100 subscribers only — then the normal price',
     },
     checkout: 'chargily',
     badge: null,
@@ -96,9 +96,9 @@ export const TIERS: Tier[] = [
     priceDzd: 70000,
     priceLabel: { ar: '70,000 دج', fr: '70 000 DZD', en: '70,000 DZD' },
     afterLabel: {
-      ar: 'بعد 31 جويلية: 100,000 دج',
-      fr: 'Après le 31 juillet : 100 000 DZD',
-      en: 'After Jul 31: 100,000 DZD',
+      ar: 'لأول 10 مشتركين فقط بهذا السعر — بعدها السعر العادي',
+      fr: 'Pour les 10 premiers seulement — ensuite le prix normal',
+      en: 'First 10 subscribers only — then the normal price',
     },
     checkout: 'chargily',
     badge: { ar: 'الأكثر اختياراً', fr: 'Le plus choisi', en: 'Most chosen' },
@@ -115,9 +115,9 @@ export const TIERS: Tier[] = [
     priceDzd: 1000000,
     priceLabel: { ar: '1,000,000 دج', fr: '1 000 000 DZD', en: '1,000,000 DZD' },
     afterLabel: {
-      ar: 'بعد 31 جويلية: 2,000,000 دج',
-      fr: 'Après le 31 juillet : 2 000 000 DZD',
-      en: 'After Jul 31: 2,000,000 DZD',
+      ar: 'لأول 3 مشتركين فقط بهذا السعر — بعدها السعر العادي',
+      fr: 'Pour les 3 premiers seulement — ensuite le prix normal',
+      en: 'First 3 subscribers only — then the normal price',
     },
     checkout: 'contact',
     badge: null,

@@ -1,4 +1,3 @@
-import { Globe, ChevronDown } from 'lucide-react'
 import { useLang } from '@/hooks/useLang'
 import type { Lang } from '@/hooks/useLang'
 import { cn } from '@/lib/utils'
@@ -33,20 +32,20 @@ export function LanguageSelect({
 
   const trigger =
     variant === 'marketing'
-      ? 'text-xs font-bold px-2.5 py-1.5 border-2 border-black bg-white text-black hover:bg-yellow-400'
-      : 'text-xs font-semibold px-2 py-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted'
+      ? 'w-9 h-9 border-2 border-black bg-white text-black hover:bg-yellow-400'
+      : 'w-9 h-9 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted'
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
           aria-label="Language"
-          className={cn('flex items-center gap-1.5 cursor-pointer transition-colors focus:outline-none', trigger, className)}
+          title="Language / اللغة"
+          className={cn('cursor-pointer transition-colors focus:outline-none leading-none flex items-center justify-center', trigger, className)}
           dir="ltr"
         >
-          <Globe className="h-3.5 w-3.5" />
-          {lang.toUpperCase()}
-          <ChevronDown className="h-3 w-3 opacity-70" />
+          {/* CJK glyph = universal "language" affordance; click opens the menu. */}
+          <span className="text-lg font-bold" style={{ fontFamily: '"Noto Sans SC", "Noto Sans JP", sans-serif' }}>文</span>
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

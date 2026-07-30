@@ -5,9 +5,9 @@ import { cn } from '@/lib/utils'
 
 const T = {
   heading: {
-    ar: 'أسعار الدفعة الأولى تنتهي خلال',
-    fr: 'Les tarifs 1re vague se terminent dans',
-    en: 'First-batch pricing ends in',
+    ar: 'أسعار الدفعة الأولى فقط',
+    fr: 'Tarifs de la première vague uniquement',
+    en: 'First-batch prices only',
   },
   ended: {
     ar: 'انتهى عرض الدفعة الأولى — الأسعار ارتفعت',
@@ -53,14 +53,8 @@ export function FirstBatchCountdown({ variant = 'dark' }: { variant?: 'dark' | '
 
   if (time === null) {
     return (
-      <div
-        dir={dir}
-        className={cn(
-          'inline-flex items-center gap-2 px-4 py-2 border-2 font-black text-sm',
-          onDark ? 'border-yellow-400 text-yellow-400' : 'border-black text-black bg-yellow-400',
-        )}
-      >
-        ⏰ {t(T.ended)}
+      <div dir={dir} className={cn('text-center text-base font-black', onDark ? 'text-yellow-400' : 'text-black')}>
+        {t(T.ended)}
       </div>
     )
   }
@@ -71,25 +65,17 @@ export function FirstBatchCountdown({ variant = 'dark' }: { variant?: 'dark' | '
     [time.mins, T.mins],
     [time.secs, T.secs],
   ]
+  const accent = onDark ? 'text-yellow-400' : 'text-black'
 
+  // Borderless, centered, oversized text — no boxes.
   return (
-    <div dir={dir} className="inline-flex flex-col items-center gap-2">
-      <span className={cn('text-xs font-bold uppercase tracking-wide', onDark ? 'text-yellow-400' : 'text-black/60')}>
-        ⏰ {t(T.heading)}
-      </span>
-      <div className="flex items-center gap-2" dir="ltr">
+    <div dir={dir} className="flex flex-col items-center text-center gap-2 w-full">
+      <span className={cn('text-sm sm:text-base font-bold', accent)}>{t(T.heading)}</span>
+      <div className="flex items-end justify-center gap-3 sm:gap-5" dir="ltr">
         {cells.map(([value, label], i) => (
-          <div key={i} className="flex items-center gap-2">
-            <div
-              className={cn(
-                'flex flex-col items-center justify-center min-w-[3.25rem] px-2 py-1.5 border-2 font-black',
-                onDark ? 'border-yellow-400 bg-black text-yellow-400' : 'border-black bg-white text-black',
-              )}
-            >
-              <span className="text-2xl leading-none tabular-nums">{String(value).padStart(2, '0')}</span>
-              <span className="text-[10px] font-bold opacity-70">{t(label)}</span>
-            </div>
-            {i < cells.length - 1 && <span className={cn('font-black text-xl', onDark ? 'text-yellow-400' : 'text-black')}>:</span>}
+          <div key={i} className="flex flex-col items-center leading-none">
+            <span className={cn('text-4xl sm:text-6xl font-black tabular-nums', accent)}>{String(value).padStart(2, '0')}</span>
+            <span className={cn('text-[10px] sm:text-xs font-bold mt-1 opacity-70', accent)}>{t(label)}</span>
           </div>
         ))}
       </div>

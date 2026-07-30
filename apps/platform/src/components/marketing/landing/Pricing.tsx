@@ -98,18 +98,6 @@ export function Pricing() {
           </div>
         </Reveal>
 
-        <Reveal delay={80}>
-          <div className="ownband">
-            <div className="ownband__txt">
-              <h3>{t(landingPricing.ownTitle)}</h3>
-              <p>{t(landingPricing.ownBody)}</p>
-            </div>
-            <Link to="/dashboard" search={{}} className="btn btn--ink">
-              {t(landingPricing.ownCta)}<span className="btn__arrow">→</span>
-            </Link>
-          </div>
-        </Reveal>
-
         <p className="pnote">{t(landingPricing.note)}</p>
       </div>
     </section>

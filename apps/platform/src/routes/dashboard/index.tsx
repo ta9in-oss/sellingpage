@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { createSubscriptionCheckout } from '@/server/createSubscriptionCheckout'
 import { verifySubscriptionPayment } from '@/server/verifySubscriptionPayment'
+import { trackPixel } from '@/lib/pixel'
 import { TIERS as PRICING_TIERS, ONCE_LABEL, contactWhatsappUrl } from '@/config/pricing'
 import { FirstBatchCountdown } from '@/components/marketing/FirstBatchCountdown'
 import { LanguageSelect } from '@/components/marketing/LanguageSelect'
@@ -138,7 +139,14 @@ function AuthenticatedDashboard({
           tier: paymentTier as 'starter' | 'pro' | 'agency',
           userEmail: email,
         },
-      }).catch(console.error)
+      })
+        .then((r) => {
+          if ((r as any)?.success) {
+            const price = PRICING_TIERS.find((x) => x.id === paymentTier)?.priceDzd
+            trackPixel('Purchase', { value: price, currency: 'DZD', content_name: paymentTier })
+          }
+        })
+        .catch(console.error)
     }
   }, [payment, paymentTier, checkoutIdParam, platformUser?.checkoutId, email])
 
@@ -177,6 +185,8 @@ function SubscriptionGate({ email, autoPlan }: { email: string; autoPlan?: strin
       const result = await createSubscriptionCheckout({
         data: { tier, userId: email, userEmail: email },
       })
+      const price = PRICING_TIERS.find((x) => x.id === tier)?.priceDzd
+      trackPixel('InitiateCheckout', { value: price, currency: 'DZD', content_name: tier })
       window.location.href = result.checkoutUrl
     } catch (e: any) {
       setError(e.message || 'حدث خطأ')
