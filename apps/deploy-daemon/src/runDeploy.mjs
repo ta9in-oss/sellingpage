@@ -3,7 +3,10 @@ import { promisify } from 'node:util'
 import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'node:path'
 import { init } from '@instantdb/admin'
+import { initLogger, createRequestLogger } from 'evlog'
 import { generateStoreConfig } from '../../../scripts/generate-store-config.mjs'
+
+initLogger({ env: { service: 'deploy-daemon', environment: process.env.NODE_ENV || 'production' } })
 
 const execFileP = promisify(execFile)
 // apps/deploy-daemon/src → repo root
@@ -31,6 +34,9 @@ async function setStatus(storeId, status, url) {
  * line logged is scrubbed of it as a backstop against accidental echo.
  */
 export async function runDeploy(storeId, { log = console.log } = {}) {
+  const startedAt = Date.now()
+  // One wide event per deploy — the summary an operator actually needs.
+  const evt = createRequestLogger({ storeId })
   await setStatus(storeId, 'building').catch((e) => log(`[${storeId}] warn: could not mark building: ${e.message}`))
 
   // No-op scrubber until we hold the token; replaced once config is generated.
@@ -80,11 +86,19 @@ export async function runDeploy(storeId, { log = console.log } = {}) {
 
     await setStatus(storeId, 'live', publicUrl)
     say(`live → ${publicUrl}`)
+    evt.set({ deploy: { storeId, slug: cfg.slug, projectName, url: publicUrl, outcome: 'success', durationMs: Date.now() - startedAt } })
+    evt.audit({ action: 'store.deploy', actor: { type: 'system', id: 'deploy-daemon' }, target: { type: 'store', id: storeId }, outcome: 'success' })
+    evt.emit()
     return { ok: true, url: publicUrl }
   } catch (err) {
-    say(`failed: ${scrub(err.message)}`)
+    const error = scrub(err.message)
+    say(`failed: ${error}`)
     await setStatus(storeId, 'failed').catch((e) => say(`warn: could not mark failed: ${e.message}`))
-    return { ok: false, error: scrub(err.message) }
+    evt.error(err)
+    evt.set({ deploy: { storeId, outcome: 'failed', durationMs: Date.now() - startedAt, error } })
+    evt.audit({ action: 'store.deploy', actor: { type: 'system', id: 'deploy-daemon' }, target: { type: 'store', id: storeId }, outcome: 'failure' })
+    evt.emit()
+    return { ok: false, error }
   }
 }
 

@@ -1,5 +1,6 @@
 import { createServerFn } from '@tanstack/react-start'
 import { init } from '@instantdb/admin'
+import { event, createError } from '../lib/logger'
 
 interface Input {
   storeId: string
@@ -13,9 +14,10 @@ const DAEMON_URL = process.env.DEPLOY_WEBHOOK_URL
 export const triggerStoreDeploy = createServerFn({ method: 'POST' })
   .validator((data: unknown) => data as Input)
   .handler(async ({ data }): Promise<{ ok: true }> => {
+    const log = event({ storeId: data.storeId })
     const secret = process.env.DEPLOY_SHARED_SECRET
-    if (!DAEMON_URL) throw new Error('DEPLOY_WEBHOOK_URL is not configured on the server')
-    if (!secret) throw new Error('DEPLOY_SHARED_SECRET is not configured on the server')
+    if (!DAEMON_URL) throw createError({ message: 'DEPLOY_WEBHOOK_URL is not configured on the server', status: 500 })
+    if (!secret) throw createError({ message: 'DEPLOY_SHARED_SECRET is not configured on the server', status: 500 })
 
     // Claim the status BEFORE dispatching. Without this, re-publishing a store
     // that is already `live` leaves deployStatus reading `live` for the whole
@@ -43,14 +45,22 @@ export const triggerStoreDeploy = createServerFn({ method: 'POST' })
       // Network/DNS failure reaching the daemon — roll the claim back so the
       // store doesn't sit at `queued` with no job coming.
       await db.transact(db.tx.stores[data.storeId].update({ deployStatus: 'failed' }))
-      throw new Error(`Deploy daemon unreachable: ${(err as Error).message}`)
+      log.error(err as Error)
+      log.set({ trigger: { storeId: data.storeId, outcome: 'daemon-unreachable' } })
+      log.emit()
+      throw createError({ message: 'Deploy daemon unreachable', status: 502, why: (err as Error).message })
     }
 
     if (!res.ok) {
       const body = await res.text()
       await db.transact(db.tx.stores[data.storeId].update({ deployStatus: 'failed' }))
-      throw new Error(`Deploy daemon rejected (${res.status}): ${body.slice(0, 200)}`)
+      log.set({ trigger: { storeId: data.storeId, outcome: 'daemon-rejected', status: res.status } })
+      log.emit()
+      throw createError({ message: 'Deploy daemon rejected the request', status: 502, why: `${res.status}: ${body.slice(0, 200)}` })
     }
 
+    log.set({ trigger: { storeId: data.storeId, outcome: 'queued' } })
+    log.audit({ action: 'store.deploy.trigger', actor: { type: 'user', id: data.storeId }, target: { type: 'store', id: data.storeId }, outcome: 'success' })
+    log.emit()
     return { ok: true }
   })
