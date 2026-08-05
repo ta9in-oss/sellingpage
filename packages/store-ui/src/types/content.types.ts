@@ -12,7 +12,10 @@ export interface HeroContent {
 }
 
 export interface Feature {
+    /** Picture URL. When empty, `icon` (emoji) is rendered as large text instead. */
     image: string;
+    /** Emoji/text glyph fallback when no picture is set. */
+    icon?: string;
     title: string;
     description: string;
     bgColor: string;

@@ -11,11 +11,40 @@
  * means "keep the stored value".
  */
 import { useState } from 'react'
-import { Eye, EyeOff, Save, Loader2, Check } from 'lucide-react'
+import { Save, Loader2, Check } from 'lucide-react'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { useLang } from '@/hooks/useLang'
 import { saveMerchantSecrets } from '@/server/saveMerchantSecrets'
+
+/** Official Cloudflare cloud mark (simple-icons path), brand orange. */
+function CloudflareLogo() {
+  return (
+    <span className="w-7 h-7 rounded-md bg-white border border-border flex items-center justify-center shrink-0">
+      <svg viewBox="0 0 24 24" className="w-5 h-5" role="img" aria-label="Cloudflare">
+        <path
+          fill="#F38020"
+          d="M16.509 16.845c.148-.507.091-.971-.155-1.316-.225-.316-.605-.499-1.063-.52l-8.677-.113a.156.156 0 0 1-.133-.071.167.167 0 0 1-.019-.152c.018-.071.084-.123.155-.135l8.757-.112c1.039-.048 2.162-.887 2.554-1.905l.497-1.292a.29.29 0 0 0 .016-.169C18.878 8.253 16.611 6.365 13.9 6.365c-2.499 0-4.618 1.61-5.38 3.847-.492-.367-1.121-.566-1.799-.499-1.207.12-2.176 1.089-2.296 2.296a2.68 2.68 0 0 0 .066.897C1.68 12.681 0 14.408 0 16.529c0 .192.014.381.041.567a.19.19 0 0 0 .18.154h15.99a.226.226 0 0 0 .216-.166l.082-.293z"
+        />
+        <path
+          fill="#FAAE40"
+          d="M19.598 11.276c-.08 0-.16.002-.239.007a.14.14 0 0 0-.115.096l-.34.94c-.148.406-.09.783.155 1.061.226.256.606.404 1.064.425l1.85.113c.056.003.104.028.133.07a.166.166 0 0 1 .019.152.19.19 0 0 1-.155.135l-1.922.112c-1.044.048-2.163.887-2.555 1.905l-.138.36a.115.115 0 0 0 .102.156h6.615a.19.19 0 0 0 .184-.138 4.75 4.75 0 0 0 .174-1.278c0-2.638-2.148-4.783-4.786-4.783z"
+        />
+      </svg>
+    </span>
+  )
+}
+
+/** InstantDB mark — black rounded square with a white bolt. */
+function InstantDbLogo() {
+  return (
+    <span className="w-7 h-7 rounded-md bg-black flex items-center justify-center shrink-0">
+      <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" role="img" aria-label="InstantDB">
+        <path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z" fill="#fff" />
+      </svg>
+    </span>
+  )
+}
 
 export interface CredentialsInitial {
   cfAccountId?: string
@@ -62,8 +91,6 @@ export function CredentialsForm({ target, initialValues, onSaved, showSaveButton
   const [instantAppId, setInstantAppId] = useState(initialValues.instantAppId ?? '')
   const [instantAdminToken, setInstantAdminToken] = useState('')
   const instantTokenOnFile = Boolean(initialValues.instantAdminToken)
-  const [showCfToken, setShowCfToken] = useState(false)
-  const [showInstantToken, setShowInstantToken] = useState(false)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -97,9 +124,7 @@ export function CredentialsForm({ target, initialValues, onSaved, showSaveButton
       {/* Cloudflare */}
       <section>
         <div className="flex items-center gap-2 mb-4">
-          <div className="w-6 h-6 rounded-md bg-[#F6821F] flex items-center justify-center shrink-0">
-            <span className="text-white text-[10px] font-bold">CF</span>
-          </div>
+          <CloudflareLogo />
           <h3 className="font-semibold text-sm">{t(T.cfSettings)}</h3>
         </div>
         <div className="bg-muted/40 rounded-xl p-4 space-y-3">
@@ -114,12 +139,7 @@ export function CredentialsForm({ target, initialValues, onSaved, showSaveButton
           </div>
           <div className="space-y-1">
             <Label className="text-xs font-bold">API Token</Label>
-            <div className="relative">
-              <Input type={showCfToken ? 'text' : 'password'} value={cfApiToken} onChange={(e) => setCfApiToken(e.target.value)} placeholder={cfTokenOnFile ? t(T.secretOnFile) : 'abcdef123456...'} dir="ltr" className="text-sm font-mono pe-10" />
-              <button type="button" onClick={() => setShowCfToken(!showCfToken)} className="absolute inset-y-0 end-2.5 flex items-center text-muted-foreground hover:text-foreground">
-                {showCfToken ? <EyeOff size={14} /> : <Eye size={14} />}
-              </button>
-            </div>
+            <Input type="password" value={cfApiToken} onChange={(e) => setCfApiToken(e.target.value)} placeholder={cfTokenOnFile ? t(T.secretOnFile) : 'abcdef123456...'} dir="ltr" className="text-sm font-mono" />
             <p className="text-[11px] text-muted-foreground">{t(T.cfApiTokenHint)} <strong>Cloudflare Pages: Edit</strong> {t(T.cfApiTokenHint2)}</p>
           </div>
         </div>
@@ -128,9 +148,7 @@ export function CredentialsForm({ target, initialValues, onSaved, showSaveButton
       {/* InstantDB */}
       <section>
         <div className="flex items-center gap-2 mb-4">
-          <div className="w-6 h-6 rounded-md bg-black flex items-center justify-center shrink-0">
-            <span className="text-white text-[10px] font-bold">DB</span>
-          </div>
+          <InstantDbLogo />
           <h3 className="font-semibold text-sm">{t(T.instantSettings)} <span className="text-[11px] font-normal text-muted-foreground">{t(T.instantOptional)}</span></h3>
         </div>
         <div className="bg-muted/40 rounded-xl p-4 space-y-3">
@@ -145,12 +163,7 @@ export function CredentialsForm({ target, initialValues, onSaved, showSaveButton
           </div>
           <div className="space-y-1">
             <Label className="text-xs font-bold">Admin Token</Label>
-            <div className="relative">
-              <Input type={showInstantToken ? 'text' : 'password'} value={instantAdminToken} onChange={(e) => setInstantAdminToken(e.target.value)} placeholder={instantTokenOnFile ? t(T.secretOnFile) : 'your-admin-token...'} dir="ltr" className="text-sm font-mono pe-10" />
-              <button type="button" onClick={() => setShowInstantToken(!showInstantToken)} className="absolute inset-y-0 end-2.5 flex items-center text-muted-foreground hover:text-foreground">
-                {showInstantToken ? <EyeOff size={14} /> : <Eye size={14} />}
-              </button>
-            </div>
+            <Input type="password" value={instantAdminToken} onChange={(e) => setInstantAdminToken(e.target.value)} placeholder={instantTokenOnFile ? t(T.secretOnFile) : 'your-admin-token...'} dir="ltr" className="text-sm font-mono" />
             <p className="text-[11px] text-muted-foreground">{t(T.instantAdminTokenHint)}</p>
           </div>
         </div>

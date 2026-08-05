@@ -79,17 +79,34 @@ export function useStoreMedia(storeId: string | null) {
       if (!storeId) throw new Error('no store selected')
       const blob = await resizeToWebpBlob(file)
       const ext = blob.type === 'image/webp' ? 'webp' : (file.name.split('.').pop() || 'img')
-      const path = `${prefix(storeId)}${Date.now()}-${safeName(file.name)}.${ext}`
-      const res = await db.storage.uploadFile(path, blob, { contentType: blob.type })
-      // uploadFile returns the created $files record (with url) in recent SDKs.
-      return (res as any)?.data?.url ?? (res as any)?.url ?? ''
+      const path = `${prefix(storeId)}${Date.now()}-${Math.random().toString(36).slice(2, 7)}-${safeName(file.name)}.${ext}`
+      await db.storage.uploadFile(path, blob, { contentType: blob.type })
+      // uploadFile only returns { data: { id } } — no url. The public url lives on
+      // the $files record, so fetch it back by path.
+      const { data } = await db.queryOnce({
+        $files: { $: { where: { path } } },
+      })
+      const url = (data?.$files as any[])?.[0]?.url ?? ''
+      if (!url) throw new Error('upload succeeded but url not found')
+      return url
     },
     [storeId],
+  )
+
+  /** Upload many files in parallel; resolves to their permanent public URLs (skips failures). */
+  const uploadMany = useCallback(
+    async (files: File[]): Promise<string[]> => {
+      const results = await Promise.allSettled(files.map((f) => upload(f)))
+      return results
+        .filter((r): r is PromiseFulfilledResult<string> => r.status === 'fulfilled' && !!r.value)
+        .map((r) => r.value)
+    },
+    [upload],
   )
 
   const remove = useCallback(async (path: string) => {
     await db.storage.delete(path)
   }, [])
 
-  return { media, upload, remove, isLoading }
+  return { media, upload, uploadMany, remove, isLoading }
 }

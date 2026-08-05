@@ -50,7 +50,7 @@ export interface StoreConfig {
 
 export type Section =
   | { id: string; type: 'hero'; headline: string; subheadline: string; cta: string; image?: string; freeDelivery?: boolean }
-  | { id: string; type: 'features'; title?: string; items: { icon: string; title: string; body: string }[] }
+  | { id: string; type: 'features'; title?: string; items: { icon: string; title: string; body: string; image?: string }[] }
   | { id: string; type: 'testimonials'; title?: string; items: { name: string; text: string; rating: number; location?: string }[] }
   | { id: string; type: 'faq'; title?: string; items: { q: string; a: string }[] }
   | { id: string; type: 'guarantee'; title?: string; items: { title: string; description: string; icon: string }[] }

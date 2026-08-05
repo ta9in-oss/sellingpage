@@ -14,6 +14,7 @@ import { cn } from '@/lib/utils'
 import { useLang } from '@/hooks/useLang'
 import { AuthModal } from '@/components/auth/AuthModal'
 import { StoreSettingsModal } from '@/components/dashboard/StoreSettingsModal'
+import { FounderCertificate } from '@/components/dashboard/FounderCertificate'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -46,6 +47,12 @@ export const Route = createFileRoute('/dashboard/')({
 })
 
 // ─── Main page ────────────────────────────────────────────────────────────────
+
+const RUN_ONE_MSG = {
+  ar: 'مرحباً، أنا مهتم بباقة Run One على 7aba.',
+  fr: 'Bonjour, je suis intéressé par le forfait Run One sur 7aba.',
+  en: 'Hi, I am interested in the Run One plan on 7aba.',
+}
 
 const DT = {
   loginTitle: { ar: 'الدخول للوحة التحكم', fr: 'Accès au tableau de bord', en: 'Dashboard Login' },
@@ -127,7 +134,7 @@ function AuthenticatedDashboard({
     platformUsers: { $: { where: { email } } },
   })
   const platformUser = (data?.platformUsers ?? [])[0] as
-    | { id: string; email: string; tier?: string; checkoutId?: string; cfAccountId?: string; cfApiToken?: string } | undefined
+    | { id: string; email: string; tier?: string; checkoutId?: string; cfAccountId?: string; cfApiToken?: string; founderCode?: string; founderBatch?: string; purchasedAt?: number } | undefined
 
   // Verify Chargily payment on return from checkout
   useEffect(() => {
@@ -168,7 +175,17 @@ function AuthenticatedDashboard({
   // prompts them to connect Cloudflare/InstantDB, and publish enforces it.
   const hasCreds = !!(platformUser?.cfAccountId)
 
-  return <StoresDashboard email={email} tier={tier} platformUserId={platformUser?.id} hasCreds={hasCreds} />
+  return (
+    <StoresDashboard
+      email={email}
+      tier={tier}
+      platformUserId={platformUser?.id}
+      hasCreds={hasCreds}
+      founderCode={platformUser?.founderCode}
+      founderBatch={platformUser?.founderBatch}
+      purchasedAt={platformUser?.purchasedAt}
+    />
+  )
 }
 
 // ─── Onboarding welcome ────────────────────────────────────────────────────────
@@ -206,7 +223,7 @@ function SubscriptionGate({ email, autoPlan }: { email: string; autoPlan?: strin
 
   return (
     <div className="min-h-screen bg-background p-6" dir={dir}>
-      <DashboardHeader email={email} />
+      <DashboardHeader email={email} showSettings={false} />
       <div className="max-w-5xl mx-auto mt-10 space-y-6">
         <div className="text-center space-y-4">
           <h2 className="text-2xl font-bold">{t(DT.choosePlan)}</h2>
@@ -227,7 +244,8 @@ function SubscriptionGate({ email, autoPlan }: { email: string; autoPlan?: strin
             >
               <div>
                 <p className="font-bold text-lg">{t(tier.name)}</p>
-                <p className="text-2xl font-black mt-1">{t(tier.priceLabel)}</p>
+                <p className="text-sm text-muted-foreground line-through mt-1">{t(tier.normalPriceLabel)}</p>
+                <p className="text-2xl font-black -mt-0.5">{t(tier.priceLabel)}</p>
                 <p className="text-xs text-muted-foreground">{t(ONCE_LABEL)}</p>
                 <p className="text-sm text-red-600 font-bold -mt-0.5">{t(tier.afterLabel)}</p>
               </div>
@@ -241,7 +259,7 @@ function SubscriptionGate({ email, autoPlan }: { email: string; autoPlan?: strin
               </ul>
               {tier.checkout === 'contact' ? (
                 <a
-                  href={contactWhatsappUrl(RUN_ONE_MSG_AR)}
+                  href={contactWhatsappUrl(t(RUN_ONE_MSG))}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full py-3 rounded-xl font-semibold transition-colors border border-border hover:bg-muted text-center"
@@ -284,6 +302,10 @@ interface StoreSettingsData {
   cfApiToken?: string
   instantAppId?: string
   instantAdminToken?: string
+  googleAnalyticsId?: string
+  clarityId?: string
+  metaPixelId?: string
+  customDomain?: string
 }
 
 function StoresDashboard({
@@ -291,11 +313,17 @@ function StoresDashboard({
   tier,
   platformUserId,
   hasCreds,
+  founderCode,
+  founderBatch,
+  purchasedAt,
 }: {
   email: string
   tier: string
   platformUserId?: string
   hasCreds: boolean
+  founderCode?: string
+  founderBatch?: string
+  purchasedAt?: number
 }) {
   const { t, dir } = useLang()
   const navigate = useNavigate()
@@ -311,6 +339,16 @@ function StoresDashboard({
       <DashboardHeader email={email} tier={tier} />
 
       <div className="max-w-6xl mx-auto mt-8 space-y-8">
+        {founderCode && (
+          <FounderCertificate
+            founderCode={founderCode}
+            tier={tier}
+            email={email}
+            batch={founderBatch}
+            purchasedAt={purchasedAt}
+          />
+        )}
+
         {!hasCreds && (
           <div className="rounded-2xl border border-primary/30 bg-primary/5 p-5 flex items-start gap-4">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
@@ -365,6 +403,10 @@ function StoresDashboard({
                       cfApiToken: store.cfApiToken,
                       instantAppId: store.instantAppId,
                       instantAdminToken: store.instantAdminToken,
+                      googleAnalyticsId: store.googleAnalyticsId,
+                      clarityId: store.clarityId,
+                      metaPixelId: store.metaPixelId,
+                      customDomain: store.customDomain,
                     })
                   }
                 />
@@ -388,6 +430,12 @@ function StoresDashboard({
             cfApiToken: settingsStore.cfApiToken,
             instantAppId: settingsStore.instantAppId,
             instantAdminToken: settingsStore.instantAdminToken,
+          }}
+          initialAnalytics={{
+            googleAnalyticsId: settingsStore.googleAnalyticsId,
+            clarityId: settingsStore.clarityId,
+            metaPixelId: settingsStore.metaPixelId,
+            customDomain: settingsStore.customDomain,
           }}
           onClose={() => setSettingsStore(null)}
           onDeleted={() => setSettingsStore(null)}
@@ -414,7 +462,14 @@ function StoreCard({
   const { t, dir } = useLang()
   const isRtl = dir === 'rtl'
   const name = store.config?.meta?.name || store.slug || store.id
-  const status = store.status ?? 'draft'
+  // A store is live once the daemon reports it: it writes deployStatus:'live' +
+  // status:'published' + deployedUrl. The card must accept any of those, not the
+  // literal 'live' status (which the daemon never writes).
+  const isLive =
+    store.deployStatus === 'live' ||
+    store.status === 'published' ||
+    store.status === 'live' ||
+    !!store.deployedUrl
 
   const handleDeploy = () => {
     if (!hasCreds) {
@@ -437,12 +492,12 @@ function StoreCard({
         <span
           className={cn(
             'text-xs px-2 py-0.5 rounded-full shrink-0',
-            status === 'live'
+            isLive
               ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
               : 'bg-muted text-muted-foreground',
           )}
         >
-          {status === 'live' ? t(DT.live) : t(DT.draft)}
+          {isLive ? t(DT.live) : t(DT.draft)}
         </span>
       </div>
 
@@ -577,7 +632,7 @@ function EmptyStores({ onNew }: { onNew: () => void }) {
 
 // ─── Header ────────────────────────────────────────────────────────────────────
 
-function DashboardHeader({ email, tier }: { email: string; tier?: string }) {
+function DashboardHeader({ email, tier, showSettings = true }: { email: string; tier?: string; showSettings?: boolean }) {
   const { t, setLang, lang } = useLang()
   const navigate = useNavigate()
   const tierLabels: Record<string, { ar: string; fr: string; en: string }> = {
@@ -601,13 +656,15 @@ function DashboardHeader({ email, tier }: { email: string; tier?: string }) {
       </div>
       <div className="flex items-center gap-3">
         <p className="text-sm text-muted-foreground hidden sm:block">{email}</p>
-        <button
-          onClick={() => navigate({ to: '/dashboard/settings', search: {} as any })}
-          className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-          title={t(DT.settings)}
-        >
-          <Settings className="h-4 w-4" />
-        </button>
+        {showSettings && (
+          <button
+            onClick={() => navigate({ to: '/dashboard/settings', search: {} as any })}
+            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            title={t(DT.settings)}
+          >
+            <Settings className="h-4 w-4" />
+          </button>
+        )}
         <LanguageSelect />
         <button
           onClick={() => db.auth.signOut()}

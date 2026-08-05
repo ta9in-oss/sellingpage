@@ -7,7 +7,7 @@
  * On finish: creates a valid StoreConfig in InstantDB then navigates to the builder.
  * On cancel: calls onCancel (typically navigates back to /dashboard).
  */
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { db } from '@/lib/instantdb'
 import { id } from '@instantdb/react'
 import { nanoid } from 'nanoid'
@@ -58,6 +58,7 @@ const T = {
   productImages: { ar: 'صور المنتج', fr: 'Images du produit', en: 'Product images' },
   addImage: { ar: 'إضافة صورة', fr: 'Ajouter une image', en: 'Add image' },
   imageHint: { ar: 'أضف حتى 5 صور للمنتج، تظهر في الكاروسيل', fr: "Ajoutez jusqu'à 5 images, affichées dans le carrousel", en: 'Add up to 5 product images, shown in carousel' },
+  bulkUpload: { ar: 'رفع عدة صور', fr: 'Plusieurs images', en: 'Bulk upload' },
   removeImage: { ar: 'حذف', fr: 'Supprimer', en: 'Remove' },
   // Validation
   nameRequired: { ar: 'اسم المتجر مطلوب', fr: 'Le nom est requis', en: 'Store name is required' },
@@ -408,6 +409,27 @@ function Step1({
   )
 }
 
+/** Resize one image file to a <=800px webp base64 string (wizard has no store yet). */
+function resizeToBase64(file: File, maxWidth = 800): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    const objectUrl = URL.createObjectURL(file)
+    img.onload = () => {
+      const scale = Math.min(1, maxWidth / img.naturalWidth)
+      const w = Math.round(img.naturalWidth * scale)
+      const h = Math.round(img.naturalHeight * scale)
+      const canvas = document.createElement('canvas')
+      canvas.width = w
+      canvas.height = h
+      canvas.getContext('2d')!.drawImage(img, 0, 0, w, h)
+      URL.revokeObjectURL(objectUrl)
+      resolve(canvas.toDataURL('image/webp', 0.82))
+    }
+    img.onerror = () => { URL.revokeObjectURL(objectUrl); reject(new Error('could not load image')) }
+    img.src = objectUrl
+  })
+}
+
 // ── Step 2: Product ─────────────────────────────────────────────────────────
 
 interface Step2Props {
@@ -427,6 +449,9 @@ function Step2({
   productName, price, currency, images, storeDir,
   onProductNameChange, onPriceChange, onCurrencyChange, onImagesChange, t
 }: Step2Props) {
+  const bulkRef = useRef<HTMLInputElement>(null)
+  const [bulkBusy, setBulkBusy] = useState(false)
+
   const updateImage = (index: number, url: string) => {
     const next = [...images]
     next[index] = url
@@ -435,6 +460,22 @@ function Step2({
 
   const addSlot = () => {
     if (images.length < 5) onImagesChange([...images, ''])
+  }
+
+  // Bulk: pick many images at once → each becomes its own product-image slot the
+  // merchant can reorder/annotate later in the builder.
+  const handleBulk = async (files: File[]) => {
+    const kept = images.filter(Boolean)
+    const room = 5 - kept.length
+    const imgs = files.filter((f) => f.type.startsWith('image/')).slice(0, room)
+    if (imgs.length === 0) return
+    setBulkBusy(true)
+    try {
+      const encoded = await Promise.all(imgs.map((f) => resizeToBase64(f).catch(() => '')))
+      onImagesChange([...kept, ...encoded.filter(Boolean)].slice(0, 5))
+    } finally {
+      setBulkBusy(false)
+    }
   }
 
   const removeImage = (index: number) => {
@@ -497,18 +538,36 @@ function Step2({
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <Label>{t(T.productImages)}</Label>
-          {images.length < 5 && (
-            <button
-              type="button"
-              onClick={addSlot}
-              className="flex items-center gap-1 text-xs text-primary hover:underline"
-            >
-              <Plus size={12} />
-              {t(T.addImage)}
-            </button>
+          {images.filter(Boolean).length < 5 && (
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => !bulkBusy && bulkRef.current?.click()}
+                className="flex items-center gap-1 text-xs text-primary hover:underline"
+              >
+                {bulkBusy ? <Loader2 size={12} className="animate-spin" /> : <Plus size={12} />}
+                {t(T.bulkUpload)}
+              </button>
+              <button
+                type="button"
+                onClick={addSlot}
+                className="flex items-center gap-1 text-xs text-muted-foreground hover:underline"
+              >
+                <Plus size={12} />
+                {t(T.addImage)}
+              </button>
+            </div>
           )}
         </div>
         <p className="text-xs text-muted-foreground">{t(T.imageHint)}</p>
+        <input
+          ref={bulkRef}
+          type="file"
+          accept="image/*"
+          multiple
+          className="hidden"
+          onChange={(e) => { handleBulk(Array.from(e.target.files ?? [])); e.target.value = '' }}
+        />
 
         <div className="space-y-3">
           {images.map((img, idx) => (

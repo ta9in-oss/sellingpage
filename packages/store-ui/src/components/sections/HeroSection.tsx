@@ -154,13 +154,14 @@ export function HeroSection({ content, onCtaClick }: HeroSectionProps) {
         );
     }
 
-    // ── Brutalist ──────────────────────────────────────────────────────────
+    // ── Brutalist (base) — colours come from the merchant's theme ────────────
+    const ink = theme.colors.border
     return (
-        <section className="bg-white py-16 px-6">
+        <section className="py-16 px-6" style={{ backgroundColor: theme.colors.background }}>
             <div className="max-w-5xl mx-auto">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
                     <div className="space-y-8 order-2 lg:order-1">
-                        <h1 className="text-4xl lg:text-5xl font-black leading-tight text-right">
+                        <h1 className="text-4xl lg:text-5xl font-black leading-tight text-right" style={{ color: theme.colors.foreground }}>
                             {content.title.map((line, i) => (
                                 <span key={i}>
                                     {line}
@@ -179,7 +180,8 @@ export function HeroSection({ content, onCtaClick }: HeroSectionProps) {
                         </div>
 
                         <Button
-                            className="bg-yellow-400 text-black px-8 py-4 border-2 border-black rounded-none font-black text-lg hover:bg-yellow-300 transition-all duration-150 transform hover:translate-x-1 hover:translate-y-1 shadow-[2px_2px_0px_0px_#000]"
+                            className="px-8 py-4 border-2 rounded-none font-black text-lg transition-all duration-150 transform hover:translate-x-1 hover:translate-y-1"
+                            style={{ backgroundColor: theme.colors.accent, color: theme.colors.foreground, borderColor: ink, boxShadow: `2px 2px 0px 0px ${ink}` }}
                             onClick={onCtaClick}
                         >
                             <ShoppingBag className="ml-2" size={20} />
@@ -197,12 +199,12 @@ export function HeroSection({ content, onCtaClick }: HeroSectionProps) {
                             )}
 
                             <div className="absolute top-8 sm:top-12 left-8 sm:left-12 transform -rotate-12 z-10">
-                                <div className="bg-yellow-400 border-4 border-black px-6 py-4 mb-2 shadow-[4px_4px_0px_0px_#000] hover:shadow-[6px_6px_0px_0px_#000] transition-all">
-                                    <span className="font-black text-2xl sm:text-3xl">{content.priceTag.amount} {content.priceTag.currency}</span>
+                                <div className="border-4 px-6 py-4 mb-2 transition-all" style={{ backgroundColor: theme.colors.accent, borderColor: ink, boxShadow: `4px 4px 0px 0px ${ink}` }}>
+                                    <span className="font-black text-2xl sm:text-3xl" style={{ color: theme.colors.foreground }}>{content.priceTag.amount} {content.priceTag.currency}</span>
                                 </div>
                                 {content.freeDelivery && (
-                                    <div className="bg-green-400 border-4 border-black px-6 py-4 shadow-[4px_4px_0px_0px_#000] hover:shadow-[6px_6px_0px_0px_#000] transition-all">
-                                        <span className="font-black text-lg sm:text-xl">التوصيل باطل</span>
+                                    <div className="border-4 px-6 py-4 transition-all" style={{ backgroundColor: theme.colors.success, borderColor: ink, boxShadow: `4px 4px 0px 0px ${ink}` }}>
+                                        <span className="font-black text-lg sm:text-xl" style={{ color: theme.colors.foreground }}>التوصيل باطل</span>
                                     </div>
                                 )}
                             </div>

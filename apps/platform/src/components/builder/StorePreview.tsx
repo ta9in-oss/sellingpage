@@ -60,7 +60,8 @@ function SectionRenderer({ section, config }: { section: Section; config: StoreC
     case 'features': {
       const features: Feature[] = section.items.length > 0
         ? section.items.map((item) => ({
-            image: '',
+            image: item.image ?? '',
+            icon: item.icon,
             title: item.title,
             description: item.body,
             bgColor: 'bg-white text-black',

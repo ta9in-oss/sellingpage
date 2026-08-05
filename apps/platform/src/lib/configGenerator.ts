@@ -38,7 +38,10 @@ export function generateContent(config: StoreConfig): SiteContent {
       freeDelivery: hero?.freeDelivery ?? false,
     },
     features: (features?.items ?? []).map((it, i) => ({
-      image: it.icon,
+      // A real picture goes in `image`; the emoji stays in `icon` as the text
+      // fallback. Never put the emoji in `image` (it would render as a broken <img>).
+      image: it.image ?? '',
+      icon: it.icon,
       title: it.title,
       description: it.body,
       bgColor: bg(i),

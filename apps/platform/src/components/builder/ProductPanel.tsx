@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useBuilderStore } from '@/hooks/useBuilderStore'
+import { useStoreMedia } from '@/hooks/useStoreMedia'
 import { cn } from '@/lib/utils'
-import { Plus, Package, X, ChevronUp, ChevronDown, ImageIcon } from 'lucide-react'
+import { Plus, Package, X, ChevronUp, ChevronDown, Upload, Loader2 } from 'lucide-react'
 import { useLang } from '@/hooks/useLang'
 import { ImageUpload } from './ImageUpload'
 
@@ -19,6 +20,9 @@ const T = {
   maxReached: { ar: `الحد الأقصى ${MAX_IMAGES} صور`, fr: `Maximum ${MAX_IMAGES} images`, en: `Max ${MAX_IMAGES} images` },
   noImages: { ar: 'لا توجد صور بعد. أضف صوراً لتظهر في الأقسام', fr: 'Aucune image. Ajoutez-en pour les sections', en: 'No images yet. Add some to use in sections' },
   usedIn: { ar: 'تُستخدم في: البطل، العرض، استمارة الطلب', fr: 'Utilisé dans : Héros, Carrousel, Commande', en: 'Used in: Hero, Carousel, Order form' },
+  bulkUpload: { ar: 'رفع عدة صور دفعة واحدة', fr: 'Téléverser plusieurs images', en: 'Upload multiple images' },
+  bulkHint: { ar: 'اسحب عدة صور أو انقر لاختيارها معاً', fr: 'Glissez plusieurs images ou cliquez', en: 'Drop several images or click to pick many' },
+  uploading: { ar: 'جارٍ الرفع…', fr: 'Téléversement…', en: 'Uploading…' },
 }
 
 export function ProductPanel() {
@@ -27,6 +31,29 @@ export function ProductPanel() {
   const { name, price, currency, images } = config.product
   const storeDir = config.meta.rtl ? 'rtl' : 'ltr'
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
+  const { storeId } = useBuilderStore()
+  const { uploadMany } = useStoreMedia(storeId)
+  const bulkInputRef = useRef<HTMLInputElement>(null)
+  const [bulkUploading, setBulkUploading] = useState(false)
+  const [bulkDragging, setBulkDragging] = useState(false)
+
+  const remainingSlots = MAX_IMAGES - images.filter(Boolean).length
+
+  const handleBulk = async (files: File[]) => {
+    if (!storeId || files.length === 0) return
+    const imgs = files.filter((f) => f.type.startsWith('image/')).slice(0, remainingSlots)
+    if (imgs.length === 0) return
+    setBulkUploading(true)
+    try {
+      const urls = await uploadMany(imgs)
+      if (urls.length) {
+        const kept = images.filter(Boolean)
+        updateProduct({ images: [...kept, ...urls].slice(0, MAX_IMAGES) })
+      }
+    } finally {
+      setBulkUploading(false)
+    }
+  }
 
   const addImage = () => {
     if (images.length >= MAX_IMAGES) return
@@ -122,6 +149,32 @@ export function ProductPanel() {
             <span className="text-[10px] text-zinc-400">{t(T.maxReached)}</span>
           )}
         </div>
+
+        {/* Bulk upload — many at once (store required; falls back to single ImageUpload before a store exists) */}
+        {storeId && remainingSlots > 0 && (
+          <div
+            onDragOver={(e) => { e.preventDefault(); setBulkDragging(true) }}
+            onDragLeave={() => setBulkDragging(false)}
+            onDrop={(e) => { e.preventDefault(); setBulkDragging(false); handleBulk(Array.from(e.dataTransfer.files)) }}
+            onClick={() => !bulkUploading && bulkInputRef.current?.click()}
+            className={cn(
+              'flex flex-col items-center justify-center gap-1 p-3 border-2 border-dashed rounded cursor-pointer transition-colors',
+              bulkDragging ? 'border-zinc-900 bg-zinc-50' : 'border-zinc-200 hover:border-zinc-400',
+            )}
+          >
+            {bulkUploading ? <Loader2 size={16} className="animate-spin text-zinc-500" /> : <Upload size={16} className="text-zinc-400" />}
+            <p className="text-xs text-zinc-600 font-medium">{bulkUploading ? t(T.uploading) : t(T.bulkUpload)}</p>
+            <p className="text-[10px] text-zinc-400 text-center">{t(T.bulkHint)}</p>
+            <input
+              ref={bulkInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={(e) => { handleBulk(Array.from(e.target.files ?? [])); e.target.value = '' }}
+            />
+          </div>
+        )}
 
         {/* Thumbnail grid */}
         {filledImages.length > 0 && (

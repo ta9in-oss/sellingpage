@@ -33,9 +33,9 @@ export function Footer() {
             <a href="/#pricing" className="text-zinc-400 hover:text-yellow-400 font-bold transition-colors">
               {t(T.pricing)}
             </a>
-            <Link to="/demo" className="text-zinc-400 hover:text-yellow-400 font-bold transition-colors">
+            <a href="https://demo.7aba.app" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-yellow-400 font-bold transition-colors">
               {t(T.demo)}
-            </Link>
+            </a>
             <Link to="/terms" className="text-zinc-400 hover:text-yellow-400 font-bold transition-colors">
               {t(T.terms)}
             </Link>
