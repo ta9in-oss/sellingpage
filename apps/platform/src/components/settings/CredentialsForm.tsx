@@ -82,6 +82,9 @@ const T = {
     fr: 'Optionnel : ces identifiants ne concernent que cette boutique et remplacent ceux de votre compte. Laissez vide pour utiliser Cloudflare et InstantDB de votre compte. Si le compte n\'en a pas non plus, une app InstantDB est créée automatiquement au déploiement.',
     en: 'Optional: these credentials apply to THIS store only and override your account settings. Leave blank to use the Cloudflare & InstantDB from your account. If your account has none either, an InstantDB app is auto-created on deploy.',
   },
+  usingAccount: { ar: 'يستخدم بيانات حسابك', fr: 'Utilise les identifiants du compte', en: 'Using your account credentials' },
+  usingOverride: { ar: 'يستخدم بيانات خاصة بهذا المتجر', fr: 'Utilise des identifiants propres à cette boutique', en: 'Using store-specific credentials' },
+  instantAutoProvision: { ar: 'يُنشأ تلقائياً عند النشر', fr: 'Créé automatiquement au déploiement', en: 'Auto-created on publish' },
   save: { ar: 'حفظ', fr: 'Enregistrer', en: 'Save' },
   saving: { ar: 'جارٍ الحفظ...', fr: 'Enregistrement...', en: 'Saving...' },
   saved: { ar: 'تم الحفظ', fr: 'Enregistré', en: 'Saved' },
@@ -138,6 +141,11 @@ export function CredentialsForm({ target, initialValues, onSaved, showSaveButton
         <div className="flex items-center gap-2 mb-4">
           <CloudflareLogo />
           <h3 className="font-semibold text-sm">{t(T.cfSettings)}</h3>
+          {isStoreTarget && (
+            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${cfTokenOnFile ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
+              {cfTokenOnFile ? t(T.usingOverride) : t(T.usingAccount)}
+            </span>
+          )}
         </div>
         <div className="bg-muted/40 rounded-xl p-4 space-y-3">
           <div className="space-y-1">
@@ -162,6 +170,11 @@ export function CredentialsForm({ target, initialValues, onSaved, showSaveButton
         <div className="flex items-center gap-2 mb-4">
           <InstantDbLogo />
           <h3 className="font-semibold text-sm">{t(T.instantSettings)} <span className="text-[11px] font-normal text-muted-foreground">{t(T.instantOptional)}</span></h3>
+          {isStoreTarget && (
+            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${instantTokenOnFile ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
+              {instantTokenOnFile ? t(T.usingOverride) : t(T.instantAutoProvision)}
+            </span>
+          )}
         </div>
         <div className="bg-muted/40 rounded-xl p-4 space-y-3">
           <div className="space-y-1">

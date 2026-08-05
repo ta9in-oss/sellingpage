@@ -11,9 +11,24 @@ import type { Theme } from './theme.types'
  * defaults fine). Foreground pairings use the theme's own colours so contrast
  * stays whatever the preset intends.
  */
+/**
+ * `--radius` drives Tailwind's whole rounded-* scale, so an oversized value (an
+ * old "pill" 9999px setting) turns cards and carousels into blobs. Clamp it to a
+ * sane card radius; per-element pills use their own class.
+ */
+const MAX_RADIUS_PX = 24
+function safeRadius(value: string | undefined): string {
+  const raw = (value ?? '0px').trim()
+  const px = /^(\d+(?:\.\d+)?)px$/.exec(raw)
+  if (px) return `${Math.min(parseFloat(px[1]), MAX_RADIUS_PX)}px`
+  const rem = /^(\d+(?:\.\d+)?)rem$/.exec(raw)
+  if (rem) return `${Math.min(parseFloat(rem[1]) * 16, MAX_RADIUS_PX)}px`
+  return raw
+}
+
 export function themeToCssVars(theme: Theme): string {
   const c = theme.colors
-  const radius = theme.effects?.borderRadius ?? '0px'
+  const radius = safeRadius(theme.effects?.borderRadius)
   const font = theme.typography?.fontFamily ?? 'inherit'
   const vars: Record<string, string> = {
     '--background': c.background,

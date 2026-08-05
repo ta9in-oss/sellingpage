@@ -14,6 +14,7 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as DemoRouteImport } from './routes/demo'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
+import { Route as DashboardWhatsNewRouteImport } from './routes/dashboard/whats-new'
 import { Route as DashboardSettingsRouteImport } from './routes/dashboard/settings'
 import { Route as DashboardNewStoreRouteImport } from './routes/dashboard/new-store'
 import { Route as DashboardDeployRouteImport } from './routes/dashboard/deploy'
@@ -44,6 +45,11 @@ const IndexRoute = IndexRouteImport.update({
 const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/dashboard/',
   path: '/dashboard/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardWhatsNewRoute = DashboardWhatsNewRouteImport.update({
+  id: '/dashboard/whats-new',
+  path: '/dashboard/whats-new',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardSettingsRoute = DashboardSettingsRouteImport.update({
@@ -88,6 +94,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/deploy': typeof DashboardDeployRoute
   '/dashboard/new-store': typeof DashboardNewStoreRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
+  '/dashboard/whats-new': typeof DashboardWhatsNewRoute
   '/dashboard': typeof DashboardIndexRoute
 }
 export interface FileRoutesByTo {
@@ -101,6 +108,7 @@ export interface FileRoutesByTo {
   '/dashboard/deploy': typeof DashboardDeployRoute
   '/dashboard/new-store': typeof DashboardNewStoreRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
+  '/dashboard/whats-new': typeof DashboardWhatsNewRoute
   '/dashboard': typeof DashboardIndexRoute
 }
 export interface FileRoutesById {
@@ -115,6 +123,7 @@ export interface FileRoutesById {
   '/dashboard/deploy': typeof DashboardDeployRoute
   '/dashboard/new-store': typeof DashboardNewStoreRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
+  '/dashboard/whats-new': typeof DashboardWhatsNewRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRouteTypes {
@@ -130,6 +139,7 @@ export interface FileRouteTypes {
     | '/dashboard/deploy'
     | '/dashboard/new-store'
     | '/dashboard/settings'
+    | '/dashboard/whats-new'
     | '/dashboard'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -143,6 +153,7 @@ export interface FileRouteTypes {
     | '/dashboard/deploy'
     | '/dashboard/new-store'
     | '/dashboard/settings'
+    | '/dashboard/whats-new'
     | '/dashboard'
   id:
     | '__root__'
@@ -156,6 +167,7 @@ export interface FileRouteTypes {
     | '/dashboard/deploy'
     | '/dashboard/new-store'
     | '/dashboard/settings'
+    | '/dashboard/whats-new'
     | '/dashboard/'
   fileRoutesById: FileRoutesById
 }
@@ -170,6 +182,7 @@ export interface RootRouteChildren {
   DashboardDeployRoute: typeof DashboardDeployRoute
   DashboardNewStoreRoute: typeof DashboardNewStoreRoute
   DashboardSettingsRoute: typeof DashboardSettingsRoute
+  DashboardWhatsNewRoute: typeof DashboardWhatsNewRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
 }
 
@@ -208,6 +221,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/whats-new': {
+      id: '/dashboard/whats-new'
+      path: '/dashboard/whats-new'
+      fullPath: '/dashboard/whats-new'
+      preLoaderRoute: typeof DashboardWhatsNewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard/settings': {
@@ -266,6 +286,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardDeployRoute: DashboardDeployRoute,
   DashboardNewStoreRoute: DashboardNewStoreRoute,
   DashboardSettingsRoute: DashboardSettingsRoute,
+  DashboardWhatsNewRoute: DashboardWhatsNewRoute,
   DashboardIndexRoute: DashboardIndexRoute,
 }
 export const routeTree = rootRouteImport

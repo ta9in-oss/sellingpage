@@ -15,6 +15,40 @@ Format: `[version/commit] YYYY-MM-DD — description`
 
 ---
 
+## [7149a06] 2026-08-05 — Builder image pipeline, theming, per-store analytics
+
+**fix: image uploads were silently failing everywhere**
+- `useStoreMedia.upload`: `db.storage.uploadFile` returns only `{ data: { id } }` (no `url`), so every upload resolved to `''` — images never attached and rendered as dead `<img>`. Now resolves the permanent url via `db.queryOnce({ $files: { $: { where: { path } } } })`
+- added `uploadMany` (parallel, skips failures) → bulk upload in `ProductPanel` and the creation wizard (base64 pre-store)
+- `ImagePicker` is now used for every product image slot; its library also lists images referenced by the store config (older stores, wizard base64, pasted urls)
+
+**fix: published stores lost their images**
+- `scripts/generate-store-config.mjs`: `$files.url` is a signed CloudFront url that expires (~7d), and it was baked into the static build. Added `localizeStoreImages()` — downloads every remote image (logo, product, hero, features, carousel) into `apps/store/public/assets/uploads`, content-hashed, and rewrites the config to permanent local paths
+
+**fix: features section rendered emoji as images**
+- `configGenerator` mapped `item.icon` into `Feature.image` → `<img src="⭐">`. `Feature` now carries `image` + optional `icon`; `FeatureGrid` renders a picture or the glyph as text; builder gained a per-feature `ImagePicker`
+
+**fix: theme**
+- presets reduced to the base theme (clean/dark rewired layouts; dark hid the pricing tags); `ThemePanel` simplified to colors/fonts/radius
+- `HeroSection`, `FeatureGrid`, `CTASection`, `ProductCarousel` now read `theme.colors`/`theme.effects.borderRadius` so the pickers visibly restyle the store
+- radius: dropped the `9999px` pill option and clamped `--radius` (`safeRadius`, max 24px) — it feeds Tailwind's whole `rounded-*` scale and turned carousels into blobs
+
+**fix: store direction**
+- store `<html>` had no `dir` and `Layout` hardcoded `rtl`, so the builder's RTL/LTR toggle only affected order/carousel. Both now read `theme.direction`
+
+**feat: per-store analytics + domain**
+- `googleAnalyticsId`, `clarityId`, `metaPixelId`, `customDomain` on the store row (schema + settings modal); deploy daemon injects `VITE_GOOGLE_ANALYTICS`, `VITE_MICROSOFT_CLARITY_ID`, `VITE_META_PIXEL_ID` at build
+
+**fix: misc**
+- store card showed Draft after a successful deploy (daemon writes `status:'published'`/`deployStatus:'live'`, card checked `'live'`)
+- Arabic live label مباشر → شغّال
+- settings gear hidden for users without a subscription (led to a near-blank page)
+- credentials form: real Cloudflare/InstantDB logos, no RTL-overlapping eye toggles, explicit "per-store override" note
+- builder back control no longer renders a double arrow; icon is direction-aware
+- marketing demo links point at `https://demo.7aba.app`
+
+---
+
 ## [f111ec8] 2026-04-01 — One-click service linking
 
 **feat: auto-provision InstantDB + Cloudflare OAuth flow**

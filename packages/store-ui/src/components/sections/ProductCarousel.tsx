@@ -1,7 +1,14 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { Button } from '../../components/ui/button';
+import { useTheme } from '../../context/ThemeContext';
 import type { ProductImage } from '../../types/content.types';
+
+/** Keep the merchant's radius inside a sane range for large surfaces. */
+function cardRadius(value: string | undefined): string {
+    const m = /^(\d+(?:\.\d+)?)px$/.exec((value ?? '0px').trim());
+    return m ? `${Math.min(parseFloat(m[1]), 24)}px` : '0px';
+}
 
 interface ProductCarouselProps {
     products: ProductImage[];
@@ -14,6 +21,9 @@ export function ProductCarousel({
     autoplay = true,
     autoplayInterval = 5000
 }: ProductCarouselProps) {
+    const theme = useTheme();
+    const radius = cardRadius(theme.effects?.borderRadius);
+    const ink = theme.colors.border;
     const [currentSlide, setCurrentSlide] = useState(0);
     const totalSlides = products.length;
 
@@ -36,23 +46,27 @@ export function ProductCarousel({
     };
 
     return (
-        <div className="bg-white border-2 border-black p-3 sm:p-6 transform -rotate-1">
+        <div
+            className="border-2 p-3 sm:p-6 transform -rotate-1"
+            style={{ backgroundColor: theme.colors.background, borderColor: ink, borderRadius: radius }}
+        >
             <div className="relative">
-                <div className="overflow-hidden rounded-lg">
+                <div className="overflow-hidden" style={{ borderRadius: radius }}>
                     <div
                         className="flex transition-transform duration-300 ease-in-out"
                         style={{ transform: `translateX(${currentSlide * 100}%)` }}
                     >
                         {products.map((product, index) => (
                             <div key={product.id} className="min-w-full flex-shrink-0">
-                                <div className={`${product.bgColor} p-2 sm:p-4 border-2 border-black rounded-lg`}>
+                                <div className={`${product.bgColor} p-2 sm:p-4 border-2`} style={{ borderColor: ink, borderRadius: radius }}>
                                     <div className="relative w-full">
                                         <picture>
                                             <source srcSet={product.image.replace(/\.(png|jpg|jpeg)$/i, '.webp')} type="image/webp" />
                                             <img
                                                 src={product.image}
                                                 alt={product.title}
-                                                className="w-72 h-64 object-cover rounded-md mx-auto"
+                                                className="w-72 h-64 object-cover mx-auto"
+                                                style={{ borderRadius: radius }}
                                                 loading={index === 0 ? 'eager' : 'lazy'}
                                                 decoding="async"
                                                 width="288"

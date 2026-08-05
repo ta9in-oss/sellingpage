@@ -19,6 +19,17 @@ Changes specific to the store selling page app (`apps/store`).
 
 ---
 
+## [7149a06] 2026-08-05 — Permanent images, whole-store direction, themed sections
+
+- **Images are now local assets.** Store configs referenced InstantDB `$files` urls, which are signed and expire — deployed stores lost every image once the signature lapsed. The deploy step downloads each image into `public/assets/uploads` (content-hashed) and rewrites the config, so the built store serves its own files.
+- **Direction is store-wide.** `__root.tsx` sets `<html dir>` and `Layout` uses `theme.direction` (both previously hardcoded/absent), so an LTR store is LTR everywhere. Field-level overrides in the order form (phone/number inputs) are unchanged.
+- **Sections honour the merchant theme.** `HeroSection`, `FeatureGrid`, `CTASection` and `ProductCarousel` read `theme.colors` and `theme.effects.borderRadius` instead of hardcoded `bg-yellow-400`/`bg-white`/`rounded-lg`.
+- **Feature items support a picture.** `Feature` gained `icon` alongside `image`; `FeatureGrid` renders an `<img>` for a real picture and the emoji as large text otherwise (previously an emoji was passed as `src`).
+- **Radius clamped.** `themeToCssVars` caps `--radius` at 24px — it feeds Tailwind's `rounded-*` scale, and a pill value distorted cards and the carousel.
+- **Per-store analytics.** `VITE_GOOGLE_ANALYTICS`, `VITE_MICROSOFT_CLARITY_ID` and `VITE_META_PIXEL_ID` are injected per store at build time by the deploy daemon.
+
+---
+
 ## [c09e717] 2026-03-24 — Performance: bundle size, images, lazy loading
 
 - **Algeria JSON**: static import → `import()` (dynamic) — removed 1.4 MB from main bundle

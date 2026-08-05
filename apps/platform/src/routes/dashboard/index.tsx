@@ -33,7 +33,7 @@ import type { DownloadType } from '@/server/getDownloadUrl'
 import {
   Plus, Settings, ExternalLink, LogOut, Store, Rocket,
   Download, Package, Smartphone, Code2, Loader2, CheckCircle2,
-  Globe, Key, ChevronDown, ChevronUp, Save, AlertCircle, ArrowRight, ArrowLeft,
+  Globe, Key, ChevronDown, ChevronUp, Save, AlertCircle, ArrowRight, ArrowLeft, Sparkles,
 } from 'lucide-react'
 
 export const Route = createFileRoute('/dashboard/')({
@@ -62,6 +62,7 @@ const DT = {
   myStores: { ar: 'متاجرك', fr: 'Mes boutiques', en: 'My stores' },
   newStore: { ar: 'متجر جديد', fr: 'Nouvelle boutique', en: 'New store' },
   live: { ar: 'شغّال', fr: 'En ligne', en: 'Live' },
+  whatsNew: { ar: 'ما الجديد', fr: 'Nouveautés', en: "What's new" },
   draft: { ar: 'مسودة', fr: 'Brouillon', en: 'Draft' },
   edit: { ar: 'تعديل', fr: 'Modifier', en: 'Edit' },
   deploy: { ar: 'نشر', fr: 'Déployer', en: 'Deploy' },
@@ -656,6 +657,15 @@ function DashboardHeader({ email, tier, showSettings = true }: { email: string; 
       </div>
       <div className="flex items-center gap-3">
         <p className="text-sm text-muted-foreground hidden sm:block">{email}</p>
+        {showSettings && (
+          <button
+            onClick={() => navigate({ to: '/dashboard/whats-new' })}
+            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            title={t(DT.whatsNew)}
+          >
+            <Sparkles className="h-4 w-4" />
+          </button>
+        )}
         {showSettings && (
           <button
             onClick={() => navigate({ to: '/dashboard/settings', search: {} as any })}
