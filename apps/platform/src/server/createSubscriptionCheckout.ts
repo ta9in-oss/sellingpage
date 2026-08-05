@@ -16,8 +16,17 @@ export const createSubscriptionCheckout = createServerFn({ method: 'POST' })
   .validator((data: unknown) => data as SubscriptionCheckoutInput)
   .handler(async ({ data }) => {
     const secretKey = process.env.CHARGILY_PLATFORM_SECRET_KEY
-    if (!secretKey) throw new Error('CHARGILY_PLATFORM_SECRET_KEY not configured')
+    if (!secretKey) {
+      throw new Error(
+        'CHARGILY_PLATFORM_SECRET_KEY not configured. In production set it with ' +
+          '`wrangler pages secret put CHARGILY_PLATFORM_SECRET_KEY` and redeploy; ' +
+          'locally put it in apps/platform/.env.',
+      )
+    }
 
+    // Absolute origin for the payment redirects. Falling back to localhost in
+    // production would strand the buyer after paying, so only allow that fallback
+    // when we are actually running locally.
     const baseUrl = process.env.VITE_APP_URL || 'http://localhost:3001'
     // Contact-sales tiers (e.g. Run One) are absent from the charge map on purpose —
     // they must never hit Chargily. Only chargily tiers have an amount here.
