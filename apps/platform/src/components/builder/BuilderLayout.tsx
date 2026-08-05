@@ -39,7 +39,7 @@ type SettingsTab = 'theme' | 'product' | 'notifications' | 'site' | 'payment'
 const T = {
   siteDataSeo: { ar: 'بيانات الموقع والـ SEO', fr: 'Données du site & SEO', en: 'Site Data & SEO' },
   logoLabel: { ar: 'شعار المتجر', fr: 'Logo de la boutique', en: 'Store logo' },
-  backToSettings: { ar: '→ رجوع إلى إعدادات المتجر', fr: '→ Retour aux réglages', en: '→ Back to store settings' },
+  backToSettings: { ar: 'رجوع إلى إعدادات المتجر', fr: 'Retour aux réglages', en: 'Back to store settings' },
   tabTitle: { ar: 'عنوان التاب', fr: 'Titre de l\'onglet', en: 'Tab title' },
   tabTitlePlaceholder: { ar: 'مثال: حقيبة ظهر | متجرك', fr: 'Ex: Sac à dos | Boutique', en: 'Ex: Backpack | Your Store' },
   tabTitleHint: { ar: 'يظهر في تاب المتصفح ونتائج البحث', fr: 'Affiché dans l\'onglet et les résultats', en: 'Shown in browser tab and search results' },
@@ -210,7 +210,7 @@ function RightPanel() {
         onClick={() => selectSection(null)}
         className="flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold text-muted-foreground hover:text-foreground bg-muted/50 border-b border-border shrink-0"
       >
-        <ArrowRight size={14} />
+        {dir === 'rtl' ? <ArrowRight size={14} /> : <ArrowLeft size={14} />}
         {t(T.backToSettings)}
       </button>
       <div className="flex-1 overflow-y-auto">{form}</div>

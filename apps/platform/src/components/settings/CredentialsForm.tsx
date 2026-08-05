@@ -77,6 +77,11 @@ const T = {
     fr: '•••••••• enregistré — laissez vide pour le conserver',
     en: '•••••••• saved & encrypted — leave blank to keep it',
   },
+  overrideNote: {
+    ar: 'اختياري: هذه البيانات تخص هذا المتجر فقط وتتجاوز إعدادات حسابك. اتركها فارغة لاستخدام Cloudflare و InstantDB من إعدادات حسابك. إن لم تُضبط في الحساب أيضاً، يُنشئ النظام تطبيق InstantDB تلقائياً عند النشر.',
+    fr: 'Optionnel : ces identifiants ne concernent que cette boutique et remplacent ceux de votre compte. Laissez vide pour utiliser Cloudflare et InstantDB de votre compte. Si le compte n\'en a pas non plus, une app InstantDB est créée automatiquement au déploiement.',
+    en: 'Optional: these credentials apply to THIS store only and override your account settings. Leave blank to use the Cloudflare & InstantDB from your account. If your account has none either, an InstantDB app is auto-created on deploy.',
+  },
   save: { ar: 'حفظ', fr: 'Enregistrer', en: 'Save' },
   saving: { ar: 'جارٍ الحفظ...', fr: 'Enregistrement...', en: 'Saving...' },
   saved: { ar: 'تم الحفظ', fr: 'Enregistré', en: 'Saved' },
@@ -119,8 +124,15 @@ export function CredentialsForm({ target, initialValues, onSaved, showSaveButton
     }
   }
 
+  const isStoreTarget = 'storeId' in target
+
   return (
     <div className="space-y-6">
+      {isStoreTarget && (
+        <div className="text-xs text-muted-foreground bg-muted/50 border border-border rounded-lg px-3 py-2.5 leading-relaxed">
+          {t(T.overrideNote)}
+        </div>
+      )}
       {/* Cloudflare */}
       <section>
         <div className="flex items-center gap-2 mb-4">

@@ -37,7 +37,7 @@ export function Layout({ children, showNavigation = true }: LayoutProps) {
       <div
         className="min-h-screen flex flex-col bg-white"
         style={{ fontFamily: "Almarai, sans-serif", position: "relative", zIndex: 1 }}
-        dir="rtl"
+        dir={theme.direction}
       >
         <header className="bg-white text-black py-3 px-6 border-1 border-black sticky top-0 z-50 flex-shrink-0">
           <div className="max-w-5xl mx-auto flex justify-between items-center">

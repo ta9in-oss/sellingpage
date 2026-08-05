@@ -1,13 +1,73 @@
 // Reads a store row from the platform InstantDB and writes the store's
 // site.config.ts + content.json. Used by .github/workflows/deploy-store.yml.
-import { writeFileSync, appendFileSync } from 'node:fs'
+import { writeFileSync, appendFileSync, mkdirSync, rmSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'node:path'
+import { createHash } from 'node:crypto'
 import { generateSiteConfig, generateContentJson } from '../apps/platform/src/lib/configGenerator.ts'
 import { decryptSecret, isEncrypted } from '../apps/platform/src/lib/secretBox.ts'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const STORE_CONFIG_DIR = resolve(__dirname, '../apps/store/src/config')
+// Downloaded images are baked into the store's own static assets so the deployed
+// store never depends on a signed/expiring InstantDB URL.
+const UPLOADS_DIR = resolve(__dirname, '../apps/store/public/assets/uploads')
+const UPLOADS_URL_PREFIX = '/assets/uploads/'
+
+const EXT_BY_TYPE = {
+  'image/webp': 'webp', 'image/png': 'png', 'image/jpeg': 'jpg',
+  'image/jpg': 'jpg', 'image/gif': 'gif', 'image/svg+xml': 'svg', 'image/avif': 'avif',
+}
+
+/**
+ * Download every remote (http/https) image referenced by the store config into
+ * the store's public/assets/uploads and rewrite the config to point at those
+ * permanent local paths. Data URLs and already-local paths are left untouched.
+ * Mutates and returns `config`.
+ */
+async function localizeStoreImages(config, log = () => {}) {
+  // Start clean so a previous store's images never leak into this build.
+  rmSync(UPLOADS_DIR, { recursive: true, force: true })
+  mkdirSync(UPLOADS_DIR, { recursive: true })
+
+  const cache = new Map() // remote url -> local path (dedupe repeated urls)
+  const isRemote = (v) => typeof v === 'string' && /^https?:\/\//i.test(v)
+
+  const localize = async (url) => {
+    if (!isRemote(url)) return url
+    if (cache.has(url)) return cache.get(url)
+    try {
+      const res = await fetch(url)
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const type = (res.headers.get('content-type') || '').split(';')[0].trim().toLowerCase()
+      const buf = Buffer.from(await res.arrayBuffer())
+      const ext = EXT_BY_TYPE[type] || (url.split('?')[0].match(/\.(webp|png|jpe?g|gif|svg|avif)$/i)?.[1] || 'img').toLowerCase()
+      const name = `${createHash('sha1').update(buf).digest('hex').slice(0, 16)}.${ext}`
+      writeFileSync(resolve(UPLOADS_DIR, name), buf)
+      const local = `${UPLOADS_URL_PREFIX}${name}`
+      cache.set(url, local)
+      return local
+    } catch (e) {
+      log(`warn: could not localize image ${url.slice(0, 60)}…: ${e.message}`)
+      return url // fall back to the remote url rather than break the build
+    }
+  }
+
+  const localizeList = async (arr) =>
+    Array.isArray(arr) ? Promise.all(arr.map((u) => localize(u))) : arr
+
+  if (config.meta) config.meta.logo = await localize(config.meta.logo)
+  if (config.product) config.product.images = await localizeList(config.product.images)
+  for (const s of config.sections ?? []) {
+    if (s.type === 'hero' && s.image) s.image = await localize(s.image)
+    if (s.type === 'product-carousel') s.images = await localizeList(s.images)
+    if (s.type === 'features') {
+      for (const it of s.items ?? []) if (it.image) it.image = await localize(it.image)
+    }
+  }
+  log(`localized ${cache.size} image(s) into public/assets/uploads`)
+  return config
+}
 
 export function buildStoreArtifacts(store) {
   if (!store || !store.config) throw new Error('store.config is missing — cannot generate artifacts')
@@ -55,6 +115,9 @@ export async function generateStoreConfig({ storeId, appId, adminToken, encKey =
   const cfApiToken = store.cfApiToken ? await decryptSecret(store.cfApiToken, encKey) : ''
   const instantAdminToken = store.instantAdminToken ? await decryptSecret(store.instantAdminToken, encKey) : ''
   const chargilyApiKey = store.chargilyApiKey ? await decryptSecret(store.chargilyApiKey, encKey) : ''
+
+  // Bake remote images into the store's own assets → permanent, non-expiring URLs.
+  if (store.config) await localizeStoreImages(store.config, (m) => console.log(m))
 
   const { siteConfigTs, contentJson } = buildStoreArtifacts(store)
   writeFileSync(resolve(STORE_CONFIG_DIR, 'site.config.ts'), siteConfigTs)

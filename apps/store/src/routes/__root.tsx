@@ -120,8 +120,11 @@ function RootComponent() {
 
 function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
   const isDark = siteConfig.theme.mode === 'dark';
+  // Whole-store text direction from the merchant's theme. Individual fields (e.g.
+  // phone/number inputs in the order form) may still override dir locally.
+  const dir = siteConfig.theme.direction ?? 'rtl';
   return (
-    <html className={isDark ? 'dark' : ''}>
+    <html dir={dir} className={isDark ? 'dark' : ''}>
       <head>
         <HeadContent />
         {/* Merchant theme → shadcn CSS vars, so shadcn components AND sections

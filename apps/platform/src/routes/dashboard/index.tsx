@@ -61,7 +61,7 @@ const DT = {
   subscribeNow: { ar: 'اشترك الآن', fr: "S'abonner", en: 'Subscribe now' },
   myStores: { ar: 'متاجرك', fr: 'Mes boutiques', en: 'My stores' },
   newStore: { ar: 'متجر جديد', fr: 'Nouvelle boutique', en: 'New store' },
-  live: { ar: 'مباشر', fr: 'En ligne', en: 'Live' },
+  live: { ar: 'شغّال', fr: 'En ligne', en: 'Live' },
   draft: { ar: 'مسودة', fr: 'Brouillon', en: 'Draft' },
   edit: { ar: 'تعديل', fr: 'Modifier', en: 'Edit' },
   deploy: { ar: 'نشر', fr: 'Déployer', en: 'Deploy' },
