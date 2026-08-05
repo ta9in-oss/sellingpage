@@ -4,7 +4,7 @@ import { useStoreMedia } from '@/hooks/useStoreMedia'
 import { cn } from '@/lib/utils'
 import { Plus, Package, X, ChevronUp, ChevronDown, Upload, Loader2 } from 'lucide-react'
 import { useLang } from '@/hooks/useLang'
-import { ImageUpload } from './ImageUpload'
+import { ImagePicker } from './ImagePicker'
 
 const MAX_IMAGES = 6
 
@@ -220,7 +220,8 @@ export function ProductPanel() {
                   {/* Edit overlay */}
                   {isEditing && (
                     <div className="col-span-3 mt-1 border border-zinc-200 rounded p-2 bg-white absolute inset-x-0 top-full z-10 shadow-lg">
-                      <ImageUpload
+                      <ImagePicker
+                        mode="single"
                         value={img}
                         onChange={(url) => {
                           if (!url) removeImage(i)
@@ -244,7 +245,8 @@ export function ProductPanel() {
                 <X size={12} />
               </button>
             </div>
-            <ImageUpload
+            <ImagePicker
+              mode="single"
               value={images[editingIndex]}
               onChange={(url) => {
                 if (!url) removeImage(editingIndex)
@@ -258,7 +260,8 @@ export function ProductPanel() {
         {filledImages.length === 0 && (
           <div className="space-y-2">
             <p className="text-xs text-zinc-400 text-center py-2">{t(T.noImages)}</p>
-            <ImageUpload
+            <ImagePicker
+              mode="single"
               value=""
               onChange={(url) => {
                 if (url) updateProduct({ images: [url] })
@@ -270,7 +273,8 @@ export function ProductPanel() {
         {/* Add new slot shown as upload widget when editingIndex points to empty slot */}
         {editingIndex !== null && !images[editingIndex] && (
           <div className="border border-zinc-200 rounded p-3 bg-zinc-50">
-            <ImageUpload
+            <ImagePicker
+              mode="single"
               label={`${t(T.addImage)}`}
               value=""
               onChange={(url) => {
