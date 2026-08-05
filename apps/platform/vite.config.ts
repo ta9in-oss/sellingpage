@@ -1,8 +1,18 @@
 // vite.config.ts
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import tsConfigPaths from 'vite-tsconfig-paths'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import viteReact from '@vitejs/plugin-react'
+
+// Vite only exposes VITE_*-prefixed values (and only to the client). Server
+// functions read plain `process.env.X` — which in dev is Node's env, so nothing
+// from .env is there and secrets like CHARGILY_PLATFORM_SECRET_KEY look
+// "not configured" locally. Copy .env into process.env here so dev matches
+// production, where Cloudflare provides these as real environment bindings.
+// Never overwrite a value already present in the real environment.
+for (const [key, value] of Object.entries(loadEnv(process.env.NODE_ENV ?? 'development', process.cwd(), ''))) {
+    if (process.env[key] === undefined) process.env[key] = value
+}
 
 export default defineConfig({
     server: {

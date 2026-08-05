@@ -11,3 +11,7 @@ pages_build_output_dir = "dist"
 [vars]
 CF_OAUTH_CLIENT_ID = "8e55e2088cfacd60b74c2199b30a3a8d"
 INSTANTDB_OAUTH_CLIENT_ID = "be194d93-775f-4b2f-b312-04996c0f5acf"
+# Public site origin. Server functions read this at runtime to build absolute URLs
+# (Chargily success/failure redirects). Without it they fall back to
+# http://localhost:3001, which strands buyers after payment.
+VITE_APP_URL = "https://7aba.store"

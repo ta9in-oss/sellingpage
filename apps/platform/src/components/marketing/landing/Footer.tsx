@@ -17,7 +17,7 @@ export function Footer() {
           <nav className="foot__links">
             <a href="#how">{t(landingNav.how)}</a>
             <a href="#pricing">{t(landingNav.pricing)}</a>
-            <a href="#proof">{t(landingNav.proof)}</a>
+            <a href="https://demo.7aba.app" target="_blank" rel="noopener noreferrer">{t(landingNav.proof)}</a>
             <a href="#roadmap">{t(landingNav.roadmap)}</a>
             <Link to="/dashboard" search={{}}>{t(landingNav.cta)}</Link>
           </nav>
