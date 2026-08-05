@@ -28,7 +28,9 @@ const T = {
   presetDark: { ar: 'داكن', fr: 'Sombre', en: 'Dark Pro' },
 }
 
-const RADIUS_OPTIONS = ['0px', '4px', '8px', '12px', '9999px']
+// No pill option: `--radius` feeds Tailwind's rounded-* scale, so a 9999px value
+// turns whole cards/carousels into blobs. Cap at a sane card radius.
+const RADIUS_OPTIONS = ['0px', '4px', '8px', '12px', '16px']
 
 export function ThemePanel() {
   const { config, updateTheme } = useBuilderStore()
@@ -211,7 +213,7 @@ export function ThemePanel() {
               className="flex-1 px-0 text-xs h-8"
               onClick={() => updateRadius(r)}
             >
-              {r === '9999px' ? '●' : r.replace('px', '')}
+              {r.replace('px', '')}
             </Button>
           ))}
         </div>

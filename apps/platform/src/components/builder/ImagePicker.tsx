@@ -43,9 +43,35 @@ interface MultiImagePickerProps {
 }
 type ImagePickerProps = SingleImagePickerProps | MultiImagePickerProps
 
+/** Every image URL already referenced by the store config (older stores, wizard
+ *  uploads, pasted URLs) so the picker shows them even if they never landed in
+ *  InstantDB Storage under this store's prefix. */
+function useConfigImages(): string[] {
+  const config = useBuilderStore((s) => s.config)
+  const urls: string[] = []
+  const push = (v?: string) => { if (v && !urls.includes(v)) urls.push(v) }
+  push(config?.meta?.logo)
+  ;(config?.product?.images ?? []).forEach(push)
+  for (const s of config?.sections ?? []) {
+    if (s.type === 'hero') push(s.image)
+    if (s.type === 'product-carousel') (s.images ?? []).forEach(push)
+    if (s.type === 'features') (s.items ?? []).forEach((it) => push(it.image))
+  }
+  return urls
+}
+
 export function ImagePicker(props: ImagePickerProps) {
   const { storeId } = useBuilderStore()
-  const { media, upload } = useStoreMedia(storeId)
+  const { media: uploaded, upload } = useStoreMedia(storeId)
+  const configImages = useConfigImages()
+
+  // Storage uploads first, then any config-referenced image not already listed.
+  const media = [
+    ...uploaded,
+    ...configImages
+      .filter((u) => !uploaded.some((m) => m.url === u))
+      .map((u) => ({ id: `cfg:${u}`, path: '', url: u })),
+  ]
   const { t, dir } = useLang()
   const inputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
