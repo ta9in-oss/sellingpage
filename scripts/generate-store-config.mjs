@@ -71,6 +71,7 @@ export async function generateStoreConfig({ storeId, appId, adminToken, encKey =
     // build-time VITE_ env for the store app; empty string = feature disabled.
     googleAnalyticsId: store.googleAnalyticsId ?? '',
     clarityId: store.clarityId ?? '',
+    metaPixelId: store.metaPixelId ?? '',
     customDomain: store.customDomain ?? '',
     // Raw sealed forms so a caller (e.g. GitHub Actions) can mask both.
     sealed: {

@@ -46,6 +46,7 @@ const _schema = i.schema({
       deployLog: i.string().optional(),
       deployStatus: i.string().optional(),
       googleAnalyticsId: i.string().optional(),
+      metaPixelId: i.string().optional(),
       instantAdminToken: i.string().optional(),
       instantAppId: i.string().optional(),
       lastDeployAt: i.date().optional(),

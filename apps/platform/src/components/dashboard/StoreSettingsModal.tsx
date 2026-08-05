@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label'
 export interface StoreAnalyticsInitial {
   googleAnalyticsId?: string
   clarityId?: string
+  metaPixelId?: string
   customDomain?: string
 }
 
@@ -39,6 +40,7 @@ const T = {
   analyticsHint: { ar: 'تُطبَّق عند النشر القادم للمتجر.', fr: 'Appliqué au prochain déploiement.', en: 'Applied on the next store deploy.' },
   gaId: { ar: 'معرّف Google Analytics', fr: 'ID Google Analytics', en: 'Google Analytics ID' },
   clarityId: { ar: 'معرّف Microsoft Clarity', fr: 'ID Microsoft Clarity', en: 'Microsoft Clarity ID' },
+  metaId: { ar: 'معرّف Meta Pixel', fr: 'ID Meta Pixel', en: 'Meta Pixel ID' },
   domain: { ar: 'النطاق المخصص', fr: 'Domaine personnalisé', en: 'Custom domain' },
   domainHint: { ar: 'أضِف النطاق أيضاً في Cloudflare Pages للمتجر.', fr: 'Ajoutez aussi le domaine dans Cloudflare Pages.', en: 'Also add the domain in the store\'s Cloudflare Pages project.' },
   save: { ar: 'حفظ', fr: 'Enregistrer', en: 'Save' },
@@ -53,6 +55,7 @@ export function StoreSettingsModal({ storeId, storeName, initialValues, initialA
   const [error, setError] = useState<string | null>(null)
   const [ga, setGa] = useState(initialAnalytics?.googleAnalyticsId ?? '')
   const [clarity, setClarity] = useState(initialAnalytics?.clarityId ?? '')
+  const [metaPixel, setMetaPixel] = useState(initialAnalytics?.metaPixelId ?? '')
   const [domain, setDomain] = useState(initialAnalytics?.customDomain ?? '')
   const [savingA, setSavingA] = useState(false)
   const [savedA, setSavedA] = useState(false)
@@ -65,6 +68,7 @@ export function StoreSettingsModal({ storeId, storeName, initialValues, initialA
         db.tx.stores[storeId].update({
           googleAnalyticsId: ga.trim(),
           clarityId: clarity.trim(),
+          metaPixelId: metaPixel.trim(),
           customDomain: domain.trim(),
         }),
       )
@@ -126,6 +130,10 @@ export function StoreSettingsModal({ storeId, storeName, initialValues, initialA
               <div className="space-y-1">
                 <Label className="text-xs font-bold">{t(T.clarityId)}</Label>
                 <Input value={clarity} onChange={(e) => setClarity(e.target.value)} placeholder="xxxxxxxxxx" dir="ltr" className="text-sm font-mono" />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs font-bold">{t(T.metaId)}</Label>
+                <Input value={metaPixel} onChange={(e) => setMetaPixel(e.target.value)} placeholder="123456789012345" dir="ltr" className="text-sm font-mono" />
               </div>
               <div className="space-y-1">
                 <Label className="text-xs font-bold">{t(T.domain)}</Label>

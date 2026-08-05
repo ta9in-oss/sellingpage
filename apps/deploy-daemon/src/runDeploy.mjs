@@ -80,6 +80,7 @@ export async function runDeploy(storeId, { log = console.log } = {}) {
         // Per-store analytics — the store app reads these at build time.
         VITE_GOOGLE_ANALYTICS: cfg.googleAnalyticsId ?? '',
         VITE_MICROSOFT_CLARITY_ID: cfg.clarityId ?? '',
+        VITE_META_PIXEL_ID: cfg.metaPixelId ?? '',
       },
     }, say, scrub)
 

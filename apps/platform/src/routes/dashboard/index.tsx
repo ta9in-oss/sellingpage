@@ -304,6 +304,7 @@ interface StoreSettingsData {
   instantAdminToken?: string
   googleAnalyticsId?: string
   clarityId?: string
+  metaPixelId?: string
   customDomain?: string
 }
 
@@ -404,6 +405,7 @@ function StoresDashboard({
                       instantAdminToken: store.instantAdminToken,
                       googleAnalyticsId: store.googleAnalyticsId,
                       clarityId: store.clarityId,
+                      metaPixelId: store.metaPixelId,
                       customDomain: store.customDomain,
                     })
                   }
@@ -432,6 +434,7 @@ function StoresDashboard({
           initialAnalytics={{
             googleAnalyticsId: settingsStore.googleAnalyticsId,
             clarityId: settingsStore.clarityId,
+            metaPixelId: settingsStore.metaPixelId,
             customDomain: settingsStore.customDomain,
           }}
           onClose={() => setSettingsStore(null)}
