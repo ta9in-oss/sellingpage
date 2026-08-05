@@ -33,6 +33,40 @@ export const KIND_LABEL: Record<ReleaseKind, Tri> = {
 
 export const RELEASES: Release[] = [
   {
+    date: '2026-08-06',
+    title: {
+      ar: 'تحكّم في الكمية المتوفرة، وحدّد مدير المتجر',
+      fr: 'Gérez le stock disponible et désignez l\'administrateur',
+      en: 'Manage available stock, and set your store admin',
+    },
+    items: [
+      {
+        kind: 'new',
+        text: {
+          ar: 'يمكنك الآن ضبط عدد الوحدات المتوفرة من لوحة تحكّم متجرك، وتنقص تلقائياً مع كل طلب.',
+          fr: 'Définissez le nombre d\'unités disponibles depuis le tableau de bord de votre boutique ; il diminue automatiquement à chaque commande.',
+          en: 'Set how many units are available straight from your store dashboard — it goes down automatically with each order.',
+        },
+      },
+      {
+        kind: 'new',
+        text: {
+          ar: 'أضف بريد مدير المتجر من المحرر — هذا البريد هو من يدخل لوحة تحكّم المتجر ويتابع الطلبات.',
+          fr: 'Ajoutez l\'e-mail de l\'administrateur depuis l\'éditeur — c\'est lui qui accède au tableau de bord et suit les commandes.',
+          en: 'Add your store admin email from the builder — that address is the one that signs in to the store dashboard and manages orders.',
+        },
+      },
+      {
+        kind: 'fixed',
+        text: {
+          ar: 'سعر المنتج في صفحة الطلب صار يأخذ السعر الذي حدّدته أنت بدل سعر ثابت.',
+          fr: 'Le prix affiché dans le formulaire de commande reprend votre prix au lieu d\'un montant fixe.',
+          en: 'The price in the order form now uses the price you set instead of a fixed amount.',
+        },
+      },
+    ],
+  },
+  {
     date: '2026-08-05',
     title: {
       ar: 'صور أفضل، ألوان تعمل فعلاً، وإحصائيات لمتجرك',

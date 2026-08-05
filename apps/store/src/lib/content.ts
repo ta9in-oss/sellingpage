@@ -4,6 +4,13 @@ import type { SiteContent } from '@/types/content.types';
 /**
  * Get all site content
  */
+/**
+ * The product number every store used before the number came from site.config.
+ * Kept as a lookup fallback so stores deployed earlier keep their existing
+ * product row (and its stock) instead of silently starting a second one.
+ */
+export const LEGACY_PRODUCT_NUMBER = 'PROD-234567-A1B2C3'
+
 export function getContent(): SiteContent {
     return contentData as SiteContent;
 }
