@@ -61,6 +61,57 @@ const T = {
   mobileSettings: { ar: 'الإعدادات', fr: 'Paramètres', en: 'Settings' },
   storeLocale: { ar: 'لغة المتجر', fr: 'Langue de la boutique', en: 'Store language' },
   storeLocaleHint: { ar: 'يحدد اتجاه النص في المتجر (يمين→يسار للعربية)', fr: 'Détermine la direction du texte (droite-gauche pour l\'arabe)', en: 'Sets text direction in the store (RTL for Arabic)' },
+  adminEmail: { ar: 'بريد مدير المتجر', fr: 'E-mail de l\'administrateur', en: 'Store admin email' },
+  adminEmailHint: {
+    ar: 'هذا البريد هو من يتحكّم في المتجر: يدخل إلى لوحة تحكّم المتجر، يتابع الطلبات، ويضبط الكمية المتوفرة. يُضاف تلقائياً عند النشر.',
+    fr: 'Cet e-mail contrôle la boutique : il accède au tableau de bord, suit les commandes et fixe le stock disponible. Ajouté automatiquement au déploiement.',
+    en: 'This email controls the store: it signs in to the store dashboard, manages orders, and sets available stock. Added automatically on publish.',
+  },
+  adminEmailPlaceholder: { ar: 'admin@example.com', fr: 'admin@example.com', en: 'admin@example.com' },
+  adminEmailInvalid: { ar: 'بريد إلكتروني غير صالح', fr: 'E-mail invalide', en: 'Invalid email address' },
+}
+
+/**
+ * Store admin email. Lives on the STORE row (not the config blob) because the
+ * deploy step reads `store.adminEmail` to seed the merchant's InstantDB `users`
+ * table — the same value the deploy wizard's admin step writes.
+ */
+function AdminEmailField() {
+  const { storeId } = useBuilderStore()
+  const { t } = useLang()
+  const { data } = db.useQuery(storeId ? { stores: { $: { where: { id: storeId } } } } : null)
+  const saved = ((data?.stores?.[0] as { adminEmail?: string } | undefined)?.adminEmail) ?? ''
+  const [value, setValue] = useState<string | null>(null)
+  const [error, setError] = useState(false)
+  const current = value ?? saved
+
+  const commit = async () => {
+    const email = current.trim().toLowerCase()
+    if (!storeId) return
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError(true); return }
+    setError(false)
+    if (email === saved) return
+    await db.transact(db.tx.stores[storeId].update({ adminEmail: email }))
+  }
+
+  if (!storeId) return null
+  return (
+    <div className="space-y-1">
+      <Label className="text-xs">{t(T.adminEmail)}</Label>
+      <Input
+        type="email"
+        value={current}
+        onChange={(e) => { setValue(e.target.value); setError(false) }}
+        onBlur={commit}
+        onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur() }}
+        placeholder={t(T.adminEmailPlaceholder)}
+        dir="ltr"
+        className="text-sm font-mono"
+      />
+      {error && <p className="text-[11px] text-red-500">{t(T.adminEmailInvalid)}</p>}
+      <p className="text-[11px] text-zinc-500 leading-relaxed">{t(T.adminEmailHint)}</p>
+    </div>
+  )
 }
 
 function SitePanel() {
@@ -100,6 +151,8 @@ function SitePanel() {
           onChange={(url) => updateMeta({ logo: url })}
         />
       </div>
+
+      <AdminEmailField />
 
       <div className="space-y-1">
         <Label className="text-xs">{t(T.tabTitle)}</Label>

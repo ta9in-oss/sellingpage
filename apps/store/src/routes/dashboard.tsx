@@ -18,6 +18,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { db } from '@/lib/instantdb';
+import { siteConfig } from '@/config/site.config';
+import { LEGACY_PRODUCT_NUMBER } from '@/lib/content';
 import { id } from "@instantdb/react";
 import type { AppSchema } from '@/instant.schema';
 
@@ -247,8 +249,54 @@ const Dashboard = ({ user, onSignOut }) => {
     })
     .reduce((sum, order) => sum + (order.quantity || 0), 0);
   
-  // current stock 
-  const availableStock = products[0]?.stock || 0;
+  // Resolve the same product row the storefront reads, so the stock shown here
+  // and the stock buyers see are always the same record.
+  const storeProduct =
+    products.find((p) => p.product_number === siteConfig.defaultProduct.productNumber) ??
+    products.find((p) => p.product_number === LEGACY_PRODUCT_NUMBER) ??
+    products[0];
+
+  // current stock
+  const availableStock = storeProduct?.stock || 0;
+
+  // Merchant-editable stock. Seeded from the DB and re-synced whenever the stored
+  // value changes underneath us (an order confirmed in another tab, say), except
+  // while the merchant is mid-edit.
+  const [stockInput, setStockInput] = useState<string>('');
+  const [savingStock, setSavingStock] = useState(false);
+  useEffect(() => {
+    setStockInput(String(availableStock));
+  }, [availableStock]);
+
+  const saveStock = async () => {
+    const next = Math.max(0, Math.floor(Number(stockInput)));
+    if (!Number.isFinite(next)) return;
+    setSavingStock(true);
+    try {
+      const existing = storeProduct;
+      if (existing) {
+        await db.transact(db.tx.products[existing.id].update({ stock: next, updated_at: new Date() }));
+      } else {
+        // No product row yet (nobody has ordered) — create it so stock is set.
+        await db.transact(
+          db.tx.products[id()].update({
+            product_number: siteConfig.defaultProduct.productNumber,
+            name: siteConfig.site.name,
+            price: 0,
+            is_available: true,
+            stock: next,
+            created_at: new Date(),
+            updated_at: new Date(),
+          })
+        );
+      }
+      showAlert('success', 'تم الحفظ', `الكمية المتوفرة الآن ${next} وحدة`);
+    } catch (e) {
+      showAlert('error', 'تعذّر الحفظ', (e as Error)?.message ?? 'حاول مجدداً');
+    } finally {
+      setSavingStock(false);
+    }
+  };
 
   // Check if current user is admin (can manage users)
   const currentUser = users.find(u => u.email === user.email);
@@ -385,8 +433,8 @@ const Dashboard = ({ user, onSignOut }) => {
       );
 
       // Update stock based on status change
-      if (products.length > 0) {
-        const currentStock = products[0].stock || 0;
+      if (storeProduct) {
+        const currentStock = storeProduct.stock || 0;
         const orderQuantity = order.quantity || 0;
         let newStock = currentStock;
 
@@ -402,7 +450,7 @@ const Dashboard = ({ user, onSignOut }) => {
         if (newStock !== currentStock) {
           try {
             await db.transact(
-              db.tx.products[products[0].id].update({
+              db.tx.products[storeProduct.id].update({
                 stock: Math.max(0, newStock) // Ensure stock doesn't be negative
               })
             );
@@ -587,6 +635,36 @@ const Dashboard = ({ user, onSignOut }) => {
             </div>
           </div>
         )}
+
+        {/* Stock management — the merchant sets how many units are available.
+            Orders still adjust it automatically as they are confirmed/cancelled. */}
+        <div className="bg-white border-2 border-black p-6 mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-end gap-4 justify-between">
+            <div>
+              <h2 className="font-black text-lg mb-1">الكمية المتوفرة</h2>
+              <p className="text-sm text-gray-600">
+                حدّد عدد الوحدات المتبقية من منتجك. تظهر للزبون في صفحة الطلب، وتنقص تلقائياً مع كل طلب مؤكَّد.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <Input
+                type="number"
+                min={0}
+                value={stockInput}
+                onChange={(e) => setStockInput(e.target.value)}
+                className="w-28 border-2 border-black rounded-none font-black text-lg text-center"
+                dir="ltr"
+              />
+              <Button
+                onClick={saveStock}
+                disabled={savingStock || stockInput === '' || Number(stockInput) === availableStock}
+                className="bg-yellow-400 text-black border-2 border-black rounded-none font-black hover:bg-yellow-300 disabled:opacity-50"
+              >
+                {savingStock ? 'جارٍ الحفظ...' : 'حفظ الكمية'}
+              </Button>
+            </div>
+          </div>
+        </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">

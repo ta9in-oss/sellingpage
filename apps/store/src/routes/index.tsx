@@ -7,7 +7,7 @@ import { useOrderNotifications } from "@/hooks/useOrderNotifications";
 import { db } from "@/lib/instantdb";
 import { useGoogleLogin } from "@react-oauth/google";
 
-import { getContent } from "@/lib/content";
+import { getContent, LEGACY_PRODUCT_NUMBER } from "@/lib/content";
 import {
   HeroSection,
   SocialProofBar,
@@ -37,7 +37,8 @@ function Home() {
   const [selectedWilaya, setSelectedWilaya] = useState("");
   const [selectedCommune, setSelectedCommune] = useState("");
   const [orderError, setOrderError] = useState("");
-  const price = 2500;
+  // Price comes from the merchant's config (hero price tag), not a constant.
+  const price = Number(getContent().hero.priceTag.amount) || 0;
   const { isSubmitting, submitOrder } = useOrderSubmission();
   const { sendOrderNotification } = useOrderNotifications();
 
@@ -48,10 +49,15 @@ function Home() {
 
   const activePaymentMethod = siteConfig.payment.activeMethod;
 
+  // Stock lives on the store's own product row and is managed from /dashboard.
+  // Match this store's product number, falling back to the legacy hardcoded one
+  // (and then to whatever single product exists) so older stores keep their stock.
   const { data: productsData } = db.useQuery({ products: {} });
-  const defaultProduct = productsData?.products?.find(
-    (p) => p.product_number === "PROD-234567-A1B2C3"
-  ) || { stock: 0 };
+  const allProducts = productsData?.products ?? [];
+  const defaultProduct =
+    allProducts.find((p) => p.product_number === siteConfig.defaultProduct.productNumber) ??
+    allProducts.find((p) => p.product_number === LEGACY_PRODUCT_NUMBER) ??
+    allProducts[0] ?? { stock: 0 };
   const totalStock = (defaultProduct as any).stock || 0;
 
   const scrollToSection = (sectionId: string) => {

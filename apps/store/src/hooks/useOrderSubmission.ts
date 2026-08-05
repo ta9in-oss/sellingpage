@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { id, tx } from '@instantdb/react';
 import { db } from '@/lib/instantdb';
+import { siteConfig } from '@/config/site.config';
+import { getContent, LEGACY_PRODUCT_NUMBER } from '@/lib/content';
 import { createChargilyCheckout } from '@/server/createChargilyCheckout';
 
 interface OrderFormData {
@@ -35,28 +37,35 @@ export function useOrderSubmission(): UseOrderSubmissionReturn {
   };
 
   const ensureDefaultProduct = async (): Promise<string> => {
-    // Check if default product exists
-    let defaultProduct = products.find(p => p.product_number === 'PROD-234567-A1B2C3');
-    
+    // This store's product, then the legacy row (stores deployed before the
+    // number came from config), then whatever single product exists.
+    const productNumber = siteConfig.defaultProduct.productNumber;
+    const defaultProduct =
+      products.find(p => p.product_number === productNumber) ??
+      products.find(p => p.product_number === LEGACY_PRODUCT_NUMBER) ??
+      products[0];
+
     if (!defaultProduct) {
-      // Create default product
+      // First order on a store whose stock was never set — create the row from
+      // the merchant's own config rather than the old hardcoded sample product.
+      const content = getContent();
       const productId = id();
       await db.transact([
         tx.products[productId].update({
-          product_number: 'PROD-234567-A1B2C3',
-          name: 'صاكادو',
-          description: 'صاكادو يد وحدة: يرفد بزاف ويبان صغير. خفيف، مريح، يخدم القراية والسبور والخرجات',
-          price: 2500,
-          image: 'https://images.modeherz.de/item/images/309629/full/PIQUADRO-Blue-Square-Revamp-Mono-Sling-Bag-Verde---Nero-309629.jpg',
+          product_number: productNumber,
+          name: siteConfig.site.name,
+          description: siteConfig.site.description ?? '',
+          price: Number(content.hero.priceTag.amount) || 0,
+          image: content.hero.image ?? '',
           is_available: true,
-          stock: 100,
+          stock: 0,
           created_at: new Date(),
           updated_at: new Date(),
         })
       ]);
       return productId;
     }
-    
+
     return defaultProduct.id;
   };
 

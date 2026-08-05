@@ -15,6 +15,16 @@ Format: `[version/commit] YYYY-MM-DD — description`
 
 ---
 
+## [Unreleased] 2026-08-06 — Store admin email in the builder
+
+**feat: admin email is set where the store is built**
+- `BuilderLayout` site panel gained `AdminEmailField`, writing `store.adminEmail` (the row the deploy step reads to seed the merchant's InstantDB `users` table). Copy states plainly that this address controls the store dashboard, orders and stock. The deploy wizard's `SetupAdminStep` still works and shares the same field.
+
+**feat: stock is merchant-managed (store side)**
+- see `apps/store/CHANGELOG.md` — the store dashboard can now set available units, and storefront/orders/dashboard all resolve the same product row.
+
+---
+
 ## [7149a06] 2026-08-05 — Builder image pipeline, theming, per-store analytics
 
 **fix: image uploads were silently failing everywhere**

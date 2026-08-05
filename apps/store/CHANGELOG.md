@@ -19,6 +19,14 @@ Changes specific to the store selling page app (`apps/store`).
 
 ---
 
+## [Unreleased] 2026-08-06 — Merchant-managed stock, config-driven product
+
+- **Stock is editable from the store dashboard.** Previously `stock` only moved when an order was confirmed or cancelled, with no way to set it; the dashboard now has a "الكمية المتوفرة" control that writes the product row (creating it if the store has never taken an order).
+- **One product row, resolved consistently.** Storefront, order submission and dashboard all resolve the product as `siteConfig.defaultProduct.productNumber` → `LEGACY_PRODUCT_NUMBER` → first product, so the stock the merchant edits is the stock buyers see. Stores deployed before the number came from config keep their existing row.
+- **Price comes from the merchant's config.** `routes/index.tsx` hardcoded `price = 2500`; it now reads the hero price tag. A newly created product row also takes its name/description/price/image from the store's own config instead of the old sample backpack.
+
+---
+
 ## [7149a06] 2026-08-05 — Permanent images, whole-store direction, themed sections
 
 - **Images are now local assets.** Store configs referenced InstantDB `$files` urls, which are signed and expire — deployed stores lost every image once the signature lapsed. The deploy step downloads each image into `public/assets/uploads` (content-hashed) and rewrites the config, so the built store serves its own files.
