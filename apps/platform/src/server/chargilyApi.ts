@@ -9,6 +9,27 @@
  * In production (CF Workers), native fetch works fine — no ALPN mismatch.
  */
 
+/**
+ * True only in the Cloudflare Workers runtime.
+ *
+ * This must NOT be inferred from `process.versions.node`: the worker runs with
+ * the `nodejs_compat` flag, which polyfills `process` — so that check reports
+ * "Node" in production, sends us down the node:https path, and unenv throws
+ * "[unenv] https.request is not implemented yet!". `WebSocketPair` is a
+ * Workers-only global, and Workers also identify themselves via navigator.
+ */
+function isCloudflareWorkers(): boolean {
+  return (
+    typeof (globalThis as { WebSocketPair?: unknown }).WebSocketPair !== 'undefined' ||
+    (typeof navigator !== 'undefined' && navigator.userAgent === 'Cloudflare-Workers')
+  )
+}
+
+/** Real Node.js (local dev), where the ALPN workaround below is needed. */
+function isNodeRuntime(): boolean {
+  return !isCloudflareWorkers() && typeof process !== 'undefined' && !!process.versions?.node
+}
+
 interface ChargilyCustomer {
   id: string
   email: string
@@ -36,8 +57,8 @@ async function chargilyRequest<T>(
   const url = `${baseUrl}${endpoint}`
   const data = JSON.stringify(body)
 
-  // CF Workers / edge: no 'process' — use native fetch (works fine there)
-  if (typeof process === 'undefined' || !process.versions?.node) {
+  // Anywhere that is not real Node (Workers, edge) — native fetch is fine.
+  if (!isNodeRuntime()) {
     const res = await fetch(url, {
       method: 'POST',
       headers: {
@@ -69,8 +90,9 @@ async function chargilyRequest<T>(
           'Content-Length': Buffer.byteLength(data),
           'User-Agent': 'Mozilla/5.0 7aba-store/1.0',
         },
+        // Not in @types/node's RequestOptions, but honoured by tls.connect underneath.
         ALPNProtocols: ['http/1.1'],
-      },
+      } as import('node:https').RequestOptions,
       (res) => {
         let responseData = ''
         res.on('data', (chunk) => (responseData += chunk))
@@ -129,10 +151,13 @@ export async function getChargilyCheckout(
   const baseUrl = getChargilyBaseUrl(secretKey)
   const url = `${baseUrl}/checkouts/${checkoutId}`
 
-  if (typeof process === 'undefined' || !process.versions?.node) {
+  if (!isNodeRuntime()) {
     const res = await fetch(url, {
       headers: { Authorization: `Bearer ${secretKey}` },
     })
+    if (!res.ok) {
+      throw new Error(`Chargily ${res.status}: ${(await res.text()).slice(0, 200)}`)
+    }
     return res.json() as Promise<{ id: string; status: string }>
   }
 
@@ -150,8 +175,9 @@ export async function getChargilyCheckout(
           Authorization: `Bearer ${secretKey}`,
           'User-Agent': 'Mozilla/5.0 7aba-store/1.0',
         },
+        // Not in @types/node's RequestOptions, but honoured by tls.connect underneath.
         ALPNProtocols: ['http/1.1'],
-      },
+      } as import('node:https').RequestOptions,
       (res) => {
         let responseData = ''
         res.on('data', (chunk) => (responseData += chunk))
