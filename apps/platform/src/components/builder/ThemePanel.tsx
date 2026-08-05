@@ -1,9 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useBuilderStore } from '@/hooks/useBuilderStore'
-import { presets } from '@7aba/store-ui'
 import type { Theme } from '@7aba/store-ui'
-import { cn } from '@/lib/utils'
-import { Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
@@ -12,6 +9,7 @@ import { useLang } from '@/hooks/useLang'
 
 const T = {
   themeSettings: { ar: 'إعدادات القالب', fr: 'Paramètres du thème', en: 'Theme settings' },
+  colorsHint: { ar: 'غيّر ألوان متجرك — تُطبَّق مباشرة على المعاينة', fr: 'Changez les couleurs — appliquées en direct', en: 'Change your store colors — applied live to the preview' },
   colors: { ar: 'الألوان', fr: 'Couleurs', en: 'Colors' },
   fonts: { ar: 'الخطوط', fr: 'Polices', en: 'Fonts' },
   bodyFont: { ar: 'خط النص', fr: 'Police du texte', en: 'Body font' },
@@ -37,12 +35,6 @@ export function ThemePanel() {
   const { theme } = config
   const { t } = useLang()
 
-  const PRESET_LABELS: Record<string, string> = {
-    brutalist: t(T.presetBrutalist),
-    clean: t(T.presetClean),
-    dark: t(T.presetDark),
-  }
-
   const COLOR_LABELS: Array<{ key: keyof Theme['colors']; label: string }> = [
     { key: 'primary', label: t(T.colorPrimary) },
     { key: 'accent', label: t(T.colorAccent) },
@@ -64,13 +56,6 @@ export function ThemePanel() {
     loadGoogleFont(theme.typography.fontFamily)
     if (theme.typography.headingFont) loadGoogleFont(theme.typography.headingFont)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
-  const applyPreset = (preset: Theme) => {
-    updateTheme(preset)
-    setLocalColors(preset.colors)
-    loadGoogleFont(preset.typography.fontFamily)
-    if (preset.typography.headingFont) loadGoogleFont(preset.typography.headingFont)
-  }
 
   // Only update Zustand (which re-renders the preview) when user releases the picker
   const commitColor = useCallback((key: keyof Theme['colors'], value: string) => {
@@ -98,35 +83,10 @@ export function ThemePanel() {
 
   return (
     <div className="p-4 space-y-5" dir="rtl">
-      {/* Preset cards */}
       <div>
-        <p className="text-xs font-bold text-zinc-500 uppercase tracking-wide mb-3">{t(T.themeSettings)}</p>
-        <div className="grid grid-cols-3 gap-2">
-          {presets.map((preset) => (
-            <button
-              key={preset.name}
-              onClick={() => applyPreset(preset)}
-              className={cn(
-                'relative flex flex-col items-center gap-1 p-2 rounded-lg border text-xs font-medium transition-colors',
-                theme.name === preset.name
-                  ? 'border-zinc-900 bg-zinc-900 text-white'
-                  : 'border-zinc-200 hover:border-zinc-400 text-zinc-700'
-              )}
-            >
-              {theme.name === preset.name && (
-                <Check size={10} className="absolute top-1 end-1" />
-              )}
-              <div
-                className="w-full h-8 rounded border"
-                style={{ background: preset.colors.background, borderColor: preset.colors.border }}
-              />
-              {PRESET_LABELS[preset.name] ?? preset.name}
-            </button>
-          ))}
-        </div>
+        <p className="text-xs font-bold text-zinc-500 uppercase tracking-wide mb-1">{t(T.themeSettings)}</p>
+        <p className="text-[11px] text-zinc-400">{t(T.colorsHint)}</p>
       </div>
-
-      <Separator />
 
       {/* Color overrides — real color picker */}
       <div>

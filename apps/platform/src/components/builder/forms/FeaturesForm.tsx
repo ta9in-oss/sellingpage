@@ -5,11 +5,13 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
+import { ImagePicker } from '../ImagePicker'
 
 const T = {
   features: { ar: 'المميزات', fr: 'Fonctionnalités', en: 'Features' },
   feature: { ar: 'ميزة', fr: 'Fonctionnalité', en: 'Feature' },
-  icon: { ar: 'الأيقونة (رمز تعبيري)', fr: 'Icône (emoji)', en: 'Icon (emoji)' },
+  icon: { ar: 'الأيقونة (رمز تعبيري) — تُستخدم إذا لم توجد صورة', fr: 'Icône (emoji) — utilisée sans image', en: 'Icon (emoji) — used when no picture' },
+  picture: { ar: 'صورة (اختياري)', fr: 'Image (optionnel)', en: 'Picture (optional)' },
   title: { ar: 'العنوان', fr: 'Titre', en: 'Title' },
   description: { ar: 'الوصف', fr: 'Description', en: 'Description' },
   addFeature: { ar: 'إضافة ميزة', fr: 'Ajouter une fonctionnalité', en: 'Add feature' },
@@ -44,6 +46,14 @@ export function FeaturesForm() {
             <Button variant="ghost" size="sm" onClick={() => update(items.filter((_, i) => i !== index))} className="text-destructive h-7 w-7 p-0" aria-label={t(T.delete)}>
               <Trash2 size={14} />
             </Button>
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs">{t(T.picture)}</Label>
+            <ImagePicker
+              mode="single"
+              value={item.image ?? ''}
+              onChange={(url) => update(items.map((it, i) => i === index ? { ...it, image: url || undefined } : it))}
+            />
           </div>
           <div className="space-y-1.5">
             <Label className="text-xs">{t(T.icon)}</Label>

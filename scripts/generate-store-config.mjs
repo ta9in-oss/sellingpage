@@ -67,6 +67,11 @@ export async function generateStoreConfig({ storeId, appId, adminToken, encKey =
     instantAppId: store.instantAppId ?? '',
     instantAdminToken,
     chargilyApiKey,
+    // Non-secret per-store analytics + domain (plain store attrs). Injected as
+    // build-time VITE_ env for the store app; empty string = feature disabled.
+    googleAnalyticsId: store.googleAnalyticsId ?? '',
+    clarityId: store.clarityId ?? '',
+    customDomain: store.customDomain ?? '',
     // Raw sealed forms so a caller (e.g. GitHub Actions) can mask both.
     sealed: {
       cfApiToken: store.cfApiToken ?? '',

@@ -31,9 +31,9 @@ export function Navbar() {
           <a href="/#pricing" className="text-sm font-bold text-black hover:underline transition-colors">
             {t(T.pricing)}
           </a>
-          <Link to="/demo" className="text-sm font-bold text-black hover:underline transition-colors">
+          <a href="https://demo.7aba.app" target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-black hover:underline transition-colors">
             {t(T.demo)}
-          </Link>
+          </a>
         </nav>
 
         {/* Right actions */}
