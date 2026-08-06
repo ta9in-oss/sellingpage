@@ -8,6 +8,7 @@
  *   4. Authed + subscribed + onboarded → show StoresDashboard
  */
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { privateHead } from '@/lib/seo'
 import React, { useState, useEffect } from 'react'
 import { db } from '@/lib/instantdb'
 import { cn } from '@/lib/utils'
@@ -36,6 +37,7 @@ import {
 } from 'lucide-react'
 
 export const Route = createFileRoute('/dashboard/')({
+  head: () => privateHead('لوحة التحكم | 7aba.app'),
   validateSearch: (search): { payment?: string; tier?: string; checkout_id?: string; plan?: string } => ({
     payment: search.payment as string | undefined,
     tier: search.tier as string | undefined,

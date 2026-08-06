@@ -54,7 +54,12 @@ export const Route = createRootRoute({
 
 function RootComponent() {
   return (
-    <html className="dark" suppressHydrationWarning>
+    // lang/dir are set here rather than only in LangProvider's effect: the
+    // effect runs after hydration, so a crawler (and the first paint) saw an
+    // <html> with no language at all. Arabic is what the server always renders,
+    // and LangProvider overwrites both attributes client-side if the visitor
+    // has picked another language.
+    <html lang="ar" dir="rtl" className="dark" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>

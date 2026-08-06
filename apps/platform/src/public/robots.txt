@@ -1,30 +1,48 @@
+# `Disallow: /dashboard` already covers every path beneath it — a robots.txt
+# rule is a prefix match, not an exact one — so the per-page /dashboard/builder
+# and /dashboard/deploy lines were redundant. /auth was missing entirely: those
+# are OAuth callback URLs carrying one-time codes and there is no reason for a
+# crawler to fetch them.
+#
+# The named Googlebot/GPTBot groups exist to state intent explicitly, not to
+# change behaviour: a crawler obeys only the most specific group that matches
+# it, so each one has to repeat the whole ruleset rather than inherit from `*`.
+
 User-agent: *
 Allow: /
 Disallow: /dashboard
-Disallow: /dashboard/
-Disallow: /dashboard/builder
-Disallow: /dashboard/deploy
+Disallow: /auth
 Disallow: /api/
 
-# AI/LLM crawlers — allow indexing for GEO
+# AI/LLM crawlers — allowed on the public pages, for GEO
 User-agent: GPTBot
 Allow: /
 Disallow: /dashboard
+Disallow: /auth
+Disallow: /api/
 
 User-agent: ChatGPT-User
 Allow: /
 Disallow: /dashboard
+Disallow: /auth
+Disallow: /api/
 
 User-agent: Claude-Web
 Allow: /
 Disallow: /dashboard
+Disallow: /auth
+Disallow: /api/
 
 User-agent: PerplexityBot
 Allow: /
 Disallow: /dashboard
+Disallow: /auth
+Disallow: /api/
 
 User-agent: Googlebot
 Allow: /
 Disallow: /dashboard
+Disallow: /auth
+Disallow: /api/
 
 Sitemap: https://7aba.app/sitemap.xml

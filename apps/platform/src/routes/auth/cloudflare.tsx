@@ -1,8 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { privateHead } from '@/lib/seo'
 import { useEffect, useState } from 'react'
 import { exchangeCloudflareOAuth } from '@/server/exchangeCloudflareOAuth'
 
 export const Route = createFileRoute('/auth/cloudflare')({
+  head: () => privateHead('ربط Cloudflare | 7aba.app'),
   component: CloudflareCallbackPage,
 })
 

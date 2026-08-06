@@ -1,11 +1,13 @@
 // /dashboard/new-store — full-page store creation wizard
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { privateHead } from '@/lib/seo'
 import { useEffect } from 'react'
 import { db } from '@/lib/instantdb'
 import { Loader2 } from 'lucide-react'
 import { StoreCreationWizard } from '@/components/builder/StoreCreationWizard'
 
 export const Route = createFileRoute('/dashboard/new-store')({
+  head: () => privateHead('متجر جديد | 7aba.app'),
   component: NewStorePage,
 })
 

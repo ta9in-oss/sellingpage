@@ -1,9 +1,15 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { pageHead } from '@/lib/seo'
 import { useLang } from '@/hooks/useLang'
 import { Navbar } from '@/components/marketing/Navbar'
 import { Footer } from '@/components/marketing/Footer'
 
 export const Route = createFileRoute('/terms')({
+  head: () => pageHead({
+    title: 'الشروط والأحكام | 7aba.app',
+    description: 'شروط استخدام منصة 7aba.app لبناء المتاجر الجزائرية: الاشتراكات، الدفع، مسؤوليات التاجر وحقوق المنصة.',
+    path: '/terms',
+  }),
   component: TermsPage,
 })
 

@@ -1,8 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { privateHead } from '@/lib/seo'
 import { useEffect, useState } from 'react'
 import { exchangeInstantDBOAuth } from '@/server/exchangeInstantDBOAuth'
 
 export const Route = createFileRoute('/auth/instantdb')({
+  head: () => privateHead('ربط InstantDB | 7aba.app'),
   component: InstantDBCallbackPage,
 })
 

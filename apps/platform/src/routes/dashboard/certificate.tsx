@@ -6,6 +6,7 @@
 // below the fold on every single visit. The header keeps a permanent link back
 // here, so nothing is lost by moving it out.
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { privateHead } from '@/lib/seo'
 import { useEffect } from 'react'
 import { db } from '@/lib/instantdb'
 import { Loader2, ArrowLeft, ArrowRight, PartyPopper } from 'lucide-react'
@@ -13,6 +14,7 @@ import { useLang } from '@/hooks/useLang'
 import { FounderCertificate } from '@/components/dashboard/FounderCertificate'
 
 export const Route = createFileRoute('/dashboard/certificate')({
+  head: () => privateHead('شهادة العضو المؤسس | 7aba.app'),
   component: CertificatePage,
 })
 

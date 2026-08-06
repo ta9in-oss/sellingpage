@@ -1,9 +1,15 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { pageHead } from '@/lib/seo'
 import { useLang } from '@/hooks/useLang'
 import { Navbar } from '@/components/marketing/Navbar'
 import { Footer } from '@/components/marketing/Footer'
 
 export const Route = createFileRoute('/privacy')({
+  head: () => pageHead({
+    title: 'سياسة الخصوصية | 7aba.app',
+    description: 'كيف تجمع منصة 7aba.app بياناتك وتستعملها وتحميها، وما هي حقوقك كتاجر أو زائر.',
+    path: '/privacy',
+  }),
   component: PrivacyPage,
 })
 

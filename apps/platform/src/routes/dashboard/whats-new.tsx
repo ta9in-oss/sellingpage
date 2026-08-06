@@ -3,6 +3,7 @@
 // Subscribers only: the feed is part of what people pay for, so an account with
 // no tier is sent back to the dashboard (which shows the pricing gate).
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { privateHead } from '@/lib/seo'
 import { useEffect } from 'react'
 import { db } from '@/lib/instantdb'
 import { Loader2, ArrowLeft, ArrowRight, Sparkles } from 'lucide-react'
@@ -11,6 +12,7 @@ import { cn } from '@/lib/utils'
 import { RELEASES, KIND_LABEL, type ReleaseKind } from '@/config/releases'
 
 export const Route = createFileRoute('/dashboard/whats-new')({
+  head: () => privateHead('ما الجديد | 7aba.app'),
   component: WhatsNewPage,
 })
 

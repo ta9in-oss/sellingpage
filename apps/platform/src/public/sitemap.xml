@@ -1,26 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+<!--
+  Every public URL, and only public URLs. /dashboard and /auth are excluded on
+  purpose: they sit behind auth, carry no public content, and are both
+  disallowed in robots.txt and marked noindex.
+
+  No hreflang alternates. The site serves one HTML document per URL and switches
+  language client-side from localStorage, so `?lang=fr` returns byte-identical
+  Arabic HTML. Declaring it a French alternate described a translation that does
+  not exist — that earns hreflang errors in Search Console and spends crawl
+  requests re-fetching a page Google already has. Reintroduce alternates only
+  alongside real per-language URLs a crawler can actually see.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
   <!-- Homepage -->
   <url>
     <loc>https://7aba.app/</loc>
-    <lastmod>2026-03-24</lastmod>
+    <lastmod>2026-08-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
-    <xhtml:link rel="alternate" hreflang="ar" href="https://7aba.app/"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://7aba.app/?lang=fr"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://7aba.app/"/>
   </url>
 
   <!-- Demo store -->
   <url>
     <loc>https://7aba.app/demo</loc>
-    <lastmod>2026-03-24</lastmod>
+    <lastmod>2026-08-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="ar" href="https://7aba.app/demo"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://7aba.app/demo"/>
+  </url>
+
+  <!-- Legal -->
+  <url>
+    <loc>https://7aba.app/terms</loc>
+    <lastmod>2026-08-06</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+  <url>
+    <loc>https://7aba.app/privacy</loc>
+    <lastmod>2026-08-06</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
   </url>
 
 </urlset>

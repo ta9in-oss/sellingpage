@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { privateHead } from '@/lib/seo'
 import { useEffect } from 'react'
 import { BuilderLayout } from '@/components/builder/BuilderLayout'
 import { db } from '@/lib/instantdb'
@@ -9,6 +10,7 @@ import type { User } from '@instantdb/react'
 import { useBuilderStore, defaultConfig } from '@/hooks/useBuilderStore'
 
 export const Route = createFileRoute('/dashboard/builder')({
+  head: () => privateHead('منشئ المتجر | 7aba.app'),
   validateSearch: (search) => ({
     storeId: (search.storeId as string) || 'new',
     plan: (search.plan as string) || '',

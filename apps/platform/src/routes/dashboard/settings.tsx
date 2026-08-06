@@ -1,5 +1,6 @@
 // /dashboard/settings — account-level CF + InstantDB credentials (shared CredentialsForm)
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { privateHead } from '@/lib/seo'
 import { useEffect } from 'react'
 import { db } from '@/lib/instantdb'
 import { Loader2, ArrowLeft, ArrowRight, AlertCircle } from 'lucide-react'
@@ -7,6 +8,7 @@ import { useLang } from '@/hooks/useLang'
 import { CredentialsForm } from '@/components/settings/CredentialsForm'
 
 export const Route = createFileRoute('/dashboard/settings')({
+  head: () => privateHead('الإعدادات | 7aba.app'),
   validateSearch: (search) => ({
     from: (search.from as string) || undefined,
   }),

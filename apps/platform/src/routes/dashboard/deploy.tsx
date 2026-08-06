@@ -1,5 +1,6 @@
 // apps/platform/src/routes/dashboard/deploy.tsx
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { privateHead } from '@/lib/seo'
 import { useEffect } from 'react'
 import { DeployWizard } from '@/components/deploy/DeployWizard'
 import { db } from '@/lib/instantdb'
@@ -7,6 +8,7 @@ import { Loader2 } from 'lucide-react'
 import { useLang } from '@/hooks/useLang'
 
 export const Route = createFileRoute('/dashboard/deploy')({
+  head: () => privateHead('نشر المتجر | 7aba.app'),
   validateSearch: (search) => ({
     storeId: (search.storeId as string) || '',
     tier: ((search.tier as string) || 'starter') as 'starter' | 'pro' | 'agency',
