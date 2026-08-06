@@ -35,6 +35,8 @@ export interface Tier {
   priceDzd: number
   /** Formatted first-batch price for display. */
   priceLabel: Tri
+  /** Normal (post-batch) price, shown struck-through above the batch price. Display only. */
+  normalPriceLabel: Tri
   /** What the tier becomes after the deadline — drives the FOMO contrast (display only). */
   afterLabel: Tri
   checkout: CheckoutKind
@@ -49,6 +51,7 @@ export const TIERS: Tier[] = [
     name: { ar: 'المبتدئ', fr: 'Starter', en: 'Starter' },
     priceDzd: 10000,
     priceLabel: { ar: '10,000 دج', fr: '10 000 DZD', en: '10,000 DZD' },
+    normalPriceLabel: { ar: '20,000 دج', fr: '20 000 DZD', en: '20,000 DZD' },
     afterLabel: {
       ar: 'لأول 100 مشترك فقط بهذا السعر — بعدها السعر العادي',
       fr: 'Pour les 100 premiers seulement — ensuite le prix normal',
@@ -95,6 +98,7 @@ export const TIERS: Tier[] = [
     name: { ar: 'المستقل', fr: 'Freelancer', en: 'Freelancer' },
     priceDzd: 70000,
     priceLabel: { ar: '70,000 دج', fr: '70 000 DZD', en: '70,000 DZD' },
+    normalPriceLabel: { ar: '100,000 دج', fr: '100 000 DZD', en: '100,000 DZD' },
     afterLabel: {
       ar: 'لأول 10 مشتركين فقط بهذا السعر — بعدها السعر العادي',
       fr: 'Pour les 10 premiers seulement — ensuite le prix normal',
@@ -114,6 +118,7 @@ export const TIERS: Tier[] = [
     name: { ar: 'الوكالة', fr: 'Run One', en: 'Run One' },
     priceDzd: 1000000,
     priceLabel: { ar: '1,000,000 دج', fr: '1 000 000 DZD', en: '1,000,000 DZD' },
+    normalPriceLabel: { ar: '2,000,000 دج', fr: '2 000 000 DZD', en: '2,000,000 DZD' },
     afterLabel: {
       ar: 'لأول 3 مشتركين فقط بهذا السعر — بعدها السعر العادي',
       fr: 'Pour les 3 premiers seulement — ensuite le prix normal',

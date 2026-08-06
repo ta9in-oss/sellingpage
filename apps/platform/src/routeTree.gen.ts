@@ -18,6 +18,7 @@ import { Route as DashboardWhatsNewRouteImport } from './routes/dashboard/whats-
 import { Route as DashboardSettingsRouteImport } from './routes/dashboard/settings'
 import { Route as DashboardNewStoreRouteImport } from './routes/dashboard/new-store'
 import { Route as DashboardDeployRouteImport } from './routes/dashboard/deploy'
+import { Route as DashboardCertificateRouteImport } from './routes/dashboard/certificate'
 import { Route as DashboardBuilderRouteImport } from './routes/dashboard/builder'
 import { Route as AuthInstantdbRouteImport } from './routes/auth/instantdb'
 import { Route as AuthCloudflareRouteImport } from './routes/auth/cloudflare'
@@ -67,6 +68,11 @@ const DashboardDeployRoute = DashboardDeployRouteImport.update({
   path: '/dashboard/deploy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardCertificateRoute = DashboardCertificateRouteImport.update({
+  id: '/dashboard/certificate',
+  path: '/dashboard/certificate',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardBuilderRoute = DashboardBuilderRouteImport.update({
   id: '/dashboard/builder',
   path: '/dashboard/builder',
@@ -91,6 +97,7 @@ export interface FileRoutesByFullPath {
   '/auth/cloudflare': typeof AuthCloudflareRoute
   '/auth/instantdb': typeof AuthInstantdbRoute
   '/dashboard/builder': typeof DashboardBuilderRoute
+  '/dashboard/certificate': typeof DashboardCertificateRoute
   '/dashboard/deploy': typeof DashboardDeployRoute
   '/dashboard/new-store': typeof DashboardNewStoreRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
@@ -105,6 +112,7 @@ export interface FileRoutesByTo {
   '/auth/cloudflare': typeof AuthCloudflareRoute
   '/auth/instantdb': typeof AuthInstantdbRoute
   '/dashboard/builder': typeof DashboardBuilderRoute
+  '/dashboard/certificate': typeof DashboardCertificateRoute
   '/dashboard/deploy': typeof DashboardDeployRoute
   '/dashboard/new-store': typeof DashboardNewStoreRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
@@ -120,6 +128,7 @@ export interface FileRoutesById {
   '/auth/cloudflare': typeof AuthCloudflareRoute
   '/auth/instantdb': typeof AuthInstantdbRoute
   '/dashboard/builder': typeof DashboardBuilderRoute
+  '/dashboard/certificate': typeof DashboardCertificateRoute
   '/dashboard/deploy': typeof DashboardDeployRoute
   '/dashboard/new-store': typeof DashboardNewStoreRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
@@ -136,6 +145,7 @@ export interface FileRouteTypes {
     | '/auth/cloudflare'
     | '/auth/instantdb'
     | '/dashboard/builder'
+    | '/dashboard/certificate'
     | '/dashboard/deploy'
     | '/dashboard/new-store'
     | '/dashboard/settings'
@@ -150,6 +160,7 @@ export interface FileRouteTypes {
     | '/auth/cloudflare'
     | '/auth/instantdb'
     | '/dashboard/builder'
+    | '/dashboard/certificate'
     | '/dashboard/deploy'
     | '/dashboard/new-store'
     | '/dashboard/settings'
@@ -164,6 +175,7 @@ export interface FileRouteTypes {
     | '/auth/cloudflare'
     | '/auth/instantdb'
     | '/dashboard/builder'
+    | '/dashboard/certificate'
     | '/dashboard/deploy'
     | '/dashboard/new-store'
     | '/dashboard/settings'
@@ -179,6 +191,7 @@ export interface RootRouteChildren {
   AuthCloudflareRoute: typeof AuthCloudflareRoute
   AuthInstantdbRoute: typeof AuthInstantdbRoute
   DashboardBuilderRoute: typeof DashboardBuilderRoute
+  DashboardCertificateRoute: typeof DashboardCertificateRoute
   DashboardDeployRoute: typeof DashboardDeployRoute
   DashboardNewStoreRoute: typeof DashboardNewStoreRoute
   DashboardSettingsRoute: typeof DashboardSettingsRoute
@@ -251,6 +264,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardDeployRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/certificate': {
+      id: '/dashboard/certificate'
+      path: '/dashboard/certificate'
+      fullPath: '/dashboard/certificate'
+      preLoaderRoute: typeof DashboardCertificateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard/builder': {
       id: '/dashboard/builder'
       path: '/dashboard/builder'
@@ -283,6 +303,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthCloudflareRoute: AuthCloudflareRoute,
   AuthInstantdbRoute: AuthInstantdbRoute,
   DashboardBuilderRoute: DashboardBuilderRoute,
+  DashboardCertificateRoute: DashboardCertificateRoute,
   DashboardDeployRoute: DashboardDeployRoute,
   DashboardNewStoreRoute: DashboardNewStoreRoute,
   DashboardSettingsRoute: DashboardSettingsRoute,

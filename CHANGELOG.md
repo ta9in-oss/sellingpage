@@ -1,16 +1,16 @@
-# Changelog — 7aba.store
+# Changelog — 7aba.app
 
 All notable changes to this project are documented here.  
 Format: `[version/commit] YYYY-MM-DD — description`
 
-> **Active HEAD:** `f111ec8` · **Live:** https://7aba.store · **Repo:** https://github.com/Ta9in/sellingpage
+> **Active HEAD:** `f111ec8` · **Live:** https://7aba.app · **Repo:** https://github.com/Ta9in/sellingpage
 
 ---
 
 ## [Unreleased] — Pending
 
 - [ ] Register CF OAuth app at dash.cloudflare.com/profile/developer-applications, set `VITE_CF_OAUTH_CLIENT_ID` + `CF_OAUTH_CLIENT_SECRET`
-- [ ] Set Chargily webhook URL in Chargily dashboard: `https://7aba.store/api/webhook/chargily`
+- [ ] Set Chargily webhook URL in Chargily dashboard: `https://7aba.app/api/webhook/chargily`
 - [ ] Set download URLs env vars when assets are ready: `DOWNLOAD_STORE_SOURCE_URL`, `DOWNLOAD_STORE_APP_URL`, `DOWNLOAD_PLATFORM_SOURCE_URL`
 
 ---
@@ -143,7 +143,7 @@ Format: `[version/commit] YYYY-MM-DD — description`
 - `apps/platform/src/components/auth/AuthModal.tsx`: Added `nonce` to Google OAuth `signInWithIdToken` for replay protection
 - `apps/platform/vite.config.ts`: `routeRules` for COOP headers (redundant but kept)
 - **Infrastructure**: `7aba-proxy` CF Worker updated to inject `Cross-Origin-Opener-Policy: unsafe-none` + `Cross-Origin-Embedder-Policy: unsafe-none` on all responses — Google OAuth popup unblocked
-- **Infrastructure**: InstantDB `google-web` OAuth client registered (`clientName: 'google-web'`) for app `b9227417-33f4-4c3d-9c88-612e094aff89`; authorized origins `7aba.store` + `localhost:3001`
+- **Infrastructure**: InstantDB `google-web` OAuth client registered (`clientName: 'google-web'`) for app `b9227417-33f4-4c3d-9c88-612e094aff89`; authorized origins `7aba.app` + `localhost:3001`
 
 ---
 
@@ -154,17 +154,17 @@ Format: `[version/commit] YYYY-MM-DD — description`
   - `CHARGILY_PLATFORM_SECRET_KEY` (Chargily test key)
   - `INSTANTDB_ADMIN_TOKEN` (InstantDB platform admin token)
   - `VITE_INSTANT_APP_ID` (platform DB app ID: `b9227417-...`)
-- Worker route `7aba.store/api/webhook/chargily` → `7aba-webhook` confirmed intact
+- Worker route `7aba.app/api/webhook/chargily` → `7aba-webhook` confirmed intact
 
 ---
 
 ## [4bfd766] 2026-03-26 — Domain routing + real CF deploy wizard
 
-**feat: 7aba.store domain wired, CF Pages deploy wizard uses real API**
+**feat: 7aba.app domain wired, CF Pages deploy wizard uses real API**
 
-- `7aba.store` + `www.7aba.store` → `7aba-platform` CF Pages project (custom domains, pending DNS)
-- `demo.7aba.store/*` → CF Worker `7aba-demo-redirect` → 301 to `7aba.store/demo`
-- `7aba.store/api/webhook/chargily` → CF Worker `7aba-webhook` (Chargily payment events)
+- `7aba.app` + `www.7aba.app` → `7aba-platform` CF Pages project (custom domains, pending DNS)
+- `demo.7aba.app/*` → CF Worker `7aba-demo-redirect` → 301 to `7aba.app/demo`
+- `7aba.app/api/webhook/chargily` → CF Worker `7aba-webhook` (Chargily payment events)
 - `ConnectServicesStep.tsx`: Added CF API Token field (stored in `stores.cfApiToken`)
 - New `src/server/deployStore.ts`:
   - Verifies merchant CF credentials
@@ -260,7 +260,7 @@ Format: `[version/commit] YYYY-MM-DD — description`
 **feat: consolidate to single app — demo store at /demo, drop separate store deploy**
 
 ### Architecture change
-- `apps/platform` is now the only deployed app at `7aba.store`
+- `apps/platform` is now the only deployed app at `7aba.app`
 - Demo store moved to `/demo` route within the platform app
 - `apps/store` becomes a standalone template used as reference for generated stores
 - Removed separate `apps/store` Cloudflare Pages deployment
@@ -272,7 +272,7 @@ Format: `[version/commit] YYYY-MM-DD — description`
 **feat: deploy infra, CF Pages, GH Actions, subscription system**
 
 - `.github/workflows/deploy.yml`: build + deploy `apps/platform` to Cloudflare Pages on push to `main`
-- Cloudflare Pages project: `7aba-platform` → `7aba.store` custom domain
+- Cloudflare Pages project: `7aba-platform` → `7aba.app` custom domain
 - Builder `PaymentPanel`: configure COD / Chargily per store (builder-only, not customer-facing)
 - `configGenerator.ts`: generates `site.config.ts` + `content.json` + `wrangler.toml` from `StoreConfig`
 - `useBuilderStore` (Zustand): added `payment` config block to builder state

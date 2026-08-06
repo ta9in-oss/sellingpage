@@ -1,6 +1,6 @@
 {
-  "name": "7aba.store — منصة المتاجر الجزائرية",
-  "short_name": "7aba.store",
+  "name": "7aba.app — منصة المتاجر الجزائرية",
+  "short_name": "7aba.app",
   "description": "منصة بناء المتاجر الإلكترونية للتجار الجزائريين",
   "start_url": "/",
   "display": "standalone",
@@ -33,7 +33,7 @@
       "src": "/demo-store-preview.png",
       "sizes": "1280x720",
       "type": "image/png",
-      "label": "متجر 7aba.store التجريبي"
+      "label": "متجر 7aba.app التجريبي"
     }
   ]
 }

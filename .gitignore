@@ -15,3 +15,7 @@ packages/*/node_modules/
 test-results/
 playwright-report/
 apps/store/src/config/*.e2e-bak
+
+# Local env overrides — these hold real secrets and must never be committed.
+.env.local
+.env.*.local

@@ -14,7 +14,7 @@ import { Footer } from '@/components/marketing/landing/Footer'
 
 const SITE_URL = 'https://7aba.app'
 
-const TITLE = '7aba.store | أطلق متجرك الإلكتروني في الجزائر | دفعة واحدة'
+const TITLE = '7aba.app | أطلق متجرك الإلكتروني في الجزائر | دفعة واحدة'
 const DESC =
   'منصة بناء المتاجر الإلكترونية للتجار الجزائريين. صمّم متجرك، انشره على Cloudflare Workers في دقيقتين، استقبل الطلبات مع إشعارات فورية. دفع نقدي وChargily Pay. ادفع مرة واحدة واكتسب كل شيء.'
 
@@ -25,7 +25,7 @@ const jsonLd = {
     {
       '@type': 'Organization',
       '@id': `${SITE_URL}/#organization`,
-      name: '7aba.store',
+      name: '7aba.app',
       alternateName: ['حبة ستور', 'Haba Store', '7aba store'],
       url: SITE_URL,
       logo: {
@@ -52,7 +52,7 @@ const jsonLd = {
       '@type': 'WebSite',
       '@id': `${SITE_URL}/#website`,
       url: SITE_URL,
-      name: '7aba.store',
+      name: '7aba.app',
       description: DESC,
       publisher: { '@id': `${SITE_URL}/#organization` },
       inLanguage: ['ar', 'fr'],
@@ -66,7 +66,7 @@ const jsonLd = {
     {
       '@type': 'SoftwareApplication',
       '@id': `${SITE_URL}/#product`,
-      name: '7aba.store',
+      name: '7aba.app',
       applicationCategory: 'BusinessApplication',
       applicationSubCategory: 'E-commerce Platform',
       operatingSystem: 'Web, iOS, Android',
@@ -120,11 +120,11 @@ const jsonLd = {
         geographicArea: { '@type': 'Country', name: 'Algeria' },
       },
     },
-    // HowTo schema — AEO: answers "how does 7aba.store work"
+    // HowTo schema — AEO: answers "how does 7aba.app work"
     {
       '@type': 'HowTo',
-      name: 'كيف تنشئ متجرك الإلكتروني مع 7aba.store',
-      description: 'أنشئ ونشر متجرك الإلكتروني في دقيقتين باستخدام منصة 7aba.store',
+      name: 'كيف تنشئ متجرك الإلكتروني مع 7aba.app',
+      description: 'أنشئ ونشر متجرك الإلكتروني في دقيقتين باستخدام منصة 7aba.app',
       totalTime: 'PT2M',
       tool: [{ '@type': 'HowToTool', name: 'Cloudflare Account' }, { '@type': 'HowToTool', name: 'InstantDB App' }],
       step: [
@@ -140,10 +140,10 @@ const jsonLd = {
       mainEntity: [
         {
           '@type': 'Question',
-          name: 'ما هي 7aba.store؟',
+          name: 'ما هي 7aba.app؟',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: '7aba.store هي منصة جزائرية لبناء المتاجر الإلكترونية. تسمح للتجار بإنشاء ونشر متجر إلكتروني كامل على Cloudflare Workers في أقل من دقيقتين، مع دعم الدفع النقدي وChargily Pay، وإشعارات الطلبات الفورية.',
+            text: '7aba.app هي منصة جزائرية لبناء المتاجر الإلكترونية. تسمح للتجار بإنشاء ونشر متجر إلكتروني كامل على Cloudflare Workers في أقل من دقيقتين، مع دعم الدفع النقدي وChargily Pay، وإشعارات الطلبات الفورية.',
           },
         },
         {
@@ -159,7 +159,7 @@ const jsonLd = {
           name: 'هل يدعم الموقع الدفع الإلكتروني في الجزائر؟',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'نعم، 7aba.store يدعم Chargily Pay لقبول المدفوعات الإلكترونية داخل الجزائر، بالإضافة إلى الدفع نقداً عند الاستلام (COD).',
+            text: 'نعم، 7aba.app يدعم Chargily Pay لقبول المدفوعات الإلكترونية داخل الجزائر، بالإضافة إلى الدفع نقداً عند الاستلام (COD).',
           },
         },
         {
@@ -167,15 +167,15 @@ const jsonLd = {
           name: 'هل أحتاج إلى خبرة تقنية لإنشاء متجر؟',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'لا. منصة 7aba.store مصممة للتجار بدون خبرة تقنية. اختر قالبك، أضف منتجاتك، وانشر. كل ذلك في دقيقتين.',
+            text: 'لا. منصة 7aba.app مصممة للتجار بدون خبرة تقنية. اختر قالبك، أضف منتجاتك، وانشر. كل ذلك في دقيقتين.',
           },
         },
         {
           '@type': 'Question',
-          name: 'ما الفرق بين 7aba.store وShopify أو WooCommerce؟',
+          name: 'ما الفرق بين 7aba.app وShopify أو WooCommerce؟',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: '7aba.store مصممة خصيصاً للسوق الجزائري: دفع بالدينار الجزائري، دفع نقدي عند الاستلام، ولايات الجزائر الـ58، Chargily Pay، واجهة عربية. ادفع مرة واحدة بدلاً من اشتراك شهري.',
+            text: '7aba.app مصممة خصيصاً للسوق الجزائري: دفع بالدينار الجزائري، دفع نقدي عند الاستلام، ولايات الجزائر الـ58، Chargily Pay، واجهة عربية. ادفع مرة واحدة بدلاً من اشتراك شهري.',
           },
         },
         {
@@ -183,7 +183,7 @@ const jsonLd = {
           name: 'هل المتجر يعمل على الهاتف المحمول؟',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'نعم، جميع متاجر 7aba.store متجاوبة بالكامل مع الهواتف المحمولة وتُنشر على Cloudflare Workers للحصول على أسرع أداء ممكن.',
+            text: 'نعم، جميع متاجر 7aba.app متجاوبة بالكامل مع الهواتف المحمولة وتُنشر على Cloudflare Workers للحصول على أسرع أداء ممكن.',
           },
         },
       ],

@@ -14,7 +14,6 @@ import { cn } from '@/lib/utils'
 import { useLang } from '@/hooks/useLang'
 import { AuthModal } from '@/components/auth/AuthModal'
 import { StoreSettingsModal } from '@/components/dashboard/StoreSettingsModal'
-import { FounderCertificate } from '@/components/dashboard/FounderCertificate'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,7 +32,7 @@ import type { DownloadType } from '@/server/getDownloadUrl'
 import {
   Plus, Settings, ExternalLink, LogOut, Store, Rocket,
   Download, Package, Smartphone, Code2, Loader2, CheckCircle2,
-  Globe, Key, ChevronDown, ChevronUp, Save, AlertCircle, ArrowRight, ArrowLeft, Sparkles,
+  Globe, Key, ChevronDown, ChevronUp, Save, AlertCircle, ArrowRight, ArrowLeft, Sparkles, Award,
 } from 'lucide-react'
 
 export const Route = createFileRoute('/dashboard/')({
@@ -63,6 +62,11 @@ const DT = {
   newStore: { ar: 'متجر جديد', fr: 'Nouvelle boutique', en: 'New store' },
   live: { ar: 'شغّال', fr: 'En ligne', en: 'Live' },
   whatsNew: { ar: 'ما الجديد', fr: 'Nouveautés', en: "What's new" },
+  founderCertificate: {
+    ar: 'شهادة العضو المؤسس',
+    fr: 'Certificat de membre fondateur',
+    en: 'Founding member certificate',
+  },
   draft: { ar: 'مسودة', fr: 'Brouillon', en: 'Draft' },
   edit: { ar: 'تعديل', fr: 'Modifier', en: 'Edit' },
   deploy: { ar: 'نشر', fr: 'Déployer', en: 'Deploy' },
@@ -99,7 +103,7 @@ function DashboardPage() {
             <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto">
               <Store className="h-8 w-8 text-primary-foreground" />
             </div>
-            <h1 className="text-2xl font-bold">7aba.store</h1>
+            <h1 className="text-2xl font-bold">7aba.app</h1>
             <p className="text-muted-foreground">سجّل دخولك للوصول للوحة التحكم</p>
             <button
               onClick={() => setShowAuth(true)}
@@ -131,6 +135,7 @@ function AuthenticatedDashboard({
   paymentTier?: string
   checkoutIdParam?: string
 }) {
+  const navigate = useNavigate()
   const { data, isLoading } = db.useQuery({
     platformUsers: { $: { where: { email } } },
   })
@@ -152,11 +157,16 @@ function AuthenticatedDashboard({
           if ((r as any)?.success) {
             const price = PRICING_TIERS.find((x) => x.id === paymentTier)?.priceDzd
             trackPixel('Purchase', { value: price, currency: 'DZD', content_name: paymentTier })
+            // Verification is what mints the founder code, so this is the first
+            // moment the certificate exists. Hand it to the buyer immediately;
+            // `replace` keeps the payment query params out of history, so a
+            // back-navigation can't re-trigger verification.
+            navigate({ to: '/dashboard/certificate', replace: true })
           }
         })
         .catch(console.error)
     }
-  }, [payment, paymentTier, checkoutIdParam, platformUser?.checkoutId, email])
+  }, [payment, paymentTier, checkoutIdParam, platformUser?.checkoutId, email, navigate])
 
   if (isLoading) {
     return (
@@ -183,8 +193,6 @@ function AuthenticatedDashboard({
       platformUserId={platformUser?.id}
       hasCreds={hasCreds}
       founderCode={platformUser?.founderCode}
-      founderBatch={platformUser?.founderBatch}
-      purchasedAt={platformUser?.purchasedAt}
     />
   )
 }
@@ -315,16 +323,12 @@ function StoresDashboard({
   platformUserId,
   hasCreds,
   founderCode,
-  founderBatch,
-  purchasedAt,
 }: {
   email: string
   tier: string
   platformUserId?: string
   hasCreds: boolean
   founderCode?: string
-  founderBatch?: string
-  purchasedAt?: number
 }) {
   const { t, dir } = useLang()
   const navigate = useNavigate()
@@ -337,19 +341,9 @@ function StoresDashboard({
 
   return (
     <div className="min-h-screen bg-background p-6" dir={dir}>
-      <DashboardHeader email={email} tier={tier} />
+      <DashboardHeader email={email} tier={tier} hasCertificate={!!founderCode} />
 
       <div className="max-w-6xl mx-auto mt-8 space-y-8">
-        {founderCode && (
-          <FounderCertificate
-            founderCode={founderCode}
-            tier={tier}
-            email={email}
-            batch={founderBatch}
-            purchasedAt={purchasedAt}
-          />
-        )}
-
         {!hasCreds && (
           <div className="rounded-2xl border border-primary/30 bg-primary/5 p-5 flex items-start gap-4">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
@@ -633,7 +627,17 @@ function EmptyStores({ onNew }: { onNew: () => void }) {
 
 // ─── Header ────────────────────────────────────────────────────────────────────
 
-function DashboardHeader({ email, tier, showSettings = true }: { email: string; tier?: string; showSettings?: boolean }) {
+function DashboardHeader({
+  email,
+  tier,
+  showSettings = true,
+  hasCertificate = false,
+}: {
+  email: string
+  tier?: string
+  showSettings?: boolean
+  hasCertificate?: boolean
+}) {
   const { t, setLang, lang } = useLang()
   const navigate = useNavigate()
   const tierLabels: Record<string, { ar: string; fr: string; en: string }> = {
@@ -648,7 +652,7 @@ function DashboardHeader({ email, tier, showSettings = true }: { email: string; 
         <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-primary-foreground font-black text-sm">
           7
         </div>
-        <span className="font-bold text-lg">7aba.store</span>
+        <span className="font-bold text-lg">7aba.app</span>
         {tier && (
           <span className="text-xs px-2 py-0.5 bg-primary/10 text-primary rounded-full">
             {tier in tierLabels ? t(tierLabels[tier]) : tier}
@@ -657,6 +661,15 @@ function DashboardHeader({ email, tier, showSettings = true }: { email: string; 
       </div>
       <div className="flex items-center gap-3">
         <p className="text-sm text-muted-foreground hidden sm:block">{email}</p>
+        {hasCertificate && (
+          <button
+            onClick={() => navigate({ to: '/dashboard/certificate' })}
+            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            title={t(DT.founderCertificate)}
+          >
+            <Award className="h-4 w-4" />
+          </button>
+        )}
         {showSettings && (
           <button
             onClick={() => navigate({ to: '/dashboard/whats-new' })}

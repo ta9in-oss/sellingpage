@@ -31,6 +31,14 @@ function TierCard({ tier }: TierCardProps) {
       {tier.badge && <div className="tier__badge">{t(tier.badge)}</div>}
       <div className="tier__name">{t(tier.name)}</div>
       <div className="tier__who">{t(tier.who)}</div>
+      {tier.normalPrice && (
+        <div
+          className="tier__normal"
+          style={{ textDecoration: 'line-through', opacity: 0.45, fontWeight: 700, fontSize: '0.95rem', marginBottom: '-0.1rem' }}
+        >
+          {tier.normalPrice} {t(landingPricing.currency)}
+        </div>
+      )}
       <div className="tier__price">
         {tier.price}
         <span className="tier__cur">{t(landingPricing.currency)}</span>

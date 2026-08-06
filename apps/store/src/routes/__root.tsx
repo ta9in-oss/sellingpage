@@ -30,7 +30,7 @@ export const Route = createRootRoute({
           ? `${siteConfig.site.name} | ${siteConfig.site.description}`
           : siteConfig.site.name,
         description: siteConfig.site.description || siteConfig.site.name,
-        image: "https://7aba.store/og_image.webp",
+        image: "https://7aba.app/og_image.webp",
       }),
     ],
     links: [

@@ -18,9 +18,9 @@ import {
 } from '@7aba/store-ui'
 
 const SITE_URL = 'https://7aba.app'
-const TITLE = 'متجر تجريبي | شوف كيف يبدو متجرك مع 7aba.store'
+const TITLE = 'متجر تجريبي | شوف كيف يبدو متجرك مع 7aba.app'
 const DESC =
-  'جرّب متجراً جزائرياً حقيقياً مبنياً بـ 7aba.store. شاهد كيف يبدو المتجر، اختبر نموذج الطلب، وتعرف على تجربة المشتري قبل أن تنشئ متجرك الخاص.'
+  'جرّب متجراً جزائرياً حقيقياً مبنياً بـ 7aba.app. شاهد كيف يبدو المتجر، اختبر نموذج الطلب، وتعرف على تجربة المشتري قبل أن تنشئ متجرك الخاص.'
 
 const demoJsonLd = {
   '@context': 'https://schema.org',
@@ -43,7 +43,7 @@ const demoJsonLd = {
     {
       '@type': 'ItemPage',
       name: 'متجر تجريبي - حقيبة ظهر احترافية',
-      description: 'مثال حي لمتجر إلكتروني جزائري مبني بمنصة 7aba.store',
+      description: 'مثال حي لمتجر إلكتروني جزائري مبني بمنصة 7aba.app',
       image: `${SITE_URL}/demo-store-preview.png`,
     },
   ],

@@ -41,7 +41,7 @@ export function ComparisonSection({ title, rows = DEFAULT_ROWS }: ComparisonSect
     const sectionTitle = title ?? 'كيف نقارن بالآخرين؟';
 
     const competitors = [
-        { key: 'us',      label: '7aba.store', highlight: true },
+        { key: 'us',      label: '7aba.app', highlight: true },
         { key: 'shopify', label: 'Shopify',    highlight: false },
         { key: 'ayor',    label: 'Ayor',       highlight: false },
         { key: 'woo',     label: 'WooCommerce', highlight: false },

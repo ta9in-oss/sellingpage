@@ -186,7 +186,7 @@ function SitePanel() {
           className="text-sm font-mono"
           dir="ltr"
         />
-        <p className="text-[11px] text-zinc-400">7aba.store/<strong>{meta.slug || 'my-store'}</strong></p>
+        <p className="text-[11px] text-zinc-400">7aba.app/<strong>{meta.slug || 'my-store'}</strong></p>
       </div>
     </div>
   )

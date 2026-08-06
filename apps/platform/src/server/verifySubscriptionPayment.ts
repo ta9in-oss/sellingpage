@@ -1,6 +1,7 @@
 import { createServerFn } from '@tanstack/react-start'
 import { init, id } from '@instantdb/admin'
 import { getChargilyCheckout } from './chargilyApi'
+import { generateFounderCode } from '../lib/founderCode'
 import { event, createError } from '../lib/logger'
 
 interface VerifyPaymentInput {
@@ -34,9 +35,13 @@ export const verifySubscriptionPayment = createServerFn({ method: 'POST' })
     const result = await adminDb.query({
       platformUsers: { $: { where: { email: data.userEmail } } },
     })
-    const existing = (result.platformUsers as { id: string } | undefined)?.[0] as
-      | { id: string }
-      | undefined
+    const existing = (result.platformUsers as
+      | { id: string; founderCode?: string }[]
+      | undefined)?.[0]
+
+    // Founder code is issued once and never regenerated — verify can run more
+    // than once (retries, refresh), so we only mint it on the first paid pass.
+    const founderCode = existing?.founderCode ?? generateFounderCode()
 
     if (existing) {
       await adminDb.transact([
@@ -44,6 +49,8 @@ export const verifySubscriptionPayment = createServerFn({ method: 'POST' })
           tier: data.tier,
           checkoutId: data.checkoutId,
           purchasedAt: new Date(),
+          founderCode,
+          founderBatch: '1',
         }),
       ])
     } else {
@@ -54,6 +61,8 @@ export const verifySubscriptionPayment = createServerFn({ method: 'POST' })
           tier: data.tier,
           checkoutId: data.checkoutId,
           purchasedAt: new Date(),
+          founderCode,
+          founderBatch: '1',
         }),
       ])
     }
@@ -61,5 +70,5 @@ export const verifySubscriptionPayment = createServerFn({ method: 'POST' })
     log.set({ payment: { checkoutId: data.checkoutId, tier: data.tier, outcome: 'paid', newUser: !existing } })
     log.audit({ action: 'subscription.purchase', actor: { type: 'user', id: data.userEmail }, target: { type: 'tier', id: data.tier }, outcome: 'success' })
     log.emit()
-    return { success: true, status: 'paid', tier: data.tier }
+    return { success: true, status: 'paid', tier: data.tier, founderCode }
   })

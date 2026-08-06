@@ -3,7 +3,7 @@
 > **For AI agents:** Read this file at the start of every session. Update it when you make structural changes, add/remove dependencies, or change conventions. Keep entries concise — one line where possible. Do NOT add prose or explanations that already exist in code. Update the `Last updated` field on every write.
 
 **Last updated:** 2026-06-29 (neo-brutalist landing redesign, CF + InstantDB OAuth, pricing)  
-**Project:** حبة ستور (7aba.store) — Algerian e-commerce platform (store builder + selling page)  
+**Project:** حبة ستور (7aba.app) — Algerian e-commerce platform (store builder + selling page)  
 **Repo:** https://github.com/Ta9in/sellingpage  
 **Monorepo:** pnpm workspaces + Turborepo — `apps/store`, `apps/platform`, `packages/store-ui`
 

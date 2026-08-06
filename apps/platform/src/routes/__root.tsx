@@ -22,7 +22,7 @@ export const Route = createRootRoute({
       { name: 'geo.placename', content: 'Algeria' },
       { name: 'geo.position', content: '28.0339;1.6596' },
       { name: 'ICBM', content: '28.0339, 1.6596' },
-      { property: 'og:site_name', content: '7aba.store' },
+      { property: 'og:site_name', content: '7aba.app' },
       { property: 'og:type', content: 'website' },
       { property: 'og:image', content: DEFAULT_OG },
       { property: 'og:image:width', content: '1200' },

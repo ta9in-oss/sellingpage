@@ -9,7 +9,7 @@ export const siteConfig = {
     site: {
         name: 'حبة ستور',
         description: 'متجر إلكتروني للمنتجات المميزة',
-        url: 'https://7aba.store',
+        url: 'https://7aba.app',
         logo: '/assets/logo/7aba_store_logo_i1.svg',
     },
 

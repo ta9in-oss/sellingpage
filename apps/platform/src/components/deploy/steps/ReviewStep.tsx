@@ -80,7 +80,7 @@ export function ReviewStep({ storeId, onContinue }: Props) {
       <div>
         <p className="text-sm font-medium mb-1.5">{t(T.storeSlug)}</p>
         <div className="flex items-center gap-2" dir="ltr">
-          <span className="text-sm text-muted-foreground shrink-0 select-none">7aba.store/</span>
+          <span className="text-sm text-muted-foreground shrink-0 select-none">7aba.app/</span>
           <input
             value={slug}
             onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/\s/g, '-'))}
