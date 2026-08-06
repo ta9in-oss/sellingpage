@@ -315,6 +315,8 @@ interface StoreSettingsData {
   clarityId?: string
   metaPixelId?: string
   customDomain?: string
+  chargilyPublicKey?: string
+  hasChargilySecret?: boolean
 }
 
 function StoresDashboard({
@@ -402,6 +404,10 @@ function StoresDashboard({
                       clarityId: store.clarityId,
                       metaPixelId: store.metaPixelId,
                       customDomain: store.customDomain,
+                      chargilyPublicKey: store.chargilyPublicKey,
+                      // Presence only — the stored value is ciphertext and the
+                      // modal must never render it back.
+                      hasChargilySecret: !!store.chargilyApiKey,
                     })
                   }
                 />
@@ -431,6 +437,8 @@ function StoresDashboard({
             clarityId: settingsStore.clarityId,
             metaPixelId: settingsStore.metaPixelId,
             customDomain: settingsStore.customDomain,
+            chargilyPublicKey: settingsStore.chargilyPublicKey,
+            hasChargilySecret: settingsStore.hasChargilySecret,
           }}
           onClose={() => setSettingsStore(null)}
           onDeleted={() => setSettingsStore(null)}

@@ -5,7 +5,8 @@
  */
 import { useState, useEffect } from 'react'
 import { db } from '@/lib/instantdb'
-import { X, Loader2, Trash2, Save, Check, BarChart3 } from 'lucide-react'
+import { X, Loader2, Trash2, Save, Check, BarChart3, CreditCard } from 'lucide-react'
+import { saveMerchantSecrets } from '@/server/saveMerchantSecrets'
 import { useLang } from '@/hooks/useLang'
 import { CredentialsForm, type CredentialsInitial } from '@/components/settings/CredentialsForm'
 import { Input } from '@/components/ui/input'
@@ -16,6 +17,9 @@ export interface StoreAnalyticsInitial {
   clarityId?: string
   metaPixelId?: string
   customDomain?: string
+  chargilyPublicKey?: string
+  /** Presence only — the sealed value never leaves the server. */
+  hasChargilySecret?: boolean
 }
 
 interface StoreSettingsModalProps {
@@ -46,6 +50,24 @@ const T = {
   save: { ar: 'حفظ', fr: 'Enregistrer', en: 'Save' },
   saving: { ar: 'جارٍ الحفظ...', fr: 'Enregistrement...', en: 'Saving...' },
   saved: { ar: 'تم الحفظ', fr: 'Enregistré', en: 'Saved' },
+  payments: { ar: 'الدفع (Chargily)', fr: 'Paiements (Chargily)', en: 'Payments (Chargily)' },
+  paymentsHint: {
+    ar: 'مفاتيح حسابك أنت في Chargily. أموال هذا المتجر تذهب إلى هذا الحساب. تُطبَّق عند النشر القادم.',
+    fr: 'Les clés de votre propre compte Chargily. Les paiements de cette boutique y sont versés. Appliqué au prochain déploiement.',
+    en: 'Your own Chargily account keys. This store\'s payments land in that account. Applied on the next deploy.',
+  },
+  chargilyPublic: { ar: 'المفتاح العام', fr: 'Clé publique', en: 'Public key' },
+  chargilySecret: { ar: 'المفتاح السري', fr: 'Clé secrète', en: 'Secret key' },
+  chargilySecretSet: {
+    ar: 'محفوظ ومشفّر. اترك الحقل فارغاً للإبقاء عليه، أو أدخل مفتاحاً جديداً لاستبداله.',
+    fr: 'Enregistrée et chiffrée. Laissez vide pour la conserver, ou saisissez-en une nouvelle pour la remplacer.',
+    en: 'Saved and encrypted. Leave blank to keep it, or enter a new one to replace it.',
+  },
+  liveKeyWarn: {
+    ar: 'استعمل مفاتيح live_ للبيع الحقيقي. مفاتيح test_ لا تقبض أموالاً.',
+    fr: 'Utilisez des clés live_ pour encaisser réellement. Les clés test_ ne prélèvent rien.',
+    en: 'Use live_ keys to take real payments. test_ keys never charge anyone.',
+  },
 }
 
 export function StoreSettingsModal({ storeId, storeName, initialValues, initialAnalytics, onClose, onDeleted }: StoreSettingsModalProps) {
@@ -59,6 +81,38 @@ export function StoreSettingsModal({ storeId, storeName, initialValues, initialA
   const [domain, setDomain] = useState(initialAnalytics?.customDomain ?? '')
   const [savingA, setSavingA] = useState(false)
   const [savedA, setSavedA] = useState(false)
+  const [chargilyPk, setChargilyPk] = useState(initialAnalytics?.chargilyPublicKey ?? '')
+  const [chargilySk, setChargilySk] = useState('')
+  const [savingC, setSavingC] = useState(false)
+  const [savedC, setSavedC] = useState(false)
+
+  const saveChargily = async () => {
+    setSavingC(true)
+    setError(null)
+    try {
+      // The secret key goes through the server function, which seals it with
+      // STORE_SECRET_KEY. Writing it from the browser (the way analytics is
+      // written below) would put a live payment credential in the database in
+      // plaintext, readable by any client that can query the row.
+      await saveMerchantSecrets({
+        data: {
+          storeId,
+          chargilyPublicKey: chargilyPk.trim(),
+          // Blank means "leave the stored key alone" — we never render it back,
+          // so an empty field cannot be distinguished from "unchanged" any
+          // other way.
+          ...(chargilySk.trim() ? { chargilyApiKey: chargilySk.trim() } : {}),
+        },
+      })
+      setChargilySk('')
+      setSavedC(true)
+      setTimeout(() => setSavedC(false), 2500)
+    } catch (e: unknown) {
+      setError((e as Error)?.message ?? 'Failed to save')
+    } finally {
+      setSavingC(false)
+    }
+  }
 
   const saveAnalytics = async () => {
     setSavingA(true)
@@ -147,6 +201,45 @@ export function StoreSettingsModal({ storeId, storeName, initialValues, initialA
                 className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-primary text-primary-foreground font-bold text-sm hover:bg-primary/90 disabled:opacity-60 transition-colors"
               >
                 {savingA ? <><Loader2 size={14} className="animate-spin" />{t(T.saving)}</> : savedA ? <><Check size={14} />{t(T.saved)}</> : <><Save size={14} />{t(T.save)}</>}
+              </button>
+            </div>
+          </section>
+
+          {/* Chargily — per store, because each storefront collects into its
+              own merchant account. */}
+          <section className="space-y-3">
+            <div className="flex items-center gap-2">
+              <CreditCard size={16} className="text-muted-foreground" />
+              <h3 className="font-semibold text-sm">{t(T.payments)}</h3>
+            </div>
+            <div className="bg-muted/40 rounded-xl p-4 space-y-3">
+              <p className="text-[11px] text-muted-foreground">{t(T.paymentsHint)}</p>
+              <div className="space-y-1">
+                <Label className="text-xs font-bold">{t(T.chargilyPublic)}</Label>
+                <Input value={chargilyPk} onChange={(e) => setChargilyPk(e.target.value)} placeholder="live_pk_..." dir="ltr" className="text-sm font-mono" />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs font-bold">{t(T.chargilySecret)}</Label>
+                <Input
+                  type="password"
+                  value={chargilySk}
+                  onChange={(e) => setChargilySk(e.target.value)}
+                  placeholder={initialAnalytics?.hasChargilySecret ? '••••••••••••' : 'live_sk_...'}
+                  dir="ltr"
+                  className="text-sm font-mono"
+                  autoComplete="off"
+                />
+                {initialAnalytics?.hasChargilySecret && (
+                  <p className="text-[11px] text-muted-foreground">{t(T.chargilySecretSet)}</p>
+                )}
+              </div>
+              <p className="text-[11px] text-amber-600 dark:text-amber-500 font-medium">{t(T.liveKeyWarn)}</p>
+              <button
+                onClick={saveChargily}
+                disabled={savingC}
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-primary text-primary-foreground font-bold text-sm hover:bg-primary/90 disabled:opacity-60 transition-colors"
+              >
+                {savingC ? <><Loader2 size={14} className="animate-spin" />{t(T.saving)}</> : savedC ? <><Check size={14} />{t(T.saved)}</> : <><Save size={14} />{t(T.save)}</>}
               </button>
             </div>
           </section>

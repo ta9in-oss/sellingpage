@@ -136,6 +136,9 @@ export async function generateStoreConfig({ storeId, appId, adminToken, encKey =
     clarityId: store.clarityId ?? '',
     metaPixelId: store.metaPixelId ?? '',
     customDomain: store.customDomain ?? '',
+    // Chargily *publishable* key. Public by design (it is inlined into the
+    // storefront bundle), unlike chargilyApiKey above, which is sealed.
+    chargilyPublicKey: store.chargilyPublicKey ?? '',
     // Raw sealed forms so a caller (e.g. GitHub Actions) can mask both.
     sealed: {
       cfApiToken: store.cfApiToken ?? '',

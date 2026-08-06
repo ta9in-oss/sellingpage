@@ -1,7 +1,9 @@
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 import { fileURLToPath } from 'node:url'
-import { dirname, resolve } from 'node:path'
+import { dirname, resolve, join } from 'node:path'
+import { mkdtemp, writeFile, rm } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
 import { init } from '@instantdb/admin'
 import { initLogger, createRequestLogger } from 'evlog'
 import { createFsDrain } from 'evlog/fs'
@@ -58,9 +60,11 @@ export async function runDeploy(storeId, { log = console.log } = {}) {
       adminToken: process.env.PLATFORM_INSTANTDB_ADMIN_TOKEN,
       encKey: process.env.STORE_SECRET_KEY ?? '',
     })
-    if (cfg.cfApiToken) {
-      const token = cfg.cfApiToken
-      scrub = (s) => s.split(token).join('***')
+    // Scrub every plaintext secret we now hold, not just the Cloudflare token —
+    // wrangler and pnpm both echo their environment on some failures.
+    const secrets = [cfg.cfApiToken, cfg.chargilyApiKey, cfg.instantAdminToken].filter(Boolean)
+    if (secrets.length > 0) {
+      scrub = (s) => secrets.reduce((acc, sec) => acc.split(sec).join('***'), String(s))
     }
     if (!cfg.cfApiToken || !cfg.cfAccountId) {
       throw new Error('store has no Cloudflare credentials (cfApiToken / cfAccountId)')
@@ -81,6 +85,10 @@ export async function runDeploy(storeId, { log = console.log } = {}) {
         VITE_GOOGLE_ANALYTICS: cfg.googleAnalyticsId ?? '',
         VITE_MICROSOFT_CLARITY_ID: cfg.clarityId ?? '',
         VITE_META_PIXEL_ID: cfg.metaPixelId ?? '',
+        // Chargily publishable key — public, and inlined into the bundle, so it
+        // belongs at build time. Per store: each storefront collects into its
+        // own merchant account.
+        VITE_CHARGILY_PUBLIC_KEY: cfg.chargilyPublicKey ?? '',
       },
     }, say, scrub)
 
@@ -89,6 +97,16 @@ export async function runDeploy(storeId, { log = console.log } = {}) {
     say('ensuring Pages project exists')
     await sh('npx', ['wrangler', 'pages', 'project', 'create', projectName, '--production-branch=main'],
       { env: cfEnv, allowFail: true }, say, scrub)
+
+    // Runtime secrets for the storefront's server functions. These are read via
+    // process.env at request time (apps/store/src/server/*), never inlined, so
+    // they must be Pages secrets — a build-time env would not reach them.
+    // Must land before the deploy: a deployment binds the secrets that exist
+    // when it is created.
+    await putPagesSecrets(projectName, {
+      CHARGILY_SECRET_KEY: cfg.chargilyApiKey,
+      INSTANT_ADMIN_TOKEN: cfg.instantAdminToken,
+    }, cfEnv, say, scrub)
 
     say('deploying to Cloudflare Pages')
     await sh('npx', ['wrangler', 'pages', 'deploy', 'apps/store/dist',
@@ -110,6 +128,35 @@ export async function runDeploy(storeId, { log = console.log } = {}) {
     evt.audit({ action: 'store.deploy', actor: { type: 'system', id: 'deploy-daemon' }, target: { type: 'store', id: storeId }, outcome: 'failure' })
     evt.emit()
     return { ok: false, error }
+  }
+}
+
+/**
+ * Upload runtime secrets to a merchant's Pages project.
+ *
+ * `wrangler pages secret put` reads the value from an interactive prompt, which
+ * hangs a daemon; `secret bulk` takes a JSON file instead. The file therefore
+ * holds plaintext credentials for the length of one command — it is created
+ * 0600 in the daemon's own temp dir and unlinked in `finally`, including on
+ * failure. Empty values are skipped rather than uploaded blank, so a store with
+ * no Chargily key keeps whatever was set before instead of having it wiped.
+ */
+async function putPagesSecrets(projectName, secrets, cfEnv, say, scrub) {
+  const present = Object.fromEntries(Object.entries(secrets).filter(([, v]) => v))
+  const names = Object.keys(present)
+  if (names.length === 0) {
+    say('no runtime secrets to upload (store has no Chargily / InstantDB keys)')
+    return
+  }
+
+  const file = join(await mkdtemp(join(tmpdir(), 'store-secrets-')), 'secrets.json')
+  try {
+    await writeFile(file, JSON.stringify(present), { mode: 0o600 })
+    say(`uploading runtime secrets: ${names.join(', ')}`)
+    await sh('npx', ['wrangler', 'pages', 'secret', 'bulk', file, `--project-name=${projectName}`],
+      { env: cfEnv }, say, scrub)
+  } finally {
+    await rm(dirname(file), { recursive: true, force: true })
   }
 }
 

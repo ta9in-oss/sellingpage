@@ -11,6 +11,10 @@ interface Params {
   cfApiToken?: string
   instantAppId?: string
   instantAdminToken?: string
+  /** Chargily secret key (sealed). Per-store: it is the merchant's own account. */
+  chargilyApiKey?: string
+  /** Chargily publishable key — public, inlined into the storefront bundle. */
+  chargilyPublicKey?: string
 }
 
 /**
@@ -29,7 +33,10 @@ interface Params {
 export const saveMerchantSecrets = createServerFn({ method: 'POST' })
   .validator((data: unknown) => data as Params)
   .handler(async ({ data }) => {
-    const { storeId, platformUserId, cfAccountId, cfApiToken, instantAppId, instantAdminToken } = data
+    const {
+      storeId, platformUserId, cfAccountId, cfApiToken, instantAppId, instantAdminToken,
+      chargilyApiKey, chargilyPublicKey,
+    } = data
     const log = event()
     const targetType = platformUserId ? 'account' : 'store'
     const targetId = platformUserId || storeId || 'unknown'
@@ -53,16 +60,28 @@ export const saveMerchantSecrets = createServerFn({ method: 'POST' })
       if (cfApiToken) patch.cfApiToken = await encryptSecret(cfApiToken.trim(), key)
       if (instantAdminToken) patch.instantAdminToken = await encryptSecret(instantAdminToken.trim(), key)
 
-      if (Object.keys(patch).length === 0) return { success: true }
+      // Chargily is store-scoped and never account-scoped: each storefront takes
+      // payments into its own merchant account, so an account-level key would
+      // silently route every store's revenue to one Chargily account.
+      const storeOnly: Record<string, string> = {}
+      if (chargilyPublicKey !== undefined) storeOnly.chargilyPublicKey = chargilyPublicKey.trim()
+      if (chargilyApiKey) storeOnly.chargilyApiKey = await encryptSecret(chargilyApiKey.trim(), key)
+
+      if (Object.keys(storeOnly).length > 0 && !storeId) {
+        throw createError({ message: 'مفاتيح Chargily تُحفظ على مستوى المتجر فقط', status: 400, why: 'chargily keys require storeId' })
+      }
+
+      const touched = [...Object.keys(patch), ...Object.keys(storeOnly)]
+      if (touched.length === 0) return { success: true }
 
       const txs: any[] = []
-      if (storeId) txs.push(db.tx.stores[storeId].update(patch))
+      if (storeId) txs.push(db.tx.stores[storeId].update({ ...patch, ...storeOnly }))
       if (platformUserId) txs.push((db.tx.platformUsers as any)[platformUserId].update(patch))
 
       await db.transact(txs)
 
       // Which secrets were touched — field names only, never values.
-      log.set({ secrets: { fields: Object.keys(patch), scope: targetType } })
+      log.set({ secrets: { fields: touched, scope: targetType } })
       log.audit({
         action: 'merchant.secrets.save',
         actor: { type: 'user', id: targetId },
