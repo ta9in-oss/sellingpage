@@ -8,7 +8,12 @@ import { useTheme } from '../../context/ThemeContext';
 interface QuantitySelectorProps {
     quantity: number;
     onQuantityChange: (newQuantity: number) => void;
-    totalStock: number;
+    /**
+     * Units the buyer may order, or `null` when the merchant does not track
+     * stock — then there is no cap and no "N left" line, because the store is
+     * not counting and must not imply that it is.
+     */
+    totalStock: number | null;
     price: number;
     unitLabel?: (num: number) => string;
     onSubmit?: () => void;
@@ -47,7 +52,11 @@ export function QuantitySelector({
     const getLabel = unitLabel || defaultUnitLabel;
     const total = price * quantity;
 
-    const incrementQuantity = () => { if (quantity < totalStock) onQuantityChange(quantity + 1); };
+    const tracked = totalStock !== null;
+    const remaining = tracked ? Math.max(0, totalStock - quantity) : null;
+    const atCap = tracked && quantity >= totalStock;
+
+    const incrementQuantity = () => { if (!atCap) onQuantityChange(quantity + 1); };
     const decrementQuantity = () => { if (quantity > 1) onQuantityChange(quantity - 1); };
 
     const handleSubmit = () => {
@@ -67,9 +76,11 @@ export function QuantitySelector({
                     <div className="space-y-4">
                         <Label className="block text-lg font-black text-gray-900">
                             الكمية المطلوبة
-                            <span className="block text-sm font-semibold text-gray-600 mt-1">
-                                متبقي {totalStock - quantity} {getLabel(totalStock - quantity)} في المخزون
-                            </span>
+                            {remaining !== null && (
+                                <span className="block text-sm font-semibold text-gray-600 mt-1">
+                                    متبقي {remaining} {getLabel(remaining)} في المخزون
+                                </span>
+                            )}
                         </Label>
 
                         {quantityError && (
@@ -83,7 +94,7 @@ export function QuantitySelector({
                         )}
 
                         <div className="flex items-center justify-center gap-6">
-                            <Button variant="outline" onClick={incrementQuantity} disabled={quantity >= totalStock}
+                            <Button variant="outline" onClick={incrementQuantity} disabled={atCap}
                                 className="w-16 h-16 border-2 border-black rounded-none bg-yellow-400 hover:bg-yellow-300 text-black font-black text-2xl p-0 shadow-[2px_2px_0px_0px_#000] hover:shadow-[4px_4px_0px_0px_#000] transition-all">
                                 <Plus size={24} />
                             </Button>
@@ -136,9 +147,11 @@ export function QuantitySelector({
                 <div className="space-y-4">
                     <Label className="block text-lg font-black" style={{ color: theme.colors.foreground }}>
                         الكمية المطلوبة
-                        <span className="block text-sm font-semibold mt-1" style={{ color: '#9ca3af' }}>
-                            متبقي {totalStock - quantity} {getLabel(totalStock - quantity)} في المخزون
-                        </span>
+                        {remaining !== null && (
+                            <span className="block text-sm font-semibold mt-1" style={{ color: '#9ca3af' }}>
+                                متبقي {remaining} {getLabel(remaining)} في المخزون
+                            </span>
+                        )}
                     </Label>
 
                     {quantityError && (
@@ -152,7 +165,7 @@ export function QuantitySelector({
                     )}
 
                     <div className="flex items-center justify-center gap-6">
-                        <Button variant="outline" onClick={incrementQuantity} disabled={quantity >= totalStock}
+                        <Button variant="outline" onClick={incrementQuantity} disabled={atCap}
                             className="w-16 h-16 font-black text-2xl p-0 transition-all"
                             style={{ backgroundColor: theme.colors.accent, color: '#000', border: 'none', borderRadius: theme.effects.borderRadius }}>
                             <Plus size={24} />

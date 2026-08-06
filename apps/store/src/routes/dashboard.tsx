@@ -19,6 +19,7 @@ import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { db } from '@/lib/instantdb';
 import { siteConfig } from '@/config/site.config';
+import { resolveStock } from '@/lib/stock';
 import { LEGACY_PRODUCT_NUMBER } from '@/lib/content';
 import { id } from "@instantdb/react";
 import type { AppSchema } from '@/instant.schema';
@@ -256,26 +257,41 @@ const Dashboard = ({ user, onSignOut }) => {
     products.find((p) => p.product_number === LEGACY_PRODUCT_NUMBER) ??
     products[0];
 
-  // current stock
-  const availableStock = storeProduct?.stock || 0;
+  // Whether this store counts units at all, and how many. See lib/stock.ts —
+  // not counting is the default, so a new store never refuses its first order.
+  const stockState = resolveStock(storeProduct as { stock?: unknown; track_stock?: unknown } | undefined);
+  const availableStock = stockState.units;
 
   // Merchant-editable stock. Seeded from the DB and re-synced whenever the stored
   // value changes underneath us (an order confirmed in another tab, say), except
   // while the merchant is mid-edit.
   const [stockInput, setStockInput] = useState<string>('');
+  const [trackStock, setTrackStock] = useState<boolean>(false);
   const [savingStock, setSavingStock] = useState(false);
   useEffect(() => {
     setStockInput(String(availableStock));
-  }, [availableStock]);
+    setTrackStock(stockState.tracked);
+  }, [availableStock, stockState.tracked]);
+
+  const stockDirty = trackStock !== stockState.tracked
+    || (trackStock && Number(stockInput) !== availableStock);
 
   const saveStock = async () => {
     const next = Math.max(0, Math.floor(Number(stockInput)));
-    if (!Number.isFinite(next)) return;
+    // Only the units field needs to parse; turning tracking off ignores it.
+    if (trackStock && !Number.isFinite(next)) return;
     setSavingStock(true);
     try {
+      // Always write track_stock explicitly — that is what removes the legacy
+      // "infer from stock" ambiguity for this store, permanently.
+      const patch = {
+        track_stock: trackStock,
+        ...(trackStock ? { stock: next } : {}),
+        updated_at: new Date(),
+      };
       const existing = storeProduct;
       if (existing) {
-        await db.transact(db.tx.products[existing.id].update({ stock: next, updated_at: new Date() }));
+        await db.transact(db.tx.products[existing.id].update(patch));
       } else {
         // No product row yet (nobody has ordered) — create it so stock is set.
         await db.transact(
@@ -284,13 +300,18 @@ const Dashboard = ({ user, onSignOut }) => {
             name: siteConfig.site.name,
             price: 0,
             is_available: true,
-            stock: next,
+            stock: trackStock ? next : 0,
+            track_stock: trackStock,
             created_at: new Date(),
             updated_at: new Date(),
           })
         );
       }
-      showAlert('success', 'تم الحفظ', `الكمية المتوفرة الآن ${next} وحدة`);
+      showAlert(
+        'success',
+        'تم الحفظ',
+        trackStock ? `الكمية المتوفرة الآن ${next} وحدة` : 'البيع بدون حدّ للكمية',
+      );
     } catch (e) {
       showAlert('error', 'تعذّر الحفظ', (e as Error)?.message ?? 'حاول مجدداً');
     } finally {
@@ -432,9 +453,11 @@ const Dashboard = ({ user, onSignOut }) => {
         })
       );
 
-      // Update stock based on status change
-      if (storeProduct) {
-        const currentStock = storeProduct.stock || 0;
+      // Update stock based on status change — but only for a store that keeps a
+      // count. Restocking an untracked store would materialise a stock level
+      // the merchant never asked for.
+      if (storeProduct && stockState.tracked) {
+        const currentStock = stockState.units;
         const orderQuantity = order.quantity || 0;
         let newStock = currentStock;
 
@@ -636,18 +659,51 @@ const Dashboard = ({ user, onSignOut }) => {
           </div>
         )}
 
-        {/* Stock management — the merchant sets how many units are available.
-            Orders still adjust it automatically as they are confirmed/cancelled. */}
+        {/* Stock — opt-in. Off by default so a new store never turns away its
+            first buyer; when on, orders draw the counter down automatically. */}
         <div className="bg-white border-2 border-black p-6 mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-end gap-4 justify-between">
-            <div>
-              <h2 className="font-black text-lg mb-1">الكمية المتوفرة</h2>
-              <p className="text-sm text-gray-600">
-                حدّد عدد الوحدات المتبقية من منتجك. تظهر للزبون في صفحة الطلب، وتنقص تلقائياً مع كل طلب مؤكَّد.
-              </p>
-            </div>
-            <div className="flex items-center gap-2 shrink-0">
+          <h2 className="font-black text-lg mb-1">المخزون</h2>
+          <p className="text-sm text-gray-600 mb-4">
+            اختر كيف تبيع: بلا حدّ للكمية، أو بعدد محدَّد من الوحدات.
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Unlimited */}
+            <button
+              type="button"
+              onClick={() => setTrackStock(false)}
+              className={`text-right border-2 border-black p-4 transition-all ${
+                !trackStock ? 'bg-yellow-400 shadow-[4px_4px_0px_0px_#000]' : 'bg-white hover:bg-gray-50'
+              }`}
+            >
+              <span className="block font-black">بيع بلا حدّ</span>
+              <span className="block text-xs text-gray-700 mt-1">
+                نقبل أي كمية. ما نحسبوش الوحدات. (الافتراضي)
+              </span>
+            </button>
+
+            {/* Limited */}
+            <button
+              type="button"
+              onClick={() => setTrackStock(true)}
+              className={`text-right border-2 border-black p-4 transition-all ${
+                trackStock ? 'bg-yellow-400 shadow-[4px_4px_0px_0px_#000]' : 'bg-white hover:bg-gray-50'
+              }`}
+            >
+              <span className="block font-black">عدد محدَّد من الوحدات</span>
+              <span className="block text-xs text-gray-700 mt-1">
+                نوقّفوا البيع كي تخلص الكمية. تنقص وحدها مع كل طلب.
+              </span>
+            </button>
+          </div>
+
+          {trackStock && (
+            <div className="flex items-center gap-3 mt-4 pt-4 border-t-2 border-dashed border-black">
+              <label className="font-bold text-sm shrink-0" htmlFor="stock-units">
+                عدد الوحدات المتوفرة
+              </label>
               <Input
+                id="stock-units"
                 type="number"
                 min={0}
                 value={stockInput}
@@ -655,14 +711,25 @@ const Dashboard = ({ user, onSignOut }) => {
                 className="w-28 border-2 border-black rounded-none font-black text-lg text-center"
                 dir="ltr"
               />
-              <Button
-                onClick={saveStock}
-                disabled={savingStock || stockInput === '' || Number(stockInput) === availableStock}
-                className="bg-yellow-400 text-black border-2 border-black rounded-none font-black hover:bg-yellow-300 disabled:opacity-50"
-              >
-                {savingStock ? 'جارٍ الحفظ...' : 'حفظ الكمية'}
-              </Button>
+              <span className="text-xs text-gray-600">
+                حُطّ 0 باش توقّف البيع مؤقتاً.
+              </span>
             </div>
+          )}
+
+          <div className="flex items-center gap-3 mt-4">
+            <Button
+              onClick={saveStock}
+              disabled={savingStock || !stockDirty || (trackStock && stockInput === '')}
+              className="bg-yellow-400 text-black border-2 border-black rounded-none font-black hover:bg-yellow-300 disabled:opacity-50"
+            >
+              {savingStock ? 'جارٍ الحفظ...' : 'حفظ'}
+            </Button>
+            {!stockDirty && (
+              <span className="text-xs text-gray-500">
+                {stockState.tracked ? `محفوظ: ${availableStock} وحدة` : 'محفوظ: بلا حدّ'}
+              </span>
+            )}
           </div>
         </div>
 
@@ -674,7 +741,7 @@ const Dashboard = ({ user, onSignOut }) => {
               <div>
                 <p className="font-bold text-sm">الكمية الفعلية في المخزون</p>
                 <p className="font-black text-2xl">
-                  {availableStock + pendingOrdersQuantity} وحدة
+                  {stockState.tracked ? `${availableStock + pendingOrdersQuantity} وحدة` : 'بلا حدّ'}
                 </p>
               </div>
               <div className="text-black">

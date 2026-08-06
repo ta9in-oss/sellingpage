@@ -8,6 +8,7 @@ import { db } from "@/lib/instantdb";
 import { useGoogleLogin } from "@react-oauth/google";
 
 import { getContent, LEGACY_PRODUCT_NUMBER } from "@/lib/content";
+import { resolveStock, stockCap } from "@/lib/stock";
 import {
   HeroSection,
   SocialProofBar,
@@ -58,7 +59,8 @@ function Home() {
     allProducts.find((p) => p.product_number === siteConfig.defaultProduct.productNumber) ??
     allProducts.find((p) => p.product_number === LEGACY_PRODUCT_NUMBER) ??
     allProducts[0] ?? { stock: 0 };
-  const totalStock = (defaultProduct as any).stock || 0;
+  // null = merchant does not track units, so no cap and no "N left" line.
+  const totalStock = stockCap(resolveStock(defaultProduct as { stock?: unknown; track_stock?: unknown }));
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);

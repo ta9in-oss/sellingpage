@@ -22,6 +22,13 @@ const _schema = i.schema({
       price: i.number(),
       image: i.string(),
       stock: i.number(),
+      /**
+       * Whether `stock` is enforced at all. Optional because rows written
+       * before it existed do not carry it — see lib/stock.ts for how a missing
+       * value is resolved. Absent-or-false means sell without a unit limit,
+       * which is the default for a new store.
+       */
+      track_stock: i.boolean().optional(),
       is_available: i.boolean(),
       created_at: i.date(),
       updated_at: i.date(),

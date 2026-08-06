@@ -26,7 +26,8 @@ import type { OrderFieldsConfig, OrderLayoutConfig, ProductImage } from '../../t
 
 interface OrderSectionProps {
     price: number;
-    totalStock: number;
+    /** Units orderable, or `null` when the merchant does not track stock. */
+    totalStock: number | null;
     productImages: ProductImage[];
     onSubmit: (orderData: OrderData) => Promise<void>;
     isSubmitting?: boolean;

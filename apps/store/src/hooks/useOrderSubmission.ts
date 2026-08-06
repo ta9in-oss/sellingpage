@@ -3,6 +3,7 @@ import { id, tx } from '@instantdb/react';
 import { db } from '@/lib/instantdb';
 import { siteConfig } from '@/config/site.config';
 import { getContent, LEGACY_PRODUCT_NUMBER } from '@/lib/content';
+import { resolveStock, hasEnoughStock } from '@/lib/stock';
 import { createChargilyCheckout } from '@/server/createChargilyCheckout';
 
 interface OrderFormData {
@@ -58,7 +59,10 @@ export function useOrderSubmission(): UseOrderSubmissionReturn {
           price: Number(content.hero.priceTag.amount) || 0,
           image: content.hero.image ?? '',
           is_available: true,
+          // Untracked by default: a store must never refuse its first order
+          // just because nobody has visited the stock field yet.
           stock: 0,
+          track_stock: false,
           created_at: new Date(),
           updated_at: new Date(),
         })
@@ -89,11 +93,16 @@ export function useOrderSubmission(): UseOrderSubmissionReturn {
       const productId = await ensureDefaultProduct();
       
       // Get product for stock check and price
-      const product = products.find(p => p.id === productId) || { price: 2500, stock: 100 };
-      console.log(product);
-      
-      if (product.stock < formData.quantity) {
-        return { success: false, error: 'الكمية المطلوبة غير متوفرة في المخزون' };
+      const product = products.find(p => p.id === productId) || { price: 2500, stock: 0, track_stock: false };
+
+      const stock = resolveStock(product as { stock?: unknown; track_stock?: unknown });
+      if (!hasEnoughStock(stock, formData.quantity)) {
+        return {
+          success: false,
+          error: stock.units > 0
+            ? `الكمية المتوفرة ${stock.units} وحدة فقط`
+            : 'المنتج غير متوفر حالياً',
+        };
       }
 
       const paymentMethod = formData.paymentMethod || 'cod';
@@ -131,11 +140,15 @@ export function useOrderSubmission(): UseOrderSubmissionReturn {
         }),
 
         tx.orders[orderId].link({ product: productId }),
-        // Update product stock
-        tx.products[productId].update({
-          stock: product.stock - formData.quantity,
-          updated_at: currentDate
-        })
+        // Only draw down a counter the merchant actually keeps. Decrementing an
+        // untracked store would invent a stock level nobody asked for, and it
+        // would eventually reach zero and start refusing orders on its own.
+        ...(stock.tracked
+          ? [tx.products[productId].update({
+              stock: Math.max(0, stock.units - formData.quantity),
+              updated_at: currentDate,
+            })]
+          : []),
       ]);
 
       // For Chargily payment: create checkout session
