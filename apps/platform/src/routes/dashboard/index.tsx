@@ -33,7 +33,7 @@ import type { DownloadType } from '@/server/getDownloadUrl'
 import {
   Plus, Settings, ExternalLink, LogOut, Store, Rocket,
   Download, Package, Smartphone, Code2, Loader2, CheckCircle2,
-  Globe, Key, ChevronDown, ChevronUp, Save, AlertCircle, ArrowRight, ArrowLeft, Sparkles, Award,
+  Globe, Key, ChevronDown, ChevronUp, Save, AlertCircle, ArrowRight, ArrowLeft, Megaphone, Award,
 } from 'lucide-react'
 
 export const Route = createFileRoute('/dashboard/')({
@@ -686,7 +686,7 @@ function DashboardHeader({
             className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
             title={t(DT.whatsNew)}
           >
-            <Sparkles className="h-4 w-4" />
+            <Megaphone className="h-4 w-4" />
           </button>
         )}
         {showSettings && (

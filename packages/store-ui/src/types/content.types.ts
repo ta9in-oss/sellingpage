@@ -115,6 +115,8 @@ export interface SiteContent {
     urgency?: UrgencyConfig;
     cta?: CTAContent;
     orderLayout?: OrderLayoutConfig;
+    /** Which order-form fields the buyer must fill. Set by the merchant. */
+    orderFields?: OrderFieldsConfig;
     sections: {
         specs: {
             title: string;
@@ -145,6 +147,21 @@ export type OrderLayoutType =
     | 'side-by-side'                       // Form left, Quantity right (no carousel)
     | 'stacked'                            // All stacked vertically
     | 'custom';                            // Custom grid configuration
+
+/**
+ * Per-field requiredness for the order form.
+ *
+ * Location (wilaya/daira/commune) is deliberately absent: a delivery cannot be
+ * dispatched without it, so it is always required. Email is special-cased at
+ * validation time — Chargily needs a real address for the receipt, so an online
+ * -payment store forces it required no matter what is set here.
+ */
+export interface OrderFieldsConfig {
+    name?: boolean;
+    email?: boolean;
+    phone?: boolean;
+    message?: boolean;
+}
 
 export interface OrderLayoutConfig {
     type: OrderLayoutType;

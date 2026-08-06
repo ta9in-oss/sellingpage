@@ -146,6 +146,7 @@ function Home() {
           layoutConfig={content.orderLayout}
           title={content.sections.order.title}
           activePaymentMethod={activePaymentMethod}
+          requiredFields={content.orderFields}
           buyerEmail={buyerEmail || undefined}
           buyerName={buyerName || undefined}
           onAuthRequest={() => setShowAuthModal(true)}

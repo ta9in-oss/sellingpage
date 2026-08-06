@@ -10,6 +10,9 @@ const SITE_URL = 'https://7aba.app'
 const DEFAULT_OG = `${SITE_URL}/og-image.webp`
 const FONT_URL = 'https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&display=swap'
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined
+// The pixel id was inlined in the snippet string below and nowhere else, so the
+// <noscript> fallback had no way to reference it. One constant, two consumers.
+const META_PIXEL_ID = '322683491235522'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -44,7 +47,7 @@ export const Route = createRootRoute({
     scripts: [
       {
         children:
-          "!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','322683491235522');fbq('track','PageView');",
+          `!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${META_PIXEL_ID}');fbq('track','PageView');`,
       },
       ...(import.meta.env.SSR ? analytics() : []),
     ],
@@ -64,6 +67,22 @@ function RootComponent() {
         <HeadContent />
       </head>
       <body>
+        {/*
+          Meta Pixel <noscript> fallback. The JS snippet in `head` is the main
+          path, but it never runs for a visitor with JS disabled or a script
+          blocker — common enough on mobile in Algeria to matter. This 1×1
+          image reports the PageView over plain HTTP instead, which is also
+          what Meta's own installation check looks for.
+        */}
+        <noscript>
+          <img
+            height="1"
+            width="1"
+            style={{ display: 'none' }}
+            alt=""
+            src={`https://www.facebook.com/tr?id=${META_PIXEL_ID}&ev=PageView&noscript=1`}
+          />
+        </noscript>
         <LangProvider>
           <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID ?? ''}>
             <Outlet />

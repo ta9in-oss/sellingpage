@@ -54,13 +54,28 @@ export type Section =
   | { id: string; type: 'testimonials'; title?: string; items: { name: string; text: string; rating: number; location?: string }[] }
   | { id: string; type: 'faq'; title?: string; items: { q: string; a: string }[] }
   | { id: string; type: 'guarantee'; title?: string; items: { title: string; description: string; icon: string }[] }
-  | { id: string; type: 'order-form'; title?: string; submitLabel: string; fields: FormField[] }
+  | { id: string; type: 'order-form'; title?: string; submitLabel: string; fields: FormField[]; requiredFields?: OrderRequiredFields }
   | { id: string; type: 'social-proof'; rating?: number; reviewCount?: number }
   | { id: string; type: 'cta'; headline: string; subheadline: string; cta: string }
   | { id: string; type: 'benefits'; title?: string; items: { icon: string; title: string; description: string }[] }
   | { id: string; type: 'value-stack'; ctaText: string; items: { icon: string; title: string; description: string; value: string; isFree: boolean }[] }
   | { id: string; type: 'product-carousel'; title?: string; images?: string[] }
   | { id: string; type: 'footer'; storeName: string; tagline?: string; phone?: string; email?: string; whatsapp?: string; copyright?: string }
+
+/**
+ * Which order-form fields the buyer must fill.
+ *
+ * Location (wilaya/daira/commune) is absent on purpose — a parcel cannot be
+ * delivered without it, so it is unconditionally required. Email is overridden
+ * to required when the store takes online payment, because Chargily sends the
+ * receipt there.
+ */
+export interface OrderRequiredFields {
+  name?: boolean
+  email?: boolean
+  phone?: boolean
+  message?: boolean
+}
 
 export interface FormField {
   id: string

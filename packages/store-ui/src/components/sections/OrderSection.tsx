@@ -22,7 +22,7 @@ import {
 } from '../../components/ui/popover';
 import { cn } from '../../lib/utils';
 import { useAlgeriaLocations } from '../../hooks/useAlgeriaLocations';
-import type { OrderLayoutConfig, ProductImage } from '../../types/content.types';
+import type { OrderFieldsConfig, OrderLayoutConfig, ProductImage } from '../../types/content.types';
 
 interface OrderSectionProps {
     price: number;
@@ -40,7 +40,22 @@ interface OrderSectionProps {
     buyerName?: string;
     /** Called when Chargily is active but buyer hasn't authenticated yet. */
     onAuthRequest?: () => void;
+    /** Which fields the merchant made mandatory. Omitted keys fall back to REQUIRED_DEFAULTS. */
+    requiredFields?: OrderFieldsConfig;
 }
+
+/**
+ * What a store demands when the merchant has not said otherwise: enough to
+ * dispatch a parcel and phone the buyer about it. Email stays optional — most
+ * Algerian COD buyers do not have one to hand, and demanding it is a silent
+ * conversion killer.
+ */
+const REQUIRED_DEFAULTS: Required<OrderFieldsConfig> = {
+    name: true,
+    phone: true,
+    email: false,
+    message: false,
+};
 
 export interface OrderData {
     name: string;
@@ -67,7 +82,12 @@ export function OrderSection({
     buyerEmail,
     buyerName,
     onAuthRequest,
+    requiredFields,
 }: OrderSectionProps) {
+    const required = { ...REQUIRED_DEFAULTS, ...(requiredFields ?? {}) };
+    // Chargily sends the receipt by email, so online payment overrides the
+    // merchant's choice. Everything else is theirs to decide.
+    const emailRequired = required.email || activePaymentMethod === 'chargily';
     const [quantity, setQuantity] = useState(1);
     const [formData, setFormData] = useState({
         name: '',
@@ -128,9 +148,14 @@ export function OrderSection({
             return;
         }
 
-        // Online payment needs a real email for the Chargily receipt; COD does not.
-        const needsEmail = activePaymentMethod === 'chargily';
-        if (!formData.name || !formData.phone || !selectedWilaya || !selectedDaira || !selectedCommune || (needsEmail && !formData.email.trim())) {
+        // Location is always required — a parcel cannot be delivered without it.
+        const missing =
+            (required.name && !formData.name.trim()) ||
+            (required.phone && !formData.phone.trim()) ||
+            (emailRequired && !formData.email.trim()) ||
+            (required.message && !(formData.message ?? '').trim()) ||
+            !selectedWilaya || !selectedDaira || !selectedCommune;
+        if (missing) {
             setValidationError(true);
             setTimeout(() => setValidationError(false), 5000);
             return;
@@ -190,7 +215,7 @@ export function OrderSection({
                 <div>
                     <Label htmlFor="name" className="block text-base font-bold mb-2 text-right">
                         الاسم الكامل
-                        <span className="text-red-500 mr-1 text-xl">*</span>
+                        {required.name && <span className="text-red-500 mr-1 text-xl">*</span>}
                     </Label>
                     <Input
                         type="text"
@@ -206,7 +231,13 @@ export function OrderSection({
                 {/* Email */}
                 <div>
                     <Label htmlFor="email" className="block text-base font-bold mb-2 text-right">
-                        {activePaymentMethod === 'chargily' ? 'البريد الإلكتروني (مطلوب للدفع الإلكتروني)' : 'البريد الإلكتروني (اختياري)'}
+                        البريد الإلكتروني
+                        {emailRequired
+                            ? <span className="text-red-500 mr-1 text-xl">*</span>
+                            : <span className="text-sm font-normal mr-1">(اختياري)</span>}
+                        {activePaymentMethod === 'chargily' && (
+                            <span className="block text-xs font-normal text-gray-500 mt-0.5">مطلوب للدفع الإلكتروني</span>
+                        )}
                     </Label>
                     <Input
                         type="email"
@@ -223,7 +254,7 @@ export function OrderSection({
                 <div>
                     <Label htmlFor="phone" className="block text-base font-bold mb-2 text-right">
                         رقم الهاتف
-                        <span className="text-red-500 mr-1 text-xl">*</span>
+                        {required.phone && <span className="text-red-500 mr-1 text-xl">*</span>}
                     </Label>
                     <Input
                         type="tel"

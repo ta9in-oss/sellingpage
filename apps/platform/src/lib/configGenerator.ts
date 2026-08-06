@@ -24,6 +24,7 @@ export function generateContent(config: StoreConfig): SiteContent {
   const socialProof = find(config, 'social-proof')
   const valueStack = find(config, 'value-stack')
   const carousel = find(config, 'product-carousel')
+  const orderForm = find(config, 'order-form')
 
   const carouselImages = carousel?.images?.length ? carousel.images : config.product.images
 
@@ -52,9 +53,20 @@ export function generateContent(config: StoreConfig): SiteContent {
       title: config.product.name,
       bgColor: bg(i),
     })),
+    // Which fields the buyer must fill. Nothing used to emit this, so every
+    // deployed store fell back to OrderSection's hardcoded rules — which
+    // demanded an email whenever the store took online payment, even though
+    // the form labelled it optional. Defaults match those hardcoded rules, so
+    // a store that never touches the setting behaves exactly as before.
+    orderFields: {
+      name: orderForm?.requiredFields?.name ?? true,
+      email: orderForm?.requiredFields?.email ?? false,
+      phone: orderForm?.requiredFields?.phone ?? true,
+      message: orderForm?.requiredFields?.message ?? false,
+    },
     sections: {
       specs: { title: features?.title ?? 'المميزات' },
-      order: { title: 'اطلب الآن' },
+      order: { title: orderForm?.title ?? 'اطلب الآن' },
       ...(testimonials ? { testimonials: { title: testimonials.title ?? 'آراء العملاء' } } : {}),
       ...(faq ? { faq: { title: faq.title ?? 'أسئلة شائعة' } } : {}),
     },

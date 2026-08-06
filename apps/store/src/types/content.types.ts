@@ -92,6 +92,7 @@ export interface SiteContent {
     urgency?: UrgencyConfig;
     cta?: CTASection;
     orderLayout?: OrderLayoutConfig;
+    orderFields?: OrderFieldsConfig;
     sections: {
         specs: {
             title: string;
@@ -122,6 +123,13 @@ export type OrderLayoutType =
     | 'side-by-side'                       // Form left, Quantity right (no carousel)
     | 'stacked'                            // All stacked vertically
     | 'custom';                            // Custom grid configuration
+
+export interface OrderFieldsConfig {
+    name?: boolean;
+    email?: boolean;
+    phone?: boolean;
+    message?: boolean;
+}
 
 export interface OrderLayoutConfig {
     type: OrderLayoutType;

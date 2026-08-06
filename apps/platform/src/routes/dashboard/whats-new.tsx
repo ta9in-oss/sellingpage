@@ -6,7 +6,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { privateHead } from '@/lib/seo'
 import { useEffect } from 'react'
 import { db } from '@/lib/instantdb'
-import { Loader2, ArrowLeft, ArrowRight, Sparkles } from 'lucide-react'
+import { Loader2, ArrowLeft, ArrowRight, Megaphone } from 'lucide-react'
 import { useLang } from '@/hooks/useLang'
 import { cn } from '@/lib/utils'
 import { RELEASES, KIND_LABEL, type ReleaseKind } from '@/config/releases'
@@ -84,7 +84,7 @@ function WhatsNewPage() {
         </button>
 
         <div className="flex items-center gap-2 mb-1">
-          <Sparkles className="h-5 w-5 text-primary" />
+          <Megaphone className="h-5 w-5 text-primary" />
           <h1 className="text-2xl font-bold">{t(T.title)}</h1>
         </div>
         <p className="text-sm text-muted-foreground mb-6">{t(T.subtitle)}</p>
