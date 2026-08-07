@@ -2,6 +2,7 @@ import { Link } from '@tanstack/react-router'
 import { useLang } from '@/hooks/useLang'
 import { Reveal, Kicker, SplitTitle, Icon } from '@/components/marketing/landing/primitives'
 import { FirstBatchCountdown } from '@/components/marketing/FirstBatchCountdown'
+import { OnlineIndicator } from '@/components/marketing/OnlineIndicator'
 import { contactWhatsappUrl } from '@/config/pricing'
 import { landingPricing } from '@/locales'
 
@@ -89,6 +90,9 @@ export function Pricing() {
   return (
     <section className="section" id="pricing">
       <div className="wrap">
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+          <OnlineIndicator />
+        </div>
         <Reveal className="shead" style={{ maxWidth: '34em' }}>
           <Kicker>{t(landingPricing.kicker)}</Kicker>
           <SplitTitle lines={[t(landingPricing.title.l1), t(landingPricing.title.l2)]} />

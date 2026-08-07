@@ -86,7 +86,12 @@ const _schema = i.schema({
       },
     },
   },
-  rooms: {},
+  rooms: {
+    // Room for the live "N browsing now" presence indicator
+    platformPresence: {
+      presence: i.entity({}),
+    },
+  },
 });
 
 // This helps TypeScript display nicer intellisense
