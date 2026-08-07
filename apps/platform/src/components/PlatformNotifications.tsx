@@ -1,11 +1,13 @@
 import { usePlatformFomo } from '@/hooks/usePlatformFomo'
 import { useLang } from '@/hooks/useLang'
+import { merchantsAr } from '@/lib/arabicPlural'
 
 const T = {
   anonymous: { ar: 'مشترك جديد', fr: 'Nouvel abonné', en: 'New subscriber' },
   subscribed: { ar: 'اشترك في باقة', fr: "s'est abonné au forfait", en: 'subscribed to the' },
   tierTotal: { ar: 'مشتركاً في باقة', fr: 'abonnés au forfait', en: 'subscribers on the' },
-  grandTotal: { ar: 'تاجراً اشتركوا في 7aba', fr: 'commerçants inscrits sur 7aba', en: 'merchants have joined 7aba' },
+  grandTotalFr: (n: number) => `${n} commerçant${n > 1 ? 's' : ''} inscrit${n > 1 ? 's' : ''} sur 7aba`,
+  grandTotalEn: (n: number) => `${n} merchant${n > 1 ? 's' : ''} have joined 7aba`,
   live: { ar: 'الآن', fr: 'maintenant', en: 'live' },
 }
 
@@ -20,7 +22,7 @@ interface PlatformNotificationsProps {
  */
 export function PlatformNotifications({ userTier }: PlatformNotificationsProps) {
   const { current, visible, timeAgo } = usePlatformFomo()
-  const { t, dir } = useLang()
+  const { t, dir, lang } = useLang()
 
   const isPaid = userTier && userTier !== 'free'
   if (isPaid) return null
@@ -61,8 +63,8 @@ export function PlatformNotifications({ userTier }: PlatformNotificationsProps) 
           )}
 
           {current.kind === 'grandTotal' && (
-            <p className="text-sm font-bold leading-snug">
-              <span className="text-yellow-400">{current.count}</span> {t(T.grandTotal)}
+            <p className="text-sm font-bold leading-snug text-yellow-400">
+              {lang === 'ar' ? merchantsAr(current.count) : lang === 'fr' ? T.grandTotalFr(current.count) : T.grandTotalEn(current.count)}
             </p>
           )}
         </div>
