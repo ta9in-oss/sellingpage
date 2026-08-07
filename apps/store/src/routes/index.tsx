@@ -119,7 +119,7 @@ function Home() {
 
       <FeatureGrid features={content.features} title={content.sections.specs.title} />
 
-      {features.benefits && <BenefitsSection benefits={content.benefits} />}
+      {features.benefits && <BenefitsSection benefits={content.benefits ?? []} />}
 
       {features.valueStack && (
         <ValueStackSection
@@ -130,11 +130,11 @@ function Home() {
         />
       )}
 
-      {features.testimonials && <TestimonialSection testimonials={content.testimonials} />}
+      {features.testimonials && <TestimonialSection testimonials={content.testimonials ?? []} />}
 
       {features.cta && content.cta && <CTASection cta={content.cta} />}
 
-      {features.guarantees && <GuaranteeSection guarantees={content.guarantees} />}
+      {features.guarantees && <GuaranteeSection guarantees={content.guarantees ?? []} />}
 
       {!isDark && <div className="w-full h-0.5 bg-black" />}
 
@@ -155,7 +155,7 @@ function Home() {
         />
       </section>
 
-      {features.faqs && <FAQSection faqs={content.faqs} />}
+      {features.faqs && <FAQSection faqs={content.faqs ?? []} />}
 
       {features.notifications && (
         <OrderNotifications

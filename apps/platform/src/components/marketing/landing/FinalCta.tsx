@@ -17,7 +17,7 @@ export function FinalCta() {
               {t(landingFinalCta.title.l2)}
             </h2>
             <p>{t(landingFinalCta.sub)}</p>
-            <Link to="/dashboard" search={{}} className="btn btn--ink btn--lg">
+            <Link to="/auth/signup" search={{}} className="btn btn--ink btn--lg">
               {t(landingFinalCta.cta)}<span className="btn__arrow">→</span>
             </Link>
           </div>

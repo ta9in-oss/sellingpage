@@ -2,7 +2,7 @@
  * /dashboard — main merchant dashboard
  *
  * Flow:
- *   1. Not authed → show AuthModal
+ *   1. Not authed → redirect to /auth/signin (dedicated, trackable page)
  *   2. Authed, no subscription → show SubscriptionGate (pricing page inline)
  *   3. Authed, no CF/InstantDB creds + first visit → show OnboardingWelcome
  *   4. Authed + subscribed + onboarded → show StoresDashboard
@@ -13,7 +13,6 @@ import React, { useState, useEffect } from 'react'
 import { db } from '@/lib/instantdb'
 import { cn } from '@/lib/utils'
 import { useLang } from '@/hooks/useLang'
-import { AuthModal } from '@/components/auth/AuthModal'
 import { StoreSettingsModal } from '@/components/dashboard/StoreSettingsModal'
 import {
   DropdownMenu,
@@ -56,8 +55,6 @@ const RUN_ONE_MSG = {
 }
 
 const DT = {
-  loginTitle: { ar: 'الدخول للوحة التحكم', fr: 'Accès au tableau de bord', en: 'Dashboard Login' },
-  loginBtn: { ar: 'تسجيل الدخول', fr: 'Se connecter', en: 'Sign in' },
   choosePlan: { ar: 'اختر باقتك', fr: 'Choisissez votre forfait', en: 'Choose your plan' },
   subscribeNow: { ar: 'اشترك الآن', fr: "S'abonner", en: 'Subscribe now' },
   myStores: { ar: 'متاجرك', fr: 'Mes boutiques', en: 'My stores' },
@@ -80,41 +77,16 @@ const DT = {
 function DashboardPage() {
   const { payment, tier, checkout_id, plan } = Route.useSearch()
   const { isLoading, user } = db.useAuth()
-  const { t, dir } = useLang()
-  const [showAuth, setShowAuth] = useState(false)
+  const navigate = useNavigate()
 
-  if (isLoading) {
+  useEffect(() => {
+    if (!isLoading && !user) navigate({ to: '/auth/signin', search: { redirect: '/dashboard' }, replace: true })
+  }, [isLoading, user, navigate])
+
+  if (isLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    )
-  }
-
-  if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-4" dir={dir}>
-        {showAuth ? (
-          <AuthModal
-            title={t(DT.loginTitle)}
-            subtitle="أدخل معلوماتك لمتابعة"
-            onClose={() => setShowAuth(false)}
-          />
-        ) : (
-          <div className="text-center space-y-4">
-            <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto">
-              <Store className="h-8 w-8 text-primary-foreground" />
-            </div>
-            <h1 className="text-2xl font-bold">7aba.app</h1>
-            <p className="text-muted-foreground">سجّل دخولك للوصول للوحة التحكم</p>
-            <button
-              onClick={() => setShowAuth(true)}
-              className="px-6 py-3 bg-primary text-primary-foreground rounded-xl font-semibold hover:bg-primary/90 transition-colors"
-            >
-              {t(DT.loginBtn)}
-            </button>
-          </div>
-        )}
       </div>
     )
   }

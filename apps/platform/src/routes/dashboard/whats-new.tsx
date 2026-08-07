@@ -8,7 +8,7 @@ import { useEffect } from 'react'
 import { db } from '@/lib/instantdb'
 import { Loader2, ArrowLeft, ArrowRight, Megaphone } from 'lucide-react'
 import { useLang } from '@/hooks/useLang'
-import { cn } from '@/lib/utils'
+import { Badge } from '@/components/ui/badge'
 import { RELEASES, KIND_LABEL, type ReleaseKind } from '@/config/releases'
 
 export const Route = createFileRoute('/dashboard/whats-new')({
@@ -32,10 +32,10 @@ const T = {
   empty: { ar: 'لا توجد تحديثات بعد.', fr: 'Aucune mise à jour pour le moment.', en: 'No updates yet.' },
 }
 
-const KIND_STYLE: Record<ReleaseKind, string> = {
-  new: 'bg-primary/10 text-primary',
-  improved: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  fixed: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+const KIND_VARIANT: Record<ReleaseKind, 'accent' | 'default' | 'outline'> = {
+  new: 'accent',
+  improved: 'default',
+  fixed: 'outline',
 }
 
 function WhatsNewPage() {
@@ -106,14 +106,9 @@ function WhatsNewPage() {
                 <ul className="space-y-3">
                   {release.items.map((item, i) => (
                     <li key={i} className="flex items-start gap-2.5">
-                      <span
-                        className={cn(
-                          'text-[11px] font-bold px-2 py-0.5 rounded-full shrink-0 mt-0.5',
-                          KIND_STYLE[item.kind],
-                        )}
-                      >
+                      <Badge variant={KIND_VARIANT[item.kind]} className="shrink-0 mt-0.5 text-[11px] font-bold">
                         {t(KIND_LABEL[item.kind])}
-                      </span>
+                      </Badge>
                       <span className="text-sm leading-relaxed">{t(item.text)}</span>
                     </li>
                   ))}

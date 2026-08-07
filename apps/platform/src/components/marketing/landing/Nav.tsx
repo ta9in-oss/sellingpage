@@ -19,10 +19,10 @@ export function Nav() {
         </nav>
         <div className="nav__right">
           <LanguageSelect variant="marketing" />
-          <Link to="/dashboard" search={{}} className="btn btn--ghost">
+          <Link to="/auth/signin" search={{}} className="btn btn--ghost">
             {t(landingNav.login)}
           </Link>
-          <Link to="/dashboard" search={{}} className="btn btn--accent">
+          <Link to="/auth/signup" search={{}} className="btn btn--accent">
             {t(landingNav.cta)}
           </Link>
         </div>

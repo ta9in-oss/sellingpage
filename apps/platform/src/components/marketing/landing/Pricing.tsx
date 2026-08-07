@@ -71,7 +71,7 @@ function TierCard({ tier }: TierCardProps) {
         </a>
       ) : (
         <Link
-          to="/dashboard"
+          to="/auth/signup"
           search={{}}
           className={'btn ' + (tier.highlight ? 'btn--accent' : 'btn--ink')}
         >

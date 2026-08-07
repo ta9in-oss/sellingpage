@@ -80,10 +80,30 @@ export interface CTASection {
     urgent?: boolean;
 }
 
+export interface SocialProofContent {
+    rating: number;
+    reviewCount: number;
+}
+
+export interface ValueStackItem {
+    icon?: string;
+    title: string;
+    description: string;
+    value?: string;
+    isFree?: boolean;
+}
+
+export interface ValueStackContent {
+    ctaText?: string;
+    items: ValueStackItem[];
+}
+
 export interface SiteContent {
     hero: HeroContent;
     features: Feature[];
     productImages: ProductImage[];
+    socialProof?: SocialProofContent;
+    valueStack?: ValueStackContent;
     testimonials?: Testimonial[];
     faqs?: FAQItem[];
     guarantees?: Guarantee[];

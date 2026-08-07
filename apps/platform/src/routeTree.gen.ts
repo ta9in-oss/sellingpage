@@ -20,6 +20,8 @@ import { Route as DashboardNewStoreRouteImport } from './routes/dashboard/new-st
 import { Route as DashboardDeployRouteImport } from './routes/dashboard/deploy'
 import { Route as DashboardCertificateRouteImport } from './routes/dashboard/certificate'
 import { Route as DashboardBuilderRouteImport } from './routes/dashboard/builder'
+import { Route as AuthSignupRouteImport } from './routes/auth/signup'
+import { Route as AuthSigninRouteImport } from './routes/auth/signin'
 import { Route as AuthInstantdbRouteImport } from './routes/auth/instantdb'
 import { Route as AuthCloudflareRouteImport } from './routes/auth/cloudflare'
 
@@ -78,6 +80,16 @@ const DashboardBuilderRoute = DashboardBuilderRouteImport.update({
   path: '/dashboard/builder',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthSignupRoute = AuthSignupRouteImport.update({
+  id: '/auth/signup',
+  path: '/auth/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthSigninRoute = AuthSigninRouteImport.update({
+  id: '/auth/signin',
+  path: '/auth/signin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthInstantdbRoute = AuthInstantdbRouteImport.update({
   id: '/auth/instantdb',
   path: '/auth/instantdb',
@@ -96,6 +108,8 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/auth/cloudflare': typeof AuthCloudflareRoute
   '/auth/instantdb': typeof AuthInstantdbRoute
+  '/auth/signin': typeof AuthSigninRoute
+  '/auth/signup': typeof AuthSignupRoute
   '/dashboard/builder': typeof DashboardBuilderRoute
   '/dashboard/certificate': typeof DashboardCertificateRoute
   '/dashboard/deploy': typeof DashboardDeployRoute
@@ -111,6 +125,8 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/auth/cloudflare': typeof AuthCloudflareRoute
   '/auth/instantdb': typeof AuthInstantdbRoute
+  '/auth/signin': typeof AuthSigninRoute
+  '/auth/signup': typeof AuthSignupRoute
   '/dashboard/builder': typeof DashboardBuilderRoute
   '/dashboard/certificate': typeof DashboardCertificateRoute
   '/dashboard/deploy': typeof DashboardDeployRoute
@@ -127,6 +143,8 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/auth/cloudflare': typeof AuthCloudflareRoute
   '/auth/instantdb': typeof AuthInstantdbRoute
+  '/auth/signin': typeof AuthSigninRoute
+  '/auth/signup': typeof AuthSignupRoute
   '/dashboard/builder': typeof DashboardBuilderRoute
   '/dashboard/certificate': typeof DashboardCertificateRoute
   '/dashboard/deploy': typeof DashboardDeployRoute
@@ -144,6 +162,8 @@ export interface FileRouteTypes {
     | '/terms'
     | '/auth/cloudflare'
     | '/auth/instantdb'
+    | '/auth/signin'
+    | '/auth/signup'
     | '/dashboard/builder'
     | '/dashboard/certificate'
     | '/dashboard/deploy'
@@ -159,6 +179,8 @@ export interface FileRouteTypes {
     | '/terms'
     | '/auth/cloudflare'
     | '/auth/instantdb'
+    | '/auth/signin'
+    | '/auth/signup'
     | '/dashboard/builder'
     | '/dashboard/certificate'
     | '/dashboard/deploy'
@@ -174,6 +196,8 @@ export interface FileRouteTypes {
     | '/terms'
     | '/auth/cloudflare'
     | '/auth/instantdb'
+    | '/auth/signin'
+    | '/auth/signup'
     | '/dashboard/builder'
     | '/dashboard/certificate'
     | '/dashboard/deploy'
@@ -190,6 +214,8 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   AuthCloudflareRoute: typeof AuthCloudflareRoute
   AuthInstantdbRoute: typeof AuthInstantdbRoute
+  AuthSigninRoute: typeof AuthSigninRoute
+  AuthSignupRoute: typeof AuthSignupRoute
   DashboardBuilderRoute: typeof DashboardBuilderRoute
   DashboardCertificateRoute: typeof DashboardCertificateRoute
   DashboardDeployRoute: typeof DashboardDeployRoute
@@ -278,6 +304,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardBuilderRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/signup': {
+      id: '/auth/signup'
+      path: '/auth/signup'
+      fullPath: '/auth/signup'
+      preLoaderRoute: typeof AuthSignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/signin': {
+      id: '/auth/signin'
+      path: '/auth/signin'
+      fullPath: '/auth/signin'
+      preLoaderRoute: typeof AuthSigninRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth/instantdb': {
       id: '/auth/instantdb'
       path: '/auth/instantdb'
@@ -302,6 +342,8 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   AuthCloudflareRoute: AuthCloudflareRoute,
   AuthInstantdbRoute: AuthInstantdbRoute,
+  AuthSigninRoute: AuthSigninRoute,
+  AuthSignupRoute: AuthSignupRoute,
   DashboardBuilderRoute: DashboardBuilderRoute,
   DashboardCertificateRoute: DashboardCertificateRoute,
   DashboardDeployRoute: DashboardDeployRoute,

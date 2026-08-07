@@ -24,7 +24,7 @@ export function Hero() {
           </Reveal>
           <Reveal delay={180}>
             <div className="hero__cta">
-              <Link to="/dashboard" search={{}} className="btn btn--accent btn--lg">
+              <Link to="/auth/signup" search={{}} className="btn btn--accent btn--lg">
                 {t(landingHero.ctaPrimary)}<span className="btn__arrow">→</span>
               </Link>
               <a className="btn btn--lg" href="https://demo.7aba.app" target="_blank" rel="noopener noreferrer">{t(landingHero.ctaSecondary)}</a>

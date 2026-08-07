@@ -9,7 +9,7 @@ import { CredentialsForm } from '@/components/settings/CredentialsForm'
 
 export const Route = createFileRoute('/dashboard/settings')({
   head: () => privateHead('الإعدادات | 7aba.app'),
-  validateSearch: (search) => ({
+  validateSearch: (search): { from?: string } => ({
     from: (search.from as string) || undefined,
   }),
   component: SettingsPage,

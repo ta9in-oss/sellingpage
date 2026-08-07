@@ -27,8 +27,8 @@ export interface Release {
 
 export const KIND_LABEL: Record<ReleaseKind, Tri> = {
   new: { ar: 'جديد', fr: 'Nouveau', en: 'New' },
-  improved: { ar: 'تحسين', fr: 'Amélioré', en: 'Improved' },
-  fixed: { ar: 'إصلاح', fr: 'Corrigé', en: 'Fixed' },
+  improved: { ar: 'محسّن', fr: 'Amélioré', en: 'Improved' },
+  fixed: { ar: 'مُصلَح', fr: 'Corrigé', en: 'Fixed' },
 }
 
 export const RELEASES: Release[] = [
