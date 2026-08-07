@@ -24,13 +24,15 @@ export const getRecentSubscribers = createServerFn({ method: 'GET' }).handler(
     const users = (result.platformUsers ?? []) as Array<{
       name?: string
       tier?: string
-      purchasedAt?: number
+      // InstantDB's i.date() round-trips as an ISO string, not the epoch
+      // number `new Date()` was written with — normalize below.
+      purchasedAt?: number | string
     }>
 
     return users
-      .filter((u): u is { name?: string; tier: string; purchasedAt: number } => !!u.tier && !!u.purchasedAt)
+      .map((u) => ({ name: u.name ?? null, tier: u.tier, purchasedAt: u.purchasedAt ? new Date(u.purchasedAt).getTime() : NaN }))
+      .filter((u): u is RecentSubscriber => !!u.tier && !Number.isNaN(u.purchasedAt))
       .sort((a, b) => b.purchasedAt - a.purchasedAt)
       .slice(0, 20)
-      .map((u) => ({ name: u.name ?? null, tier: u.tier, purchasedAt: u.purchasedAt }))
   }
 )
