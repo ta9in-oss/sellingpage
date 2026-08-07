@@ -29,9 +29,11 @@ export const getRecentSubscribers = createServerFn({ method: 'GET' }).handler(
       purchasedAt?: number | string
     }>
 
+    const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000
+
     return users
       .map((u) => ({ name: u.name ?? null, tier: u.tier, purchasedAt: u.purchasedAt ? new Date(u.purchasedAt).getTime() : NaN }))
-      .filter((u): u is RecentSubscriber => !!u.tier && !Number.isNaN(u.purchasedAt))
+      .filter((u): u is RecentSubscriber => !!u.tier && !Number.isNaN(u.purchasedAt) && u.purchasedAt >= thirtyDaysAgo)
       .sort((a, b) => b.purchasedAt - a.purchasedAt)
       .slice(0, 20)
   }
