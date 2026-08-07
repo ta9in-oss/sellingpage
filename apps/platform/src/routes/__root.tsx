@@ -5,6 +5,7 @@ import { LangProvider } from '@/context/LangContext'
 import { CookieNotice } from '@/components/marketing/CookieNotice'
 import { WhatsAppButton } from '@/components/marketing/WhatsAppButton'
 import { PlatformNotifications } from '@/components/PlatformNotifications'
+import { InAppBrowserBanner } from '@/components/marketing/InAppBrowserBanner'
 import appCss from '@/styles/app.css?url'
 import analytics from '@/utils/analytics'
 
@@ -87,6 +88,7 @@ function RootComponent() {
         </noscript>
         <LangProvider>
           <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID ?? ''}>
+            <InAppBrowserBanner />
             <Outlet />
             <WhatsAppButton />
             <PlatformNotifications />
