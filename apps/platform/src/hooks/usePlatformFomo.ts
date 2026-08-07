@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { getRecentSubscribers, type RecentSubscriber } from '@/server/getRecentSubscribers'
+import { getRecentSubscribers, type SubscriberStats } from '@/server/getRecentSubscribers'
 import { TIERS } from '@/config/pricing'
 import type { Tri } from '@/config/pricing'
 
@@ -11,12 +11,14 @@ import type { Tri } from '@/config/pricing'
  * entity (which also carries deployment credential fields). `name` is
  * optional at signup, so anonymous subscribers show without one — never
  * invent a name or location that wasn't actually given.
+ *
+ * Three real event shapes, mixed and shuffled: an individual recent signup,
+ * an all-time count for one tier, or the all-time total across every tier.
  */
-export interface FomoEvent {
-  name: string | null
-  plan: Tri
-  purchasedAt: number
-}
+export type FomoEvent =
+  | { kind: 'individual'; name: string | null; plan: Tri; purchasedAt: number }
+  | { kind: 'tierTotal'; plan: Tri; count: number }
+  | { kind: 'grandTotal'; count: number }
 
 function relativeTime(ms: number): Tri {
   const diff = Date.now() - ms
@@ -29,6 +31,32 @@ function relativeTime(ms: number): Tri {
   return { ar: `منذ ${days} يوم`, fr: `il y a ${days} j`, en: `${days}d ago` }
 }
 
+function tierName(id: string): Tri {
+  return TIERS.find((t) => t.id === id)?.name ?? { ar: id, fr: id, en: id }
+}
+
+function buildEvents(stats: SubscriberStats): FomoEvent[] {
+  const events: FomoEvent[] = stats.recent.map((u) => ({
+    kind: 'individual',
+    name: u.name,
+    plan: tierName(u.tier),
+    purchasedAt: u.purchasedAt,
+  }))
+
+  for (const [tier, count] of Object.entries(stats.byTier)) {
+    if (count > 0) events.push({ kind: 'tierTotal', plan: tierName(tier), count })
+  }
+
+  if (stats.total > 0) events.push({ kind: 'grandTotal', count: stats.total })
+
+  // Shuffle so the three kinds interleave instead of running in fixed blocks.
+  for (let i = events.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[events[i], events[j]] = [events[j], events[i]]
+  }
+  return events
+}
+
 export function usePlatformFomo() {
   const [current, setCurrent] = useState<FomoEvent | null>(null)
   const [visible, setVisible] = useState(false)
@@ -38,18 +66,15 @@ export function usePlatformFomo() {
   useEffect(() => {
     let cancelled = false
 
-    getRecentSubscribers().then((subscribers: RecentSubscriber[]) => {
-      if (cancelled || subscribers.length === 0) return
+    getRecentSubscribers().then((stats: SubscriberStats) => {
+      if (cancelled) return
+      const events = buildEvents(stats)
+      if (events.length === 0) return
 
       function showNext() {
-        const u = subscribers[indexRef.current % subscribers.length]
+        const event = events[indexRef.current % events.length]
         indexRef.current++
-        const tier = TIERS.find((t) => t.id === u.tier)
-        setCurrent({
-          name: u.name,
-          plan: tier?.name ?? { ar: u.tier, fr: u.tier, en: u.tier },
-          purchasedAt: u.purchasedAt,
-        })
+        setCurrent(event)
         setVisible(true)
 
         timerRef.current = setTimeout(() => {
@@ -69,5 +94,6 @@ export function usePlatformFomo() {
     }
   }, [])
 
-  return { current, visible, timeAgo: current ? relativeTime(current.purchasedAt) : null }
+  const timeAgo = current?.kind === 'individual' ? relativeTime(current.purchasedAt) : null
+  return { current, visible, timeAgo }
 }

@@ -53,10 +53,10 @@ const T = {
 }
 
 const HAS_GOOGLE_AUTH = !!import.meta.env.VITE_GOOGLE_CLIENT_ID
-// Email felt like friction for real visitors (Clarity session review). Google-only for
-// now — the 'email'/'code' steps and all their tracking stay wired, just unreachable
-// from the UI, so flipping this back on later is a one-line change.
-const SHOW_EMAIL_OPTION = false
+// Most FB-ad visitors aren't already Google-authenticated on the device they
+// clicked through on, so Google-only cuts off a real path — email stays as
+// the fallback until Meta login ships.
+const SHOW_EMAIL_OPTION = true
 
 /** Fires the same conversion under each channel's own vocabulary, once per mode. */
 function trackAuthSuccess(mode: AuthMode) {
