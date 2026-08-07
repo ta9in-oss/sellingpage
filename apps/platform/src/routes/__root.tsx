@@ -4,6 +4,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google'
 import { LangProvider } from '@/context/LangContext'
 import { CookieNotice } from '@/components/marketing/CookieNotice'
 import { WhatsAppButton } from '@/components/marketing/WhatsAppButton'
+import { PlatformNotifications } from '@/components/PlatformNotifications'
 import appCss from '@/styles/app.css?url'
 import analytics from '@/utils/analytics'
 
@@ -88,6 +89,7 @@ function RootComponent() {
           <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID ?? ''}>
             <Outlet />
             <WhatsAppButton />
+            <PlatformNotifications />
             <CookieNotice />
           </GoogleOAuthProvider>
         </LangProvider>

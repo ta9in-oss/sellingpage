@@ -53,6 +53,10 @@ const T = {
 }
 
 const HAS_GOOGLE_AUTH = !!import.meta.env.VITE_GOOGLE_CLIENT_ID
+// Email felt like friction for real visitors (Clarity session review). Google-only for
+// now — the 'email'/'code' steps and all their tracking stay wired, just unreachable
+// from the UI, so flipping this back on later is a one-line change.
+const SHOW_EMAIL_OPTION = false
 
 /** Fires the same conversion under each channel's own vocabulary, once per mode. */
 function trackAuthSuccess(mode: AuthMode) {
@@ -157,7 +161,7 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
             </div>
           )}
 
-          {HAS_GOOGLE_AUTH && (
+          {SHOW_EMAIL_OPTION && HAS_GOOGLE_AUTH && (
             <div className="flex items-center gap-3 text-xs text-zinc-400">
               <div className="flex-1 h-px bg-zinc-200" />
               <span>{t(T.or)}</span>
@@ -165,6 +169,7 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
             </div>
           )}
 
+          {(SHOW_EMAIL_OPTION || !HAS_GOOGLE_AUTH) && (
           <button
             onClick={() => setStep('email')}
             className={cn(
@@ -175,6 +180,7 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
           >
             {t(T.continueEmail)}
           </button>
+          )}
 
           {error && <p className="text-red-600 text-xs border border-red-200 bg-red-50 p-2">{error}</p>}
         </div>
