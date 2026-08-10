@@ -196,7 +196,7 @@ function DemoStorePage() {
             href="/#pricing"
             className="inline-block bg-yellow-400 text-black px-8 py-4 border-4 border-yellow-400 font-black text-lg hover:bg-yellow-300 transition-colors"
           >
-            ابدأ الآن: 10,000 دج دفعة واحدة
+            ابدأ الآن: من 1,000 دج دفعة واحدة
           </a>
         </div>
       </div>
