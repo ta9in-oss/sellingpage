@@ -34,6 +34,7 @@ jobs:
           VITE_INSTANT_APP_ID: b9227417-33f4-4c3d-9c88-612e094aff89
           VITE_APP_URL: https://7aba.app
           VITE_GOOGLE_CLIENT_ID: 1031735082979-bjhvq3ulo8gsmebkeihkalh3gohoropm.apps.googleusercontent.com
+          VITE_META_PIXEL_ID: '322683491235522'
           # Public OAuth client ids (not secrets) — inlined by Vite to render the
           # "connect" buttons. The matching *_CLIENT_SECRET values are runtime-only
           # and set as encrypted Pages secrets, never here.

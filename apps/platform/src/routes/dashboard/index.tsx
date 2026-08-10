@@ -22,8 +22,10 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { createSubscriptionCheckout } from '@/server/createSubscriptionCheckout'
 import { verifySubscriptionPayment } from '@/server/verifySubscriptionPayment'
-import { trackPixel } from '@/lib/pixel'
-import { TIERS as PRICING_TIERS, ONCE_LABEL, contactWhatsappUrl } from '@/config/pricing'
+import { trackPixel, trackPixelCustom } from '@/lib/pixel'
+import { trackGtag, trackClarity } from '@/lib/track'
+import { TIERS as PRICING_TIERS, ONCE_LABEL, contactWhatsappUrl, STARTER_PRICE_VARIANTS, FLEXY_LABEL, formatDzdLabel } from '@/config/pricing'
+import { getStarterPriceVariant } from '@/lib/starterPriceVariant'
 import { FirstBatchCountdown } from '@/components/marketing/FirstBatchCountdown'
 import { LanguageSelect } from '@/components/marketing/LanguageSelect'
 import { getDownloadUrl } from '@/server/getDownloadUrl'
@@ -129,16 +131,43 @@ function AuthenticatedDashboard({
       })
         .then((r) => {
           if ((r as any)?.success) {
-            const price = PRICING_TIERS.find((x) => x.id === paymentTier)?.priceDzd
-            trackPixel('Purchase', { value: price, currency: 'DZD', content_name: paymentTier })
+            // Actual charged amount from Chargily, not a static tier lookup —
+            // starter's price varies per visitor (STARTER_PRICE_VARIANTS), so
+            // Meta must get what this buyer really paid.
+            const price = (r as any)?.priceDzd ?? PRICING_TIERS.find((x) => x.id === paymentTier)?.priceDzd
+            // Purchase is the standard e-commerce event Ads Manager expects for
+            // conversion-campaign optimization; Subscribe is Meta's dedicated
+            // recurring-billing event and is what its own setup guidance asks
+            // for on top of Purchase. content_ids lets a Custom Conversion be
+            // scoped to one tier without needing a per-tier URL.
+            trackPixel('Purchase', { value: price, currency: 'DZD', content_name: paymentTier, content_ids: [paymentTier], content_type: 'product' })
+            trackPixel('Subscribe', { value: price, currency: 'DZD', content_name: paymentTier, content_ids: [paymentTier], predicted_ltv: price })
             // Verification is what mints the founder code, so this is the first
             // moment the certificate exists. Hand it to the buyer immediately;
             // `replace` keeps the payment query params out of history, so a
             // back-navigation can't re-trigger verification.
             navigate({ to: '/dashboard/certificate', replace: true })
+          } else {
+            // Chargily sent the buyer back on success_url, but our own re-check
+            // of the checkout says it never actually got paid (stale link, race,
+            // manual URL edit). Same dead end as payment=failed below.
+            const price = PRICING_TIERS.find((x) => x.id === paymentTier)?.priceDzd
+            trackGtag('checkout_abandoned', { tier: paymentTier })
+            trackClarity('checkout_abandoned')
+            trackPixelCustom('CheckoutAbandoned', { value: price, currency: 'DZD', content_name: paymentTier, content_ids: [paymentTier] })
+            navigate({ to: '/dashboard', search: { payment: undefined, tier: undefined, checkout_id: undefined, plan: undefined }, replace: true })
           }
         })
         .catch(console.error)
+    } else if (payment === 'failed') {
+      // Buyer bounced off Chargily without paying — declined, closed the tab,
+      // or let the checkout expire. No server confirmation needed here (there's
+      // nothing to confirm); this is purely a client-side "they didn't convert"
+      // signal so the funnel isn't silently missing this outcome.
+      const price = PRICING_TIERS.find((x) => x.id === paymentTier)?.priceDzd
+      trackGtag('checkout_abandoned', { tier: paymentTier })
+      trackClarity('checkout_abandoned')
+      trackPixelCustom('CheckoutAbandoned', { value: price, currency: 'DZD', content_name: paymentTier, content_ids: [paymentTier ?? 'unknown'] })
     }
   }, [payment, paymentTier, checkoutIdParam, platformUser?.checkoutId, email, navigate])
 
@@ -153,7 +182,7 @@ function AuthenticatedDashboard({
   const tier = platformUser?.tier
 
   if (!tier) {
-    return <SubscriptionGate email={email} autoPlan={autoPlan} />
+    return <SubscriptionGate email={email} autoPlan={autoPlan} paymentFailed={payment === 'failed'} />
   }
 
   // New merchants land straight on their (empty) dashboard; the dashboard itself
@@ -173,20 +202,32 @@ function AuthenticatedDashboard({
 
 // ─── Onboarding welcome ────────────────────────────────────────────────────────
 
-function SubscriptionGate({ email, autoPlan }: { email: string; autoPlan?: string }) {
+function SubscriptionGate({ email, autoPlan, paymentFailed }: { email: string; autoPlan?: string; paymentFailed?: boolean }) {
   const [loading, setLoading] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(
+    paymentFailed
+      ? 'لم تكتمل عملية الدفع. يمكنك إعادة المحاولة.'
+      : null,
+  )
   const { t, dir, lang } = useLang()
+  const [starterPrice, setStarterPrice] = useState<number>(STARTER_PRICE_VARIANTS[1])
+  useEffect(() => {
+    setStarterPrice(getStarterPriceVariant())
+  }, [])
 
   const handleBuy = async (tier: 'starter' | 'pro' | 'agency') => {
     setLoading(tier)
     setError(null)
     try {
+      // Starter's amount is per-visitor (A/B price test) and must be sent so
+      // the charge matches whatever price this visitor was actually shown —
+      // the server validates it's one of the allowed variants either way.
+      const amount = tier === 'starter' ? starterPrice : undefined
       const result = await createSubscriptionCheckout({
-        data: { tier, userId: email, userEmail: email },
+        data: { tier, userId: email, userEmail: email, amount },
       })
-      const price = PRICING_TIERS.find((x) => x.id === tier)?.priceDzd
-      trackPixel('InitiateCheckout', { value: price, currency: 'DZD', content_name: tier })
+      const price = amount ?? PRICING_TIERS.find((x) => x.id === tier)?.priceDzd
+      trackPixel('InitiateCheckout', { value: price, currency: 'DZD', content_name: tier, content_ids: [tier], content_type: 'product' })
       window.location.href = result.checkoutUrl
     } catch (e: any) {
       setError(e.message || 'حدث خطأ')
@@ -228,7 +269,12 @@ function SubscriptionGate({ email, autoPlan }: { email: string; autoPlan?: strin
               <div>
                 <p className="font-bold text-lg">{t(tier.name)}</p>
                 <p className="text-sm text-muted-foreground line-through mt-1">{t(tier.normalPriceLabel)}</p>
-                <p className="text-2xl font-black -mt-0.5">{t(tier.priceLabel)}</p>
+                <p className="text-2xl font-black -mt-0.5">
+                  {t(tier.id === 'starter' ? formatDzdLabel(starterPrice) : tier.priceLabel)}
+                </p>
+                {tier.id === 'starter' && (
+                  <p className="text-xs text-muted-foreground opacity-70 -mt-0.5">{FLEXY_LABEL}</p>
+                )}
                 <p className="text-xs text-muted-foreground">{t(ONCE_LABEL)}</p>
                 <p className="text-sm text-red-600 font-bold -mt-0.5">{t(tier.afterLabel)}</p>
               </div>

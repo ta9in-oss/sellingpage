@@ -25,6 +25,7 @@ const _schema = i.schema({
       tier: i.string().optional(),
       checkoutId: i.string().optional(),
       purchasedAt: i.date().optional(),
+      purchasedPriceDzd: i.number().optional(),
       createdAt: i.date().optional(),
       // Global deployment credentials — apply to all stores by default
       cfAccountId: i.string().optional(),

@@ -43,12 +43,18 @@ export const verifySubscriptionPayment = createServerFn({ method: 'POST' })
     // than once (retries, refresh), so we only mint it on the first paid pass.
     const founderCode = existing?.founderCode ?? generateFounderCode()
 
+    // Chargily echoes back the amount actually charged on this checkout —
+    // that's what goes to Meta and into the DB, never a static tier lookup,
+    // since starter's price varies per visitor (STARTER_PRICE_VARIANTS).
+    const purchasedPriceDzd = checkout.amount
+
     if (existing) {
       await adminDb.transact([
         adminDb.tx.platformUsers[existing.id].update({
           tier: data.tier,
           checkoutId: data.checkoutId,
           purchasedAt: new Date(),
+          purchasedPriceDzd,
           founderCode,
           founderBatch: '1',
         }),
@@ -61,14 +67,15 @@ export const verifySubscriptionPayment = createServerFn({ method: 'POST' })
           tier: data.tier,
           checkoutId: data.checkoutId,
           purchasedAt: new Date(),
+          purchasedPriceDzd,
           founderCode,
           founderBatch: '1',
         }),
       ])
     }
 
-    log.set({ payment: { checkoutId: data.checkoutId, tier: data.tier, outcome: 'paid', newUser: !existing } })
+    log.set({ payment: { checkoutId: data.checkoutId, tier: data.tier, priceDzd: purchasedPriceDzd, outcome: 'paid', newUser: !existing } })
     log.audit({ action: 'subscription.purchase', actor: { type: 'user', id: data.userEmail }, target: { type: 'tier', id: data.tier }, outcome: 'success' })
     log.emit()
-    return { success: true, status: 'paid', tier: data.tier, founderCode }
+    return { success: true, status: 'paid', tier: data.tier, founderCode, priceDzd: purchasedPriceDzd }
   })

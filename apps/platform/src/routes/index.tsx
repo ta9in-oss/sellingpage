@@ -1,6 +1,9 @@
 import '@/styles/landing.css'
 import { createFileRoute } from '@tanstack/react-router'
+import { useEffect } from 'react'
 import { useLang } from '@/hooks/useLang'
+import { trackPixel } from '@/lib/pixel'
+import { getStarterPriceVariant } from '@/lib/starterPriceVariant'
 import { Nav } from '@/components/marketing/landing/Nav'
 import { Hero } from '@/components/marketing/landing/Hero'
 import { Manifesto } from '@/components/marketing/landing/Manifesto'
@@ -227,6 +230,16 @@ export const Route = createFileRoute('/')({
 
 function LandingPage() {
   const { dir } = useLang()
+
+  useEffect(() => {
+    // Meta flagged 100% of ViewContent on 7aba.app as missing value/currency —
+    // that was Meta's own automatic/heuristic event detection on this page,
+    // since no code here ever called trackPixel before. This explicit call
+    // with real params both fixes the diagnostic and gives Meta a usable
+    // signal for ROAS optimization.
+    trackPixel('ViewContent', { value: getStarterPriceVariant(), currency: 'DZD', content_name: 'landing' })
+  }, [])
+
   return (
     <div className="landing-root" dir={dir}>
       <Nav /><Hero /><Manifesto /><Features /><Proof /><How /><Pricing /><Roadmap /><FinalCta /><Footer />

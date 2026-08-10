@@ -5,12 +5,14 @@ import {
   createChargilyCustomer,
   createChargilyCheckout,
 } from './chargilyApi'
-import { TIER_CHARGE_DZD, tierById } from '@/config/pricing'
+import { TIER_CHARGE_DZD, STARTER_PRICE_VARIANTS, tierById } from '@/config/pricing'
 
 interface SubscriptionCheckoutInput {
   tier: 'starter' | 'pro' | 'agency'
   userId: string
   userEmail: string
+  /** Starter's per-visitor A/B price. Ignored for pro/agency — those are always server-fixed. */
+  amount?: number
 }
 
 export const createSubscriptionCheckout = createServerFn({ method: 'POST' })
@@ -31,7 +33,17 @@ export const createSubscriptionCheckout = createServerFn({ method: 'POST' })
     const baseUrl = process.env.VITE_APP_URL || 'http://localhost:3001'
     // Contact-sales tiers (e.g. Run One) are absent from the charge map on purpose —
     // they must never hit Chargily. Only chargily tiers have an amount here.
-    const amount = TIER_CHARGE_DZD[data.tier]
+    //
+    // Starter is price-tested (STARTER_PRICE_VARIANTS) — the client tells us
+    // which variant this visitor was shown, but we never trust that blindly:
+    // it must be one of the allowed variants, or we fall back to the fixed
+    // price. This is the only tier where client-supplied amount is honored at
+    // all; pro/agency always charge the server-fixed price regardless of what
+    // the client sends.
+    const amount =
+      data.tier === 'starter' && data.amount != null && (STARTER_PRICE_VARIANTS as readonly number[]).includes(data.amount)
+        ? data.amount
+        : TIER_CHARGE_DZD[data.tier]
     if (!amount) throw new Error(`Tier not purchasable via checkout: ${data.tier}`)
     const tierNameAr = tierById(data.tier)?.name.ar ?? data.tier
 
@@ -49,7 +61,10 @@ export const createSubscriptionCheckout = createServerFn({ method: 'POST' })
         amount,
         currency: 'dzd',
         success_url: `${baseUrl}/dashboard?payment=success&tier=${data.tier}`,
-        failure_url: `${baseUrl}/dashboard?payment=failed`,
+        // Chargily's own naming — this fires on decline, buyer-abandoned checkout,
+        // or expiry, not only on hard failures. tier is included so the failed
+        // branch can still attribute the abandonment to a plan.
+        failure_url: `${baseUrl}/dashboard?payment=failed&tier=${data.tier}`,
         description: `اشتراك باقة ${tierNameAr} - 7aba`,
         locale: 'ar',
         customer_id: customer.id,
@@ -57,6 +72,7 @@ export const createSubscriptionCheckout = createServerFn({ method: 'POST' })
           tier: data.tier,
           userId: data.userId,
           userEmail: data.userEmail,
+          priceDzd: String(amount),
         },
       })
     } catch (err) {

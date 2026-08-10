@@ -147,7 +147,7 @@ export async function createChargilyCheckout(
 export async function getChargilyCheckout(
   secretKey: string,
   checkoutId: string,
-): Promise<{ id: string; status: string }> {
+): Promise<{ id: string; status: string; amount?: number; metadata?: Record<string, string> }> {
   const baseUrl = getChargilyBaseUrl(secretKey)
   const url = `${baseUrl}/checkouts/${checkoutId}`
 
@@ -158,7 +158,7 @@ export async function getChargilyCheckout(
     if (!res.ok) {
       throw new Error(`Chargily ${res.status}: ${(await res.text()).slice(0, 200)}`)
     }
-    return res.json() as Promise<{ id: string; status: string }>
+    return res.json() as Promise<{ id: string; status: string; amount?: number; metadata?: Record<string, string> }>
   }
 
   const { default: https } = await import('node:https')
@@ -183,7 +183,7 @@ export async function getChargilyCheckout(
         res.on('data', (chunk) => (responseData += chunk))
         res.on('end', () => {
           try {
-            resolve(JSON.parse(responseData) as { id: string; status: string })
+            resolve(JSON.parse(responseData) as { id: string; status: string; amount?: number; metadata?: Record<string, string> })
           } catch {
             reject(new Error(`Parse error: ${responseData.slice(0, 200)}`))
           }

@@ -6,6 +6,7 @@ import { AuthForm } from '@/components/auth/AuthForm'
 import { OnlineIndicator } from '@/components/marketing/OnlineIndicator'
 import { trackGtag, trackClarity } from '@/lib/track'
 import { trackPixel } from '@/lib/pixel'
+import { getStarterPriceVariant } from '@/lib/starterPriceVariant'
 import { Store } from 'lucide-react'
 
 const T = {
@@ -29,7 +30,7 @@ function SignupPage() {
   useEffect(() => {
     trackGtag('view_signup')
     trackClarity('view_signup')
-    trackPixel('ViewContent', { content_name: 'signup' })
+    trackPixel('ViewContent', { value: getStarterPriceVariant(), currency: 'DZD', content_name: 'signup' })
   }, [])
 
   return (
