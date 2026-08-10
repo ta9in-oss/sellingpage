@@ -3,7 +3,6 @@ import { Outlet, createRootRoute, HeadContent, Scripts } from '@tanstack/react-r
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import { LangProvider } from '@/context/LangContext'
 import { CookieNotice } from '@/components/marketing/CookieNotice'
-import { WhatsAppButton } from '@/components/marketing/WhatsAppButton'
 import { PlatformNotifications } from '@/components/PlatformNotifications'
 import { InAppBrowserBanner } from '@/components/marketing/InAppBrowserBanner'
 import appCss from '@/styles/app.css?url'
@@ -94,7 +93,6 @@ function RootComponent() {
           <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID ?? ''}>
             <InAppBrowserBanner />
             <Outlet />
-            <WhatsAppButton />
             <PlatformNotifications />
             <CookieNotice />
           </GoogleOAuthProvider>

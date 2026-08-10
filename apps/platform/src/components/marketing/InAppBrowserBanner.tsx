@@ -39,7 +39,12 @@ export function InAppBrowserBanner() {
   if (!browser || dismissed) return null
 
   return (
-    <div className="fixed top-0 inset-x-0 z-50 bg-black text-white border-b-2 border-yellow-400 px-4 py-3" dir={dir}>
+    // Static, not fixed — it sits first in the DOM (before Outlet in
+    // __root.tsx) and must actually push the page's sticky navbar down, not
+    // float on top of it. A fixed overlay left the navbar (which is `position:
+    // sticky` and rendered later in the tree) painting over the banner at the
+    // top of the page until the user scrolled.
+    <div className="relative z-[60] bg-black text-white border-b-2 border-yellow-400 px-4 py-3" dir={dir}>
       <div className="max-w-2xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-sm">
         <p className="text-zinc-200 text-center sm:text-start">
           {t(T.message)}

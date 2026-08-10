@@ -1,5 +1,6 @@
 import { useOnlinePresence } from '@/hooks/useOnlinePresence'
 import { useLang } from '@/hooks/useLang'
+import { useIsPaidUser } from '@/hooks/useIsPaidUser'
 
 const T = {
   online: { ar: 'يتصفحون الآن', fr: 'en ligne maintenant', en: 'browsing now' },
@@ -8,12 +9,16 @@ const T = {
 /**
  * Live visitor-count pill — real presence, not a fabricated number. Hidden
  * below 2 since "1 person online" is just the viewer themselves and has no
- * honest signal to show.
+ * honest signal to show. Also hidden for anyone who already bought — this is
+ * urgency pressure for people still deciding, not something a paying
+ * customer should keep seeing.
  */
 export function OnlineIndicator() {
   const count = useOnlinePresence()
   const { t } = useLang()
+  const isPaid = useIsPaidUser()
 
+  if (isPaid) return null
   if (count < 2) return null
 
   return (

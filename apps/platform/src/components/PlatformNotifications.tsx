@@ -1,5 +1,6 @@
 import { usePlatformFomo } from '@/hooks/usePlatformFomo'
 import { useLang } from '@/hooks/useLang'
+import { useIsPaidUser } from '@/hooks/useIsPaidUser'
 import { merchantsAr } from '@/lib/arabicPlural'
 
 const T = {
@@ -11,20 +12,17 @@ const T = {
   live: { ar: 'الآن', fr: 'maintenant', en: 'live' },
 }
 
-interface PlatformNotificationsProps {
-  /** Current visitor's own tier — if already subscribed, don't nudge them about others. */
-  userTier?: string | null
-}
-
 /**
  * Real subscriber toast — see usePlatformFomo for why this only shows actual
- * `platformUsers` rows, never invented names or cities.
+ * `platformUsers` rows, never invented names or cities. Mounted globally in
+ * __root.tsx, so it must check paid status itself rather than take it as a
+ * prop nobody was actually passing.
  */
-export function PlatformNotifications({ userTier }: PlatformNotificationsProps) {
+export function PlatformNotifications() {
   const { current, visible, timeAgo } = usePlatformFomo()
   const { t, dir, lang } = useLang()
+  const isPaid = useIsPaidUser()
 
-  const isPaid = userTier && userTier !== 'free'
   if (isPaid) return null
   if (!current) return null
 
