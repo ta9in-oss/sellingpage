@@ -323,8 +323,8 @@ export const landingPricing = {
     {
       name:      { ar: 'الوكالة',   en: 'Run One' },
       who:       { ar: 'الوكالة: تملك منصة مثل هذه',  en: 'The agency: own a platform like this' },
-      price:     '10,000',
-      normalPrice: '20,000',
+      price:     '100,000',
+      normalPrice: '200,000',
       after:     { ar: 'لأول 3 مشتركين فقط — بعدها السعر العادي', en: 'First 3 subscribers only — then the normal price' },
       contact:   true,
       highlight: false,

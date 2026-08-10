@@ -120,9 +120,9 @@ export const TIERS: Tier[] = [
   {
     id: 'agency',
     name: { ar: 'الوكالة', fr: 'Run One', en: 'Run One' },
-    priceDzd: 10000,
-    priceLabel: { ar: '10,000 دج', fr: '10 000 DZD', en: '10,000 DZD' },
-    normalPriceLabel: { ar: '20,000 دج', fr: '20 000 DZD', en: '20,000 DZD' },
+    priceDzd: 100000,
+    priceLabel: { ar: '100,000 دج', fr: '100 000 DZD', en: '100,000 DZD' },
+    normalPriceLabel: { ar: '200,000 دج', fr: '200 000 DZD', en: '200,000 DZD' },
     afterLabel: {
       ar: 'لأول 3 مشتركين فقط بهذا السعر — بعدها السعر العادي',
       fr: 'Pour les 3 premiers seulement — ensuite le prix normal',
