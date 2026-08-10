@@ -1,9 +1,11 @@
 import { Link } from '@tanstack/react-router'
+import { useEffect, useState } from 'react'
 import { useLang } from '@/hooks/useLang'
 import { Reveal, Kicker, SplitTitle, Icon } from '@/components/marketing/landing/primitives'
 import { FirstBatchCountdown } from '@/components/marketing/FirstBatchCountdown'
 import { OnlineIndicator } from '@/components/marketing/OnlineIndicator'
-import { contactWhatsappUrl } from '@/config/pricing'
+import { contactWhatsappUrl, STARTER_NORMAL_DZD, FLEXY_LABEL } from '@/config/pricing'
+import { getStarterPriceVariant } from '@/lib/starterPriceVariant'
 import { landingPricing } from '@/locales'
 
 /* ---- types ---- */
@@ -22,28 +24,37 @@ const RUN_ONE_MSG = {
 
 interface TierCardProps {
   tier: Tier
+  /** Only set for the starter card — overrides the static fallback price with the visitor's assigned A/B variant. */
+  priceOverride?: number
 }
 
 /* ---- TierCard (local) ---- */
-function TierCard({ tier }: TierCardProps) {
+function TierCard({ tier, priceOverride }: TierCardProps) {
   const { t } = useLang()
+  const price = priceOverride != null ? priceOverride.toLocaleString('en-US') : tier.price
+  const normalPrice = priceOverride != null ? STARTER_NORMAL_DZD.toLocaleString('en-US') : tier.normalPrice
   return (
     <div className={'tier' + (tier.highlight ? ' tier--hl' : '')}>
       {tier.badge && <div className="tier__badge">{t(tier.badge)}</div>}
       <div className="tier__name">{t(tier.name)}</div>
       <div className="tier__who">{t(tier.who)}</div>
-      {tier.normalPrice && (
+      {normalPrice && (
         <div
           className="tier__normal"
           style={{ textDecoration: 'line-through', opacity: 0.45, fontWeight: 700, fontSize: '0.95rem', marginBottom: '-0.1rem' }}
         >
-          {tier.normalPrice} {t(landingPricing.currency)}
+          {normalPrice} {t(landingPricing.currency)}
         </div>
       )}
       <div className="tier__price">
-        {tier.price}
+        {price}
         <span className="tier__cur">{t(landingPricing.currency)}</span>
       </div>
+      {priceOverride != null && (
+        <div className="tier__flexy" style={{ fontSize: '0.8rem', opacity: 0.7, marginTop: '-0.2rem' }}>
+          {FLEXY_LABEL}
+        </div>
+      )}
       <div className="tier__once">{t(landingPricing.once)}</div>
       {tier.after && (
         <div
@@ -86,6 +97,14 @@ function TierCard({ tier }: TierCardProps) {
 /* ---- Pricing (exported) ---- */
 export function Pricing() {
   const { t } = useLang()
+  // Starts at the static fallback (2000, the majority variant) for SSR/first
+  // paint, then swaps to the visitor's persisted variant once localStorage is
+  // readable — avoids a hydration mismatch while still showing the real
+  // assigned price almost immediately.
+  const [starterPrice, setStarterPrice] = useState<number | undefined>(undefined)
+  useEffect(() => {
+    setStarterPrice(getStarterPriceVariant())
+  }, [])
 
   return (
     <section className="section" id="pricing">
@@ -108,7 +127,7 @@ export function Pricing() {
         <Reveal delay={60}>
           <div className="tiers">
             {(landingPricing.tiers as Tier[]).map((tier, i) => (
-              <TierCard key={i} tier={tier} />
+              <TierCard key={i} tier={tier} priceOverride={i === 0 ? starterPrice : undefined} />
             ))}
           </div>
         </Reveal>

@@ -49,9 +49,13 @@ export const TIERS: Tier[] = [
   {
     id: 'starter',
     name: { ar: 'المبتدئ', fr: 'Starter', en: 'Starter' },
-    priceDzd: 10000,
-    priceLabel: { ar: '10,000 دج', fr: '10 000 DZD', en: '10,000 DZD' },
-    normalPriceLabel: { ar: '20,000 دج', fr: '20 000 DZD', en: '20,000 DZD' },
+    // 2000 is the majority-weight test variant (see STARTER_VARIANT_WEIGHTS) —
+    // used here only as the static/SSR fallback before a visitor's assigned
+    // variant is known. Actual displayed/charged price comes from
+    // lib/starterPriceVariant.ts everywhere a buyer can see or pay this price.
+    priceDzd: 2000,
+    priceLabel: { ar: '2,000 دج', fr: '2 000 DZD', en: '2,000 DZD' },
+    normalPriceLabel: { ar: '5,000 دج', fr: '5 000 DZD', en: '5,000 DZD' },
     afterLabel: {
       ar: 'لأول 100 مشترك فقط بهذا السعر — بعدها السعر العادي',
       fr: 'Pour les 100 premiers seulement — ensuite le prix normal',
@@ -96,9 +100,9 @@ export const TIERS: Tier[] = [
   {
     id: 'pro',
     name: { ar: 'المستقل', fr: 'Freelancer', en: 'Freelancer' },
-    priceDzd: 70000,
-    priceLabel: { ar: '70,000 دج', fr: '70 000 DZD', en: '70,000 DZD' },
-    normalPriceLabel: { ar: '100,000 دج', fr: '100 000 DZD', en: '100,000 DZD' },
+    priceDzd: 7000,
+    priceLabel: { ar: '7,000 دج', fr: '7 000 DZD', en: '7,000 DZD' },
+    normalPriceLabel: { ar: '20,000 دج', fr: '20 000 DZD', en: '20,000 DZD' },
     afterLabel: {
       ar: 'لأول 10 مشتركين فقط بهذا السعر — بعدها السعر العادي',
       fr: 'Pour les 10 premiers seulement — ensuite le prix normal',
@@ -116,9 +120,9 @@ export const TIERS: Tier[] = [
   {
     id: 'agency',
     name: { ar: 'الوكالة', fr: 'Run One', en: 'Run One' },
-    priceDzd: 1000000,
-    priceLabel: { ar: '1,000,000 دج', fr: '1 000 000 DZD', en: '1,000,000 DZD' },
-    normalPriceLabel: { ar: '2,000,000 دج', fr: '2 000 000 DZD', en: '2,000,000 DZD' },
+    priceDzd: 10000,
+    priceLabel: { ar: '10,000 دج', fr: '10 000 DZD', en: '10,000 DZD' },
+    normalPriceLabel: { ar: '20,000 دج', fr: '20 000 DZD', en: '20,000 DZD' },
     afterLabel: {
       ar: 'لأول 3 مشتركين فقط بهذا السعر — بعدها السعر العادي',
       fr: 'Pour les 3 premiers seulement — ensuite le prix normal',
@@ -157,6 +161,23 @@ export const TIER_CHARGE_DZD: Partial<Record<TierId, number>> = Object.fromEntri
 
 export function tierById(id: string): Tier | undefined {
   return TIERS.find((t) => t.id === id)
+}
+
+/**
+ * Starter is price-tested across visitors instead of having one fixed price.
+ * Weights are traffic share, not probability out of 1 — pickStarterVariant
+ * (lib/starterPriceVariant.ts) normalizes by their sum.
+ */
+export const STARTER_PRICE_VARIANTS = [1000, 2000, 3000] as const
+export const STARTER_VARIANT_WEIGHTS: Record<number, number> = { 1000: 25, 2000: 50, 3000: 25 }
+export const STARTER_NORMAL_DZD = 5000
+
+/** Verbatim label shown next to the starter price — not translated, shown as-is in every language. */
+export const FLEXY_LABEL = 'قيس فليكسي'
+
+export function formatDzdLabel(amountDzd: number): Tri {
+  const n = amountDzd.toLocaleString('en-US')
+  return { ar: `${n} دج`, fr: `${n} DZD`, en: `${n} DZD` }
 }
 
 /** WhatsApp deep link prefilled for a Run One inquiry. */

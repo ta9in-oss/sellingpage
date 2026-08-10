@@ -286,8 +286,11 @@ export const landingPricing = {
     {
       name:      { ar: 'المبتدئ',   en: 'Starter' },
       who:       { ar: 'البائع: تبيع بنفسك',  en: 'The seller: sell for yourself' },
-      price:     '10,000',
-      normalPrice: '20,000',
+      // Static fallback only — price is A/B tested per visitor, see
+      // lib/starterPriceVariant.ts. Pricing.tsx overrides `price` for this
+      // tier at render time with the visitor's assigned variant.
+      price:     '2,000',
+      normalPrice: '5,000',
       after:     { ar: 'لأول 100 مشترك فقط — بعدها السعر العادي', en: 'First 100 subscribers only — then the normal price' },
       highlight: false,
       features: [
@@ -305,8 +308,8 @@ export const landingPricing = {
     {
       name:      { ar: 'المستقل',   en: 'Freelancer' },
       who:       { ar: 'المستقل: تبني لعملائك',  en: 'The freelancer: build for clients' },
-      price:     '70,000',
-      normalPrice: '100,000',
+      price:     '7,000',
+      normalPrice: '20,000',
       after:     { ar: 'لأول 10 مشتركين فقط — بعدها السعر العادي', en: 'First 10 subscribers only — then the normal price' },
       badge:     { ar: 'الأكثر اختياراً',  en: 'Most chosen' },
       highlight: true,
@@ -320,8 +323,8 @@ export const landingPricing = {
     {
       name:      { ar: 'الوكالة',   en: 'Run One' },
       who:       { ar: 'الوكالة: تملك منصة مثل هذه',  en: 'The agency: own a platform like this' },
-      price:     '1,000,000',
-      normalPrice: '2,000,000',
+      price:     '10,000',
+      normalPrice: '20,000',
       after:     { ar: 'لأول 3 مشتركين فقط — بعدها السعر العادي', en: 'First 3 subscribers only — then the normal price' },
       contact:   true,
       highlight: false,
