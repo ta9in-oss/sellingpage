@@ -5,13 +5,13 @@ import { LangProvider } from '@/context/LangContext'
 import { CookieNotice } from '@/components/marketing/CookieNotice'
 import { PlatformNotifications } from '@/components/PlatformNotifications'
 import { InAppBrowserBanner } from '@/components/marketing/InAppBrowserBanner'
-import { SunsetBanner } from '@/components/marketing/SunsetBanner'
+import { SunsetAnnouncement } from '@/components/marketing/SunsetAnnouncement'
 import appCss from '@/styles/app.css?url'
 import analytics from '@/utils/analytics'
 
 const SITE_URL = 'https://7aba.app'
 const DEFAULT_OG = `${SITE_URL}/og-image.webp`
-const FONT_URL = 'https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&display=swap'
+const FONT_URL = 'https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&family=Amiri:wght@400;700&family=Aref+Ruqaa:wght@400;700&display=swap'
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined
 const META_PIXEL_ID = import.meta.env.VITE_META_PIXEL_ID as string | undefined
 
@@ -92,7 +92,7 @@ function RootComponent() {
         )}
         <LangProvider>
           <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID ?? ''}>
-            <SunsetBanner />
+            <SunsetAnnouncement />
             <InAppBrowserBanner />
             <Outlet />
             <PlatformNotifications />
