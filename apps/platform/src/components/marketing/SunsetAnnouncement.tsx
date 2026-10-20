@@ -129,6 +129,9 @@ export function SunsetAnnouncement() {
 
         <p className="text-left text-3xl" style={{ fontFamily: "'Aref Ruqaa', serif" }}>
           فريق حبّة
+          <span className="mt-2 block text-lg" style={{ fontFamily: "'Amiri', serif" }}>
+            ومن ورائها <span dir="ltr">Ta9in</span>
+          </span>
         </p>
 
         {lang !== 'ar' && (
@@ -147,7 +150,7 @@ export function SunsetAnnouncement() {
             ref={buttonRef}
             onClick={acknowledge}
             size="lg"
-            className="rounded-none px-8 py-6 text-lg"
+            className="cursor-pointer rounded-none px-8 py-6 text-lg transition-opacity hover:opacity-85"
             style={{ background: INK, color: PARCHMENT, fontFamily: lang === 'ar' ? "'Amiri', serif" : undefined }}
           >
             {t(T.continue)}
