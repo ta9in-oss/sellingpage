@@ -5,6 +5,7 @@ import { LangProvider } from '@/context/LangContext'
 import { CookieNotice } from '@/components/marketing/CookieNotice'
 import { PlatformNotifications } from '@/components/PlatformNotifications'
 import { InAppBrowserBanner } from '@/components/marketing/InAppBrowserBanner'
+import { SunsetBanner } from '@/components/marketing/SunsetBanner'
 import appCss from '@/styles/app.css?url'
 import analytics from '@/utils/analytics'
 
@@ -91,6 +92,7 @@ function RootComponent() {
         )}
         <LangProvider>
           <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID ?? ''}>
+            <SunsetBanner />
             <InAppBrowserBanner />
             <Outlet />
             <PlatformNotifications />
