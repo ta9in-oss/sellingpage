@@ -130,7 +130,16 @@ export function SunsetAnnouncement() {
         <p className="text-left text-3xl" style={{ fontFamily: "'Aref Ruqaa', serif" }}>
           فريق حبّة
           <span className="mt-2 block text-lg" style={{ fontFamily: "'Amiri', serif" }}>
-            ومن ورائها تقن
+            ومن ورائها{' '}
+            <a
+              href="https://ta9in.com"
+              target="_blank"
+              rel="noopener"
+              className="underline underline-offset-4 hover:opacity-70"
+              style={{ color: RUBRIC }}
+            >
+              تقن
+            </a>
           </span>
         </p>
 
