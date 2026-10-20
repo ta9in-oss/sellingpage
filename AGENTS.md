@@ -2,7 +2,7 @@
 
 > **For AI agents:** Read this file at the start of every session. Update it when you make structural changes, add/remove dependencies, or change conventions. Keep entries concise — one line where possible. Do NOT add prose or explanations that already exist in code. Update the `Last updated` field on every write.
 
-**Last updated:** 2026-06-29 (neo-brutalist landing redesign, CF + InstantDB OAuth, pricing)  
+**Last updated:** 2026-10-20 (sunset announcement — InstantDB discontinued, product going open source)  
 **Project:** حبة ستور (7aba.app) — Algerian e-commerce platform (store builder + selling page)  
 **Repo:** https://github.com/Ta9in/sellingpage  
 **Monorepo:** pnpm workspaces + Turborepo — `apps/store`, `apps/platform`, `packages/store-ui`
@@ -340,6 +340,7 @@ npx tsx seed-orders.ts          # Seed test orders (from apps/store/)
 - **Landing page** (`apps/platform/src/routes/index.tsx`): neo-brutalist redesign, SEPARATE from `@7aba/store-ui`. All markup under `<div className="landing-root">`; styles in `src/styles/landing.css` are **scoped under `.landing-root`** (do not unscope — it would leak resets into the Tailwind/shadcn dashboard). Sections in `components/marketing/landing/*`, copy in `locales/index.ts` `landing*` exports (ar/en; fr falls back to en until translated), shared helpers in `landing/primitives.tsx` (inline SVG icons, `Reveal`, `SplitTitle`, `Kicker`, `Brand`). Old store-ui landing sections removed from `/` but still used by `/demo` + builder preview.
 - **InstantDB OAuth (Platform)**: verify endpoints against live docs before going live — `https://api.instantdb.com/platform/oauth/{start,token}` + `/superadmin/apps`. OAuth apps start in **test mode** (members only) until InstantDB approves (request release via InstantDB Discord `#oauth-apps-feedback`). Both `/auth/cloudflare` and `/auth/instantdb` callbacks currently omit the OAuth `state`/CSRF param (future hardening). Registered: OAuth App `7aba-store` (id `33d23de1-498f-4205-866f-0dc56471b662`) under platform app `b9227417-...`; OAuth Client `7aba-store-web` id `be194d93-775f-4b2f-b312-04996c0f5acf`, redirects `https://7aba.app/auth/instantdb` + `http://localhost:3001/auth/instantdb`, scopes `apps-read apps-write` (requested at authorize time).
 - `apps/platform/src/public/landing/store.png` + `dashboard.png` are the landing screenshots; `dashboard.png` is currently an interim copy of `demo-hero-screenshot.png` — swap the real design dashboard asset when available.
+- **Sunset announcement** (`components/marketing/SunsetAnnouncement.tsx`, mounted in `__root.tsx`): full-screen SSR takeover telling visitors not to buy (InstantDB discontinued, open-sourcing soon, new version coming). Acked per session via `sessionStorage` key `sunset-announcement-ack`. Deploys are currently manual (`wrangler pages deploy`) — GitHub Actions balance exhausted; do NOT push to `main` expecting CI. `apps/platform/dist` is tracked in git — restore it after local builds.
 
 ---
 
