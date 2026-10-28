@@ -2,10 +2,11 @@
 
 > **For AI agents:** Read this file at the start of every session. Update it when you make structural changes, add/remove dependencies, or change conventions. Keep entries concise — one line where possible. Do NOT add prose or explanations that already exist in code. Update the `Last updated` field on every write.
 
-**Last updated:** 2026-10-20 (sunset announcement — InstantDB discontinued, product going open source)  
+**Last updated:** 2026-10-28 (open-source release: deps upgraded, Biome, Vitest projects + coverage, CI)  
 **Project:** حبة ستور (7aba.app) — Algerian e-commerce platform (store builder + selling page)  
-**Repo:** https://github.com/Ta9in/sellingpage  
-**Monorepo:** pnpm workspaces + Turborepo — `apps/store`, `apps/platform`, `packages/store-ui`
+**Repo:** https://github.com/ta9in-oss/sellingpage  
+**Monorepo:** pnpm workspaces — `apps/store`, `apps/platform`, `apps/deploy-daemon`, `packages/store-ui`  
+**License:** MIT · open-source release of v1 (InstantDB discontinued; a new version is in development)
 
 ---
 
@@ -23,7 +24,7 @@
 - Use `github-mcp-server-push_files` for multi-file commits (prefer over individual git commands)
 - Use `github-mcp-server-create_pull_request` for PRs
 - Use `github-mcp-server-list_workflow_runs` to check CI status
-- **Repo owner:** `Ta9in` · **Repo name:** `sellingpage`
+- **Repo owner:** `ta9in-oss` · **Repo name:** `sellingpage`
 
 ### Cloudflare MCP
 - Use `cloudflare-mcp-execute` to deploy Workers/Pages, set env vars, manage DNS
@@ -44,13 +45,14 @@
 
 | Layer | Technology |
 |---|---|
-| Framework | TanStack Start 1.131.31 (full-stack React) — pinned exact in both apps |
-| UI | React 19, TypeScript 5, Tailwind CSS 4 |
+| Framework | TanStack Start 1.169 + TanStack Router 1.170 (full-stack React) — pinned exact, keep router at the version Start depends on |
+| UI | React 19.3, TypeScript 7, Tailwind CSS 4 (`@tailwindcss/vite`) |
 | Routing | TanStack Router (file-based, `src/routes/`) |
 | Database | InstantDB (`@instantdb/react`, `@instantdb/admin`) — separate apps per workspace |
 | Components | Shadcn/ui + Radix UI primitives |
-| Build | Vite 6 — store: port 3000, platform: port 3001 |
-| Monorepo | pnpm workspaces + Turborepo (`turbo.json` at root) |
+| Build | Vite 8 + Nitro (`nitro/vite`, `cloudflare-pages` preset when `CF_PAGES=1`) — store: port 3000, platform: port 3001 |
+| Monorepo | pnpm workspaces (`pnpm -r`); no Turborepo |
+| Quality | Biome (lint), `tsc --noEmit` per workspace, Vitest projects + V8 coverage (root `vitest.config.ts`) |
 | State | Zustand (platform builder) + InstantDB reactive queries |
 | DnD | @dnd-kit/core + @dnd-kit/sortable (builder SectionList) |
 | Icons | Lucide React |
@@ -65,10 +67,11 @@
 ```
 sellingpage/                  ← monorepo root
 ├── pnpm-workspace.yaml       ← workspace: apps/*, packages/*
-├── turbo.json                ← Turborepo task config
+├── vitest.config.ts          ← Vitest projects (scripts + deploy-daemon, platform) + coverage
+├── biome.json                ← lint config (errors block CI; a11y/hooks backlog = warnings)
 ├── package.json              ← root: pnpm overrides for React singleton
 ├── CHANGELOG.md              ← project-wide changelog
-├── MASTER_PLAN.md / AUTOPILOT.md / AGENTS.md
+├── AGENTS.md / README.md / CONTRIBUTING.md / SECURITY.md / LICENSE
 ├── apps/
 │   ├── store/                ← store selling page template (port 3000)
 │   │   ├── CHANGELOG.md      ← store-specific changelog
@@ -269,8 +272,11 @@ Page order in `apps/store/src/routes/index.tsx`: Hero → SocialProofBar → Fea
 ## Dev Commands
 
 ```bash
-# From repo root (uses pnpm -r not turbo — turbo binary may segfault):
+# From repo root:
 pnpm dev           # Start all apps in parallel
+pnpm check         # biome lint + tsc --noEmit + vitest (what CI runs)
+pnpm test:coverage # vitest with V8 coverage → coverage/
+CF_PAGES=1 pnpm build   # Cloudflare Pages output in apps/*/dist
 
 # Per-app:
 cd apps/store && pnpm dev       # port 3000
@@ -285,10 +291,10 @@ npx tsx seed-orders.ts          # Seed test orders (from apps/store/)
 
 ## CI/CD
 
-- **GitHub Actions:** `.github/workflows/deploy.yml` — triggers on push to `main`
-- **Builds:** `apps/platform` only (store is a template, not deployed separately)
-- **Deploys to:** Cloudflare Pages project `7aba-platform` → `7aba.app`
-- **CF token in CI:** `CLOUDFLARE_API_TOKEN` secret in GitHub repo settings
+- **`ci.yml`** (push/PR): lint, typecheck, tests + coverage (Codecov via OIDC), build matrix (platform, store), gitleaks CLI scan
+- **`deploy.yml`**: `workflow_dispatch` only — builds platform and deploys to Cloudflare Pages; needs `CLOUDFLARE_API_TOKEN` secret + repo vars (`CLOUDFLARE_ACCOUNT_ID`, `CF_PAGES_PROJECT`, `VITE_*`)
+- **`deploy-store.yml`**: `repository_dispatch` per-merchant store deploy (superseded by `apps/deploy-daemon`)
+- **Dependabot:** weekly npm (grouped), monthly actions
 
 ---
 
@@ -313,7 +319,7 @@ npx tsx seed-orders.ts          # Seed test orders (from apps/store/)
 ## Known Gotchas
 
 - **Vite HMR stale module cache** — symptom: "does not provide an export named 'X'" even though file is correct. Fix: `touch <affected-file> <importer-file>` then hard-refresh browser (Ctrl+Shift+R). If still broken, restart dev server. This recurs whenever a file is significantly rewritten.
-- `apps/store/src/routes/index.tsx` — **5 pre-existing nullability TS errors** — hard rule: never modify business logic here
+- `apps/store/src/routes/index.tsx` — hard rule: never modify business logic here
 - `dashboard.tsx` (store) is 45 KB — read in sections, not all at once
 - `algeria-locations.json` is 1.4 MB — import via `useAlgeriaLocations()` hook only (dynamic import)
 - `useAlgeriaLocations` returns `loading: boolean` — consumers must handle loading state
@@ -321,11 +327,12 @@ npx tsx seed-orders.ts          # Seed test orders (from apps/store/)
 - `routeTree.gen.ts` regenerates on `pnpm dev` — never commit manual edits
 - Order notifications use queue: 5 s display + 2.5 s gap — logic in `useOrderNotifications`
 - `pnpm install` may require `pnpm approve-builds` for esbuild + @parcel/watcher (run once)
-- `^1.131.31` for `@tanstack/react-start` resolves to latest — must pin exact `1.131.31`
-- **Turbo binary may segfault** on some Linux systems — root `package.json` uses `pnpm -r --parallel run dev` as fallback
-- `apps/platform/src/lib/instantdb.ts` line 5 — `ImportMeta.env` TS error — pre-existing, do NOT touch
+- **TanStack versions:** pin `@tanstack/react-start` and `@tanstack/react-router` exactly, and keep the router at the version Start itself depends on (`npm view @tanstack/react-start@<v> dependencies`) — a mismatch duplicates the router. Server fns use `createServerFn(...).validator(...)` in this version; check the installed `.d.ts` before renaming APIs.
+- **Static files live in `apps/*/public/`** (Vite/Nitro default). A custom `publicDir` is not copied by the Start + Nitro build.
+- **No `baseUrl` in tsconfig** — TS 7 drops it, and with Vite's `resolve.tsconfigPaths` it made bare CSS imports like `@import "tailwindcss"` resolve to `./tailwindcss`.
+- **Never run `tsc` without `--noEmit`** — it writes `.js` next to every `.ts`/`.tsx`.
 - `apps/store/app/` — **DELETED** (was a legacy duplicate of `apps/store/src/`)
-- **TanStack Start v1.131.31 has NO `createAPIFileRoute`** — API/webhook endpoints must be Cloudflare Workers or `createServerFn`
+- **No `createAPIFileRoute` in this codebase** — API/webhook endpoints must be Cloudflare Workers or `createServerFn`
 - CF Worker `7aba-webhook` at `https://7aba-webhook.mohessaid.workers.dev` — handles Chargily webhooks; all env vars are **encrypted secrets** (`secret_text` bindings)
 - CF Worker `7aba-proxy` — reverse-proxies `7aba.app/*` → `7aba-platform.pages.dev`; injects `Cross-Origin-Opener-Policy: unsafe-none` on all responses (required for Google OAuth popup)
 - CF Worker `7aba-demo-redirect` — `demo.7aba.app/*` → **proxy** to `7aba-platform.pages.dev/demo` (NOT a redirect; root `/` maps to `/demo`)
@@ -333,14 +340,13 @@ npx tsx seed-orders.ts          # Seed test orders (from apps/store/)
 - **`handleNewStore`** in `dashboard/index.tsx` must pass `useBuilderStore.getState().config` (full StoreConfig) when creating a store — never a partial/manual config. Wrong section shapes crash `SortableSectionCard`.
 - **Chargily API v2 does NOT accept inline `customer` objects** in `createCheckout` — always call `createCustomer()` first, then pass `customer_id` to `createCheckout()`
 - **Google OAuth**: `clientName: 'google-web'` must be registered in InstantDB dash API — cannot use `instant-cli` for this; use `POST /dash/apps/{id}/oauth_service_providers` then `POST /dash/apps/{id}/oauth_clients`
-- **InstantDB personal token** for dash API calls: `REDACTED` (at `~/.config/instantdb-prod-nodejs/a`)
 - **InstantDB app creation API**: `POST https://api.instantdb.com/dash/apps` — must supply `id` (UUID), `title`, `admin_token` (UUID) in body + `Authorization: Bearer {personal_token}`. Response: `{"app": {..., "admin-token": "...", "id": "..."}}` (note hyphen in `admin-token`)
 - **CF OAuth**: `ConnectServicesStep` shows OAuth button when `VITE_CF_OAUTH_CLIENT_ID` is set; falls back to manual entry. Callback route at `/auth/cloudflare`. Requires registering app at dash.cloudflare.com/profile/developer-applications — scopes: `account:read user:read workers:write workers_routes:write zone:read dns:write` (NO Cloudflare KV/D1/DB scopes — all data is InstantDB). Registered client "7aba Store" id `8e55e2088cfacd60b74c2199b30a3a8d`, Client Secret POST auth, redirects `https://7aba.app/auth/cloudflare` + `http://localhost:3001/auth/cloudflare`
 - **InstantDB auto-provision**: `autoProvisionInstantDB` server fn uses `INSTANTDB_PLATFORM_PERSONAL_TOKEN` to create store apps automatically (`/dash/apps`) — merchants never need an InstantDB account. If a merchant OAuth-connects their own InstantDB (deploy wizard), `autoProvisionInstantDB({storeSlug, merchantToken})` provisions under THEIR account via `/superadmin/apps` instead.
 - **Landing page** (`apps/platform/src/routes/index.tsx`): neo-brutalist redesign, SEPARATE from `@7aba/store-ui`. All markup under `<div className="landing-root">`; styles in `src/styles/landing.css` are **scoped under `.landing-root`** (do not unscope — it would leak resets into the Tailwind/shadcn dashboard). Sections in `components/marketing/landing/*`, copy in `locales/index.ts` `landing*` exports (ar/en; fr falls back to en until translated), shared helpers in `landing/primitives.tsx` (inline SVG icons, `Reveal`, `SplitTitle`, `Kicker`, `Brand`). Old store-ui landing sections removed from `/` but still used by `/demo` + builder preview.
 - **InstantDB OAuth (Platform)**: verify endpoints against live docs before going live — `https://api.instantdb.com/platform/oauth/{start,token}` + `/superadmin/apps`. OAuth apps start in **test mode** (members only) until InstantDB approves (request release via InstantDB Discord `#oauth-apps-feedback`). Both `/auth/cloudflare` and `/auth/instantdb` callbacks currently omit the OAuth `state`/CSRF param (future hardening). Registered: OAuth App `7aba-store` (id `33d23de1-498f-4205-866f-0dc56471b662`) under platform app `b9227417-...`; OAuth Client `7aba-store-web` id `be194d93-775f-4b2f-b312-04996c0f5acf`, redirects `https://7aba.app/auth/instantdb` + `http://localhost:3001/auth/instantdb`, scopes `apps-read apps-write` (requested at authorize time).
-- `apps/platform/src/public/landing/store.png` + `dashboard.png` are the landing screenshots; `dashboard.png` is currently an interim copy of `demo-hero-screenshot.png` — swap the real design dashboard asset when available.
-- **Sunset announcement** (`components/marketing/SunsetAnnouncement.tsx`, mounted in `__root.tsx`): full-screen SSR takeover telling visitors not to buy (InstantDB discontinued, open-sourcing soon, new version coming). Acked per session via `sessionStorage` key `sunset-announcement-ack`. Deploys are currently manual (`wrangler pages deploy`) — GitHub Actions balance exhausted; do NOT push to `main` expecting CI. `apps/platform/dist` is tracked in git — restore it after local builds.
+- `apps/platform/public/landing/store.png` + `dashboard.png` are the landing screenshots; `dashboard.png` is currently an interim copy of `demo-hero-screenshot.png` — swap the real design dashboard asset when available.
+- **Sunset announcement** (`components/marketing/SunsetAnnouncement.tsx`, mounted in `__root.tsx`): full-screen SSR takeover telling visitors not to buy (InstantDB discontinued, open-sourcing soon, new version coming). Acked per session via `sessionStorage` key `sunset-announcement-ack`. Production deploys are manual (`wrangler pages deploy`); the deploy workflow is `workflow_dispatch` only.
 
 ---
 

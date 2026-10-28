@@ -19,13 +19,13 @@ const TIER_ACCESS: Record<DownloadType, string[]> = {
 const DOWNLOAD_URLS: Record<DownloadType, string> = {
   'store-source':
     process.env.DOWNLOAD_URL_STORE_SOURCE ||
-    'https://github.com/Ta9in/sellingpage/archive/refs/heads/main.zip',
+    'https://github.com/ta9in-oss/sellingpage/archive/refs/heads/main.zip',
   'store-app':
     process.env.DOWNLOAD_URL_STORE_APP ||
-    'https://github.com/Ta9in/sellingpage/archive/refs/heads/main.zip',
+    'https://github.com/ta9in-oss/sellingpage/archive/refs/heads/main.zip',
   'platform-source':
     process.env.DOWNLOAD_URL_PLATFORM_SOURCE ||
-    'https://github.com/Ta9in/sellingpage/archive/refs/heads/main.zip',
+    'https://github.com/ta9in-oss/sellingpage/archive/refs/heads/main.zip',
 }
 
 export const getDownloadUrl = createServerFn({ method: 'POST' })

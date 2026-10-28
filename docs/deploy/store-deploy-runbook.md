@@ -12,13 +12,13 @@ Done on 2026-07-23. Note InstantDB creates an attribute on first write anyway, s
 push types the field rather than unblocking it.
 
 ### 2. GitHub Actions secret
-Repo `Ta9in/sellingpage` → Settings → Secrets and variables → Actions → New repository secret:
+Repo `ta9in-oss/sellingpage` → Settings → Secrets and variables → Actions → New repository secret:
 - `PLATFORM_INSTANTDB_ADMIN_TOKEN` — platform InstantDB admin token (InstantDB dashboard →
   platform app `b9227417-…aff89` → Admin → Admin token). The workflow uses it to read the
   store row (incl. the merchant's CF token) and write deploy status back.
 
 ### 3. Platform Cloudflare Pages secret
-- `GH_DISPATCH_TOKEN` — GitHub fine-grained PAT scoped to `Ta9in/sellingpage`,
+- `GH_DISPATCH_TOKEN` — GitHub fine-grained PAT scoped to `ta9in-oss/sellingpage`,
   **Contents: Read and write** (authorizes `repository_dispatch`), Metadata: Read.
   The platform uses it to fire the deploy-store dispatch.
 

@@ -3,9 +3,20 @@
 All notable changes to this project are documented here.  
 Format: `[version/commit] YYYY-MM-DD — description`
 
-> **Active HEAD:** `f111ec8` · **Live:** https://7aba.app · **Repo:** https://github.com/Ta9in/sellingpage
+> **Live:** https://7aba.app · **Repo:** https://github.com/ta9in-oss/sellingpage
 
 ---
+
+## [1.0.0] 2026-10-28 — Open-source release
+
+7aba v1 is released under the MIT license. InstantDB, the database it is built on, has been discontinued, so this version is no longer sold; a new version is in development.
+
+- **Sunset announcement:** full-screen notice on 7aba.app telling visitors not to buy this version.
+- **Upgrades:** TanStack Start 1.131 → 1.169 (Router 1.170), Vite 6 → 8, React 19.1 → 19.3, TypeScript 5 → 7, Vitest → 5, InstantDB SDKs → 1.0, lucide-react → 1.x, Radix, Tailwind 4.3 and the rest to latest.
+- **Build:** Cloudflare Pages output now comes from the `nitro/vite` plugin (`cloudflare-pages` preset); Tailwind via `@tailwindcss/vite`; Vite's built-in `resolve.tsconfigPaths` replaces `vite-tsconfig-paths`; static files moved from `src/public/` to `public/`; Turborepo removed.
+- **Quality:** zero TypeScript errors (was 79); Biome linting; one Vitest run across workspaces with V8 coverage (platform tests now run); two stale config-generator tests fixed.
+- **CI:** lint, typecheck, test + coverage, build matrix and gitleaks on every push/PR; production deploy is manual-only; Dependabot.
+- **Repo hygiene:** build output, tool caches and internal agent notes untracked; secrets scrubbed from history; LICENSE, CONTRIBUTING, CODE_OF_CONDUCT, SECURITY and issue/PR templates added.
 
 ## [Unreleased] — Pending
 
@@ -168,7 +179,7 @@ Format: `[version/commit] YYYY-MM-DD — description`
 - `ConnectServicesStep.tsx`: Added CF API Token field (stored in `stores.cfApiToken`)
 - New `src/server/deployStore.ts`:
   - Verifies merchant CF credentials
-  - Creates CF Pages project in merchant's account linked to `github.com/Ta9in/sellingpage`
+  - Creates CF Pages project in merchant's account linked to `github.com/ta9in-oss/sellingpage`
   - Sets env vars: `VITE_INSTANT_APP_ID`, `INSTANT_ADMIN_TOKEN`, `VITE_APP_URL`, `CHARGILY_SECRET_KEY`
 - `DeployingStep.tsx`: Rewritten to call real `deployStore` server function
 
