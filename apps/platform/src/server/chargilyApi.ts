@@ -182,6 +182,11 @@ export async function getChargilyCheckout(
         let responseData = ''
         res.on('data', (chunk) => (responseData += chunk))
         res.on('end', () => {
+          // Match the fetch path: an error status must not resolve as a checkout.
+          if ((res.statusCode ?? 0) >= 400) {
+            reject(new Error(`Chargily ${res.statusCode}: ${responseData.slice(0, 200)}`))
+            return
+          }
           try {
             resolve(JSON.parse(responseData) as { id: string; status: string; amount?: number; metadata?: Record<string, string> })
           } catch {

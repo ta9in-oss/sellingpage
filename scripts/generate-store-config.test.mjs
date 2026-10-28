@@ -16,7 +16,10 @@ const store = {
 describe('buildStoreArtifacts', () => {
   it('returns site.config.ts source and content.json string from a store row', () => {
     const { siteConfigTs, contentJson } = buildStoreArtifacts(store)
-    expect(siteConfigTs).toContain("from './themes/brutalist'")
+    // The merchant's edited theme is inlined (not imported by preset name) so
+    // builder theme edits reach the deployed store.
+    expect(siteConfigTs).toContain("import type { Theme } from './themes/theme.types'")
+    expect(siteConfigTs).toContain('"name": "brutalist"')
     const content = JSON.parse(contentJson)
     expect(content.hero.title).toEqual(['A'])
     expect(content.hero.priceTag).toEqual({ amount: '999', currency: 'دج' })

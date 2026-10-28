@@ -61,12 +61,14 @@ describe('generateContent', () => {
 })
 
 describe('generateSiteConfig', () => {
-  it('imports the theme by name and the store theme types (not a phantom module)', () => {
+  it('inlines the edited theme and imports only the store theme types', () => {
     const src = generateSiteConfig(base)
-    expect(src).toContain("from './themes/theme.types'")
-    expect(src).toContain("from './themes/brutalist'")
+    expect(src).toContain("import type { Theme } from './themes/theme.types'")
+    expect(src).not.toContain("from './themes/brutalist'")
     expect(src).not.toContain('site.config.types')
-    expect(src).toContain('brutalistTheme as Theme')
+    // The merchant's edited theme object is emitted verbatim so builder edits
+    // reach the deployed store.
+    expect(src).toContain(`theme: ${JSON.stringify(base.theme, null, 2)} as Theme`)
   })
 
   it('emits feature flags reflecting present sections', () => {

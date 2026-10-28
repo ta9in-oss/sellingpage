@@ -30,12 +30,19 @@ async function localizeStoreImages(config, log = () => {}) {
   rmSync(UPLOADS_DIR, { recursive: true, force: true })
   mkdirSync(UPLOADS_DIR, { recursive: true })
 
-  const cache = new Map() // remote url -> local path (dedupe repeated urls)
+  // remote url -> Promise<local path>. Caching the promise (not the result)
+  // dedupes a url repeated within one parallel Promise.all batch too.
+  const cache = new Map()
+  let localized = 0
   const isRemote = (v) => typeof v === 'string' && /^https?:\/\//i.test(v)
 
-  const localize = async (url) => {
-    if (!isRemote(url)) return url
-    if (cache.has(url)) return cache.get(url)
+  const localize = (url) => {
+    if (!isRemote(url)) return Promise.resolve(url)
+    if (!cache.has(url)) cache.set(url, download(url))
+    return cache.get(url)
+  }
+
+  const download = async (url) => {
     try {
       const res = await fetch(url)
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
@@ -44,9 +51,8 @@ async function localizeStoreImages(config, log = () => {}) {
       const ext = EXT_BY_TYPE[type] || (url.split('?')[0].match(/\.(webp|png|jpe?g|gif|svg|avif)$/i)?.[1] || 'img').toLowerCase()
       const name = `${createHash('sha1').update(buf).digest('hex').slice(0, 16)}.${ext}`
       writeFileSync(resolve(UPLOADS_DIR, name), buf)
-      const local = `${UPLOADS_URL_PREFIX}${name}`
-      cache.set(url, local)
-      return local
+      localized++
+      return `${UPLOADS_URL_PREFIX}${name}`
     } catch (e) {
       log(`warn: could not localize image ${url.slice(0, 60)}…: ${e.message}`)
       return url // fall back to the remote url rather than break the build
@@ -65,7 +71,7 @@ async function localizeStoreImages(config, log = () => {}) {
       for (const it of s.items ?? []) if (it.image) it.image = await localize(it.image)
     }
   }
-  log(`localized ${cache.size} image(s) into public/assets/uploads`)
+  log(`localized ${localized} image(s) into public/assets/uploads`)
   return config
 }
 
