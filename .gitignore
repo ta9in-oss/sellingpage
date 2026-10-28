@@ -19,3 +19,15 @@ apps/store/src/config/*.e2e-bak
 # Local env overrides — these hold real secrets and must never be committed.
 .env.local
 .env.*.local
+
+# Build output & tool caches
+dist/
+.nitro/
+.vite/
+.tanstack/
+coverage/
+*.log
+
+# Vitest/RTK artifacts
+.vitest/
+.wrangler/
