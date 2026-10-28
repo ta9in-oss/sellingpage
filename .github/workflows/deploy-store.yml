@@ -27,7 +27,7 @@ jobs:
       STORE_SECRET_KEY: ${{ secrets.STORE_SECRET_KEY }}
       STORE_ID: ${{ github.event.client_payload.storeId }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
