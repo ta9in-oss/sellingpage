@@ -1,25 +1,24 @@
 // vite.config.ts
 import { defineConfig } from 'vite'
-import tsConfigPaths from 'vite-tsconfig-paths'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
+import { nitro } from 'nitro/vite'
 import viteReact from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
+    resolve: { tsconfigPaths: true },
     server: {
         port: 3000,
     },
     plugins: [
-        tsConfigPaths(),
-        tanstackStart({
-            customViteReactPlugin: true,
-            server: {
-                // @ts-expect-error preset is valid at runtime
-                preset: process.env.CF_PAGES ? 'cloudflare-pages' : 'node-server',
-            },
+        tailwindcss(),
+        tanstackStart(),
+        nitro({
+            // Cloudflare Pages in production (output: dist/), plain Node elsewhere.
+            preset: process.env.CF_PAGES ? 'cloudflare-pages' : 'node-server',
         }),
         viteReact(),
     ],
-    publicDir: 'src/public',
     build: {
         cssCodeSplit: true,
         rollupOptions: {

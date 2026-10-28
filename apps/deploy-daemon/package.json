@@ -9,11 +9,12 @@
     "test": "vitest run src"
   },
   "dependencies": {
-    "@instantdb/admin": "^0.22.169",
-    "evlog": "^2.22.4"
+    "@instantdb/admin": "^1.0.67",
+    "evlog": "^2.34.0"
   },
   "devDependencies": {
-    "tsx": "^4.19.2",
-    "vitest": "^2.1.8"
-  }
+    "tsx": "^4.23.15",
+    "vitest": "^5.0.5"
+  },
+  "license": "MIT"
 }

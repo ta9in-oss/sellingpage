@@ -93,7 +93,7 @@ function DashboardPage() {
     )
   }
 
-  return <AuthenticatedDashboard email={user.email} autoPlan={plan} payment={payment} paymentTier={tier} checkoutIdParam={checkout_id} />
+  return <AuthenticatedDashboard email={user.email ?? ''} autoPlan={plan} payment={payment} paymentTier={tier} checkoutIdParam={checkout_id} />
 }
 
 // ─── Authenticated shell ───────────────────────────────────────────────────────

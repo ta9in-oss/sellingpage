@@ -28,6 +28,11 @@ export const Route = createFileRoute('/dashboard')({
   component: SellerDashboard,
 });
 
+type OrderStatus = string | { value: string; label: string };
+type AuthStep = 'email' | 'code';
+type AuthResult = 'UNAUTHORIZED' | 'CODE_SENT' | 'SIGNED_IN' | 'ERROR';
+type StatusKey = 'pending' | 'confirmed' | 'shipped' | 'cancelled';
+
 // Define the Order interface
 interface Order {
   id: string;
@@ -40,7 +45,7 @@ interface Order {
   customer_address: string;
   customer_wilaya?: string;
   customer_city?: string;
-  status?: string | { value: string; label: string };
+  status?: OrderStatus;
   product?: any; 
   quantity?: number;
   total_amount?: number;
@@ -49,13 +54,19 @@ interface Order {
   chargily_checkout_id?: string;
 }
 
-const LoginScreen = ({ onSignIn, isLoading, error }) => {
+interface LoginScreenProps {
+  onSignIn: (emailOrCode: string, step: AuthStep) => Promise<AuthResult>;
+  isLoading: boolean;
+  error: string;
+}
+
+const LoginScreen = ({ onSignIn, isLoading, error }: LoginScreenProps) => {
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
-  const [step, setStep] = useState('email');
+  const [step, setStep] = useState<AuthStep>('email');
   const [sentTo, setSentTo] = useState('');
 
-  const handleSendCode = async (e) => {
+  const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) return;
     
@@ -72,7 +83,7 @@ const LoginScreen = ({ onSignIn, isLoading, error }) => {
     }
   };
 
-  const handleVerifyCode = async (e) => {
+  const handleVerifyCode = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!code.trim()) return;
     
@@ -198,7 +209,12 @@ const LoginScreen = ({ onSignIn, isLoading, error }) => {
   );
 };
 
-const Dashboard = ({ user, onSignOut }) => {
+interface DashboardProps {
+  user: { email?: string | null };
+  onSignOut: () => void;
+}
+
+const Dashboard = ({ user, onSignOut }: DashboardProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -394,9 +410,9 @@ const Dashboard = ({ user, onSignOut }) => {
     );
   };
 
-  const getStatusColor = (status) => {
+  const getStatusColor = (status: OrderStatus | undefined) => {
     if (typeof status === 'string') {
-      const colors = {
+      const colors: Record<string, string> = {
         pending: 'bg-yellow-400 text-black',
         confirmed: 'bg-green-400 text-black',
         shipped: 'bg-blue-400 text-black', 
@@ -405,29 +421,29 @@ const Dashboard = ({ user, onSignOut }) => {
       return colors[status] || 'bg-gray-400 text-black';
     }
     
-    const colors = {
+    const colors: Record<string, string> = {
       pending: 'bg-yellow-400 text-black',
       confirmed: 'bg-green-400 text-black',
       shipped: 'bg-blue-400 text-black', 
       cancelled: 'bg-red-400 text-white'
     };
-    return colors[status?.value] || 'bg-gray-400 text-black';
+    return colors[status?.value ?? ''] || 'bg-gray-400 text-black';
   };
 
-  const getStatusIcon = (status) => {
+  const getStatusIcon = (status: OrderStatus | undefined) => {
     const statusValue = typeof status === 'string' ? status : status?.value;
-    const icons = {
+    const icons: Record<StatusKey, React.ReactNode> = {
       pending: <Clock size={16} />,
       confirmed: <CheckCircle size={16} />,
       shipped: <Package size={16} />,
       cancelled: <XCircle size={16} />
     };
-    return icons[statusValue] || <Clock size={16} />;
+    return icons[statusValue as StatusKey] || <Clock size={16} />;
   };
 
-  const getStatusLabel = (status) => {
+  const getStatusLabel = (status: OrderStatus | undefined) => {
     if (typeof status === 'string') {
-      const labels = {
+      const labels: Record<string, string> = {
         pending: 'في الانتظار',
         confirmed: 'مؤكد',
         shipped: 'تم الشحن',
@@ -507,7 +523,9 @@ const Dashboard = ({ user, onSignOut }) => {
     return matchesSearch && matchesStatus;
   });
 
-  const printOrder = (order) => {
+  const printOrder = (
+    order: Pick<Order, 'created_at' | 'customer_address' | 'customer_city' | 'customer_name' | 'customer_phone' | 'customer_wilaya' | 'order_number' | 'quantity' | 'status' | 'total_amount'>,
+  ) => {
     const printContent = `
       <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right; padding: 20px;">
         <h2>تفاصيل الطلب</h2>
@@ -1233,7 +1251,7 @@ export default function SellerDashboard() {
     return foundUser && (foundUser.role === 'admin' || foundUser.role === 'seller');
   };
 
-  const handleAuth = async (emailOrCode, step) => {
+  const handleAuth = async (emailOrCode: string, step: AuthStep): Promise<AuthResult> => {
     setAuthLoading(true);
     setAuthError('');
     
@@ -1252,8 +1270,8 @@ export default function SellerDashboard() {
         await db.auth.sendMagicCode({ email: emailOrCode });
         setSentEmail(emailOrCode);
         return 'CODE_SENT'; // Return status to indicate code was sent successfully
-      } else if (step === 'code') {
-        // Sign in with the magic code
+      } else {
+        // step === 'code': sign in with the magic code
         await db.auth.signInWithMagicCode({ email: sentEmail, code: emailOrCode });
         return 'SIGNED_IN'; // Return status to indicate successful sign in
       }

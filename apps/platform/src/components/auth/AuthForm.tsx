@@ -155,7 +155,6 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
                 size="large"
                 width="320"
                 text="continue_with"
-                locale="ar"
                 useOneTap={false}
               />
             </div>
@@ -200,6 +199,7 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
               autoCapitalize="none"
               autoCorrect="off"
               spellCheck={false}
+              // biome-ignore lint/a11y/noAutofocus: the field is revealed by the user's own submit; focusing it is the expected next step
               autoFocus
               className="w-full border-2 border-black px-3 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-yellow-400"
             />
@@ -242,6 +242,7 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
               onKeyDown={(e) => e.key === 'Enter' && handleVerifyCode()}
               placeholder="123456"
               dir="ltr"
+              // biome-ignore lint/a11y/noAutofocus: the field is revealed by the user's own submit; focusing it is the expected next step
               autoFocus
               className="w-full border-2 border-black px-3 py-2.5 text-sm font-mono text-center tracking-widest focus:outline-none focus:ring-2 focus:ring-yellow-400"
             />

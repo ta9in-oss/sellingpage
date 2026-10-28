@@ -91,7 +91,7 @@ function RootComponent() {
           </noscript>
         )}
         <LangProvider>
-          <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID ?? ''}>
+          <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID ?? ''} locale="ar">
             <SunsetAnnouncement />
             <InAppBrowserBanner />
             <Outlet />

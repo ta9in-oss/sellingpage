@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "noEmit": true,
     "jsx": "react-jsx",
     "moduleResolution": "Bundler",
     "module": "ESNext",
@@ -7,7 +8,6 @@
     "skipLibCheck": true,
     "strictNullChecks": true,
     "resolveJsonModule": true,
-    "baseUrl": "."
   },
   "include": ["src"]
 }

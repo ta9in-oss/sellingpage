@@ -9,30 +9,25 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TermsRouteImport } from './routes/terms'
-import { Route as PrivacyRouteImport } from './routes/privacy'
-import { Route as DemoRouteImport } from './routes/demo'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
-import { Route as DashboardWhatsNewRouteImport } from './routes/dashboard/whats-new'
-import { Route as DashboardSettingsRouteImport } from './routes/dashboard/settings'
-import { Route as DashboardNewStoreRouteImport } from './routes/dashboard/new-store'
-import { Route as DashboardDeployRouteImport } from './routes/dashboard/deploy'
-import { Route as DashboardCertificateRouteImport } from './routes/dashboard/certificate'
-import { Route as DashboardBuilderRouteImport } from './routes/dashboard/builder'
-import { Route as AuthSignupRouteImport } from './routes/auth/signup'
-import { Route as AuthSigninRouteImport } from './routes/auth/signin'
-import { Route as AuthInstantdbRouteImport } from './routes/auth/instantdb'
+import { Route as DemoRouteImport } from './routes/demo'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AuthCloudflareRouteImport } from './routes/auth/cloudflare'
+import { Route as AuthInstantdbRouteImport } from './routes/auth/instantdb'
+import { Route as AuthSigninRouteImport } from './routes/auth/signin'
+import { Route as AuthSignupRouteImport } from './routes/auth/signup'
+import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
+import { Route as DashboardBuilderRouteImport } from './routes/dashboard/builder'
+import { Route as DashboardCertificateRouteImport } from './routes/dashboard/certificate'
+import { Route as DashboardDeployRouteImport } from './routes/dashboard/deploy'
+import { Route as DashboardNewStoreRouteImport } from './routes/dashboard/new-store'
+import { Route as DashboardSettingsRouteImport } from './routes/dashboard/settings'
+import { Route as DashboardWhatsNewRouteImport } from './routes/dashboard/whats-new'
 
-const TermsRoute = TermsRouteImport.update({
-  id: '/terms',
-  path: '/terms',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PrivacyRoute = PrivacyRouteImport.update({
-  id: '/privacy',
-  path: '/privacy',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DemoRoute = DemoRouteImport.update({
@@ -40,54 +35,19 @@ const DemoRoute = DemoRouteImport.update({
   path: '/demo',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DashboardIndexRoute = DashboardIndexRouteImport.update({
-  id: '/dashboard/',
-  path: '/dashboard/',
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DashboardWhatsNewRoute = DashboardWhatsNewRouteImport.update({
-  id: '/dashboard/whats-new',
-  path: '/dashboard/whats-new',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DashboardSettingsRoute = DashboardSettingsRouteImport.update({
-  id: '/dashboard/settings',
-  path: '/dashboard/settings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DashboardNewStoreRoute = DashboardNewStoreRouteImport.update({
-  id: '/dashboard/new-store',
-  path: '/dashboard/new-store',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DashboardDeployRoute = DashboardDeployRouteImport.update({
-  id: '/dashboard/deploy',
-  path: '/dashboard/deploy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DashboardCertificateRoute = DashboardCertificateRouteImport.update({
-  id: '/dashboard/certificate',
-  path: '/dashboard/certificate',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DashboardBuilderRoute = DashboardBuilderRouteImport.update({
-  id: '/dashboard/builder',
-  path: '/dashboard/builder',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthSignupRoute = AuthSignupRouteImport.update({
-  id: '/auth/signup',
-  path: '/auth/signup',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthSigninRoute = AuthSigninRouteImport.update({
-  id: '/auth/signin',
-  path: '/auth/signin',
+const AuthCloudflareRoute = AuthCloudflareRouteImport.update({
+  id: '/auth/cloudflare',
+  path: '/auth/cloudflare',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthInstantdbRoute = AuthInstantdbRouteImport.update({
@@ -95,9 +55,49 @@ const AuthInstantdbRoute = AuthInstantdbRouteImport.update({
   path: '/auth/instantdb',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthCloudflareRoute = AuthCloudflareRouteImport.update({
-  id: '/auth/cloudflare',
-  path: '/auth/cloudflare',
+const AuthSigninRoute = AuthSigninRouteImport.update({
+  id: '/auth/signin',
+  path: '/auth/signin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthSignupRoute = AuthSignupRouteImport.update({
+  id: '/auth/signup',
+  path: '/auth/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardIndexRoute = DashboardIndexRouteImport.update({
+  id: '/dashboard/',
+  path: '/dashboard/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardBuilderRoute = DashboardBuilderRouteImport.update({
+  id: '/dashboard/builder',
+  path: '/dashboard/builder',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardCertificateRoute = DashboardCertificateRouteImport.update({
+  id: '/dashboard/certificate',
+  path: '/dashboard/certificate',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardDeployRoute = DashboardDeployRouteImport.update({
+  id: '/dashboard/deploy',
+  path: '/dashboard/deploy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardNewStoreRoute = DashboardNewStoreRouteImport.update({
+  id: '/dashboard/new-store',
+  path: '/dashboard/new-store',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardSettingsRoute = DashboardSettingsRouteImport.update({
+  id: '/dashboard/settings',
+  path: '/dashboard/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardWhatsNewRoute = DashboardWhatsNewRouteImport.update({
+  id: '/dashboard/whats-new',
+  path: '/dashboard/whats-new',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -116,7 +116,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/new-store': typeof DashboardNewStoreRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
   '/dashboard/whats-new': typeof DashboardWhatsNewRoute
-  '/dashboard': typeof DashboardIndexRoute
+  '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -170,7 +170,7 @@ export interface FileRouteTypes {
     | '/dashboard/new-store'
     | '/dashboard/settings'
     | '/dashboard/whats-new'
-    | '/dashboard'
+    | '/dashboard/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -227,18 +227,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/terms': {
-      id: '/terms'
-      path: '/terms'
-      fullPath: '/terms'
-      preLoaderRoute: typeof TermsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/privacy': {
-      id: '/privacy'
-      path: '/privacy'
-      fullPath: '/privacy'
-      preLoaderRoute: typeof PrivacyRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/demo': {
@@ -248,74 +241,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DemoRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dashboard/': {
-      id: '/dashboard/'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardIndexRouteImport
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dashboard/whats-new': {
-      id: '/dashboard/whats-new'
-      path: '/dashboard/whats-new'
-      fullPath: '/dashboard/whats-new'
-      preLoaderRoute: typeof DashboardWhatsNewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dashboard/settings': {
-      id: '/dashboard/settings'
-      path: '/dashboard/settings'
-      fullPath: '/dashboard/settings'
-      preLoaderRoute: typeof DashboardSettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dashboard/new-store': {
-      id: '/dashboard/new-store'
-      path: '/dashboard/new-store'
-      fullPath: '/dashboard/new-store'
-      preLoaderRoute: typeof DashboardNewStoreRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dashboard/deploy': {
-      id: '/dashboard/deploy'
-      path: '/dashboard/deploy'
-      fullPath: '/dashboard/deploy'
-      preLoaderRoute: typeof DashboardDeployRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dashboard/certificate': {
-      id: '/dashboard/certificate'
-      path: '/dashboard/certificate'
-      fullPath: '/dashboard/certificate'
-      preLoaderRoute: typeof DashboardCertificateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dashboard/builder': {
-      id: '/dashboard/builder'
-      path: '/dashboard/builder'
-      fullPath: '/dashboard/builder'
-      preLoaderRoute: typeof DashboardBuilderRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/signup': {
-      id: '/auth/signup'
-      path: '/auth/signup'
-      fullPath: '/auth/signup'
-      preLoaderRoute: typeof AuthSignupRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/signin': {
-      id: '/auth/signin'
-      path: '/auth/signin'
-      fullPath: '/auth/signin'
-      preLoaderRoute: typeof AuthSigninRouteImport
+    '/auth/cloudflare': {
+      id: '/auth/cloudflare'
+      path: '/auth/cloudflare'
+      fullPath: '/auth/cloudflare'
+      preLoaderRoute: typeof AuthCloudflareRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/instantdb': {
@@ -325,11 +269,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthInstantdbRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/auth/cloudflare': {
-      id: '/auth/cloudflare'
-      path: '/auth/cloudflare'
-      fullPath: '/auth/cloudflare'
-      preLoaderRoute: typeof AuthCloudflareRouteImport
+    '/auth/signin': {
+      id: '/auth/signin'
+      path: '/auth/signin'
+      fullPath: '/auth/signin'
+      preLoaderRoute: typeof AuthSigninRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/signup': {
+      id: '/auth/signup'
+      path: '/auth/signup'
+      fullPath: '/auth/signup'
+      preLoaderRoute: typeof AuthSignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/': {
+      id: '/dashboard/'
+      path: '/dashboard'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/builder': {
+      id: '/dashboard/builder'
+      path: '/dashboard/builder'
+      fullPath: '/dashboard/builder'
+      preLoaderRoute: typeof DashboardBuilderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/certificate': {
+      id: '/dashboard/certificate'
+      path: '/dashboard/certificate'
+      fullPath: '/dashboard/certificate'
+      preLoaderRoute: typeof DashboardCertificateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/deploy': {
+      id: '/dashboard/deploy'
+      path: '/dashboard/deploy'
+      fullPath: '/dashboard/deploy'
+      preLoaderRoute: typeof DashboardDeployRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/new-store': {
+      id: '/dashboard/new-store'
+      path: '/dashboard/new-store'
+      fullPath: '/dashboard/new-store'
+      preLoaderRoute: typeof DashboardNewStoreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/settings': {
+      id: '/dashboard/settings'
+      path: '/dashboard/settings'
+      fullPath: '/dashboard/settings'
+      preLoaderRoute: typeof DashboardSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/whats-new': {
+      id: '/dashboard/whats-new'
+      path: '/dashboard/whats-new'
+      fullPath: '/dashboard/whats-new'
+      preLoaderRoute: typeof DashboardWhatsNewRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -355,3 +355,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
