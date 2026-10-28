@@ -72,7 +72,7 @@ export const useAlgeriaLocations = (): ProcessedLocationData => {
       if (!dairasByWilaya[item.wilaya_name].includes(item.daira_name))
         dairasByWilaya[item.wilaya_name].push(item.daira_name);
     });
-    Object.keys(dairasByWilaya).forEach(w => dairasByWilaya[w].sort());
+    for (const w of Object.keys(dairasByWilaya)) dairasByWilaya[w].sort();
 
     const communesByDaira: Record<string, string[]> = {};
     raw.forEach(item => {
@@ -81,7 +81,7 @@ export const useAlgeriaLocations = (): ProcessedLocationData => {
       if (!communesByDaira[key].includes(item.commune_name))
         communesByDaira[key].push(item.commune_name);
     });
-    Object.keys(communesByDaira).forEach(k => communesByDaira[k].sort());
+    for (const k of Object.keys(communesByDaira)) communesByDaira[k].sort();
 
     return {
       wilayas,

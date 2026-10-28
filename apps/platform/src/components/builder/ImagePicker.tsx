@@ -55,7 +55,9 @@ function useConfigImages(): string[] {
   for (const s of config?.sections ?? []) {
     if (s.type === 'hero') push(s.image)
     if (s.type === 'product-carousel') (s.images ?? []).forEach(push)
-    if (s.type === 'features') (s.items ?? []).forEach((it) => push(it.image))
+    if (s.type === 'features') (s.items ?? []).forEach((it) => {
+      push(it.image)
+    })
   }
   return urls
 }

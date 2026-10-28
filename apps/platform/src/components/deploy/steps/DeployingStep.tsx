@@ -169,7 +169,7 @@ export function DeployingStep({ storeId, onComplete, onError }: Props) {
     }
     if (deployStatus === 'live') {
       doneRef.current = true
-      ;[2, 3, 4, 5, 6].forEach((i) => setStepStatus(i, 'done'))
+      for (const i of [2, 3, 4, 5, 6]) setStepStatus(i, 'done')
       addLog(`> 🎉 المتجر أصبح مباشراً: ${store?.deployedUrl ?? ''}`)
       onComplete()
     }

@@ -1,0 +1,19 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      tanstack:
+        patterns: ['@tanstack/*']
+      radix:
+        patterns: ['@radix-ui/*', 'radix-ui']
+      instantdb:
+        patterns: ['@instantdb/*']
+      minor-and-patch:
+        update-types: [minor, patch]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly

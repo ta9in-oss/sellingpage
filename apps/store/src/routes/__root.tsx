@@ -124,11 +124,13 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
   // phone/number inputs in the order form) may still override dir locally.
   const dir = siteConfig.theme.direction ?? 'rtl';
   return (
-    <html dir={dir} className={isDark ? 'dark' : ''}>
+    // Algerian stores are Arabic (RTL) or French (LTR).
+    <html lang={dir === 'rtl' ? 'ar' : 'fr'} dir={dir} className={isDark ? 'dark' : ''}>
       <head>
         <HeadContent />
         {/* Merchant theme → shadcn CSS vars, so shadcn components AND sections
             share one source of truth. SSR-rendered → no flash of default theme. */}
+        {/* biome-ignore lint/security/noDangerouslySetInnerHtml: CSS generated from the store's own build-time theme config, not user input */}
         <style dangerouslySetInnerHTML={{ __html: themeToRootCss(siteConfig.theme) }} />
       </head>
       <body>
@@ -143,6 +145,7 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
             height="1"
             width="1"
             style={{ display: "none" }}
+            alt=""
             src={`https://www.facebook.com/tr?id=${
               import.meta.env.VITE_META_PIXEL_ID
             }&ev=PageView&noscript=1`}

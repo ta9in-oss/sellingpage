@@ -150,7 +150,7 @@ export function CredentialsForm({ target, initialValues, onSaved, showSaveButton
         <div className="bg-muted/40 rounded-xl p-4 space-y-3">
           <div className="space-y-1">
             <Label className="text-xs font-bold">Account ID</Label>
-            <Input value={cfAccountId} onChange={(e) => setCfAccountId(e.target.value)} placeholder="ab523bcff1d5e827..." dir="ltr" className="text-sm font-mono" />
+            <Input value={cfAccountId} onChange={(e) => setCfAccountId(e.target.value)} placeholder="0123456789abcdef..." dir="ltr" className="text-sm font-mono" />
             <p className="text-[11px] text-muted-foreground">
               {t(T.cfAccountIdHint)}{' '}
               <a href="https://dash.cloudflare.com" target="_blank" rel="noopener noreferrer" className="underline">dash.cloudflare.com</a>{' '}

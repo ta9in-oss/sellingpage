@@ -31,7 +31,7 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: .nvmrc
           cache: pnpm
 
       - name: Install dependencies
@@ -49,7 +49,7 @@ jobs:
           CF_PAGES: '1' # selects the cloudflare-pages preset → output in apps/store/dist
           VITE_INSTANT_APP_ID: ${{ steps.gen.outputs.instant_app_id }}
           VITE_APP_URL: https://7aba-${{ steps.gen.outputs.slug }}.pages.dev
-          VITE_GOOGLE_CLIENT_ID: 1031735082979-bjhvq3ulo8gsmebkeihkalh3gohoropm.apps.googleusercontent.com
+          VITE_GOOGLE_CLIENT_ID: ${{ vars.VITE_GOOGLE_CLIENT_ID }}
         run: pnpm --filter store build
 
       - name: Deploy to merchant's Cloudflare Pages
