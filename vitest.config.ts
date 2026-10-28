@@ -1,13 +1,32 @@
 import { defineConfig } from 'vitest/config'
-import tsConfigPaths from 'vite-tsconfig-paths'
 
-// Root-level vitest: covers the repo scripts (workflow helpers). The .mjs
-// scripts import the platform's .ts generator, so tsConfigPaths resolves the
-// @7aba/store-ui alias used transitively.
+// One test run for the whole monorepo. Each project keeps its own include
+// globs; the platform project has its own config so its path aliases resolve
+// against apps/platform/tsconfig.json.
 export default defineConfig({
-  plugins: [tsConfigPaths()],
+  resolve: { tsconfigPaths: true },
   test: {
-    environment: 'node',
-    include: ['scripts/**/*.test.mjs', 'apps/deploy-daemon/src/**/*.test.mjs'],
+    projects: [
+      {
+        extends: true,
+        test: {
+          name: 'scripts',
+          environment: 'node',
+          include: ['scripts/**/*.test.mjs', 'apps/deploy-daemon/src/**/*.test.mjs'],
+        },
+      },
+      'apps/platform/vitest.config.ts',
+    ],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text-summary', 'lcov', 'json-summary'],
+      include: [
+        'scripts/**/*.mjs',
+        'apps/deploy-daemon/src/**/*.mjs',
+        'apps/platform/src/lib/**/*.ts',
+        'apps/platform/src/server/**/*.ts',
+      ],
+      exclude: ['**/*.test.*', '**/*.d.ts'],
+    },
   },
 })
