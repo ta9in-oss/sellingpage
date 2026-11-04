@@ -12,7 +12,7 @@
     "check": "pnpm lint && pnpm typecheck && pnpm test"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.6.3",
+    "@biomejs/biome": "2.6.4",
     "@instantdb/admin": "^1.0.67",
     "@vitest/coverage-v8": "^5.0.5",
     "tsx": "^4.23.15",
